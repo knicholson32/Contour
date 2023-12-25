@@ -1,0 +1,11 @@
+.git
+.github
+.gitignore
+*Dockerfile*
+*docker-compose*
+/node_modules
+/prisma/.env
+/build
+/.svelte-kit
+Makefile
+**/*.bak
