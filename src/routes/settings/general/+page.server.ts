@@ -17,7 +17,5 @@ export const actions = {
 
 		const timezone = (data.get('general.timezone') ?? undefined) as undefined | string;
 		if (timezone !== undefined) await settings.set('general.timezone', timezone);
-
-		console.log(s.abc12);
 	}
 };
