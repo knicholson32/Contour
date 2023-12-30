@@ -19,6 +19,16 @@ export const validateURL = (url: string) => {
 };
 
 /**
+ * Delay for a number of ms
+ * @param ms the number of ms to delay for
+ * @returns the promise
+ */
+export const delay = (ms: number) => {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+};
+export const sleep = delay;
+
+/**
  * Fetch data from a URL
  * @param url the URL to fetch from
  * @returns the data
@@ -312,6 +322,44 @@ export const deepCopy = <T>(obj: T): T => {
 export const clamp = (val: number, min: number, max: number): number => {
 	return Math.min(Math.max(val, min), max);
 };
+
+/**
+ * Pad a string with leading zeros
+ * @param num the number to pad
+ * @param size the number of digits required
+ * @returns the string
+ */
+export const pad = (num: number, size: number) => {
+	let numStr = num.toString();
+	while (numStr.length < size) numStr = "0" + numStr;
+	return numStr;
+}
+
+/**
+ * Convert a unix timestamp to a readable string
+ * @param UNIX_timestamp the timestamp
+ * @returns the string
+ */
+export const timeConverter = (UNIX_timestamp: number, options?: {dateOnly?: boolean}) => {
+	const a = new Date(UNIX_timestamp * 1000);
+	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	if (options !== undefined && options.dateOnly === true) {
+		return `${pad(a.getMonth() + 1, 2)}/${pad(a.getDate(), 2)}/${a.getFullYear()}`;
+	} else {
+		const min = a.getMinutes() < 10 ? '0' + a.getMinutes() : a.getMinutes();
+		const sec = a.getSeconds() < 10 ? '0' + a.getSeconds() : a.getSeconds();
+		return a.getDate() + ' ' + months[a.getMonth()] + ' ' + a.getFullYear() + ' ' + a.getHours() + ':' + min + ':' + sec;
+	}
+}
+
+/**
+ * Make sure a URL is valid
+ * @param url the URL
+ * @returns whether or not it is valid
+ */
+export const validateUrl = (url: string) => {
+	return /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/i.test(url);
+}
 
 /**
  * Get an icon for an extension

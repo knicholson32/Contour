@@ -5,21 +5,29 @@ import * as helpers from '$lib/server/helpers';
 import type { Prisma } from '@prisma/client';
 
 export const TypeNames = {
+	// Entry ---------------------------------
+	'entry.tour.current': -1,
+	'entry.day.current': -1,
+	'entry.defaultFlightID': 'EJA',
 	// System --------------------------------
 	'system.debug': 0,
-	// Plex ----------------------------------
 	// General -------------------------------
 	'general.encKey': 'UNSET',
+	'general.aeroAPI': '',
 	'general.timezone': process.env.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone
 };
 
 export type TypeName = keyof typeof TypeNames;
 
 export type ObjectType<T extends TypeName> = 
-	  T extends 'system.debug' ? number // Integer
-	: T extends 'general.encKey' ? string // String
-	: T extends 'general.timezone' ? string // String
-	: string;
+	T extends 'entry.tour.current' ? number : 		// Integer
+	T extends 'entry.day.current' ? number : 			// Integer
+	T extends 'entry.defaultFlightID' ? string : 	// String
+	T extends 'system.debug' ? number : 					// Integer
+	T extends 'general.encKey' ? string : 				// String
+	T extends 'general.aeroAPI' ? string : 				// String
+	T extends 'general.timezone' ? string : 			// String
+	string;
 
 // -------------------------------------------------------------------------------------------------
 // Settings
@@ -32,10 +40,7 @@ export type SettingPayload = Prisma.SettingsGetPayload<{}>;
  * @param setting the setting to get
  * @returns the setting
  */
-export const get = async <T extends TypeName>(
-	setting: T,
-	settingVal?: SettingPayload | null
-): Promise<ObjectType<T>> => {
+export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPayload | null): Promise<ObjectType<T>> => {
 	// Make sure the setting can exist
 	if (!(setting in TypeNames)) throw Error(`Unknown setting: ${setting}`);
 
@@ -56,6 +61,8 @@ export const get = async <T extends TypeName>(
 			// 	return (settingVal.value === 'true' ? true : false) as ObjectType<T>;
 
 			// Integer Conversion ------------------------------------------------------------------------
+			case 'entry.tour.current':
+			case 'entry.day.current':
 			case 'system.debug':
 				return parseInt(settingVal.value) as ObjectType<T>;
 
@@ -64,13 +71,14 @@ export const get = async <T extends TypeName>(
 			// 	return parseFloat(settingVal.value) as ObjectType<T>;
 
 			// String Conversion -------------------------------------------------------------------------
+			case 'entry.defaultFlightID':
 			case 'general.encKey':
 			case 'general.timezone':
 				return settingVal.value as ObjectType<T>;
 
 			// Encrypted Strings -------------------------------------------------------------------------
-			// case '':
-			// 	return (await helpers.decrypt(settingVal.value)) as ObjectType<T>;
+			case 'general.aeroAPI':
+				return (await helpers.decrypt(settingVal.value)) as ObjectType<T>;
 
 			// Enum Conversion ---------------------------------------------------------------------------
 			// case '':
@@ -105,33 +113,22 @@ export const get = async <T extends TypeName>(
 };
 
 // Generate two helpers types that will allow us to select based on the settings
-export type SettingsSet<
-	T extends TypeName,
-	Prefix extends string
-> = T extends `${Prefix}.${infer Rest}` ? T : never;
-type SettingsPrefix<T extends TypeName, Prefix extends string> = T extends `${Prefix}.${infer Rest}`
-	? Prefix
-	: never;
+export type SettingsSet<T extends TypeName, Prefix extends string> = T extends `${Prefix}.${infer Rest}` ? T : never;
+type SettingsPrefix<T extends TypeName, Prefix extends string> = T extends `${Prefix}.${infer Rest}` ? Prefix : never;
 
 /**
  * Get a set of settings, as long as they match a certain prefix
  * @param prefix the prefix to match
  * @returns an object with the settings
  */
-export const getSet = async <Prefix extends string>(
-	prefix: SettingsPrefix<TypeName, Prefix>
-): Promise<{ [K in SettingsSet<TypeName, Prefix>]: ObjectType<K> }> => {
+export const getSet = async <Prefix extends string>(prefix: SettingsPrefix<TypeName, Prefix>): Promise<{ [K in SettingsSet<TypeName, Prefix>]: ObjectType<K> }> => {
 	// Get the possible settings keys based on the prefix
-	const keys = (Object.keys(TypeNames) as TypeName[]).filter((key) =>
-		key.startsWith(prefix)
-	) as SettingsSet<TypeName, Prefix>[];
+	const keys = (Object.keys(TypeNames) as TypeName[]).filter((key) => key.startsWith(prefix)) as SettingsSet<TypeName, Prefix>[];
 	// Initialize a resulting settings object, typed to only include the settings we will return
 	const settings = {} as { [K in (typeof keys)[number]]: ObjectType<K> };
 
 	// Get the settings from the DB
-	const manySettings = await prisma.settings.findMany({
-		where: { setting: { startsWith: prefix } }
-	});
+	const manySettings = await prisma.settings.findMany({where: { setting: { startsWith: prefix } } });
 
 	// Loop through the possible settings
 	for (const key of keys) {
@@ -150,18 +147,14 @@ export const getSet = async <Prefix extends string>(
 };
 
 // Generate a helper type that will allow us to select based on settings
-type FilterSettingsMany<T extends TypeName, Search extends string> = T extends `${Search}`
-	? T
-	: never;
+type FilterSettingsMany<T extends TypeName, Search extends string> = T extends `${Search}` ? T : never;
 
 /**
  * Get many fully-qualified settings
  * @param settings the settings to get
  * @returns an object with the settings
  */
-export const getMany = async <T extends TypeName>(
-	...settings: T[]
-): Promise<{ [K in FilterSettingsMany<TypeName, T>]: ObjectType<K> }> => {
+export const getMany = async <T extends TypeName>(...settings: T[]): Promise<{ [K in FilterSettingsMany<TypeName, T>]: ObjectType<K> }> => {
 	// Get the possible settings keys based on the inputs. This protects against uncaught typescript errors
 	const keys: TypeName[] = [];
 	for (const setting of settings) if (setting in TypeNames) keys.push(setting);
@@ -196,9 +189,9 @@ export const set = async <T extends TypeName>(setting: T, value: ObjectType<T>) 
 	// Make sure the setting can exist
 	if (!(setting in TypeNames)) throw Error(`Unknown setting: ${setting}`);
 
-	// if (setting === '') {
-	// 	value = (await helpers.encrypt(value as string)) as ObjectType<T>;
-	// }
+	if (setting === 'general.aeroAPI') {
+		value = (await helpers.encrypt(value as string)) as ObjectType<T>;
+	}
 
 	// Create or modify the value
 	await prisma.settings.upsert({

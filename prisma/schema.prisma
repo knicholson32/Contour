@@ -7,9 +7,246 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ------------------------------------------------------------------------------------------------
+// Enums
+// ------------------------------------------------------------------------------------------------
+
+enum AltitudeChange {
+  CLIMBING
+  DESCENDING
+  LEVEL
+  UNKNOWN
+}
+
+enum UpdateType {
+  PROJECTED
+  OCEANIC
+  RADAR
+  ADSB
+  MULTILATERATION
+  DATALINK
+  ADSB_ASDEX
+  SPACE
+  UNKNOWN
+}
+
+// enum Relative {
+//   BEFORE_DEPARTURE
+//   DURING
+//   AFTER_ARRIVAL
+// }
+
+// enum SearchError {
+//   INVALID_ARGUMENT
+//   FLIGHT_NOT_FOUND
+//   FLIGHT_IN_PROGRESS
+//   FLIGHT_COULD_NOT_BE_CREATED
+//   RESULTING_FLIGHT_ALREADY_EXISTS
+//   DAY_DOES_NOT_EXIST
+//   RATE_LIMITED
+// }
+
+// ------------------------------------------------------------------------------------------------
+// Primary Datatypes
+// ------------------------------------------------------------------------------------------------
+
+model Tour {
+  id Int @id @default(autoincrement())
+  days Day[]
+  options Option[]
+  @@map("tours")
+}
+
+model Day {
+  id Int @id @default(autoincrement())
+  tourId Int
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Restrict)
+  legs Leg[]
+  startTime_utc Int
+  startTimezoneOffset Int
+  endTime_utc Int
+  endTimezoneOffset Int
+  @@map("days")
+}
+
+model Option {
+  id String @id @default(uuid())
+
+  tourId             Int
+  tour               Tour  @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  inaccurateTiming  Boolean
+  ident             String  @db.VarChar(16)
+  faFlightId        String
+  operator          String? @db.VarChar(16)
+  flightNumber      String? @db.VarChar(16)
+  registration      String? @db.VarChar(16)
+  inboundFaFlightId String?
+
+  blocked      Boolean
+  diverted     Boolean
+  cancelled    Boolean
+  positionOnly Boolean
+
+  originAirportId      String? @db.VarChar(5)
+  destinationAirportId String? @db.VarChar(5)
+  diversionAirportId   String? @db.VarChar(5)
+
+  departureDelay      Int?
+  arrivalDelay        Int?
+  filedEte            Int?
+  progressPercent     Int?
+  status              String
+  aircraftType        String? @db.VarChar(32)
+  routeDistance       Int?
+  filedAirspeed       Int?
+  filedAltitude       Int?
+  filedRoute          String?
+  seatsCabinBusiness  Int?
+  seatsCabinCoach     Int?
+  seatsCabinFirst     Int?
+  gateOrigin          String? @db.VarChar(16)
+  gateDestination     String? @db.VarChar(16)
+  terminalOrigin      String? @db.VarChar(16)
+  terminalDestination String? @db.VarChar(16)
+  type                String
+
+  scheduledOut Int?
+  scheduledOff Int?
+  actualOut    Int?
+  actualOff    Int?
+  scheduledIn  Int?
+  scheduledOn  Int?
+  actualIn     Int?
+  actualOn     Int?
+
+  startTime Int
+  endTime   Int
+
+  @@unique([faFlightId])
+  @@map("options")
+}
+
+model Leg {
+  id        String @id @default(uuid())
+  dayId     Int
+  day       Day @relation(fields: [dayId], references: [id], onDelete: Restrict)
+  positions Position[]
+  fixes     Fix[]
+
+  ident             String  @db.VarChar(16)
+  faFlightId        String
+  operator          String? @db.VarChar(16)
+  flightNumber      String? @db.VarChar(16)
+  registration      String? @db.VarChar(16)
+  inboundFaFlightId String?
+
+  blocked      Boolean
+  diverted     Boolean
+  cancelled    Boolean
+  positionOnly Boolean
+
+  originAirportId      String?  @db.VarChar(5)
+  destinationAirportId String?  @db.VarChar(5)
+  diversionAirportId   String?  @db.VarChar(5)
+  originAirport        Airport? @relation("originAirport", fields: [originAirportId], references: [id], onDelete: Restrict)
+  destinationAirport   Airport? @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
+  diversionAirport     Airport? @relation("diversionAirport", fields: [diversionAirportId], references: [id], onDelete: Restrict)
+
+  departureDelay      Int?
+  arrivalDelay        Int?
+  filedEte            Int?
+  progressPercent     Int?
+  status              String
+  aircraftType        String? @db.VarChar(32)
+  routeDistance       Int?
+  filedAirspeed       Int?
+  filedAltitude       Int?
+  filedRoute          String?
+  seatsCabinBusiness  Int?
+  seatsCabinCoach     Int?
+  seatsCabinFirst     Int?
+  gateOrigin          String? @db.VarChar(16)
+  gateDestination     String? @db.VarChar(16)
+  terminalOrigin      String? @db.VarChar(16)
+  terminalDestination String? @db.VarChar(16)
+  type                String
+
+  scheduledOut Int?
+  scheduledOff Int?
+  actualOut    Int?
+  actualOff    Int?
+  scheduledIn  Int?
+  scheduledOn  Int?
+  actualIn     Int?
+  actualOn     Int?
+
+  startTime Int
+  endTime   Int
+
+  @@unique([faFlightId])
+  @@map("legs")
+}
+
 model Settings {
   setting String @id
   value   String
 
   @@map("settings")
+}
+
+// ------------------------------------------------------------------------------------------------
+// Supporting Datatypes
+// ------------------------------------------------------------------------------------------------
+
+model Airport {
+  id          String  @id
+  timezone    String
+  name        String
+  city        String
+  infoURL     String?
+  latitude    Decimal
+  longitude   Decimal
+  countryCode String
+
+  legOrigin      Leg[] @relation("originAirport")
+  legDestination Leg[] @relation("destinationAirport")
+  legDiversion   Leg[] @relation("diversionAirport")
+
+  @@unique([latitude, longitude])
+  @@map("airports")
+}
+
+model Position {
+  legId       String
+  altitude       Int
+  altitudeChange AltitudeChange
+  groundspeed    Int
+  heading        Int
+  latitude       Decimal
+  longitude      Decimal
+  timestamp      Int
+  updateType     UpdateType?
+
+  leg Leg @relation(fields: [legId], references: [id], onDelete: Cascade)
+
+  @@unique([legId, timestamp, latitude, longitude])
+  @@map("positions")
+}
+
+model Fix {
+  id                    Int      @id @default(autoincrement())
+  legId              String
+  name                  String
+  latitude              Decimal?
+  longitude             Decimal?
+  distanceFromOrigin    Decimal?
+  distanceThisLeg       Decimal?
+  distanceToDestination Decimal?
+  outboundCourse        Int?
+  type                  String
+
+  leg Leg @relation(fields: [legId], references: [id], onDelete: Cascade)
+
+  @@map("fixes")
 }

@@ -12,7 +12,7 @@
 <div class="mx-auto max-w-7xl flex flex-col xl:gap-x-16 xl:px-8">
 	<aside class="flex sm:justify-center overflow-x-scroll border-b border-gray-900/5 py-4">
 		<nav class="flex-none px-4 sm:px-6 xl:px-0">
-			<ul role="list" class="flex gap-x-3 gap-y-1 whitespace-nowrap xl:flex-col">
+			<ul role="list" class="flex gap-x-3 gap-y-1 whitespace-nowrap">
 				<li>
 					<!-- Current: "bg-gray-50 text-indigo-600", Default: "text-gray-700 hover:text-indigo-600 hover:bg-gray-50" -->
 					<a href="/settings/general" class="{$page.url.pathname === '/settings/general' ? subMenuActive : subMenuDefault} group flex gap-x-3 rounded-md py-2 pl-2 pr-3 text-sm leading-6 font-semibold" >

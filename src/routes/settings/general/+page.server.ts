@@ -3,15 +3,22 @@ import { error } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
 export const load = async ({ params }) => {
+
+	const settingValues = await settings.getSet('general');
+
 	return {
-		settingValues: {
-			'general.timezone': await settings.get('general.timezone')
-		},
+		settingValues,
 		version: process.env.GIT_COMMIT ?? 'Unknown'
 	};
 };
 
 export const actions = {
+	updateAeroAPI: async ({ request }) => {
+		const data = await request.formData();
+
+		const aeroAPI = (data.get('general.aeroAPI') ?? undefined) as undefined | string;
+		if (aeroAPI !== undefined) await settings.set('general.aeroAPI', aeroAPI);
+	},
 	updateLocalization: async ({ request }) => {
 		const data = await request.formData();
 

@@ -57,7 +57,7 @@ export const encrypt = async (input: string) => {
 	encryptedData += cipher.final('hex');
 
 	// Create and add the header (to store the IV)
-	const header = 'UNABRIDGED/' + initVector.toString('hex') + '/';
+	const header = 'CONTOUR/' + initVector.toString('hex') + '/';
 
 	// Done
 	return header + encryptedData;
