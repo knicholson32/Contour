@@ -5,13 +5,14 @@ import * as aeroAPI from '$lib/server/api/flightaware';
 import { redirect } from '@sveltejs/kit';
 import * as options from '$lib/server/db/options';
 import { finalizeFlight } from '$lib/server/db/legs';
+import type { API } from '$lib/types';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
 const EIGHT_HOURS = 8 * 60 * 60;
 
 /** @type {import('./$types').PageServerLoad} */
-export const load = async ({ params }) => {
+export const load = async ({ params, fetch }) => {
 
   const entrySettings = await settings.getSet('entry');
 
@@ -61,11 +62,14 @@ export const load = async ({ params }) => {
 
   if (await settings.get('general.aeroAPI') === '') throw redirect(301, '/settings/general')
 
+  const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
+
   return {
     entrySettings,
     currentTour,
     tourOptions,
-    currentDay: await prisma.day.findUnique({ where: { id: entrySettings['entry.day.current'] }})
+    currentDay: await prisma.day.findUnique({ where: { id: entrySettings['entry.day.current'] }}),
+    airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
   };
 };
 

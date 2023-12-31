@@ -26,6 +26,7 @@ export const getAirport = async (id: string): Promise<Types.Airport | undefined>
  */
 export const addAirport = async (airport_id: string, aeroAPIKey: string): Promise<boolean> => {
   try {
+    airport_id = airport_id.trim().toLocaleUpperCase();
     // Get the airport from AeroAPI
     const aeroAirport = await aero.getAirport(airport_id, aeroAPIKey);
     // Make the DB compatible entry

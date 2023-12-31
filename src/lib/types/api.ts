@@ -15,7 +15,13 @@ namespace API {
 
 	// Export all types that the API can carry
 	export namespace Types {
-
+		export type Airport = Prisma.AirportGetPayload<{
+			select: {
+				id: true,
+				timezone: true,
+				name: true
+			}
+		}>
 	}
 
 	// Export the basic response with all the available API responses
@@ -23,6 +29,8 @@ namespace API {
 		| Error
 		| General
 		| Boolean
+		| Airports
+		| Airport
 
 	// Create a basic API interface that all other APIs will extend
 	interface API {
@@ -53,6 +61,16 @@ namespace API {
 	export interface Boolean extends Success {
 		type: 'boolean';
 		value: boolean;
+	}
+
+	export interface Airports extends Success {
+		type: 'airports';
+		airports: Types.Airport[]
+	}
+
+	export interface Airport extends Success {
+		type: 'airport';
+		airport: Types.Airport
 	}
 }
 

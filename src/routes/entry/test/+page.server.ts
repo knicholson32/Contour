@@ -14,11 +14,8 @@ export const load = async ({ params }) => {
       const end = l.lastIndexOf(';');
       const line = l.substring(start, end);
       const entry = JSON.parse(line);
-
       const flightID = (Object.keys(entry.flights)[0]).split(':')[0];
-
       console.log(flightID);
-
       break;
     }
   }

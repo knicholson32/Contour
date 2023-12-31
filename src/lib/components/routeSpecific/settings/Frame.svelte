@@ -10,9 +10,9 @@
 	export let indent = false;
 </script>
 
-<div class="sm:mr-3 mt-2 sm:mt-0">
-	<div class="pt-6 flex items-center">
-		<dt class="pr-6 font-medium text-gray-900 sm:w-64">
+<div class="sm:mr-3 mt-0 mb-10 xs:mb-0">
+	<div class="pt-6 flex flex-col xs:flex-row items-left xs:items-center">
+		<dt class="xs:pr-6 h-10 xs:h-auto font-medium text-gray-900 sm:w-64">
 			<div class="flex gap-x-2 relative items-center {indent ? 'ml-5 font-mono' : ''}" title={hoverTitle} >
 				{#if titleLink !== null}
 					<a href={titleLink} class="flex gap-x-2 items-center">
@@ -53,10 +53,8 @@
 				<p class="text-xs leading-6 text-green-500">{success}</p>
 			{/if}
 		</dt>
-		<dd class="flex flex-auto items-center justify-end">
-			<div class="flex items-center justify-end gap-x-6">
+		<dd class="flex flex-auto items-center justify-end relative">
 				<slot />
-			</div>
 		</dd>
 	</div>
 </div>

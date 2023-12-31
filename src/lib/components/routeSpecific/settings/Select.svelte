@@ -15,7 +15,7 @@
 </script>
 
 <Frame {title} {hoverTitle} {badge} error={form?.success === false && form?.name === name ? form.message ?? null : null}>
-	<div class="-my-2">
+	<div class="-my-2 w-full xs:w-auto">
 		<select on:change={update} {disabled} {name} title={hoverTitle} class="block w-full min-w-[16em] {mono ? 'font-mono' : ''} shadow-sm select:disabled:text rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 sm:text-sm sm:leading-6">
 			{#each options as option}
 				{#if typeof option === 'string'}

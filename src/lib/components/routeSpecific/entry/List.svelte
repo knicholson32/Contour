@@ -100,7 +100,7 @@
 				{/if} -->
 			</div>
 		</div>
-		<dl class="mt-6 space-y-6 divide-y divide-gray-100 border-t border-gray-200 text-sm leading-6">
+		<dl class="mt-6 xs:space-y-6 divide-y divide-gray-100 xs:border-t border-gray-200 text-sm leading-6">
 			<slot />
 		</dl>
 	</div>

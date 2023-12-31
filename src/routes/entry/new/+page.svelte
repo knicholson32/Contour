@@ -5,7 +5,8 @@
   import * as helpers from '$lib/helpers';
   import { beforeNavigate } from '$app/navigation';
   import List from '$lib/components/routeSpecific/entry/List.svelte';
-    import { enhance } from '$app/forms';
+  import { enhance } from '$app/forms';
+  import AirportPicker from '$lib/components/routeSpecific/entry/AirportPicker.svelte';
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
@@ -118,6 +119,9 @@
     flightSets = flightSets.filter((e) => e.id !== id);
   };
 
+  let startTZ: string | null;
+  let endTZ: string | null;
+
 </script>
 
 <form class="m-4 space-y-10" method="post" 
@@ -142,8 +146,10 @@
 
     <Settings.Select {form} name="tourAttach" title="Tour" update={dayUpdate} value={data.currentTour?.id.toString() ?? 'unset'} options={tourOptions}/>
 
-    <TimePicker {form} name="startTime" title="Start Time" update={dayUpdate} bind:value={startTime}/>
-    <TimePicker {form} name="endTime" title="End Time" update={dayUpdate} bind:value={endTime}/>
+    <AirportPicker disabled bind:airports={data.airports} bind:tz={startTZ} name="startAirport" title="Start Airport" hoverTitle="Start Airport"/>
+    <TimePicker {form} name="startTime" title="Start Time" update={dayUpdate} bind:value={startTime} bind:autoTZ={startTZ}/>
+    <AirportPicker bind:airports={data.airports} bind:tz={endTZ} value={data.airports[1]} name="endAirport" title="End Airport" hoverTitle="End Airport" />
+    <TimePicker {form} name="endTime" title="End Time" update={dayUpdate} bind:value={endTime} bind:autoTZ={endTZ}/>
 
   </List>
 
