@@ -68,7 +68,7 @@ export const load = async ({ params, fetch }) => {
     entrySettings,
     currentTour,
     tourOptions,
-    currentDay: await prisma.day.findUnique({ where: { id: entrySettings['entry.day.current'] }}),
+    currentDay: await prisma.dutyDay.findUnique({ where: { id: entrySettings['entry.day.current'] }}),
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
   };
 };

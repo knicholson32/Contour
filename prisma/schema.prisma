@@ -30,6 +30,29 @@ enum UpdateType {
   UNKNOWN
 }
 
+enum AircraftCategory {
+  AIRPLANE
+}
+
+enum AirplaneClass {
+  SINGLE_ENGINE_LAND
+  SINGLE_ENGINE_SEA
+  MULTI_ENGINE_LAND
+  MLTI_ENGINE_SEA
+}
+
+enum GearType {
+  FIXED_TRICYCLE
+  RETRACTABLE_TRICYCLE
+  FIXED_TAILWHEEL
+  RETRACTABLE_TAILWHEEL
+}
+
+enum EngineType {
+  PISTON
+  TURBOFAN
+}
+
 // enum Relative {
 //   BEFORE_DEPARTURE
 //   DURING
@@ -51,29 +74,31 @@ enum UpdateType {
 // ------------------------------------------------------------------------------------------------
 
 model Tour {
-  id Int @id @default(autoincrement())
-  days Day[]
+  id      Int       @id @default(autoincrement())
+  days    DutyDay[]
   options Option[]
+
   @@map("tours")
 }
 
-model Day {
-  id Int @id @default(autoincrement())
-  tourId Int
-  tour Tour @relation(fields: [tourId], references: [id], onDelete: Restrict)
-  legs Leg[]
-  startTime_utc Int
+model DutyDay {
+  id                  Int   @id @default(autoincrement())
+  tourId              Int
+  tour                Tour  @relation(fields: [tourId], references: [id], onDelete: Restrict)
+  legs                Leg[]
+  startTime_utc       Int
   startTimezoneOffset Int
-  endTime_utc Int
-  endTimezoneOffset Int
+  endTime_utc         Int
+  endTimezoneOffset   Int
+
   @@map("days")
 }
 
 model Option {
   id String @id @default(uuid())
 
-  tourId             Int
-  tour               Tour  @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  tourId Int
+  tour   Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
 
   inaccurateTiming  Boolean
   ident             String  @db.VarChar(16)
@@ -127,15 +152,9 @@ model Option {
   @@map("options")
 }
 
-model Leg {
-  id        String @id @default(uuid())
-  dayId     Int
-  day       Day @relation(fields: [dayId], references: [id], onDelete: Restrict)
-  positions Position[]
-  fixes     Fix[]
+model FlightAwareData {
+  faFlightId String @id
 
-  ident             String  @db.VarChar(16)
-  faFlightId        String
   operator          String? @db.VarChar(16)
   flightNumber      String? @db.VarChar(16)
   registration      String? @db.VarChar(16)
@@ -146,18 +165,11 @@ model Leg {
   cancelled    Boolean
   positionOnly Boolean
 
-  originAirportId      String?  @db.VarChar(5)
-  destinationAirportId String?  @db.VarChar(5)
-  diversionAirportId   String?  @db.VarChar(5)
-  originAirport        Airport? @relation("originAirport", fields: [originAirportId], references: [id], onDelete: Restrict)
-  destinationAirport   Airport? @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
-  diversionAirport     Airport? @relation("diversionAirport", fields: [diversionAirportId], references: [id], onDelete: Restrict)
-
   departureDelay      Int?
   arrivalDelay        Int?
   filedEte            Int?
   progressPercent     Int?
-  status              String
+  status              String  @db.VarChar(64)
   aircraftType        String? @db.VarChar(32)
   routeDistance       Int?
   filedAirspeed       Int?
@@ -180,11 +192,68 @@ model Leg {
   scheduledOn  Int?
   actualIn     Int?
   actualOn     Int?
+  
+  legId        String @unique
+  leg          Leg    @relation(fields: [legId], references: [id])
+
+  @@map("flightAwareData")
+}
+
+model Leg {
+  id        String     @id @default(uuid())
+  dayId     Int?
+  day       DutyDay?   @relation(fields: [dayId], references: [id], onDelete: Restrict)
+  positions Position[]
+  fixes     Fix[]
+
+  flightAwareData FlightAwareData?
+
+  ident String @db.VarChar(16)
+
+  originAirportId      String   @db.VarChar(5)
+  destinationAirportId String   @db.VarChar(5)
+  diversionAirportId   String?  @db.VarChar(5)
+  originAirport        Airport  @relation("originAirport", fields: [originAirportId], references: [id], onDelete: Restrict)
+  destinationAirport   Airport  @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
+  diversionAirport     Airport? @relation("diversionAirport", fields: [diversionAirportId], references: [id], onDelete: Restrict)
 
   startTime Int
   endTime   Int
 
-  @@unique([faFlightId])
+  totalTime Float @default(0)
+  pic       Float @default(0)
+  sic       Float @default(0)
+  night     Float @default(0)
+  solo      Float @default(0)
+  xc        Float @default(0)
+  distance  Float @default(0)
+
+  dayTakeOffs   Int @default(0)
+  dayLandings   Int @default(0)
+  nightTakeOffs Int @default(0)
+  nightLandings Int @default(0)
+
+  simulatedInstrument Float @default(0)
+  actualInstrument    Float @default(0)
+  holds               Int   @default(0)
+
+  dualGiven    Float @default(0)
+  dualReceived Float @default(0)
+  sim          Float @default(0)
+
+  flightReview Boolean @default(false)
+  checkride    Boolean @default(false)
+  ipc          Boolean @default(false)
+  faa6158      Boolean @default(false)
+
+  passengers Int @default(0)
+
+  notes String @default("") @db.VarChar(1024)
+
+  aircraft                  Aircraft @relation(fields: [aircraftRegistration], references: [registration])
+  aircraftRegistration      String
+  flightAwareDataFaFlightId String?
+
   @@map("legs")
 }
 
@@ -198,6 +267,57 @@ model Settings {
 // ------------------------------------------------------------------------------------------------
 // Supporting Datatypes
 // ------------------------------------------------------------------------------------------------
+
+model AircraftType {
+  id String @id
+
+  typeCode        String
+  make            String
+  model           String
+  category        AircraftCategory
+  class           AirplaneClass
+  gear            GearType
+  engine          EngineType
+  complex         Boolean
+  TAA             Boolean
+  highPerformance Boolean
+  pressurized     Boolean
+
+  aircraft Aircraft[]
+
+  @@map("aircraft-types")
+}
+
+model Image {
+  id           String @unique
+  content_type String
+  full         Bytes
+  i512         Bytes
+  i256         Bytes
+  i128         Bytes
+  i56          Bytes
+
+  aircraft Aircraft[]
+
+  @@map("images")
+}
+
+model Aircraft {
+  registration String @id
+
+  year      Int
+  simulator Boolean @default(false)
+  serial    String?
+  notes     String?
+  image     Image?  @relation(fields: [imageId], references: [id])
+
+  type           AircraftType @relation(fields: [aircraftTypeId], references: [id])
+  aircraftTypeId String
+  imageId        String?
+  legs           Leg[]
+
+  @@map("aircraft")
+}
 
 model Airport {
   id          String  @id
@@ -218,7 +338,7 @@ model Airport {
 }
 
 model Position {
-  legId       String
+  legId          String
   altitude       Int
   altitudeChange AltitudeChange
   groundspeed    Int
@@ -236,7 +356,7 @@ model Position {
 
 model Fix {
   id                    Int      @id @default(autoincrement())
-  legId              String
+  legId                 String
   name                  String
   latitude              Decimal?
   longitude             Decimal?

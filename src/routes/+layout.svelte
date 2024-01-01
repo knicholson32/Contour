@@ -1,9 +1,10 @@
 <script lang="ts">
   import { page } from "$app/stores";
-    import { cubicIn, cubicInOut, cubicOut } from "svelte/easing";
+  import { cubicIn, cubicInOut, cubicOut } from "svelte/easing";
   import "../app.css";
-    import { EscapeOrClickOutside } from "$lib/components/events";
-    import { fade, scale } from "svelte/transition";
+  import { EscapeOrClickOutside } from "$lib/components/events";
+  import { fade, scale } from "svelte/transition";
+  export let data: import('./$types').PageData;
 
   // -----------------------------------------------------------------------------------------------
 	// Navigation Menus
@@ -60,16 +61,26 @@
   <body class="h-full">
   ```
 -->
+
 <div class="min-h-full flex flex-col">
-  <nav bind:this={menuHeaderBar} class="border-b border-gray-200 bg-white relative">
+  <nav bind:this={menuHeaderBar} class="border-b border-gray-200 bg-white sticky top-0 z-50">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 justify-between">
         <div class="flex">
           <div class="flex flex-shrink-0 items-center">
-            <img class="block h-10 w-auto lg:hidden" src="/logo-inverted.png" alt="Contour">
-            <img class="hidden h-10 w-auto lg:block" src="/logo-inverted.png" alt="Contour">
+            <img class="block w-9 h-auto lg:hidden" src="/logo-inverted.png" alt="Contour">
+            <img class="hidden w-9 h-auto lg:block" src="/logo-inverted.png" alt="Contour">
           </div>
-          <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
+          {#if data.entrySettings["entry.tour.current"] !== -1}
+            <div class="m-3 flex items-center">
+              <a href="/tour" class="uppercase select-none border border-sky-400 text-sky-500 rounded-md py-2 px-3 whitespace-nowrap">
+                On Tour
+              </a>
+            </div>
+          {:else}
+            <div class="sm:ml-6"></div>
+          {/if}
+          <div class="hidden sm:-my-px sm:flex sm:space-x-8">
             <!-- Desktop Menu -->
             {#each menu as m}
               <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
@@ -93,7 +104,7 @@
           <!-- Profile dropdown -->
           <div bind:this={profileBar} use:EscapeOrClickOutside={{ callback: closeAccountDropdown, except: profileBar }} class="relative ml-3">
             <div>
-              <button type="button" on:click={toggleAccountDropdown} class="relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+              <button type="button" on:click={toggleAccountDropdown} class="touch-manipulation relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
                 <span class="absolute -inset-1.5"></span>
                 <span class="sr-only">Open user menu</span>
                 <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
@@ -130,7 +141,7 @@
         </div>
         <div class="-mr-2 flex items-center sm:hidden">
           <!-- Mobile menu button -->
-          <button type="button" on:click={toggleMobileMenu} class="relative inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
+          <button type="button" on:click={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
             <span class="absolute -inset-0.5"></span>
             <span class="sr-only">Open main menu</span>
             <!-- Menu open: "hidden", Menu closed: "block" -->

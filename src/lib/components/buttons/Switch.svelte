@@ -31,7 +31,7 @@
 		on:click={click}
 		{type}
 		title={hoverTitle}
-		class="shadow-sm rounded-full {value
+		class="touch-manipulation shadow-sm rounded-full {value
 			? disabled
 				? 'bg-gray-200'
 				: 'bg-indigo-600'

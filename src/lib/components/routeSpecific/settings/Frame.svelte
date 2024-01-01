@@ -12,7 +12,7 @@
 
 <div class="sm:mr-3 mt-0 mb-10 xs:mb-0">
 	<div class="pt-6 flex flex-col xs:flex-row items-left xs:items-center">
-		<dt class="xs:pr-6 h-10 xs:h-auto font-medium text-gray-900 sm:w-64">
+		<dt class="xs:pr-6 inline-flex items-center gap-3 xs:block h-10 xs:h-auto font-medium text-gray-900 sm:w-64">
 			<div class="flex gap-x-2 relative items-center {indent ? 'ml-5 font-mono' : ''}" title={hoverTitle} >
 				{#if titleLink !== null}
 					<a href={titleLink} class="flex gap-x-2 items-center">

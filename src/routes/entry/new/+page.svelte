@@ -158,14 +158,14 @@
     <List class="" {form} id={set.id} remove={removeFlightSet} bind:action={set.flightID} bind:unsavedChanges={setUnsavedChanges} >
       <span slot="title">Flight ID 
         {#if set.flightID !== ''}
-          <span class="ml-2 font-mono text-sky-500">'{set.flightID}'</span>
+          <span class="ml-2 font-mono text-sky-500">'{set.flightID.toUpperCase()}'</span>
         {:else}
           <span class="ml-2 font-mono text-gray-400">Unset</span>
         {/if}
       </span>
       <span slot="description">Legs that share a common flight ID</span>
 
-      <Settings.Input {form} name="flightID" title="Flight ID" bind:value={set.flightID} placeholder={data.entrySettings['entry.defaultFlightID'] + '123'} bind:update={setUpdate} />
+      <Settings.Input {form} name="flightID" title="Flight ID" bind:value={set.flightID} uppercase={true} placeholder={data.entrySettings['entry.defaultFlightID'] + '123'} bind:update={setUpdate} />
 
       {#each set.flights as flight (flight.id)}
         <Settings.Input {form} bind:name={set.flightID} title="Leg" bind:value={flight.value} placeholder={"https://www.flightaware.com/live/flight/EJA762/history/20231228/1430Z/KJFK/KFWA"} bind:update={setUpdate} bind:updatedContents={set.update} />

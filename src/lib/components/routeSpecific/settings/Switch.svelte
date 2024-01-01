@@ -15,23 +15,8 @@
 	export let update = () => {};
 </script>
 
-<Frame
-	{title}
-	{hoverTitle}
-	{indent}
-	{titleImg}
-	{titleLink}
-	error={form?.success === false && form?.name === name ? form.message ?? null : null}
->
-	<Switch
-		changed={(b) => {
-			update();
-		}}
-		type="button"
-		forceHiddenInput={true}
-		{disabled}
-		{hoverTitle}
-		valueName={name}
-		bind:value
-	/>
+<Frame {title} {hoverTitle} {indent} {titleImg} {titleLink} error={form?.success === false && form?.name === name ? form.message ?? null : null}>
+	<div class="w-full xs:w-auto flex">
+		<Switch changed={(b) => { update(); }} type="button" forceHiddenInput={true} {disabled} {hoverTitle} valueName={name} bind:value/>
+	</div>
 </Frame>
