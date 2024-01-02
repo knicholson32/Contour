@@ -1,12 +1,12 @@
 <script lang="ts">
   import * as Settings from '$lib/components/routeSpecific/settings';
-  import TimePicker from '$lib/components/routeSpecific/entry/TimePicker.svelte';
+  import TimePicker from '$lib/components/routeSpecific/tour/TimePicker.svelte';
   import { v4 as uuidv4 } from 'uuid';
   import * as helpers from '$lib/helpers';
   import { beforeNavigate } from '$app/navigation';
-  import List from '$lib/components/routeSpecific/entry/List.svelte';
+  import List from '$lib/components/routeSpecific/tour/List.svelte';
   import { enhance } from '$app/forms';
-  import AirportPicker from '$lib/components/routeSpecific/entry/AirportPicker.svelte';
+  import AirportPicker from '$lib/components/routeSpecific/tour/AirportPicker.svelte';
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 

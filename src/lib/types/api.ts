@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 import type * as types from './';
 import type { ObjectType, SettingsSet, TypeName } from '$lib/server/settings';
 import * as _responses from './responses';
+import * as _form from './form';
 import * as validators from './prisma';
 
 /**
@@ -40,6 +41,12 @@ namespace API {
 
 	// Export basic functions
 	export const response = _responses;
+
+	export namespace Form {
+		export type Type = _form.Type;
+		export const formFailure = _form.formFailure;
+		export const formSuccess = _form.formSuccess;
+	}
 
 	// Export a basic Error API response
 	export interface Error extends API {

@@ -1,8 +1,8 @@
 <script lang="ts">
-    import icons from "$lib/components/icons";
-
+  import icons from "$lib/components/icons";
   export let title: string;
   export let visible = true;
+  export let error: string | null = null;
 
   let click = () => {
     visible = !visible;
@@ -12,6 +12,10 @@
 
 <button tabindex="-1" type="button" on:click={click} class="touch-manipulation inline-flex w-full items-center cursor-default text-left px-3 py-1 border-b border-gray-200 uppercase font-medium text-sm bg-gray-100 text-gray-500">
   <span>{title}</span>
+  {#if error !== null}
+    <span class="flex-grow"></span>
+    <span class="flex-grow text-red-500 ml-2">{error}</span>
+  {/if}
   <span class="flex-grow"></span>
   <span class="">
     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >

@@ -1,16 +1,20 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-  import Frame from "./Frame.svelte";
-    import icons from "$lib/components/icons";
-
+  import { onMount } from "svelte";
+  import Frame from "./framing/Frame.svelte";
+  import icons from "$lib/components/icons";
+  import type { API } from "$lib/types";
+  
   export let value: number | null = null;
 	export let name: string;
   export let title: string;
+  export let action: string = '?/default';
+  export let form: null | API.Form.Type = null
 	export let disabled: boolean = false;
+  export let required: boolean = false;
 
   export let update: () => void = () => {};
 
-
+  
   let lastValue = value !== null ? value.toFixed(2) : '';
   /**
    * Each time the user enters a character, check the input
@@ -24,6 +28,7 @@
     }
     // If we get here, the input was valid. Save it for later in case we need to go back to it.
     lastValue = input.value;
+    update();
   }
 
   /**
@@ -43,7 +48,9 @@
     let v = parseInt(input.value);
     if (isNaN(v)) v = 0;
     v = v + 1;
+    value = v;
     input.value = v.toFixed(0);
+    update();
     input.blur();
   }
   let dec = () => {
@@ -51,7 +58,9 @@
     if (isNaN(v)) v = 0;
     v = v - 1;
     if (v < 0) v = 0;
+    value = v;
     input.value = v.toFixed(0);
+    update();
     input.blur();
   }
 
@@ -63,7 +72,7 @@
 </script>
 
 
-<Frame bind:title focus={focus} bind:disabled>
+<Frame {name} {action} {form} bind:title focus={focus} bind:disabled>
   <div slot="outsideButton">
     <div class="absolute right-24 top-2 inline-flex gap-2 w-[4.5rem]">
       <button tabindex="-1" disabled={disabled} on:click={dec} type="button" class="touch-manipulation select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 px-2 rounded-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-sky-300 betterhover:hover:bg-sky-50 betterhover:hover:text-sky-700 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white focus-visible:outline-grey-500">
@@ -78,6 +87,6 @@
       </button>
     </div>
   </div>
-  <input tabindex="0" maxlength="4" bind:this={input} disabled={disabled} on:change={_update} on:input={_updateContinuous} pattern="[0-9]*" type="number" bind:value placeholder="0" name={name}
+  <input {required} tabindex="0" maxlength="4" bind:this={input} disabled={disabled} on:change={_update} on:input={_updateContinuous} pattern="[0-9]*" type="number" bind:value placeholder="0" name={name}
     class="text-ellipsis px-0 w-14 text-sm font-mono font-bold text-right flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
 </Frame>

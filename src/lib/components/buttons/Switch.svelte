@@ -5,14 +5,21 @@
 	export let title = '';
 	export let hoverTitle: string | undefined = undefined;
 	export let disabled = false;
+	export let disableClick = false;
 
 	export let forceHiddenInput = false;
 
 	export let changed = (b: boolean) => {};
 
-	let click = () => {
+	let button: HTMLButtonElement;
+	export const click = () => {
 		value = !value;
 		changed(value);
+	}
+
+	let _click = () => {
+		if (disableClick) return;
+		click();
 	};
 </script>
 
@@ -26,26 +33,15 @@
 	{#if type === 'submit' || forceHiddenInput === true}
 		<input type="hidden" bind:value name={valueName} />
 	{/if}
-	<button
-		{disabled}
-		on:click={click}
-		{type}
-		title={hoverTitle}
-		class="touch-manipulation shadow-sm rounded-full {value
-			? disabled
-				? 'bg-gray-200'
-				: 'bg-indigo-600'
-			: 'bg-gray-200'} disabled:cursor-not-allowed relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
-		role="switch"
-		aria-checked="false"
-		aria-labelledby="annual-billing-label"
-	>
-		<!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
-		<span
-			aria-hidden="true"
-			class="{value
-				? 'translate-x-5'
-				: 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-		/>
-	</button>
+	{#if disableClick}
+		<div title={hoverTitle} class="touch-manipulation shadow-sm rounded-full {value ? disabled ? 'bg-gray-200' : 'bg-indigo-600' : 'bg-gray-200'} disabled:cursor-not-allowed relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">
+			<!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
+			<span aria-hidden="true" class="{value ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"/>
+		</div>
+	{:else}
+		<button bind:this={button} {disabled} on:click={_click} {type} title={hoverTitle} class="touch-manipulation shadow-sm rounded-full {value ? disabled ? 'bg-gray-200' : 'bg-indigo-600' : 'bg-gray-200'} disabled:cursor-not-allowed relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">
+			<!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
+			<span aria-hidden="true" class="{value ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"/>
+		</button>
+	{/if}
 </div>

@@ -49,12 +49,12 @@
 	let spinnerClasses = '';
 	let spinnerProgressClasses = '';
 
-	// rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50
+	// rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 betterhover:hover:bg-gray-50
 	switch (themeDefault) {
 		case 'green':
 			themeClassesStatic = '';
 			themeClassesDefault =
-				'bg-green-600 text-white hover:bg-green-500 disabled:text-gray-200 disabled:bg-gray-800 disabled:hover:bg-gray-800 focus-visible:outline-green-500';
+				'bg-green-600 text-white betterhover:hover:bg-green-500 disabled:text-gray-200 disabled:bg-gray-800 disabled:betterhover:hover:bg-gray-800 focus-visible:outline-green-500';
 			themeClassesSubmitting = 'bg-green-600 text-white cursor-default';
 			spinnerClasses = 'fill-white text-green-700';
 			spinnerProgressClasses = 'text-white';
@@ -62,7 +62,7 @@
 		case 'red':
 			themeClassesStatic = '';
 			themeClassesDefault =
-				'bg-red-600 text-white hover:bg-red-500 disabled:text-gray-200 disabled:bg-gray-800 disabled:hover:bg-gray-800 focus-visible:outline-red-500';
+				'bg-red-600 text-white betterhover:hover:bg-red-500 disabled:text-gray-200 disabled:bg-gray-800 disabled:betterhover:hover:bg-gray-800 focus-visible:outline-red-500';
 			themeClassesSubmitting = 'bg-red-600 text-white cursor-default';
 			spinnerClasses = 'fill-white text-red-700';
 			spinnerProgressClasses = 'text-white';
@@ -71,7 +71,7 @@
 			themeClassesStatic =
 				'ring-1 ring-inset ring-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200';
 			themeClassesDefault =
-				'bg-white text-gray-800 hover:bg-gray-100 hover:text-gray-900 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500';
+				'bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500';
 			themeClassesSubmitting = 'bg-white text-gray-800 cursor-default';
 			spinnerClasses = 'text-gray-100 fill-gray-800';
 			spinnerProgressClasses = 'text-gray-800';
@@ -79,7 +79,7 @@
 		default: // indigo
 			themeClassesStatic = '';
 			themeClassesDefault =
-				'bg-indigo-600 text-white hover:bg-indigo-500 disabled:text-gray-200 disabled:bg-gray-800 disabled:hover:bg-gray-800 focus-visible:outline-indigo-500';
+				'bg-indigo-600 text-white betterhover:hover:bg-indigo-500 disabled:text-gray-200 disabled:bg-gray-800 disabled:betterhover:hover:bg-gray-800 focus-visible:outline-indigo-500';
 			themeClassesSubmitting = 'bg-indigo-600 text-white cursor-default';
 			spinnerClasses = 'fill-white text-indigo-700';
 			spinnerProgressClasses = 'text-white';
@@ -89,26 +89,26 @@
 	switch (themeDone) {
 		case 'white':
 			themeClassesDone =
-				'bg-white text-gray-800 hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-grey-500 ring-1 ring-inset ring-gray-300';
+				'bg-white text-gray-800 betterhover:hover:bg-gray-50 betterhover:hover:text-gray-900 focus-visible:outline-grey-500 ring-1 ring-inset ring-gray-300';
 			break;
 		default: // green
 			themeClassesDone =
-				'bg-green-600 text-white hover:bg-green-500 focus-visible:outline-green-500';
+				'bg-green-600 text-white betterhover:hover:bg-green-500 focus-visible:outline-green-500';
 			break;
 	}
 
 	switch (themeFailed) {
 		case 'yellow':
 			themeClassesFailed =
-				'bg-yellow-500 text-white hover:bg-yellow-400 ring-yellow-300 focus-visible:outline-yellow-500';
+				'bg-yellow-500 text-white betterhover:hover:bg-yellow-400 ring-yellow-300 focus-visible:outline-yellow-500';
 			break;
 		case 'white':
 			themeClassesFailed =
-				'bg-white text-gray-800 hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-grey-500 ring-1 ring-inset ring-gray-300';
+				'bg-white text-gray-800 betterhover:hover:bg-gray-50 betterhover:hover:text-gray-900 focus-visible:outline-grey-500 ring-1 ring-inset ring-gray-300';
 			break;
 		default: // red
 			themeClassesFailed =
-				'bg-red-600 text-white hover:bg-red-500 ring-red-300 focus-visible:outline-red-500';
+				'bg-red-600 text-white betterhover:hover:bg-red-500 ring-red-300 focus-visible:outline-red-500';
 			break;
 	}
 
@@ -162,7 +162,7 @@
 	// stroke-dasharray="{circumference}" stroke-dashoffset="{offset}"
 </script>
 
-<button title={submitting && progress != 0 ? `${Math.round(progress * 100)}%` : hoverTitle} bind:this={button} {disabled} type="submit" class="{clazz} select-none transition-colors flex justify-center px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed {done ? '' : themeClassesStatic} {themeClasses}">
+<button title={submitting && progress != 0 ? `${Math.round(progress * 100)}%` : hoverTitle} bind:this={button} {disabled} type="submit" class="{clazz} touch-manipulation select-none transition-colors flex justify-center px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed {done ? '' : themeClassesStatic} {themeClasses}">
 	<span class="flex-none">{done ? failed ? failedText : doneText : submitting ? actionTextInProgress : actionText}</span>
 	{#if submitting || done}
 		<div transition:reveal role="status" class="relative flex-none ml-2 w-5 h-5 align-middle overflow-hidden">

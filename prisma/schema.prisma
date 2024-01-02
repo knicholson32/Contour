@@ -30,44 +30,45 @@ enum UpdateType {
   UNKNOWN
 }
 
-enum AircraftCategory {
-  AIRPLANE
-}
-
-enum AirplaneClass {
-  SINGLE_ENGINE_LAND
-  SINGLE_ENGINE_SEA
-  MULTI_ENGINE_LAND
-  MLTI_ENGINE_SEA
+enum CategoryClass {
+  ASEL // Airplane Single-Engine Land
+  AMEL // Airplane Multi-Engine Land
+  ASES // Airplane Single-Engine Sea
+  AMES // Airplane Multi-Engine Sea
+  RH // Rotocraft Helicopter
+  RG // Rotocraft Gyroplane
+  GL // Glider
+  LA // Lighter Than Air Airship
+  LB // Lighter Than Air Balloon
+  PLIFT // Powered Lift
+  PL // Powered Parachute Land
+  PS // Powered Parachute Land
+  WL // Weight Shift Control Land
+  WS // Weight Shift Control Sea
 }
 
 enum GearType {
-  FIXED_TRICYCLE
-  RETRACTABLE_TRICYCLE
-  FIXED_TAILWHEEL
-  RETRACTABLE_TAILWHEEL
+  AM // Amphibian
+  FC // Fixed Tailwheel
+  FT // Fixed Tricycle
+  FL // Floats
+  RC // Retractable Tailwheel
+  RT // Retractable Tricycle
+  SK // Skids
+  SI // Skis
 }
 
 enum EngineType {
-  PISTON
-  TURBOFAN
+  DS // Diesel
+  EL // Electric
+  NP // Non-Powered
+  PT // Piston
+  RA // Radial
+  TF // Turbofan
+  TJ // Turbojet
+  TP // Turboprop
+  TS // Turboshaft
 }
-
-// enum Relative {
-//   BEFORE_DEPARTURE
-//   DURING
-//   AFTER_ARRIVAL
-// }
-
-// enum SearchError {
-//   INVALID_ARGUMENT
-//   FLIGHT_NOT_FOUND
-//   FLIGHT_IN_PROGRESS
-//   FLIGHT_COULD_NOT_BE_CREATED
-//   RESULTING_FLIGHT_ALREADY_EXISTS
-//   DAY_DOES_NOT_EXIST
-//   RATE_LIMITED
-// }
 
 // ------------------------------------------------------------------------------------------------
 // Primary Datatypes
@@ -192,9 +193,9 @@ model FlightAwareData {
   scheduledOn  Int?
   actualIn     Int?
   actualOn     Int?
-  
-  legId        String @unique
-  leg          Leg    @relation(fields: [legId], references: [id])
+
+  legId String @unique
+  leg   Leg    @relation(fields: [legId], references: [id])
 
   @@map("flightAwareData")
 }
@@ -272,19 +273,20 @@ model AircraftType {
   id String @id
 
   typeCode        String
+  subCode         String?
   make            String
   model           String
-  category        AircraftCategory
-  class           AirplaneClass
+  catClass        CategoryClass
   gear            GearType
   engine          EngineType
   complex         Boolean
-  TAA             Boolean
+  taa             Boolean
   highPerformance Boolean
   pressurized     Boolean
 
   aircraft Aircraft[]
 
+  @@unique([typeCode, subCode])
   @@map("aircraft-types")
 }
 
@@ -311,10 +313,14 @@ model Aircraft {
   notes     String?
   image     Image?  @relation(fields: [imageId], references: [id])
 
-  type           AircraftType @relation(fields: [aircraftTypeId], references: [id])
-  aircraftTypeId String
-  imageId        String?
-  legs           Leg[]
+  type            AircraftType @relation(fields: [aircraftTypeId], references: [id])
+  aircraftTypeId  String
+  imageId         String?
+  complex         Boolean
+  TAA             Boolean
+  highPerformance Boolean
+  pressurized     Boolean
+  legs            Leg[]
 
   @@map("aircraft")
 }
