@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Section from '$lib/components/routeSpecific/entry/framing/Section.svelte';
+  import Section from '$lib/components/Section.svelte';
   import TextField from '$lib/components/routeSpecific/entry/TextField.svelte';
   import Select from '$lib/components/routeSpecific/entry/Select.svelte';
   import Input from '$lib/components/routeSpecific/entry/Input.svelte';

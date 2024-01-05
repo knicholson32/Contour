@@ -16,7 +16,6 @@
     import AircraftPicker from '$lib/components/routeSpecific/entry/AircraftPicker.svelte';
     import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
     import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
-    import ListGroup from '$lib/components/list/ListGroup.svelte';
 
   const LOCAL_STORAGE = 'entry';
 
@@ -195,7 +194,7 @@
   </form>
 
   <nav class="h-full" aria-label="Directory">
-    <ListGroup title="A">
+    <Section title="A">
       <ul role="list" class="divide-y divide-gray-100">
         <li class="flex gap-x-4 px-3 py-5">
           <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
@@ -223,8 +222,8 @@
           </div>
         </li>
       </ul>
-    </ListGroup>
-    <ListGroup title="A">
+    </Section>
+    <Section title="A">
       <ul role="list" class="divide-y divide-gray-100">
         <li class="flex gap-x-4 px-3 py-5">
           <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
@@ -250,8 +249,8 @@
           </div>
         </li>
       </ul>
-    </ListGroup>
-    <ListGroup title="A">
+    </Section>
+    <Section title="A">
       <ul role="list" class="divide-y divide-gray-100">
         <li class="flex gap-x-4 px-3 py-5">
           <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
@@ -277,8 +276,8 @@
           </div>
         </li>
       </ul>
-    </ListGroup>
-    <ListGroup title="A">
+    </Section>
+    <Section title="A">
       <ul role="list" class="divide-y divide-gray-100">
         <li class="flex gap-x-4 px-3 py-5">
           <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
@@ -304,8 +303,8 @@
           </div>
         </li>
       </ul>
-    </ListGroup>
-    <ListGroup title="A">
+    </Section>
+    <Section title="A">
       <ul role="list" class="divide-y divide-gray-100">
         <li class="flex gap-x-4 px-3 py-5">
           <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
@@ -331,7 +330,7 @@
           </div>
         </li>
       </ul>
-    </ListGroup>
+    </Section>
     <div class="inline-flex -mt-[2px] py-2 px-5 gap-4 w-full border-t flex-row justify-center sticky bottom-0 z-50 bg-white">
       <button type="submit" class="touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-grey-500">Next</button>
       <button type="submit" class="touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-grey-500">Next</button>

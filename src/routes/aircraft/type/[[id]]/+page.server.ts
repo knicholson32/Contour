@@ -11,6 +11,8 @@ export const load = async ({ fetch, params }) => {
 
   const entrySettings = await settings.getSet('entry');
 
+  console.log(params);
+
   return {
     entrySettings,
     types: await prisma.aircraftType.findMany({ orderBy: { typeCode: 'desc' }}),

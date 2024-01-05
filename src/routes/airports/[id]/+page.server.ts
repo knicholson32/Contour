@@ -6,7 +6,9 @@ import * as helpers from '$lib/server/helpers';
 
 const MAX_MB = 10;
 
-export const load = async ({ fetch }) => {
+export const load = async ({ fetch, params }) => {
+
+  const id = params.id;
 
   const entrySettings = await settings.getSet('entry');
   const airports = await ((await fetch('/api/airports')).json()) as API.Airports;

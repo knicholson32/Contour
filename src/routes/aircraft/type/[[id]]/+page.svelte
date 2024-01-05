@@ -6,8 +6,7 @@
   import Switch from '$lib/components/routeSpecific/entry/Switch.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
   import Image from '$lib/components/Image.svelte';
-    import ListGroup from '$lib/components/list/ListGroup.svelte';
-    import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
+  import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
 
   export let data: import('./$types').PageData;
 	export let form: import('./new/$types').ActionData;
