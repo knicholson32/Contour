@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Frame from "./framing/Frame.svelte";
+  import Frame from "./Frame.svelte";
   import type { API } from "$lib/types";
 
   export let value: number | null = null;

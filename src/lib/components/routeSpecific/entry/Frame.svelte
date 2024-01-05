@@ -14,7 +14,7 @@
 
 </script>
 
-<div class="w-full relative inline-flex items-center px-3 py-1 gap-2 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500' : ''}">
+<li class="w-full relative inline-flex items-center px-3 py-1 gap-2 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500' : ''}">
   <button {disabled} tabindex="-1" type="button" title="" on:click={focus} 
     class="touch-manipulation w-full {disabled ? 'cursor-not-allowed' : 'cursor-default'} inline-flex items-center gap-2 ring-0 focus-within:ring-0">
     <dt class="font-bold inline-flex items-center gap-2 {red ? 'text-red-500' : ''}">
@@ -37,4 +37,4 @@
     </dd>
   </button>
   <slot name="outsideButton"/>
-</div>
+</li>

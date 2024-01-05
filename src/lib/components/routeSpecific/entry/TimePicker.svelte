@@ -1,7 +1,7 @@
 <script lang="ts">
   import { timeZonesNames } from '@vvo/tzdb';
   import * as helpers from '$lib/helpers';
-	import Frame from './framing/Frame.svelte';
+	import Frame from './Frame.svelte';
   import Switch from '$lib/components/buttons/Switch.svelte';
   import { fade, scale } from 'svelte/transition';
   import { cubicIn, cubicOut } from 'svelte/easing';

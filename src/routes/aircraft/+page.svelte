@@ -1,6 +1,6 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  import Section from '$lib/components/routeSpecific/entry/framing/Section.svelte';
+  import Section from '$lib/components/Section.svelte';
   import Input from '$lib/components/routeSpecific/entry/Input.svelte';
   import Select from '$lib/components/routeSpecific/entry/Select.svelte';
   import Switch from '$lib/components/routeSpecific/entry/Switch.svelte';

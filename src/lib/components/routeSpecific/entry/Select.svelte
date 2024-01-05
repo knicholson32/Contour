@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { API } from '$lib/types';
-  import Frame from './framing/Frame.svelte';
+  import Frame from './Frame.svelte';
 
   export let value: string | null = '';
   export let options: ({ title: string; value: string; unset?: boolean } | string)[];

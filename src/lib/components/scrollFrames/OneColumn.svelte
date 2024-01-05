@@ -15,7 +15,7 @@
     </div>
   </div>
 {:else}
-  <div class="h-full w-full flex flex-col relative overflow-y-scroll pb-[env(safe-area-inset-bottom)]">
+  <div style="-webkit-transform: translateZ(0);" class="h-full w-full flex flex-col relative overflow-y-scroll pb-[env(safe-area-inset-bottom)]">
     <slot />    
   </div>
 {/if}

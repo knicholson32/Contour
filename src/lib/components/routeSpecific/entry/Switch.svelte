@@ -1,7 +1,7 @@
 <script lang="ts">
   import Switch from "$lib/components/buttons/Switch.svelte";
   import type { API } from "$lib/types";
-  import Frame from "./framing/Frame.svelte";
+  import Frame from "./Frame.svelte";
 
   export let value: boolean = false;
 	export let name: string;

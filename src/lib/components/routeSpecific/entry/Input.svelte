@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { API } from "$lib/types";
-  import Frame from "./framing/Frame.svelte";
+  import Frame from "./Frame.svelte";
 
   export let value: string | null = null;
   export let action: string = '?/default';
@@ -37,5 +37,5 @@
 
 <Frame {name} {action} {form} {error} {required} bind:title focus={focus} bind:disabled>
   <input bind:this={input} {required} disabled={disabled} on:input={_update} pattern={useNumberPattern ? '[0-9]*' : undefined} type="text" style="{uppercase ? 'text-transform:uppercase' : ''}" bind:value={value} placeholder={placeholder} name={name}
-        class="w-full text-ellipsis px-0 text-sm font-mono font-bold text-right flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-300 placeholder:text-xs focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
+    class="w-full text-ellipsis px-0 text-sm font-mono font-bold text-right flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-300 placeholder:text-xs focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
 </Frame>

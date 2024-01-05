@@ -8,6 +8,6 @@
 
 </script>
 
-<div class="w-full relative inline-flex items-center px-3 py-1 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500' : ''}">
+<li class="w-full relative inline-flex items-center px-3 py-1 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500' : ''}">
   <textarea {required} bind:value={value} on:input={update} disabled={disabled ? true : undefined} {placeholder} {name} class="m-0 p-0 text-sm font-medium w-full border-0 ring-0 outline-none bg-transparent focus-within:outline-none focus-within:ring-0 placeholder:text-gray-400 placeholder:text-xs disabled:cursor-not-allowed disabled:text-gray-500" rows="5"/>
-</div>
+</li>

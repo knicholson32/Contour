@@ -39,20 +39,20 @@
 
 <div class="h-full w-full flex flex-col md:flex-row relative overflow-hidden">
   {#if left === 'safe'}
-    <div class="mb-[env(safe-area-inset-bottom)] overflow-y-scroll {activeOnSingleCol === 'right' ? 'hidden md:block' : ''}">
+    <div style="-webkit-transform: translateZ(0);" class="mb-[env(safe-area-inset-bottom)] flex-grow overflow-y-scroll {activeOnSingleCol === 'right' ? 'hidden md:block' : ''}">
       <slot name="left"/>
     </div>
   {:else}
-    <div class="pb-[env(safe-area-inset-bottom)] overflow-y-scroll {activeOnSingleCol === 'right' ? 'hidden md:block' : ''}">
+    <div style="-webkit-transform: translateZ(0);" class="pb-[env(safe-area-inset-bottom)] flex-grow overflow-y-scroll {activeOnSingleCol === 'right' ? 'hidden md:block' : ''}">
       <slot name="left"/>
     </div>
   {/if}
   {#if right === 'safe'}
-    <div class="mb-[env(safe-area-inset-bottom)] overflow-y-scroll {activeOnSingleCol === 'left' ? 'hidden md:block' : ''}">
+    <div style="-webkit-transform: translateZ(0);" class="mb-[env(safe-area-inset-bottom)] flex-grow overflow-y-scroll {activeOnSingleCol === 'left' ? 'hidden md:block' : ''}">
       <slot name="right"/>
     </div>
   {:else}
-    <div class="pb-[env(safe-area-inset-bottom)] overflow-y-scroll {activeOnSingleCol === 'left' ? 'hidden md:block' : ''}">
+    <div style="-webkit-transform: translateZ(0);" class="pb-[env(safe-area-inset-bottom)] flex-grow overflow-y-scroll {activeOnSingleCol === 'left' ? 'hidden md:block' : ''}">
       <slot name="right"/>
     </div>
   {/if}

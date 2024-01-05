@@ -63,7 +63,7 @@
   ```
 -->
 
-<nav bind:this={menuHeaderBar} class="border-b border-gray-200 bg-white h-16">
+<nav bind:this={menuHeaderBar} class="relative z-50 border-b border-gray-200 bg-white h-16">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 justify-between">
       <div class="flex">
@@ -85,9 +85,9 @@
           {#each menu as m}
             <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
             {#if $page.url.pathname.startsWith(m.href)}
-              <a href="{m.href}" class="border-indigo-500 text-gray-900 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">{m.title}</a>  
+              <a href="{m.href}" class="border-indigo-500 relative z-40 text-gray-900 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">{m.title}</a>  
             {:else}
-              <a href="{m.href}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</a>  
+              <a href="{m.href}" class="border-transparent relative z-40 text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</a>  
             {/if}
           {/each}
         </div>
@@ -204,6 +204,6 @@
   {/if}
 </nav>
 
-<div class="overflow-y-hidden pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem)">
+<div class="overflow-y-hidden -mt-[1px] pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem + 1px);">
   <slot/>
 </div>

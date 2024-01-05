@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { API } from '$lib/types';
   import type { Prisma } from '@prisma/client';
-  import Frame from './framing/Frame.svelte';
+  import Frame from './Frame.svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';  
   
@@ -112,9 +112,9 @@
   // tz = value?.timezone ?? null;
 </script>
 
-<input type="hidden" name={name} bind:value />
-<form on:submit|preventDefault={() => {}} class="w-full">
-  <Frame {name} {action} {form} {required} {error} bind:title={title} focus={focus} bind:disabled>
+<Frame {name} {action} {form} {required} {error} bind:title={title} focus={focus} bind:disabled>
+  <input type="hidden" name={name} bind:value />
+  <form on:submit|preventDefault={() => {}} class="w-full">
     <input tabindex="0" bind:this={select} disabled={disabled} on:change={_update} type="text" style="text-transform:uppercase" bind:value placeholder="" name="aircraft-visible" list="aircraft"
       class="w-full text-right px-0 text-sm font-mono text-sky-400 font-bold flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
     <datalist id="aircraft">
@@ -122,8 +122,8 @@
         <option selected={plane.registration === value} value="{plane.registration}">{plane.type.typeCode} ({plane.type.make} {plane.type.model})</option>
       {/each}
     </datalist>
-  </Frame>
-</form>
+  </form>
+</Frame>
 
 <style>
   /* Make sure the datalist arrow always shows */
