@@ -13,7 +13,12 @@ export const load = async ({ fetch, params }) => {
 
   return {
     entrySettings,
-    types: await prisma.aircraftType.findMany()
+    types: await prisma.aircraftType.findMany(),
+    enums: {
+      categoryClass: Object.keys(CategoryClass).map((v) => { return { value: v, title: `${categoryClassToString(v as CategoryClass)} (${v})` }; }),
+      gearType: Object.keys(GearType).map((v) => { return { value: v, title: `${gearTypeToString(v as GearType)} (${v})` }; }),
+      engineType: Object.keys(EngineType).map((v) => { return { value: v, title: `${engineTypeToString(v as EngineType)} (${v})` }; }),
+    }
   }
 }
 

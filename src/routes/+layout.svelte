@@ -14,6 +14,7 @@
   const menu = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Entry', href: '/entry' },
+    { title: 'Aircraft', href: '/aircraft' },
     { title: 'Logbook', href: '/log' },
     { title: 'Calendar', href: '/calendar' },
   ];

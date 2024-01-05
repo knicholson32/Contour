@@ -18,6 +18,7 @@ export const load = async ({ fetch }) => {
 
   return {
     entrySettings,
-    airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
+    airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[],
+    aircraft: await prisma.aircraft.findMany({ select: { registration: true, type: { select: { typeCode: true, make: true, model: true }}}})
   }
 }

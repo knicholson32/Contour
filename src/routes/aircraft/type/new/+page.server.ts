@@ -6,6 +6,9 @@ import { CategoryClass, EngineType, GearType } from '@prisma/client';
 import { categoryClassToString, engineTypeToString, gearTypeToString } from '$lib/types/prisma';
 import { delay } from '$lib/helpers/index.js';
 import { v4 as uuidv4 } from 'uuid';
+import * as helpers from '$lib/server/helpers';
+
+const MAX_MB = 10;
 
 export const load = async ({ fetch, params }) => {
 
@@ -17,7 +20,8 @@ export const load = async ({ fetch, params }) => {
       categoryClass: Object.keys(CategoryClass).map((v) => { return { value: v, title: `${categoryClassToString(v as CategoryClass)} (${v})` }; }),
       gearType: Object.keys(GearType).map((v) => { return { value: v, title: `${gearTypeToString(v as GearType)} (${v})` }; }),
       engineType: Object.keys(EngineType).map((v) => { return { value: v, title: `${engineTypeToString(v as EngineType)} (${v})` }; }),
-    }
+    },
+    MAX_MB
   }
 }
 
@@ -36,6 +40,7 @@ export const actions = {
     const taa = data.get('taa');
     const hp = data.get('hp');
     const press = data.get('press');
+    const image = data.get('image');
     if (type === null || type === '') return API.Form.formFailure('?/default', 'type', 'Required field');
     if (make === null || make === '') return API.Form.formFailure('?/default', 'make', 'Required field');
     if (model === null || model === '') return API.Form.formFailure('?/default', 'model', 'Required field');
@@ -69,6 +74,21 @@ export const actions = {
     } catch (e) {
       console.log(e);
       return API.Form.formFailure('?/default', '*', 'Aircraft already exists');
+    }
+
+    if (image !== null && image !== '') {
+      const results = await helpers.uploadImage(image, MAX_MB);
+      if (results.success !== true) return API.Form.formFailure('?/default', 'image', results.message);
+
+      try {
+        await prisma.aircraftType.update({ where: { id }, data: { imageId: results.id } });
+      } catch (e) {
+        try {
+          await prisma.aircraftType.delete({ where: { id: type as string } });
+        } catch (e) { }
+        console.log('Error adding image to aircraft type', e);
+        return API.Form.formFailure('?/default', 'image', 'Could not add image to aircraft type');
+      }
     }
 
     throw redirect(301, '/aircraft/type');

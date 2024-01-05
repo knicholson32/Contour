@@ -19,6 +19,6 @@
 </script>
 
 
-<Frame {name} {action} {form} bind:title focus={focus} bind:disabled>
+<Frame {name} {action} {form} required={false} bind:title focus={focus} bind:disabled>
   <Switch type="submit" bind:click={focus} disableClick={true} bind:value changed={update} bind:valueName={name} {disabled} />
 </Frame>

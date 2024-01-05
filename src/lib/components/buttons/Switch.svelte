@@ -31,7 +31,7 @@
 	{/if}
 	<!-- Enabled: "bg-indigo-600", Not Enabled: "bg-gray-200" -->
 	{#if type === 'submit' || forceHiddenInput === true}
-		<input type="hidden" bind:value name={valueName} />
+		<input {disabled} type="hidden" bind:value name={valueName} />
 	{/if}
 	{#if disableClick}
 		<div title={hoverTitle} class="touch-manipulation shadow-sm rounded-full {value ? disabled ? 'bg-gray-200' : 'bg-indigo-600' : 'bg-gray-200'} disabled:cursor-not-allowed relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">

@@ -32,20 +32,24 @@
 }}>
 
   <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
-    <Input {form} required={false} title="Type Code" name="type" placeholder="CL30" uppercase={true} update={update} />
+    <Input {form} required={true} title="Type Code" name="type" placeholder="CL30" uppercase={true} update={update} />
     <Input {form} required={false} title="Sub Code" name="subType" placeholder="350" uppercase={true} update={update} />
-    <Input {form} required={false} title="Make" name="make" placeholder="Bombardier" uppercase={false} update={update} />
-    <Input {form} required={false} title="Model" name="model" placeholder="Challenger 350" uppercase={false} update={update} />
+    <Input {form} required={true} title="Make" name="make" placeholder="Bombardier" uppercase={false} update={update} />
+    <Input {form} required={true} title="Model" name="model" placeholder="Challenger 350" uppercase={false} update={update} />
   </Section>
 
   <Section title="Type">
-    <Select {form} required={false} title="Category / Class" options={data.enums.categoryClass} placeholder="Unset" name="catClass" update={update} />
-    <Select {form} required={false} title="Gear Type" options={data.enums.gearType} name="gear" placeholder="Unset" update={update} />
-    <Select {form} required={false} title="Engine Type" options={data.enums.engineType} placeholder="Unset" name="engine" update={update} />
+    <Select {form} required={true} title="Category / Class" options={data.enums.categoryClass} placeholder="Unset" name="catClass" update={update} />
+    <Select {form} required={true} title="Gear Type" options={data.enums.gearType} name="gear" placeholder="Unset" update={update} />
+    <Select {form} required={true} title="Engine Type" options={data.enums.engineType} placeholder="Unset" name="engine" update={update} />
     <Switch {form} title="Complex" name="complex" update={update} />
     <Switch {form} title="Technically Advanced" name="taa" update={update} />
     <Switch {form} title="High Performance" name="hp" update={update} />
     <Switch {form} title="Pressurized" name="press" update={update} />
+  </Section>
+
+  <Section title="Generic Type Image" error={form !== null && form.ok === false && form.action === '?/default' && form.name === 'image' ? form.message : null}>
+    <ImageUpload name="image" maxMB={data.MAX_MB} />
   </Section>
 
   <div class="w-full h-10 bg-gray-100"></div>

@@ -13,11 +13,13 @@
 	export let form: import('./$types').ActionData;
 
   import { persisted } from 'svelte-persisted-store'
+    import AircraftPicker from '$lib/components/routeSpecific/entry/AircraftPicker.svelte';
 
   const LOCAL_STORAGE = 'entry';
 
   type LocalStoreValues = {
     date: string | null,
+    aircraft: string | null,
     from: API.Types.Airport | null,
     to: API.Types.Airport | null,
     route: string | null,
@@ -50,6 +52,7 @@
     version: '1',
     values: {
       date: null,
+      aircraft: null,
       from: null,
       to: null,
       route: null,
@@ -139,15 +142,16 @@
 <form>
 
   <Section title="General">
-    <TimePickerNew title="Date" name="date" dateOnly={true} bind:value={localStore.values.date} update={update} />
-    <AirportPickerNew airports={data.airports} title="From" name="from" bind:value={localStore.values.from} update={update} />
-    <AirportPickerNew airports={data.airports} title="To" name="to" bind:value={localStore.values.to} update={update} />
+    <TimePickerNew required={true} title="Date" name="date" dateOnly={true} bind:value={localStore.values.date} update={update} />
+    <AircraftPicker required={true} title="Aircraft" name="aircraft" aircraft={data.aircraft} bind:value={localStore.values.aircraft} update={update} />
+    <AirportPickerNew required={true} airports={data.airports} title="From" name="from" bind:value={localStore.values.from} update={update} />
+    <AirportPickerNew required={true} airports={data.airports} title="To" name="to" bind:value={localStore.values.to} update={update} />
     <Input title="Route" name="route" uppercase={true} bind:value={localStore.values.route} update={update} />
     <Ticker title="Passengers" name="pax" bind:value={localStore.values.pax} update={update} />
   </Section>
 
   <Section title="Times">
-    <FlightTime title="Total Time" name="total-time" autoFill={null} bind:value={localStore.values.totalTime} update={update} />
+    <FlightTime required={true} title="Total Time" name="total-time" autoFill={null} bind:value={localStore.values.totalTime} update={update} />
     <FlightTime title="PIC" name="pic-time" bind:autoFill={localStore.values.totalTime} bind:value={localStore.values.picTime} update={update} />
     <FlightTime title="SIC" name="sic-time" bind:autoFill={localStore.values.totalTime} bind:value={localStore.values.sicTime} update={update} />
     <FlightTime title="Night" name="night-time" bind:autoFill={localStore.values.totalTime} bind:value={localStore.values.nightTime} update={update} />

@@ -1,8 +1,121 @@
 import * as settings from '$lib/server/settings';
 import * as crypto from 'node:crypto';
 import zlib from 'node:zlib';
+import sharp from 'sharp';
+import { v4 as uuidv4 } from 'uuid';
+import prisma from '$lib/server/prisma';
+import * as helpers from '$lib/helpers';
 
 const ENC_SALT = 'CONTOUR_SALT'
+
+
+export type Images = {
+	original: Buffer;
+	fullJpeg: Buffer; 
+	fullAvif: Buffer;
+	i2048Jpeg: Buffer;
+	i2048Avif: Buffer;
+	i1024Jpeg: Buffer;
+	i1024Avif: Buffer;
+	i768Jpeg: Buffer;
+	i768Avif: Buffer;
+	i512Jpeg: Buffer;
+	i512Avif: Buffer;
+	i256Jpeg: Buffer;
+	i256Avif: Buffer;
+	i128Jpeg: Buffer;
+	i128Avif: Buffer;
+};
+
+export const cropImages = async (image: ArrayBuffer): Promise<Images> => {
+	const imageBuffer = helpers.toBuffer(image);
+	const initial = sharp(imageBuffer).rotate();
+
+	const promiseList: Promise<void>[] = [];
+	const ret: Images = {
+		original: imageBuffer
+	} as Images;
+	promiseList.push(new Promise<void>(async (resolve) => { ret.fullJpeg = await initial.clone().jpeg().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.fullAvif = await initial.clone().avif().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i2048Jpeg = await initial.clone().resize({ width: 2048, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i2048Avif = await initial.clone().resize({ width: 2048, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i1024Jpeg = await initial.clone().resize({ width: 1024, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i1024Avif = await initial.clone().resize({ width: 1024, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i768Jpeg = await initial.clone().resize({ width: 768, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i768Avif = await initial.clone().resize({ width: 768, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i512Jpeg = await initial.clone().resize({ width: 512, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i512Avif = await initial.clone().resize({ width: 512, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i256Jpeg = await initial.clone().resize({ width: 256, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i256Avif = await initial.clone().resize({ width: 256, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i128Jpeg = await initial.clone().resize({ width: 128, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve) => { ret.i128Avif = await initial.clone().resize({ width: 128, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
+
+	await Promise.allSettled(promiseList);
+
+	return ret;
+};
+
+
+type UploadImageResult = uploadSuccess | uploadFail;
+
+interface uploadSuccess {
+	success: true,
+	id: string
+}
+
+interface uploadFail {
+	success: false,
+	message: string
+}
+
+export const uploadImage = async (image: string | File, maxMB = 10): Promise<UploadImageResult> => {
+	let arrayBuf: ArrayBuffer | null = null;
+	let type = '';
+
+	if (typeof image === 'string') {
+		const res = await fetch(image);
+		if (res.ok !== true) return { success: false, message: 'Could not load image from provided URL'};
+		const contentLength = parseInt(res.headers.get('content-length') ?? '*');
+		if (isNaN(contentLength)) {
+			console.log('ERROR: Image did not provided a \'content-length\' header, so we don\'t know how big it is. Can\'t download.');
+			return { success: false, message: 'Unknown image size. See logs.'};
+		}
+		const t = res.headers.get('content-type');
+		if (t === null) {
+			console.log('ERROR: Image did not provided a \'content-type\' header, so we don\'t know what kind of file it is. Can\'t download.');
+			return { success: false, message: 'Unknown file type. See logs.'};
+		}
+		type = t;
+		if (contentLength / 1000000 > maxMB) return { success: false, message: 'Image too large'};
+		arrayBuf = await res.arrayBuffer();
+		if (arrayBuf.byteLength / 1000000 > maxMB) return { success: false, message: 'Image too large'};
+	} else if (image instanceof File) {
+		// Check image size
+		if (image.size / 1000000 > maxMB) return { success: false, message: 'Image too large'};
+		arrayBuf = await image.arrayBuffer();
+		type = image.type;
+	} else {
+		return { success: false, message: 'Unsupported file type'};
+	}
+
+	const id = uuidv4();
+
+	try {
+		const images = await cropImages(arrayBuf);
+		// Store the image
+		await prisma.image.create({
+			data: {
+				id: id,
+				...images
+			}
+		});
+
+	} catch (e) {
+		console.log('Error during image upload', e);
+		return { success: false, message: 'Upload failed. See logs.' };
+	}
+	return { success: true, id };
+}
 
 /**
  * Remove up to one trailing slash from a URL

@@ -55,7 +55,7 @@
 
 </script>
 
-<Frame {name} {action} {form} bind:title bind:disabled focus={focus}>
+<Frame {name} {action} {form} {required} bind:title bind:disabled focus={focus}>
 
 
   {#if dateOnly}

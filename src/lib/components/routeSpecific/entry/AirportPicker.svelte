@@ -6,6 +6,7 @@
   export let tz: string | null = null;
   export let airports: API.Types.Airport[];
 
+  export let required: boolean = false;
   export let action: string = '?/default';
   export let form: null | API.Form.Type = null
 
@@ -98,7 +99,7 @@
 
 <input type="hidden" name={name} bind:value={hiddenValue} />
 <form on:submit|preventDefault={() => {}} class="w-full">
-  <Frame {name} {action} {form} bind:title={title} focus={focus} bind:disabled error={warningMessage}>
+  <Frame {name} {action} {form} {required} bind:title={title} focus={focus} bind:disabled error={warningMessage}>
     <input tabindex="0" bind:this={select} disabled={disabled} maxlength="4" on:change={_update} type="text" style="text-transform:uppercase" value={value?.id ?? ''} placeholder="" name="airport-visible" list="airport"
       class="w-full text-right px-0 text-sm font-mono text-sky-400 font-bold flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
     <datalist id="airport">

@@ -2,8 +2,7 @@
   import Header from "./Header.svelte";
   export let title: string;
   export let error: string | null = null;
-
-  let visible = true;
+  export let visible: boolean = true;
 
 </script>
 

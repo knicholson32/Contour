@@ -284,6 +284,9 @@ model AircraftType {
   highPerformance Boolean
   pressurized     Boolean
 
+  image   Image?  @relation(fields: [imageId], references: [id])
+  imageId String? @unique
+
   aircraft Aircraft[]
 
   @@unique([typeCode, subCode])
@@ -291,15 +294,25 @@ model AircraftType {
 }
 
 model Image {
-  id           String @unique
-  content_type String
-  full         Bytes
-  i512         Bytes
-  i256         Bytes
-  i128         Bytes
-  i56          Bytes
+  id        String @unique
+  original  Bytes
+  fullJpeg  Bytes
+  fullAvif  Bytes
+  i2048Jpeg Bytes
+  i2048Avif Bytes
+  i1024Jpeg Bytes
+  i1024Avif Bytes
+  i768Jpeg  Bytes
+  i768Avif  Bytes
+  i512Jpeg  Bytes
+  i512Avif  Bytes
+  i256Jpeg  Bytes
+  i256Avif  Bytes
+  i128Jpeg  Bytes
+  i128Avif  Bytes
 
-  aircraft Aircraft[]
+  aircraft     Aircraft?
+  aircraftType AircraftType?
 
   @@map("images")
 }
@@ -307,20 +320,21 @@ model Image {
 model Aircraft {
   registration String @id
 
-  year      Int
-  simulator Boolean @default(false)
-  serial    String?
-  notes     String?
-  image     Image?  @relation(fields: [imageId], references: [id])
+  aircraftTypeId String
+  type           AircraftType @relation(fields: [aircraftTypeId], references: [id])
+  year           Int?
+  serial         String?
 
-  type            AircraftType @relation(fields: [aircraftTypeId], references: [id])
-  aircraftTypeId  String
-  imageId         String?
-  complex         Boolean
-  TAA             Boolean
-  highPerformance Boolean
-  pressurized     Boolean
-  legs            Leg[]
+  simulator       Boolean  @default(false)
+  complex         Boolean?
+  taa             Boolean?
+  highPerformance Boolean?
+  pressurized     Boolean?
+
+  notes   String?
+  image   Image?  @relation(fields: [imageId], references: [id])
+  imageId String? @unique
+  legs    Leg[]
 
   @@map("aircraft")
 }
