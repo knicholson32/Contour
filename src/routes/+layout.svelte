@@ -16,7 +16,7 @@
     { title: 'Entry', href: '/entry' },
     { title: 'Aircraft', href: '/aircraft' },
     { title: 'Logbook', href: '/log' },
-    { title: 'Calendar', href: '/calendar' },
+    { title: 'Airports', href: '/airports' },
   ];
 
   // Mobile menu controls
