@@ -193,7 +193,7 @@
 
   </form>
 
-  <nav class="h-full" aria-label="Directory">
+  <nav class="" aria-label="Directory">
     <Section title="A">
       <ul role="list" class="divide-y divide-gray-100">
         <li class="flex gap-x-4 px-3 py-5">
@@ -214,6 +214,60 @@
         </li>
       </ul>
       <ul role="list" class="divide-y divide-gray-100">
+        <li class="flex gap-x-4 px-3 py-5">
+          <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold leading-6 text-gray-900">Emma Young</p>
+            <p class="mt-1 truncate text-xs leading-5 text-gray-500">emma.young@example.com</p>
+          </div>
+        </li>
+      </ul>
+    </Section>
+    <Section title="A">
+      <ul role="list" class="divide-y divide-gray-100">
+        <li class="flex gap-x-4 px-3 py-5">
+          <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold leading-6 text-gray-900">Emma Young</p>
+            <p class="mt-1 truncate text-xs leading-5 text-gray-500">emma.young@example.com</p>
+          </div>
+        </li>
+      </ul><ul role="list" class="divide-y divide-gray-100">
+        <li class="flex gap-x-4 px-3 py-5">
+          <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold leading-6 text-gray-900">Emma Young</p>
+            <p class="mt-1 truncate text-xs leading-5 text-gray-500">emma.young@example.com</p>
+          </div>
+        </li>
+      </ul><ul role="list" class="divide-y divide-gray-100">
+        <li class="flex gap-x-4 px-3 py-5">
+          <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold leading-6 text-gray-900">Emma Young</p>
+            <p class="mt-1 truncate text-xs leading-5 text-gray-500">emma.young@example.com</p>
+          </div>
+        </li>
+      </ul>
+    </Section>
+    <Section title="A">
+      <ul role="list" class="divide-y divide-gray-100">
+        <li class="flex gap-x-4 px-3 py-5">
+          <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold leading-6 text-gray-900">Emma Young</p>
+            <p class="mt-1 truncate text-xs leading-5 text-gray-500">emma.young@example.com</p>
+          </div>
+        </li>
+      </ul><ul role="list" class="divide-y divide-gray-100">
+        <li class="flex gap-x-4 px-3 py-5">
+          <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold leading-6 text-gray-900">Emma Young</p>
+            <p class="mt-1 truncate text-xs leading-5 text-gray-500">emma.young@example.com</p>
+          </div>
+        </li>
+      </ul><ul role="list" class="divide-y divide-gray-100">
         <li class="flex gap-x-4 px-3 py-5">
           <img class="h-12 w-12 flex-none rounded-full bg-gray-50" src="https://images.unsplash.com/photo-1505840717430-882ce147ef2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
           <div class="min-w-0">

@@ -41,7 +41,7 @@ services:
     command: sh -c "npm i && npx prisma generate && npm run build && npm run preview -- --host"
     init: true
     ports:
-      - 5173:4173
+      - 5173:5173
     tty: true
     stdin_open: true
     depends_on:

@@ -39,7 +39,7 @@
     {/each}
   </ul>
 
-  <nav slot="left" class="h-full" aria-label="Directory">
+  <nav slot="left" class="" aria-label="Directory">
     <Section title="A">
       <ul role="list" class="divide-y divide-gray-100">
         <li class="flex gap-x-4 px-3 py-5">
