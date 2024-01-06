@@ -26,7 +26,7 @@
 </script>
 
 <Frame {name} {action} {form} bind:error {required} bind:title bind:disabled focus={_focus}>
-  <select {required} bind:this={select} bind:value={value} on:change={update} {disabled} {name} class="absolute invalid:text-gray-300 invalid:text-xs right-0 opacity-100 text-right {mono ? 'font-mono' : ''} font-bold text-sm bg-transparent disabled:option:text-gray-300 border-0 py-1.5 pl-3 pr-10 focus:ring-0 disabled:cursor-not-allowed select:disabled:text disabled:text-gray-500">
+  <select {required} bind:this={select} bind:value={value} on:change={update} {disabled} {name} class="absolute z-0 invalid:text-gray-300 invalid:text-xs right-0 opacity-100 text-right {mono ? 'font-mono' : ''} font-bold text-sm bg-transparent disabled:option:text-gray-300 border-0 py-1.5 pl-3 pr-10 focus:ring-0 disabled:cursor-not-allowed select:disabled:text disabled:text-gray-500">
     {#if placeholder !== null}
       <option disabled selected={value === ''} value="">{placeholder}</option>
     {/if}

@@ -1,8 +1,11 @@
 import * as settings from '$lib/server/settings';
 
-export const load = async ({ }) => {
+const MAX_MB = 10;
+
+export const load = async ({  }) => {
 
   return {
-    entrySettings: await settings.getSet('entry')
+    entrySettings: await settings.getSet('entry'),
+    MAX_MB,
   };
 };

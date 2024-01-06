@@ -3,7 +3,9 @@
   import { cubicIn, cubicInOut, cubicOut } from "svelte/easing";
   import "../app.css";
   import { EscapeOrClickOutside } from "$lib/components/events";
-  import { fade, scale } from "svelte/transition";
+  import { fade, scale, slide } from "svelte/transition";
+  import { backArrow, backButtonClicked, backText } from "$lib/stores";
+    import { icons } from "$lib/components";
   export let data: import('./$types').PageData;
 
   // -----------------------------------------------------------------------------------------------
@@ -67,10 +69,22 @@
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 justify-between">
       <div class="flex">
-        <div class="flex flex-shrink-0 items-center">
-          <img class="block w-9 h-auto lg:hidden" src="/logo-inverted.png" alt="Contour">
-          <img class="hidden w-9 h-auto lg:block" src="/logo-inverted.png" alt="Contour">
-        </div>
+        {#if $backArrow}
+          <div class="flex items-center justify-center">
+            <button on:click={$backButtonClicked} type="button" class="touch-manipulation text-center flex-grow select-none inline-flex items-center gap-1 transition-colors pl-1 pr-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-gray-300 ring-inset bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+                {@html icons.chevronLeft}
+              </svg>
+              {$backText}
+            </button>
+          </div>
+        {:else}
+          <div class="flex flex-shrink-0 items-center">
+            <img class="block w-9 h-auto lg:hidden" src="/logo-inverted.png" alt="Contour">
+            <img class="hidden w-9 h-auto lg:block" src="/logo-inverted.png" alt="Contour">
+          </div>
+        {/if}
+
         {#if data.entrySettings["entry.tour.current"] !== -1}
           <div class="m-3 flex items-center">
             <a href="/tour" class="uppercase select-none border border-sky-400 text-sky-500 rounded-md py-2 px-3 whitespace-nowrap">
@@ -141,7 +155,7 @@
       </div>
       <div class="-mr-2 flex items-center sm:hidden">
         <!-- Mobile menu button -->
-        <button type="button" on:click={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
+        <button type="button" on:click={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md  p-2 text-gray-400 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-500 {mobileNavMenuVisible ? 'bg-gray-100' : 'bg-white'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
           <span class="absolute -inset-0.5"></span>
           <span class="sr-only">Open main menu</span>
           <!-- Menu open: "hidden", Menu closed: "block" -->

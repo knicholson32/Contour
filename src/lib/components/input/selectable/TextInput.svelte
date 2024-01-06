@@ -49,14 +49,7 @@
 	<div bind:this={basicText} on:click={edit} on:keyup={() => {}} tabindex="-1" role="textbox">
 		{#if value === ''}
 			<span class="text-xs opacity-30">{noDataText}</span>
-			<svg
-				class="inline-flex w-4 h-4 cursor-pointer opacity-30 relative bottom-0.5"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-			>
+			<svg class="inline-flex w-4 h-4 cursor-pointer opacity-30 relative bottom-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 				<path
 					stroke-linecap="round"
 					stroke-linejoin="round"
@@ -65,14 +58,7 @@
 			</svg>
 		{:else}
 			{value}
-			<svg
-				class="inline-flex w-4 h-4 cursor-pointer opacity-50 relative bottom-0.5"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-			>
+			<svg class="inline-flex w-4 h-4 cursor-pointer opacity-50 relative bottom-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 				<path
 					stroke-linecap="round"
 					stroke-linejoin="round"

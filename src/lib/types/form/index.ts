@@ -19,17 +19,19 @@ export interface Failure extends base {
 }
 
 export const formFailure = (action: string, name: string, message: string): Type => {
-  return {
+  const val = {
     action,
     name,
     ok: false,
     message
-  }; 
+  };
+  console.log('formFailure', val);
+  return val; 
 }
 
 export const formSuccess = (action: string): Type => {
   return {
     action,
     ok: true,
-  }
+  };
 }

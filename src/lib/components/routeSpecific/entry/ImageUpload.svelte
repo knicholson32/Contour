@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Image from "$lib/components/Image.svelte";
+
   export let initialImageId: string | null = null;
 	export let name: string;
 	export let disabled: boolean = false;
@@ -133,12 +135,12 @@
   <div class="w-full relative my-2 flex flex-col items-center px-3 py-1 gap-1 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500' : ''}">
     <div class="col-span-full w-full">
       <div role="form" class=" group relative mx-auto flex justify-center rounded-lg max-w-sm" on:mouseleave={mouseLeave} on:dragenter={startDrag} on:dragleave={endDrag} on:dragover={(e) => e.preventDefault()} on:drop={handleDrop}>
-        <div class="bg-white {((initialImageId === null && previewString === '') || dragging) && !forceImageDisplay ? 'opacity-100' : 'opacity-0'} {forceImageDisplay ? '' : 'group-hover:opacity-100'} transition-opacity text-center absolute inset-0 flex flex-col items-center justify-center rounded-lg border-dashed {dragging ? 'border-sky-400 border-2' : 'border'}">
+        <div class="bg-gray-100 {((initialImageId === null && previewString === '') || dragging) && !forceImageDisplay ? 'opacity-100' : 'opacity-0'} {forceImageDisplay ? '' : 'group-hover:opacity-100'} transition-opacity text-center absolute inset-0 flex flex-col items-center justify-center rounded-lg border-dashed border-gray-300 {dragging ? 'border-sky-400 border-2' : 'border'}">
           <svg class="mx-auto h-12 w-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd" />
           </svg>
           <div class="mt-4 flex justify-center text-sm leading-6 text-gray-600">
-            <label for="file-upload" class="relative cursor-pointer rounded-md bg-white font-semibold text-sky-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-sky-600 focus-within:ring-offset-2 hover:text-sky-500">
+            <label for="file-upload" class="relative cursor-pointer rounded-md font-semibold text-sky-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-sky-600 focus-within:ring-offset-2 hover:text-sky-500">
               <span>Upload an image</span>
               <input name={name + (isURL ? '-preview' : '')} id="file-upload" bind:this={imageInput} on:change={imageChanged} accept="image/*" type="file" class="sr-only">
             </label>
@@ -153,10 +155,12 @@
             {/if}
           </div>
         </div>
-        {#if previewString !== '' || initialImageId === null}
+        {#if previewString !== ''}
           <img class="w-full rounded-lg group-hover:rounded-xl transition-all mx-auto flex justify-center object-cover max-w-sm min-h-48" src={previewString} alt="Current aircraft"/>
+        {:else if initialImageId === null}
+          <div class="w-full min-h-48 mx-auto"></div>
         {:else}
-          <img class="w-full rounded-lg group-hover:rounded-xl transition-all mx-auto flex justify-center object-cover max-w-sm min-h-48" src="/api/image/{initialImageId}" alt="Current aircraft"/>
+          <Image class="w-full rounded-lg group-hover:rounded-xl transition-all mx-auto flex justify-center object-cover max-w-sm min-h-48" size={384} bind:id={initialImageId} alt="Current aircraft"/>
         {/if}
       </div>
     </div>
