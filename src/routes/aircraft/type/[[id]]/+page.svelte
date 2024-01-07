@@ -83,12 +83,29 @@
   let urlActiveParam: string;
   let isMobileSize: boolean;
 
+  const onMenuBack = () => {
+    goto('/aircraft');
+  }
+
 </script>
 
-<TwoColumn menu="scroll" form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" defaultRatio={0.50} bind:ratio >
+<TwoColumn menu="scroll" form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" onMenuBack={onMenuBack} defaultRatio={0.50} bind:ratio >
 
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink" aria-label="Directory">
+    <a href="/aircraft" class="hidden md:flex h-11 border-b relative flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 betterhover:hover:bg-gray-200 betterhover:hover:text-black">
+      <!-- <div class="h-7 w-7 mx-2.5 flex-shrink-0 rounded-full bg-gray-600 text-black uppercase font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
+        Back
+      </div> -->
+      <div class="h-7 w-12 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
+        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+          {@html icons.chevronLeft}
+        </svg>
+      </div>
+      <div class="flex flex-col gap-1 overflow-hidden flex-initial">
+        <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">Go Back</div>
+      </div>
+    </a>
     {#if data.orderGroups.length === 0}
       <!-- No Aircraft -->
       <div class="absolute top-0 bottom-24 text-center w-full flex flex-col justify-center items-center">
@@ -109,10 +126,12 @@
     {:else}
       <!-- New Aircraft -->
       <a href="/aircraft/type/new?{urlActiveParam}" class="relative flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 {$page.url.pathname.endsWith('new') && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
-        <div class="h-7 w-7 mx-2.5 flex-shrink-0 rounded-full bg-gray-600 text-black uppercase font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
-          <svg class="h-4 w-4 shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
-            {@html icons.plus}
-          </svg>
+        <div class="h-7 w-12 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
+          <div class="h-7 w-7 flex-shrink-0 rounded-full bg-gray-600 text-black uppercase font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
+            <svg class="h-4 w-4 shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+              {@html icons.plus}
+            </svg>
+          </div>
         </div>
         <div class="flex flex-col gap-1 overflow-hidden flex-initial">
           <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">Create a new aircraft type</div>

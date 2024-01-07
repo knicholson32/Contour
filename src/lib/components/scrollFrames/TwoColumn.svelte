@@ -34,10 +34,6 @@
   }
 
   let innerWidth: number;
-  $:{
-    $backArrow = activeOnSingleCol === 'form' && innerWidth < 768;
-    isMobileSize = innerWidth < 768;
-  }
 
   /**
    * Whether or not the columns should be resizable
@@ -59,6 +55,12 @@
   $:{
     $_backText = backText;
   }
+  $:{
+    $backArrow = (activeOnSingleCol === 'form'  || onMenuBack !== null) && innerWidth < 768;
+    isMobileSize = innerWidth < 768;
+  }
+
+  export let onMenuBack: (() => void) | null = null;
 
   let wrapper: HTMLDivElement;
   let _menu: HTMLDivElement;
@@ -67,10 +69,13 @@
 
   $backButtonClicked = () => {
     console.log('Back button')
-    if (activeOnSingleCol === 'form') $page.url.searchParams.set('active', 'menu');
-    else $page.url.searchParams.set('active', 'form');
-    console.log($page.url.pathname + '?' + $page.url.searchParams.toString())
-    goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: true, noScroll: false });
+    if (activeOnSingleCol === 'form') {
+      $page.url.searchParams.set('active', 'menu');
+      goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: true, noScroll: false });
+    } else if (onMenuBack !== null) {
+      $backArrow = false;
+      onMenuBack();
+    }
     activeOnSingleCol = activeOnSingleCol;
   };
 
