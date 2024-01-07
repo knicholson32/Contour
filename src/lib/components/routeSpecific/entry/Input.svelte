@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { API } from "$lib/types";
+    import { onMount } from "svelte";
   import Frame from "./Frame.svelte";
+  import { browser } from "$app/environment";
+  import id from "date-fns/locale/id";
 
   export let value: string | null = null;
   export let action: string = '?/default';
@@ -17,6 +20,7 @@
 
   export let update: () => void = () => {};
 
+
   let lastValue = value;
   export let _update = () => {
     if (validator !== null && input.value !== null) {
@@ -25,12 +29,57 @@
       }
     }
     lastValue = input.value;
+    if (uid !== null) {
+      localStorage.setItem(uid + '.' + name, lastValue);
+      localStorage.setItem(uid + '.unsaved', 'true');
+    }
     update();
     return true;
   }
 
   let input: HTMLInputElement;
   let focus = () => input.focus();
+
+  // ----------------------------------------------------------------------------
+  // Local Storage Support
+  // ----------------------------------------------------------------------------
+  export let uid: string | null = null;
+  /**
+   * Check local storage. If it exists and is not null, use that value
+   */
+  const checkLocalStorage = () => {
+    if (!browser) return;
+    const savedValue = localStorage.getItem(uid + '.' + name);
+    if (savedValue !== null) value = savedValue;
+  }
+
+  /**
+   * Check for a storage update. If the update matches the key and is not null,
+   * use that value
+   */
+  const checkStorageUpdate = (e: StorageEvent) => {
+    if (uid === null) return;
+    if (e.key !== uid + '.' + name || e.newValue === null) return;
+    value = e.newValue;
+  }
+
+  /**
+   * If uid or name changes, the entry element has been re-assigned. Check local
+   * storage and assign if required
+   */
+  $:{
+    name;
+    if (uid !== null) checkLocalStorage();
+  }
+
+  /**
+   * Attach a handler to listen for the storage event, which is emitted when
+   * local storage changes. Remove if off mount.
+   */
+  onMount(() => {
+    window.addEventListener('storage', checkStorageUpdate)
+    return () => window.removeEventListener('storage', checkStorageUpdate)
+  });
 
 </script>
 

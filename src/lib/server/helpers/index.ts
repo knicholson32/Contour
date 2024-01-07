@@ -27,7 +27,7 @@ export type Images = {
 	i128Avif: Buffer;
 };
 
-export const cropImages = async (image: ArrayBuffer): Promise<Images> => {
+export const cropImages = async (image: ArrayBuffer): Promise<Images | null> => {
 	const imageBuffer = helpers.toBuffer(image);
 	const initial = sharp(imageBuffer).rotate();
 
@@ -35,22 +35,98 @@ export const cropImages = async (image: ArrayBuffer): Promise<Images> => {
 	const ret: Images = {
 		original: imageBuffer
 	} as Images;
-	promiseList.push(new Promise<void>(async (resolve) => { ret.fullJpeg = await initial.clone().jpeg().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.fullAvif = await initial.clone().avif().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i2048Jpeg = await initial.clone().resize({ width: 2048, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i2048Avif = await initial.clone().resize({ width: 2048, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i1024Jpeg = await initial.clone().resize({ width: 1024, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i1024Avif = await initial.clone().resize({ width: 1024, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i768Jpeg = await initial.clone().resize({ width: 768, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i768Avif = await initial.clone().resize({ width: 768, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i512Jpeg = await initial.clone().resize({ width: 512, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i512Avif = await initial.clone().resize({ width: 512, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i256Jpeg = await initial.clone().resize({ width: 256, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i256Avif = await initial.clone().resize({ width: 256, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i128Jpeg = await initial.clone().resize({ width: 128, withoutEnlargement: true }).jpeg().toBuffer(); resolve() }));
-	promiseList.push(new Promise<void>(async (resolve) => { ret.i128Avif = await initial.clone().resize({ width: 128, withoutEnlargement: true }).avif().toBuffer(); resolve() }));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.fullJpeg = await initial.clone().jpeg().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.fullAvif = await initial.clone().avif().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i2048Jpeg = await initial.clone().resize({ width: 2048, withoutEnlargement: true }).jpeg().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i2048Avif = await initial.clone().resize({ width: 2048, withoutEnlargement: true }).avif().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i1024Jpeg = await initial.clone().resize({ width: 1024, withoutEnlargement: true }).jpeg().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i1024Avif = await initial.clone().resize({ width: 1024, withoutEnlargement: true }).avif().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i768Jpeg = await initial.clone().resize({ width: 768, withoutEnlargement: true }).jpeg().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i768Avif = await initial.clone().resize({ width: 768, withoutEnlargement: true }).avif().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i512Jpeg = await initial.clone().resize({ width: 512, withoutEnlargement: true }).jpeg().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i512Avif = await initial.clone().resize({ width: 512, withoutEnlargement: true }).avif().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i256Jpeg = await initial.clone().resize({ width: 256, withoutEnlargement: true }).jpeg().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i256Avif = await initial.clone().resize({ width: 256, withoutEnlargement: true }).avif().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i128Jpeg = await initial.clone().resize({ width: 128, withoutEnlargement: true }).jpeg().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			ret.i128Avif = await initial.clone().resize({ width: 128, withoutEnlargement: true }).avif().toBuffer();
+		} catch (e) { reject(e) }
+		resolve()
+	}));
 
-	await Promise.allSettled(promiseList);
+	try {
+		const p = await Promise.allSettled(promiseList);
+		for (const res of p) if (res.status === 'rejected') return null
+	} catch(e) {
+		console.log('Error cropping images', e);
+		return null;
+	}
 
 	return ret;
 };
@@ -68,6 +144,12 @@ interface uploadFail {
 	message: string
 }
 
+/**
+ * Process images as the result of an image upload
+ * @param image the image object, a string or file
+ * @param maxMB the max number of MB allowed
+ * @returns the results if the image upload process
+ */
 export const uploadImage = async (image: string | File, maxMB = 10): Promise<UploadImageResult> => {
 	let arrayBuf: ArrayBuffer | null = null;
 	let type = '';
@@ -102,6 +184,7 @@ export const uploadImage = async (image: string | File, maxMB = 10): Promise<Upl
 
 	try {
 		const images = await cropImages(arrayBuf);
+		if (images === null) return { success: false, message: 'Unsupported image' };
 		// Store the image
 		await prisma.image.create({
 			data: {
@@ -115,6 +198,24 @@ export const uploadImage = async (image: string | File, maxMB = 10): Promise<Upl
 		return { success: false, message: 'Upload failed. See logs.' };
 	}
 	return { success: true, id };
+}
+
+/**
+ * Clear hanging images from the DB (IE. Images with no aircraft, type or log entry)
+ */
+export const clearHangingImages = async (): Promise<boolean> => {
+	try {
+		await prisma.image.deleteMany({ where: {
+			AND: {
+				aircraft: { is: null },
+				aircraftType: { is: null }
+			}
+		}});
+	} catch (e) {
+		console.log('Error during clearHangingImages', e);
+		return false;
+	}
+	return true;
 }
 
 /**

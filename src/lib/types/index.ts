@@ -19,3 +19,11 @@ export const countryCodes = [
 ];
 
 export { default as API } from './api';
+
+
+
+export enum ImageUploadState {
+	NO_CHANGE = 'NO_CHANGE',
+	UPDATE = 'UPDATE',
+	DELETE = 'DELETE'
+}

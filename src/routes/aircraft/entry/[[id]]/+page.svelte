@@ -21,7 +21,6 @@
 
   <a href="/aircraft/type">Types</a>
 
-  {window.devicePixelRatio}
 
   {#each data.aircraft as aircraft}
     <div class="inline-flex">

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { browser } from "$app/environment";
-    import { goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { backArrow, backButtonClicked, backText as _backText } from "$lib/stores";
   import { onMount } from "svelte";
@@ -24,9 +24,13 @@
   export let isMobileSize = true;
 
   $: {
-    const active = $page.url.searchParams.get('active');
+    $page.url.pathname;
+    $page.url.search;
+    let active = $page.url.searchParams.get('active');
+    if (active === null) active = (new URLSearchParams($page.url.search)).get('active');
     if (active === 'menu' || active === 'form') activeOnSingleCol = active;
     urlActiveParam = 'active=' + (activeOnSingleCol === 'form' ? 'menu' : 'form');
+    // console.log($page.url.pathname, $page.url.search, active, activeOnSingleCol);
   }
 
   let innerWidth: number;
@@ -60,15 +64,15 @@
   let _menu: HTMLDivElement;
   let dragging = false;
 
-  export const switchSide = () => {
+
+  $backButtonClicked = () => {
     console.log('Back button')
     if (activeOnSingleCol === 'form') $page.url.searchParams.set('active', 'menu');
     else $page.url.searchParams.set('active', 'form');
     console.log($page.url.pathname + '?' + $page.url.searchParams.toString())
     goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: true, noScroll: false });
-  }
-
-  $backButtonClicked = switchSide;
+    activeOnSingleCol = activeOnSingleCol;
+  };
 
 
   const dragStart = () => {

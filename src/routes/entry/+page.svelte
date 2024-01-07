@@ -13,9 +13,9 @@
 	export let form: import('./$types').ActionData;
 
   import { persisted } from 'svelte-persisted-store'
-    import AircraftPicker from '$lib/components/routeSpecific/entry/AircraftPicker.svelte';
-    import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
-    import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
+  import AircraftPicker from '$lib/components/routeSpecific/entry/AircraftPicker.svelte';
+  import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
+  import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
 
   const LOCAL_STORAGE = 'entry';
 

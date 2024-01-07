@@ -4,7 +4,7 @@
   import "../app.css";
   import { EscapeOrClickOutside } from "$lib/components/events";
   import { fade, scale, slide } from "svelte/transition";
-  import { backArrow, backButtonClicked, backText } from "$lib/stores";
+  import { backArrow, backButtonClicked, backText, unsaved } from "$lib/stores";
     import { icons } from "$lib/components";
   export let data: import('./$types').PageData;
 
@@ -70,13 +70,16 @@
     <div class="flex h-16 justify-between">
       <div class="flex">
         {#if $backArrow}
-          <div class="flex items-center justify-center">
+          <div class="flex items-center gap-2 justify-center">
             <button on:click={$backButtonClicked} type="button" class="touch-manipulation text-center flex-grow select-none inline-flex items-center gap-1 transition-colors pl-1 pr-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-gray-300 ring-inset bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">
               <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
                 {@html icons.chevronLeft}
               </svg>
               {$backText}
             </button>
+            {#if $unsaved}
+              <span class="font-mono text-xxs px-2 rounded-full bg-sky-600 text-white font-bold block sm:hidden">UNSAVED</span>
+            {/if}
           </div>
         {:else}
           <div class="flex flex-shrink-0 items-center">
