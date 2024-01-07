@@ -1,5 +1,6 @@
 <script lang="ts">
   import { browser } from "$app/environment";
+    import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { backArrow, backButtonClicked, backText as _backText } from "$lib/stores";
   import { onMount } from "svelte";
@@ -12,15 +13,26 @@
   export let menu: 'safe' | 'scroll' = 'safe';
   export let form: 'safe' | 'scroll' = 'safe';
 
+
   /**
    * Specifies which side should be active in single-column mode
    */
-  export let activeOnSingleCol: 'menu' | 'form' = 'menu';
+  let activeOnSingleCol: 'menu' | 'form' = $page.url.searchParams.get('active') as 'menu' | 'form';
+  if (activeOnSingleCol !== 'menu' && activeOnSingleCol !== 'form') activeOnSingleCol = 'menu';
+  export let urlActiveParam = 'active=' + (activeOnSingleCol === 'form' ? 'menu' : 'form');
+
+  export let isMobileSize = true;
+
+  $: {
+    const active = $page.url.searchParams.get('active');
+    if (active === 'menu' || active === 'form') activeOnSingleCol = active;
+    urlActiveParam = 'active=' + (activeOnSingleCol === 'form' ? 'menu' : 'form');
+  }
 
   let innerWidth: number;
   $:{
     $backArrow = activeOnSingleCol === 'form' && innerWidth < 768;
-    console.log(innerWidth);
+    isMobileSize = innerWidth < 768;
   }
 
   /**
@@ -48,11 +60,15 @@
   let _menu: HTMLDivElement;
   let dragging = false;
 
-  $backButtonClicked = () => {
+  export const switchSide = () => {
     console.log('Back button')
-    if (activeOnSingleCol === 'form') activeOnSingleCol = 'menu';
-    else activeOnSingleCol = 'form';
+    if (activeOnSingleCol === 'form') $page.url.searchParams.set('active', 'menu');
+    else $page.url.searchParams.set('active', 'form');
+    console.log($page.url.pathname + '?' + $page.url.searchParams.toString())
+    goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: true, noScroll: false });
   }
+
+  $backButtonClicked = switchSide;
 
 
   const dragStart = () => {
@@ -107,23 +123,23 @@
 <!-- Menu -->
 <div bind:this={wrapper} class="h-full w-full flex flex-row relative overflow-hidden" style="--column-width: {ratio * 100}%;" role="presentation">
   {#if menu === 'safe'}
-    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full md:w-[--column-width] flex-shrink-0 flex-col overflow-y-scroll hidden md:flex">
+    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border mb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full md:w-[--column-width] flex-shrink-0 flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
       <slot name="menu"/>
     </div>
-    <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
+    <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
       <slot name="mobile-menu">
         <slot name="menu"/>
       </slot>
-    </div>
+    </div> -->
   {:else}
-    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full md:w-[--column-width] flex-shrink-0 flex-col overflow-y-scroll hidden md:flex">
+    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full md:w-[--column-width] flex-shrink-0 flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
       <slot name="menu"/>
     </div>
-    <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
+    <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
       <slot name="mobile-menu">
         <slot name="menu"/>
       </slot>
-    </div>
+    </div> -->
   {/if}
 
   <!-- Separator -->

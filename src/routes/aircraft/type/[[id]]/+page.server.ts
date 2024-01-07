@@ -23,7 +23,7 @@ export const load = async ({ fetch, params }) => {
     else throw redirect(301, '/aircraft/type/new')
   }
 
-  const orderGroups: { make: string, types: (typeof types[0])[] }[] = []
+  let orderGroups: { make: string, types: (typeof types[0])[] }[] = []
   let currentMake = '';
   let currentGroup: (typeof types[0])[] = []
   for (const type of types) {
