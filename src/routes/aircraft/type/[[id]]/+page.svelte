@@ -93,10 +93,7 @@
 
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink" aria-label="Directory">
-    <a href="/aircraft" class="hidden md:flex h-11 border-b relative flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 betterhover:hover:bg-gray-200 betterhover:hover:text-black">
-      <!-- <div class="h-7 w-7 mx-2.5 flex-shrink-0 rounded-full bg-gray-600 text-black uppercase font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
-        Back
-      </div> -->
+    <a href="/aircraft" class="hidden md:flex select-none h-11 border-b relative flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 betterhover:hover:bg-gray-200 betterhover:hover:text-black">
       <div class="h-7 w-12 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
           {@html icons.chevronLeft}
@@ -125,7 +122,7 @@
       </div>
     {:else}
       <!-- New Aircraft -->
-      <a href="/aircraft/type/new?{urlActiveParam}" class="relative flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 {$page.url.pathname.endsWith('new') && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
+      <a href="/aircraft/type/new?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 {$page.url.pathname.endsWith('new') && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
         <div class="h-7 w-12 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
           <div class="h-7 w-7 flex-shrink-0 rounded-full bg-gray-600 text-black uppercase font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
             <svg class="h-4 w-4 shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
@@ -146,7 +143,7 @@
       {#each data.orderGroups as group (group.make)}
         <Section title={group.make}>
           {#each group.types as type (type.id)}
-            <a href="/aircraft/type/{type.id}?{urlActiveParam}" class="relative flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 {type.id === data.params.id && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
+            <a href="/aircraft/type/{type.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 {type.id === data.params.id && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
               {#if type.imageId !== null}
                 <div class="h-12 w-12 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
                   <Image id={type.imageId} size={48} class="aspect-1 object-cover w-full h-full" alt="Icon for the {type.make} {type.model}"/>

@@ -67,7 +67,7 @@
 
 <nav bind:this={menuHeaderBar} class="relative z-50 border-b border-gray-200 bg-white h-16">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="flex h-16 justify-between">
+    <div class="flex h-16 justify-between select-none">
       <div class="flex">
         {#if $backArrow}
           <div class="flex items-center gap-2 justify-center">
@@ -178,7 +178,7 @@
   {#if mobileNavMenuVisible}
     <div in:fade={{ duration: 100, easing: cubicOut }} out:fade={{ duration: 75, easing: cubicIn }}
       use:EscapeOrClickOutside={{ callback: closeMobileMenu, except: menuHeaderBar }} 
-      class="sm:hidden absolute left-0 right-0 bg-white z-50 shadow-md" id="mobile-menu">
+      class="sm:hidden select-none absolute left-0 right-0 bg-white z-50 shadow-md" id="mobile-menu">
       <div class="space-y-1 pb-3 pt-2">
         <!-- Mobile Menu -->
         {#each menu as m}
