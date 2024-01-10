@@ -17,10 +17,17 @@ export const load = async ({ fetch, params, url }) => {
 
   console.log(params);
 
-  const aircrafts = await prisma.aircraft.findMany({ include: { type: true, _count: true }, orderBy: [{ type: { typeCode: 'asc' } }, { registration: 'asc' }] });
+  const aircrafts = await prisma.aircraft.findMany({ include: { type: true, _count: true, legs: { select: { totalTime: true } } }, orderBy: [{ type: { typeCode: 'asc' } }, { registration: 'asc' }] });
   if (params.id === undefined) {
     if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].id + '?active=menu')
     else throw redirect(301, '/aircraft/entry/new')
+  }
+
+  const aircraftTimes: { [key: string]: string } = {};
+  for (const ac of aircrafts) {
+    const legTimes = ac.legs.map((v) => v.totalTime);
+    if (legTimes.length !== 0) aircraftTimes[ac.id] = (legTimes.reduce((p, c) => p + c)).toFixed(1);
+    else aircraftTimes[ac.id] = (0).toFixed(1);
   }
 
   const currentAircraft = await prisma.aircraft.findUnique({ where: { id: params.id }, include: { type: true, _count: true } });
@@ -54,6 +61,7 @@ export const load = async ({ fetch, params, url }) => {
   return {
     entrySettings,
     aircrafts,
+    aircraftTimes,
     aircraft: currentAircraft,
     typeOptions,
     orderGroups,
@@ -106,7 +114,7 @@ export const actions = {
         const data = {
           id,
           type: { connect: { id: type as string } },
-          registration: tail as string,
+          registration: (tail as string).toLocaleUpperCase(),
           year: year === null ? null : parseInt(year as string),
           serial: serial as string | null,
           simulator: (sim as string) === 'true',
@@ -133,7 +141,7 @@ export const actions = {
         const data = {
           id,
           type: { connect: { id: type as string } },
-          registration: tail as string,
+          registration: (tail as string).toLocaleUpperCase(),
           year: year === null ? null : parseInt(year as string),
           serial: serial as string | null,
           simulator: (sim as string) === 'true',

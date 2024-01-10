@@ -19,6 +19,8 @@
   import TextField from '$lib/components/entry/TextField.svelte';
   import * as MenuForm from '$lib/components/menuForm';
     import Stats from '$lib/components/decorations/Stats.svelte';
+    import Tag from '$lib/components/decorations/Tag.svelte';
+    import SearchBar from '$lib/components/menuForm/SearchBar.svelte';
 
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
@@ -104,39 +106,41 @@
       <MenuForm.BlankMenu href={'/aircraft/entry/new?' + urlActiveParam} title="No aircraft" subtitle="Get started by creating a new aircraft." buttonText="New Aircraft" />
     {:else}
       <MenuForm.Link href={'/aircraft/entry/new?' + urlActiveParam} icon={icons.plus} text="Create a new aircraft" type={'right'} selected={$page.url.pathname.endsWith('entry/new') && !isMobileSize} />
+      <MenuForm.SearchBar />
       {#each data.orderGroups as group (group.typeCode)}
-        <Section title={group.typeCode}>
+        <Section title={group.typeCode} subtitle={`${group.regs.length} Aircraft`} collapsable={true} >
           {#each group.regs as ac (ac.id)}
-            <a href="/aircraft/entry/{ac.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 {ac.id === data.params.id && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
+            <a href="/aircraft/entry/{ac.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-1 py-2 {ac.id === data.params.id && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
               {#if ac.imageId !== null}
-                <div class="h-8 w-8 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
-                  <Image id={ac.imageId} size={32} class="aspect-1 object-cover w-full h-full" alt="Icon for the {ac.registration}, {ac.type.make} {ac.type.model}"/>
-                  <Badge class="absolute top-[4px] left-[4px]">{ac._count.legs}</Badge>
+                <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
+                  <!-- <Image id={ac.imageId} size={32} class="aspect-1 object-cover w-full h-full" alt="Icon for the {ac.registration}, {ac.type.make} {ac.type.model}"/> -->
+                  <Badge class="h-full">{ac._count.legs}</Badge>
                 </div>
               {:else if ac.type.imageId !== null}
-                <div class="h-8 w-8 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
-                  <Image id={ac.type.imageId} size={32} class="aspect-1 object-cover w-full h-full" alt="Icon for the {ac.registration}, {ac.type.make} {ac.type.model}"/>
-                  <Badge class="absolute top-[4px] left-[4px]">{ac._count.legs}</Badge>
+                <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
+                  <!-- <Image id={ac.type.imageId} size={32} class="aspect-1 object-cover w-full h-full" alt="Icon for the {ac.registration}, {ac.type.make} {ac.type.model}"/> -->
+                  <Badge class="h-full">{ac._count.legs}</Badge>
                 </div>
               {:else}
-                <div class="h-8 w-8 flex-shrink-0 rounded-lg bg-gray-300 text-black uppercase font-mono text-xxs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
+                <div class="h-6 w-6 flex-shrink-0 rounded-lg bg-gray-300 text-black uppercase font-mono text-xxs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
                   {ac.registration.substring(0, (ac.registration.length < 2 ? ac.registration.length : 3))}
                 </div>
               {/if}
               <div class="flex flex-col gap-0.5 overflow-hidden flex-initial">
                 <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-                  {ac.registration} - {ac.type.typeCode}
+                  {ac.registration}
                   {#if unsavedKeys.includes(ac.id)}
-                    <span class="font-mono text-xxs px-2 rounded-full bg-sky-600 text-white font-bold">UNSAVED</span>
+                    <Tag>UNSAVED</Tag>
+                  {:else if ac.simulator === true}
+                    <Tag>SIM</Tag>
                   {/if}
                 </div>
-                <div class="text-xs overflow-hidden uppercase whitespace-nowrap text-ellipsis inline-flex gap-2 items-baseline">{ac.type.make} - {ac.type.model}</div>
               </div>
-              <div class="absolute right-1">
-                <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
-                  {@html icons.chevronRight}
-                </svg>
-              </div>
+              <div class="flex-grow"></div>
+              <span class="text-xxs text-gray-400">{data.aircraftTimes[ac.id]}hr</span>
+              <svg class="h-4 w-4 shrink-0 flex-nowrap" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+                {@html icons.chevronRight}
+              </svg>
             </a>
           {/each}
         </Section>  
@@ -160,6 +164,7 @@
         <MenuForm.FormHeader title={`${data.aircraft.registration} - ${data.aircraft.type.make} ${data.aircraft.type.model}`}>
           <Stats values={[
             {title: 'Total Legs', value: data.aircraft._count.legs.toLocaleString()},
+            {title: 'Total FLight Time', value: `0.0 hr`},
             {title: 'Avg. Leg Length', value: '00:00'},
             {title: 'Diversion %', value: '0%'}
           ]}/>

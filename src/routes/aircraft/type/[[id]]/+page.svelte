@@ -16,6 +16,7 @@
   import { unsaved } from '$lib/stores';
   import Badge from '$lib/components/decorations/Badge.svelte';
   import * as MenuForm from '$lib/components/menuForm';
+    import Tag from '$lib/components/decorations/Tag.svelte';
 
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
@@ -98,6 +99,7 @@
       <MenuForm.BlankMenu href={'/aircraft/type/new?' + urlActiveParam} title="No aircraft types" subtitle="Get started by creating a new aircraft type." buttonText="New Aircraft"/>
     {:else}
       <MenuForm.Link href={'/aircraft/type/new?' + urlActiveParam} selected={$page.url.pathname.endsWith('new') && !isMobileSize} icon={icons.plus} text="Create a new aircraft type" type="right"/>
+      <MenuForm.SearchBar />
       <!-- Existing Aircraft -->
       {#each data.orderGroups as group (group.make)}
         <Section title={group.make}>
@@ -119,7 +121,7 @@
                 <div class="text-xs overflow-hidden uppercase whitespace-nowrap text-ellipsis inline-flex gap-2 items-baseline">
                   {type.catClass} - {type.typeCode}
                   {#if unsavedKeys.includes(type.id)}
-                    <span class="font-mono text-xxs px-2 rounded-full bg-sky-600 text-white font-bold">UNSAVED</span>
+                    <Tag>UNSAVED</Tag>
                   {/if}
                 </div>
               </div>
