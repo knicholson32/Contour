@@ -1,11 +1,11 @@
 <script lang="ts">
-  import AirportPickerNew from '$lib/components/routeSpecific/entry/AirportPicker.svelte';
-  import FlightTime from '$lib/components/routeSpecific/entry/FlightTime.svelte';
-  import Input from '$lib/components/routeSpecific/entry/Input.svelte';
+  import AirportPickerNew from '$lib/components/entry/AirportPicker.svelte';
+  import FlightTime from '$lib/components/entry/FlightTime.svelte';
+  import Input from '$lib/components/entry/Input.svelte';
   import Section from '$lib/components/Section.svelte';
-  import TextField from '$lib/components/routeSpecific/entry/TextField.svelte';
-  import Ticker from '$lib/components/routeSpecific/entry/Ticker.svelte';
-  import TimePickerNew from '$lib/components/routeSpecific/entry/TimePicker.svelte';
+  import TextField from '$lib/components/entry/TextField.svelte';
+  import Ticker from '$lib/components/entry/Ticker.svelte';
+  import TimePickerNew from '$lib/components/entry/TimePicker.svelte';
   import type { API } from '$lib/types';
   import { onMount } from 'svelte';
 
@@ -13,7 +13,7 @@
 	export let form: import('./$types').ActionData;
 
   import { persisted } from 'svelte-persisted-store'
-  import AircraftPicker from '$lib/components/routeSpecific/entry/AircraftPicker.svelte';
+  import AircraftPicker from '$lib/components/entry/AircraftPicker.svelte';
   import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
 

@@ -52,6 +52,7 @@
    * Adjust what the back text should be for this form
    */
   export let backText = 'Back';
+  export let ref: string | null = null;
   $:{
     $_backText = backText;
   }
@@ -70,8 +71,12 @@
   $backButtonClicked = () => {
     console.log('Back button')
     if (activeOnSingleCol === 'form') {
-      $page.url.searchParams.set('active', 'menu');
-      goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: true, noScroll: false });
+      if (ref === null) {
+        $page.url.searchParams.set('active', 'menu');
+        goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: true, noScroll: false });
+      } else {
+        goto(ref);
+      }
     } else if (onMenuBack !== null) {
       $backArrow = false;
       onMenuBack();
@@ -164,11 +169,11 @@
 
   <!-- Form -->
   {#if form === 'safe'}
-    <div style="-webkit-transform: translateZ(0);" class="box-border bg-gray-100 mb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-scroll {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
+    <div style="-webkit-transform: translateZ(0);" class="box-border w-full bg-gray-100 mb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-scroll {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
       <slot name="form"/>
     </div>
   {:else}
-    <div style="-webkit-transform: translateZ(0);" class="box-border bg-gray-100 pb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-scroll {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
+    <div style="-webkit-transform: translateZ(0);" class="box-border w-full bg-gray-100 pb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-scroll {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
       <slot name="form"/>
     </div>
   {/if}

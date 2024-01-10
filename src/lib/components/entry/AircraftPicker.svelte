@@ -77,7 +77,7 @@
 
     if (confirm('This aircraft does not exist. Do you want to create it?')) {
       // Save it!
-      goto('/aircraft/new?reg=' + v + '&ref=' + $page.url.pathname);
+      goto('/aircraft/entry/new?reg=' + v + '&ref=' + $page.url.pathname + '&active=form');
     }
 
     // if (v.length > 4 || v.length < 3) {

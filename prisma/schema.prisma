@@ -293,6 +293,29 @@ model AircraftType {
   @@map("aircraft-types")
 }
 
+model Aircraft {
+  id String @id
+  registration String @unique
+
+  aircraftTypeId String
+  type           AircraftType @relation(fields: [aircraftTypeId], references: [id], onDelete: Restrict)
+  year           Int?
+  serial         String?
+
+  simulator       Boolean  @default(false)
+  complex         Boolean?
+  taa             Boolean?
+  highPerformance Boolean?
+  pressurized     Boolean?
+
+  notes   String?
+  image   Image?  @relation(fields: [imageId], references: [id], onDelete: Restrict)
+  imageId String? @unique
+  legs    Leg[]
+
+  @@map("aircraft")
+}
+
 model Image {
   id        String @unique
   original  Bytes
@@ -315,28 +338,6 @@ model Image {
   aircraftType AircraftType?
 
   @@map("images")
-}
-
-model Aircraft {
-  registration String @id
-
-  aircraftTypeId String
-  type           AircraftType @relation(fields: [aircraftTypeId], references: [id], onDelete: Restrict)
-  year           Int?
-  serial         String?
-
-  simulator       Boolean  @default(false)
-  complex         Boolean?
-  taa             Boolean?
-  highPerformance Boolean?
-  pressurized     Boolean?
-
-  notes   String?
-  image   Image?  @relation(fields: [imageId], references: [id], onDelete: Restrict)
-  imageId String? @unique
-  legs    Leg[]
-
-  @@map("aircraft")
 }
 
 model Airport {

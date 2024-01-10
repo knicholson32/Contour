@@ -5,6 +5,7 @@
   import Frame from './Frame.svelte';
 
   export let value: string | null = '';
+  export let updatedValue: string | null = null;
   export let options: ({ title: string; value: string; unset?: boolean } | string)[];
   export let mono = true;
   export let error = '';
@@ -22,8 +23,11 @@
 
   const _update = () => {
     if (uid !== null) {
-      if (value === null) localStorage.removeItem(uid + '.' + name);
-      else {
+      if (value === null) {
+        updatedValue = null;
+        localStorage.removeItem(uid + '.' + name);
+      } else {
+        updatedValue = value;
         localStorage.setItem(uid + '.' + name, value);
         localStorage.setItem(uid + '.unsaved', 'true');
       }
@@ -46,7 +50,10 @@
   const checkLocalStorage = () => {
     if (!browser) return;
     const savedValue = localStorage.getItem(uid + '.' + name);
-    if (savedValue !== null) value = savedValue;
+    if (savedValue !== null) {
+      value = savedValue;
+      updatedValue = value;
+    }
   }
 
   /**
@@ -57,7 +64,7 @@
     if (uid === null) return;
     if (e.key !== uid + '.' + name || e.newValue === null) return;
     value = e.newValue;
-
+    updatedValue = value;
   }
 
   /**
@@ -68,6 +75,8 @@
     name;
     if (uid !== null) checkLocalStorage();
   }
+
+  $: { console.log(updatedValue) };
 
   /**
    * Attach a handler to listen for the storage event, which is emitted when

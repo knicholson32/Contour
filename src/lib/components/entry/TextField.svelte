@@ -1,28 +1,21 @@
 <script lang="ts">
   import { browser } from "$app/environment";
-  import Switch from "$lib/components/buttons/Switch.svelte";
-  import type { API } from "$lib/types";
   import { onMount } from "svelte";
-  import Frame from "./Frame.svelte";
 
-  export let value: boolean = false;
-	export let name: string;
-  export let title: string;
-	export let disabled: boolean = false;
-  export let action: string = '?/default';
-  export let form: null | API.Form.Type = null
-
+  export let name: string;
+  export let disabled: boolean = false;
+  export let placeholder = 'Enter comments';
   export let update: () => void = () => {};
+  export let required: boolean = false;
+  export let value: string | null = null;
 
   const _update = () => {
     if (uid !== null) {
-      localStorage.setItem(uid + '.' + name, value ? 'true' : 'false');
+      localStorage.setItem(uid + '.' + name, value ?? '');
       localStorage.setItem(uid + '.unsaved', 'true');
     }
     update();
   }
-
-  let focus: () => void;
 
   // ----------------------------------------------------------------------------
   // Local Storage Support
@@ -34,7 +27,7 @@
   const checkLocalStorage = () => {
     if (!browser) return;
     const savedValue = localStorage.getItem(uid + '.' + name);
-    if (savedValue !== null && (savedValue === 'true' || savedValue === 'false')) value = savedValue === 'true';
+    if (savedValue !== null) value = savedValue;
   }
 
   /**
@@ -43,8 +36,8 @@
    */
   const checkStorageUpdate = (e: StorageEvent) => {
     if (uid === null) return;
-    if (e.key !== uid + '.' + name || e.newValue === null || (e.newValue !== 'true' && e.newValue !== 'false')) return;
-    value = e.newValue === 'true';
+    if (e.key !== uid + '.' + name || e.newValue === null) return;
+    value = e.newValue;
   }
 
   /**
@@ -67,7 +60,6 @@
 
 </script>
 
-
-<Frame {name} {action} {form} required={false} bind:title focus={focus} bind:disabled>
-  <Switch type="submit" bind:click={focus} disableClick={true} bind:value changed={_update} bind:valueName={name} {disabled} />
-</Frame>
+<li class="w-full relative inline-flex items-center px-3 py-1 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500' : ''}">
+  <textarea {required} bind:value={value} on:input={_update} disabled={disabled ? true : undefined} {placeholder} {name} class="m-0 p-0 text-sm font-medium w-full border-0 ring-0 outline-none bg-transparent focus-within:outline-none focus-within:ring-0 placeholder:text-gray-400 placeholder:text-xs disabled:cursor-not-allowed disabled:text-gray-500" rows="5"/>
+</li>

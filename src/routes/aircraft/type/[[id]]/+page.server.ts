@@ -54,7 +54,7 @@ export const load = async ({ fetch, params }) => {
 }
 
 export const actions = {
-  createOrModify: async ({ request, params }) => {
+  createOrModify: async ({ request, params, url }) => {
 
     const id = (params.id !== 'new' ? params.id : undefined) ?? uuidv4();
 
@@ -163,8 +163,11 @@ export const actions = {
     // Clear any hanging images
     await helpers.clearHangingImages()
 
-    throw redirect(301, '/aircraft/type/' + id + '?active=form');
-    // return API.Form.formSuccess('?/default');
+    
+    const ref = url.searchParams.get('ref');
+    console.log('ref', ref);
+    if (ref !== null) throw redirect(301, ref);
+    else throw redirect(301, '/aircraft/type/' + id + '?active=form');
   },
   delete: async ({ request, params }) => {
 

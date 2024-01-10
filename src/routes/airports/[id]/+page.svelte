@@ -1,11 +1,11 @@
 <script lang="ts">
   import Section from '$lib/components/Section.svelte';
-  import TextField from '$lib/components/routeSpecific/entry/TextField.svelte';
-  import Select from '$lib/components/routeSpecific/entry/Select.svelte';
-  import Input from '$lib/components/routeSpecific/entry/Input.svelte';
-  import Switch from '$lib/components/routeSpecific/entry/Switch.svelte';
-  import Button from '$lib/components/routeSpecific/entry/Button.svelte';
-  import ImageUpload from '$lib/components/routeSpecific/entry/ImageUpload.svelte';
+  import TextField from '$lib/components/entry/TextField.svelte';
+  import Select from '$lib/components/entry/Select.svelte';
+  import Input from '$lib/components/entry/Input.svelte';
+  import Switch from '$lib/components/entry/Switch.svelte';
+  import Button from '$lib/components/entry/Button.svelte';
+  import ImageUpload from '$lib/components/entry/ImageUpload.svelte';
   import { Submit } from '$lib/components/buttons';
   import { enhance } from '$app/forms';
     import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';

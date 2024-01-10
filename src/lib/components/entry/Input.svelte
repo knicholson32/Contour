@@ -1,11 +1,12 @@
 <script lang="ts">
   import type { API } from "$lib/types";
-    import { onMount } from "svelte";
+  import { onMount } from "svelte";
   import Frame from "./Frame.svelte";
   import { browser } from "$app/environment";
   import id from "date-fns/locale/id";
 
   export let value: string | null = null;
+  export let updatedValue: string | null = null;
   export let action: string = '?/default';
   export let form: null | API.Form.Type = null
 	export let name: string;
@@ -29,6 +30,7 @@
       }
     }
     lastValue = input.value;
+    updatedValue = lastValue;
     if (uid !== null) {
       localStorage.setItem(uid + '.' + name, lastValue);
       localStorage.setItem(uid + '.unsaved', 'true');
@@ -50,7 +52,10 @@
   const checkLocalStorage = () => {
     if (!browser) return;
     const savedValue = localStorage.getItem(uid + '.' + name);
-    if (savedValue !== null) value = savedValue;
+    if (savedValue !== null) {
+      value = savedValue;
+      updatedValue = value;
+    }
   }
 
   /**
@@ -61,6 +66,7 @@
     if (uid === null) return;
     if (e.key !== uid + '.' + name || e.newValue === null) return;
     value = e.newValue;
+    updatedValue = lastValue;
   }
 
   /**

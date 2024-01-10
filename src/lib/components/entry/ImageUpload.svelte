@@ -6,7 +6,7 @@
   import hi from "date-fns/locale/hi";
   import { onMount } from "svelte";
 
-  export let initialImageId: string | null = null;
+  export let initialImageId: string | null = 'unset';
 	export let name: string;
 	export let disabled: boolean = false;
   export let maxMB = 10;
@@ -26,7 +26,7 @@
   // is immortally cleared.
   const initialImageIDChange = () => {
     _initialImageId = initialImageId;
-    initialImageId = null;
+    initialImageId = 'unset';
   }
 
   /**
