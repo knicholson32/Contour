@@ -3,19 +3,22 @@
   import Frame from "./Frame.svelte";
   import icons from "$lib/components/icons";
   import type { API } from "$lib/types";
+    import { writable } from "svelte/store";
+    import { LocalStorageManager } from "./localStorage";
+    import { form } from "./entryStore";
   
-  export let value: number | null = null;
+  export let defaultValue: number | null;
+  export let value: number | null = defaultValue;
 	export let name: string;
   export let title: string;
   export let action: string = '?/default';
-  export let form: null | API.Form.Type = null
 	export let disabled: boolean = false;
   export let required: boolean = false;
 
   export let update: () => void = () => {};
 
   
-  let lastValue = value !== null ? value.toFixed(2) : '';
+  let lastValue = defaultValue !== null ? defaultValue.toFixed(0) : '';
   /**
    * Each time the user enters a character, check the input
    */
@@ -28,13 +31,23 @@
     }
     // If we get here, the input was valid. Save it for later in case we need to go back to it.
     lastValue = input.value;
-    update();
+    // localStorage.setItem($uid + '.' + name, lastValue);
+    // localStorage.setItem($uid + '.unsaved', 'true');
+    _update();
   }
 
   /**
    * Each time the user is done with the input, clean it up
    */
   let _update = () => {
+    // if ($uid !== null) {
+    //   if (initialValue !== null) {
+    //     localStorage.setItem($uid + '.' + name, initialValue.toFixed(0));
+    //     localStorage.setItem($uid + '.unsaved', 'true');
+    //   } else {
+    //     localStorage.removeItem($uid + '.' + name);
+    //   }
+    // }
     update();
   }
 
@@ -48,9 +61,10 @@
     let v = parseInt(input.value);
     if (isNaN(v)) v = 0;
     v = v + 1;
+    // initialValue = v;
     value = v;
     input.value = v.toFixed(0);
-    update();
+    _update();
     input.blur();
   }
   let dec = () => {
@@ -58,21 +72,45 @@
     if (isNaN(v)) v = 0;
     v = v - 1;
     if (v < 0) v = 0;
+    // initialValue = v;
     value = v;
     input.value = v.toFixed(0);
-    update();
+    _update();
     input.blur();
   }
 
+
+  // ----------------------------------------------------------------------------
+  // Local Storage Support
+  // ----------------------------------------------------------------------------
+  // Create a writable for the name
+  const nameStore = writable(name);
+  $: nameStore.set(name);
+  $: name = $nameStore;
+  // Initialize the local storage manager
+  const local = new LocalStorageManager(nameStore, defaultValue?.toFixed(0) ?? null, (v) => {
+    if (v === null) value = defaultValue;
+    else {
+      const parsed = parseInt(v);
+      if (!isNaN(parsed)) value = parsed
+      else value = defaultValue;
+    }
+    _update();
+  });
+  const unsaved = local.getUnsavedStore();
+  // Attach the local storage manager to value and default value
+  $: local.setDefault(defaultValue?.toFixed(0) ?? null);
+  $: local.set(value?.toFixed(0) ?? null);
+
   // When mounted, format the default input
   onMount(() => {
-    if (value !== null) input.value = value.toFixed(0);
+    if (defaultValue !== null) input.value = defaultValue.toFixed(0);
   });
 
 </script>
 
 
-<Frame {name} {action} {form} {required} bind:title focus={focus} bind:disabled>
+<Frame {name} {action} unsaved={$unsaved} restore={() => local.clear(true)} form={$form} {required} bind:title focus={focus} bind:disabled>
   <div slot="outsideButton">
     <div class="absolute right-24 top-2 inline-flex gap-2 w-[4.5rem]">
       <button tabindex="-1" disabled={disabled} on:click={dec} type="button" class="touch-manipulation select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 px-2 rounded-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-sky-300 betterhover:hover:bg-sky-50 betterhover:hover:text-sky-700 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white focus-visible:outline-grey-500">

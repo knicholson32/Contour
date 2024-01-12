@@ -1,18 +1,17 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
-  import type { API } from '$lib/types';
-  import { onMount } from 'svelte';
   import Frame from './Frame.svelte';
+  import { writable } from 'svelte/store';
+  import { LocalStorageManager } from './localStorage';
+  import { form } from './entryStore';
 
-  export let value: string | null = '';
-  export let updatedValue: string | null = null;
+  export let defaultValue: string | null;
+  export let value: string | null = defaultValue;
   export let options: ({ title: string; value: string; unset?: boolean } | string)[];
   export let mono = true;
   export let error = '';
   export let placeholder: string | null = null;
   export let required: boolean = true;
   export let action: string = '?/default';
-  export let form: null | API.Form.Type = null
 
 
 	export let name: string;
@@ -22,16 +21,6 @@
   export let update = () => {};
 
   const _update = () => {
-    if (uid !== null) {
-      if (value === null) {
-        updatedValue = null;
-        localStorage.removeItem(uid + '.' + name);
-      } else {
-        updatedValue = value;
-        localStorage.setItem(uid + '.' + name, value);
-        localStorage.setItem(uid + '.unsaved', 'true');
-      }
-    }
     update();
   }
 
@@ -43,56 +32,25 @@
   // ----------------------------------------------------------------------------
   // Local Storage Support
   // ----------------------------------------------------------------------------
-  export let uid: string | null = null;
-  /**
-   * Check local storage. If it exists and is not null, use that value
-   */
-  const checkLocalStorage = () => {
-    if (!browser) return;
-    const savedValue = localStorage.getItem(uid + '.' + name);
-    if (savedValue !== null) {
-      value = savedValue;
-      updatedValue = value;
-    }
-  }
-
-  /**
-   * Check for a storage update. If the update matches the key and is not null,
-   * use that value
-   */
-  const checkStorageUpdate = (e: StorageEvent) => {
-    if (uid === null) return;
-    if (e.key !== uid + '.' + name || e.newValue === null) return;
-    value = e.newValue;
-    updatedValue = value;
-  }
-
-  /**
-   * If uid or name changes, the entry element has been re-assigned. Check local
-   * storage and assign if required
-   */
-  $:{
-    name;
-    if (uid !== null) checkLocalStorage();
-  }
-
-  $: { console.log(updatedValue) };
-
-  /**
-   * Attach a handler to listen for the storage event, which is emitted when
-   * local storage changes. Remove if off mount.
-   */
-  onMount(() => {
-    window.addEventListener('storage', checkStorageUpdate)
-    return () => window.removeEventListener('storage', checkStorageUpdate)
+  // Create a writable for the name
+  const nameStore = writable(name);
+  $: nameStore.set(name);
+  $: name = $nameStore;
+  // Initialize the local storage manager
+  const local = new LocalStorageManager(nameStore, defaultValue, (v) => {
+    value = v ?? defaultValue;
+    _update();
   });
+  const unsaved = local.getUnsavedStore();
+  // Attach the local storage manager to value and default value
+  $: local.setDefault(defaultValue);
+  $: local.set(value);
 
 </script>
-
-<Frame {name} {action} {form} bind:error {required} bind:title bind:disabled focus={_focus}>
-  <select {required} bind:this={select} bind:value={value} on:change={_update} {disabled} {name} class="absolute z-0 invalid:text-gray-300 invalid:text-xs right-0 opacity-100 text-right {mono ? 'font-mono' : ''} font-bold text-sm bg-transparent disabled:option:text-gray-300 border-0 py-1.5 pl-3 pr-10 focus:ring-0 disabled:cursor-not-allowed select:disabled:text disabled:text-gray-500">
+<Frame {name} {action} unsaved={$unsaved} restore={() => local.clear(true)} form={$form} bind:error {required} bind:title bind:disabled focus={_focus}>
+  <select {required} bind:this={select} bind:value on:change={_update} {disabled} {name} class="absolute z-0 invalid:text-gray-300 invalid:text-xs right-0 opacity-100 text-right {mono ? 'font-mono' : ''} font-bold text-sm bg-transparent disabled:option:text-gray-300 border-0 py-1.5 pl-3 pr-10 focus:ring-0 disabled:cursor-not-allowed select:disabled:text disabled:text-gray-500">
     {#if placeholder !== null}
-      <option disabled selected={value === ''} value="">{placeholder}</option>
+      <option disabled selected={value === '' || value === null} value="">{placeholder}</option>
     {/if}
     {#each options as option}
 			{#if typeof option === 'string'}

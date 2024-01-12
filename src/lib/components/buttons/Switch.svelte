@@ -31,6 +31,7 @@
 	{/if}
 	<!-- Enabled: "bg-indigo-600", Not Enabled: "bg-gray-200" -->
 	{#if type === 'submit' || forceHiddenInput === true}
+		{value}
 		<input {disabled} type="hidden" bind:value name={valueName} />
 	{/if}
 	{#if disableClick}

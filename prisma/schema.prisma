@@ -209,7 +209,7 @@ model Leg {
 
   flightAwareData FlightAwareData?
 
-  ident String @db.VarChar(16)
+  ident String? @db.VarChar(16)
 
   originAirportId      String   @db.VarChar(5)
   destinationAirportId String   @db.VarChar(5)
@@ -218,8 +218,8 @@ model Leg {
   destinationAirport   Airport  @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
   diversionAirport     Airport? @relation("diversionAirport", fields: [diversionAirportId], references: [id], onDelete: Restrict)
 
-  startTime Int
-  endTime   Int
+  startTime Int?
+  endTime   Int?
 
   totalTime Float @default(0)
   pic       Float @default(0)
@@ -251,8 +251,8 @@ model Leg {
 
   notes String @default("") @db.VarChar(1024)
 
-  aircraft                  Aircraft @relation(fields: [aircraftRegistration], references: [registration], onDelete: Restrict)
-  aircraftRegistration      String
+  aircraft                  Aircraft @relation(fields: [aircraftId], references: [id], onDelete: Restrict)
+  aircraftId      String
   flightAwareDataFaFlightId String?
 
   @@map("legs")

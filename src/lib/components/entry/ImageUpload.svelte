@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { browser } from "$app/environment";
-  import { page } from "$app/stores";
   import Image from "$lib/components/Image.svelte";
-  import { ImageUploadState } from "$lib/types";
+  import { API, ImageUploadState } from "$lib/types";
   import hi from "date-fns/locale/hi";
-  import { onMount } from "svelte";
+  import { writable } from "svelte/store";
+  import { LocalStorageManager } from "./localStorage";
+    import { form } from "./entryStore";
 
   export let initialImageId: string | null = 'unset';
 	export let name: string;
@@ -64,8 +64,6 @@
   let isDefault = true;
 
   const _update = () => {
-    localStorage.setItem(uid + '.unsaved', 'true');
-    localStorage.setItem(uid + '.' + name, 'updated');
     update();
   }
 
@@ -91,7 +89,7 @@
       forceImageDisplay = true;
       imageInput.blur();
       currentState = ImageUploadState.UPDATE;
-      localStorage.removeItem(uid + '.' + name + '.url');
+      // localStorage.removeItem($uid + '.' + name + '.url');
       _update();
 		});
 		reader.readAsDataURL(file);
@@ -173,7 +171,7 @@
           forceImageDisplay = true;
           isDefault = false;
           currentState = ImageUploadState.UPDATE;
-          localStorage.setItem(uid + '.' + name + '.url', previewString);
+          // localStorage.setItem($uid + '.' + name + '.url', previewString);
           _update();
           return;
         } catch (e) {
@@ -184,59 +182,85 @@
     }
   }
 
-  // ----------------------------------------------------------------------------
-  // Local Storage Support
-  // ----------------------------------------------------------------------------
-  export let uid: string | null = null;
-  /**
-   * Check local storage. If it exists and is not null, use that value
-   */
-  const checkLocalStorage = () => {
-    if (!browser) return;
-    console.log('Image checking local storage');
-    const url = localStorage.getItem(uid + '.' + name + '.url');
-    if (url !== null) {
-      previewString = url;
-      isURL = true;
-      isDefault = false;
-      currentState = ImageUploadState.UPDATE;
-    }
-  }
+  // // ----------------------------------------------------------------------------
+  // // Local Storage Support
+  // // ----------------------------------------------------------------------------
+  // import { uid } from '$lib/components/entry/entryStore';
+  // /**
+  //  * Check local storage. If it exists and is not null, use that value
+  //  */
+  // const checkLocalStorage = () => {
+  //   if (!browser) return;
+  //   console.log('Image checking local storage');
+  //   const url = localStorage.getItem($uid + '.' + name + '.url');
+  //   if (url !== null) {
+  //     previewString = url;
+  //     isURL = true;
+  //     isDefault = false;
+  //     currentState = ImageUploadState.UPDATE;
+  //   }
+  // }
 
-  /**
-   * Check for a storage update. If the update matches the key and is not null,
-   * use that value
-   */
-  const checkStorageUpdate = (e: StorageEvent) => {
-    if (uid === null) return;
-    if (e.key !== uid + '.' + name) return;
-  }
+  // /**
+  //  * Check for a storage update. If the update matches the key and is not null,
+  //  * use that value
+  //  */
+  // const checkStorageUpdate = (e: StorageEvent) => {
+  //   if ($uid === null) return;
+  //   if (e.key !== $uid + '.' + name) return;
+  // }
 
-  /**
-   * If uid or name changes, the entry element has been re-assigned. Check local
-   * storage and assign if required
-   */
-  $:{
-    name;
-    initialImageId;
-    initialImageIDChange();
-    clearUpload();
-    if (uid !== null) checkLocalStorage();
-  }
+  // /**
+  //  * If $uid or name changes, the entry element has been re-assigned. Check local
+  //  * storage and assign if required
+  //  */
+  // $:{
+  //   name;
+  //   form;
+  //   initialImageId;
+  //   initialImageIDChange();
+  //   clearUpload();
+  //   if ($uid !== null) checkLocalStorage();
+  // }
 
-  /**
-   * Attach a handler to listen for the storage event, which is emitted when
-   * local storage changes. Remove if off mount.
-   */
-  onMount(() => {
-    window.addEventListener('storage', checkStorageUpdate)
-    return () => window.removeEventListener('storage', checkStorageUpdate)
-  });
+  // /**
+  //  * Attach a handler to listen for the storage event, which is emitted when
+  //  * local storage changes. Remove if off mount.
+  //  */
+  // onMount(() => {
+  //   window.addEventListener('storage', checkStorageUpdate)
+  //   return () => window.removeEventListener('storage', checkStorageUpdate)
+  // });
 
   let forceShowMenu = false;
   const clickedArea = () => {
     forceShowMenu = !forceShowMenu;
   }
+
+  // ----------------------------------------------------------------------------
+  // Local Storage Support
+  // ----------------------------------------------------------------------------
+  // Create a writable for the name
+  const nameStore = writable(name);
+  $: nameStore.set(name);
+  $: name = $nameStore;
+  // Initialize the local storage manager
+  const local = new LocalStorageManager(nameStore, '', (v) => {
+    if (v !== null) previewString = v;
+    // initialImageIDChange();
+    // clearUpload();
+    _update();
+  });
+  $:{
+    name;
+    $form;
+    initialImageId;
+    initialImageIDChange();
+    clearUpload();
+    local.setDefault('');
+  }
+  // Attach the local storage manager to value and default value
+  $: if (isURL === true) local.set(previewString);
 
 
 </script>

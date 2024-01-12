@@ -82,12 +82,13 @@ export const actions = {
 
     const id = (params.id !== 'new' ? params.id : undefined) ?? uuidv4();
 
-
     const data = await request.formData();
     await delay(500);
     for (const key of data.keys()) {
       console.log(key, data.getAll(key));
     }
+
+    // return API.Form.formFailure('?/default', 'tail', 'Required field');
     
     const type = data.get('type');
     const tail = data.get('tail');
@@ -193,7 +194,6 @@ export const actions = {
     console.log('ref',ref);
     if (ref !== null) throw redirect(301, ref);
     else throw redirect(301, '/aircraft/entry/' + id + '?active=form');
-    // return API.Form.formSuccess('?/default');
   },
 
   delete: async ({ request, params }) => {

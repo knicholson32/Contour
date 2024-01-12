@@ -1,10 +1,20 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
   import type { API } from '$lib/types';
+  import { onMount } from 'svelte';
   import Frame from './Frame.svelte';
+
+  let findAirportOption = (icao: string | null) => {
+    if (icao === null || icao === undefined) return null
+    icao = icao.trim().toUpperCase();
+    for (const airport of airports) if (airport.id === icao) return airport;
+    return null;
+  }
   
-  export let value: API.Types.Airport | null = null;
+  export let initialValue: string | null = null;
   export let tz: string | null = null;
   export let airports: API.Types.Airport[];
+  export let value: API.Types.Airport | null = findAirportOption(initialValue);
 
   export let required: boolean = false;
   export let action: string = '?/default';
@@ -38,12 +48,19 @@
       tz = null;
       hiddenValue = '';
       warningMessage = message;
+      if ($uid !== null) {
+        localStorage.removeItem($uid + '.' + name);
+      }
     } else {
       // The airport does exist. Assign it and clear the message
       value = a;
       tz = a.timezone;
       hiddenValue = value.id;
       warningMessage = '';
+      if ($uid !== null) {
+        localStorage.setItem($uid + '.' + name, hiddenValue);
+        localStorage.setItem($uid + '.unsaved', 'true');
+      }
     }
     update();
   }
@@ -95,12 +112,81 @@
 
   // Set initial values
   tz = value?.timezone ?? null;
+
+  // ----------------------------------------------------------------------------
+  // Local Storage Support
+  // ----------------------------------------------------------------------------
+  import { uid } from '$lib/components/entry/entryStore';
+  /**
+   * Check local storage. If it exists and is not null, use that value
+   */
+  const checkLocalStorage = () => {
+    if (!browser) return;
+    const savedValue = localStorage.getItem($uid + '.' + name);
+    if (savedValue !== null) {
+      initialValue = savedValue;
+      value = findAirportOption(initialValue);
+      if (value !== null) {
+        hiddenValue = value.id;
+        tz = value.timezone;
+      } else {
+        hiddenValue = '';
+        tz = null;
+      }
+    }
+  }
+
+  /**
+   * Check for a storage update. If the update matches the key and is not null,
+   * use that value
+   */
+  const checkStorageUpdate = (e: StorageEvent) => {
+    if ($uid === null) return;
+    if (e.key !== $uid + '.' + name || e.newValue === null) return;
+    initialValue = e.newValue;
+    value = findAirportOption(initialValue);
+    if (value !== null) {
+      hiddenValue = value.id;
+      tz = value.timezone;
+    } else {
+      hiddenValue = '';
+      tz = null;
+    }
+  }
+
+  /**
+   * Transfer the contents of value to updatedValue whenever it changes
+   */
+  $: {
+    value = findAirportOption(initialValue);
+  }
+
+  /**
+   * If $uid or name changes, the entry element has been re-assigned. Check local
+   * storage and assign if required
+   */
+  $:{
+    name;
+    form;
+    if ($uid !== null) checkLocalStorage();
+  }
+
+  /**
+   * Attach a handler to listen for the storage event, which is emitted when
+   * local storage changes. Remove if off mount.
+   */
+  onMount(() => {
+    window.addEventListener('storage', checkStorageUpdate)
+    return () => window.removeEventListener('storage', checkStorageUpdate)
+  });
+
 </script>
 
 <Frame {name} {action} {form} {required} bind:title={title} focus={focus} bind:disabled error={warningMessage}>
   <input type="hidden" name={name} bind:value={hiddenValue} />
+  <input type="hidden" name={name+'-tz'} bind:value={tz} />
   <form on:submit|preventDefault={() => {}} class="w-full">
-    <input tabindex="0" bind:this={select} disabled={disabled} maxlength="4" on:change={_update} type="text" style="text-transform:uppercase" value={value?.id ?? ''} placeholder="" name="airport-visible" list="airport"
+    <input tabindex="0" bind:this={select} {required} disabled={disabled} maxlength="4" on:change={_update} type="text" style="text-transform:uppercase" value={value?.id ?? ''} placeholder="" name="airport-visible" list="airport"
       class="w-full text-right px-0 text-sm font-mono text-sky-400 font-bold flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
     <datalist id="airport">
       {#each airports as airport (airport.id)}

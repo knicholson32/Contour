@@ -7,28 +7,6 @@ import { getTimeZones } from '@vvo/tzdb';
 const timeZonesWithUtc = getTimeZones({ includeUtc: true });
 
 /**
- * Remove local storage starting with the specified UID
- * @param uid the UID to remove
- */
-export const removeLocalStorage = (uid: string | null | undefined) => {
-	console.log('REMOVING ALL LOCAL STORAGE', uid);
-	// Nothing to do if server-side or no UID
-	if (!browser || uid === null || uid === undefined) return;
-	// Create an array to hold the keys to remove
-	const keysToRemove: string[] = [];
-	// Loop through the keys
-	for (let i = 0; i < localStorage.length; i++) {
-		// Get the key
-		const key = localStorage.key(i);
-		// If it is not null and starts with the UID, add it to be removed.
-		// We can't remove it here because then our for loop gets out of sync.
-		if (key !== null && key.startsWith(uid)) keysToRemove.push(key)
-	}
-	// Remove all the items that should be removed
-	for (const key of keysToRemove) localStorage.removeItem(key);
-}
-
-/**
  * Validate a URL
  * @see https://www.makeuseof.com/regular-expressions-validate-url/
  * @param url the URL to validate

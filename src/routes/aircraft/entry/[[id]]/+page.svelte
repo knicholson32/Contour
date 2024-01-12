@@ -1,83 +1,46 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import Section from '$lib/components/Section.svelte';
-  import Input from '$lib/components/entry/Input.svelte';
-  import Select from '$lib/components/entry/Select.svelte';
-  import Switch from '$lib/components/entry/Switch.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
-  import Image from '$lib/components/Image.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
   import { icons } from '$lib/components';
-  import ImageUpload from '$lib/components/entry/ImageUpload.svelte';
-  import { removeLocalStorage } from '$lib/helpers';
   import { page } from '$app/stores';
-  import { browser } from '$app/environment';
-  import { goto, invalidateAll } from '$app/navigation';
-  import { unsaved } from '$lib/stores';
   import Badge from '$lib/components/decorations/Badge.svelte';
-  import Button from '$lib/components/entry/Button.svelte';
-  import TextField from '$lib/components/entry/TextField.svelte';
   import * as MenuForm from '$lib/components/menuForm';
-    import Stats from '$lib/components/decorations/Stats.svelte';
-    import Tag from '$lib/components/decorations/Tag.svelte';
-    import SearchBar from '$lib/components/menuForm/SearchBar.svelte';
+  import Stats from '$lib/components/decorations/Stats.svelte';
+  import Tag from '$lib/components/decorations/Tag.svelte';
+  import { FormManager, clearUID } from '$lib/components/entry/localStorage';
+  import * as Entry from '$lib/components/entry';
 
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
-  let deleting = false;
-  let unsavedChanges = false;
-  let unsavedKeys: string[] = [];
-
-  const clearUnsaved = () => {
-    console.log('clear!');
-    removeLocalStorage(data.aircraft?.id ?? 'new-reg');
-    invalidateAll();
-  }
-
-  const clearLocalStorageIfSuccess = () => {
-    if (form?.ok !== false) removeLocalStorage(data.aircraft?.id ?? 'new-reg');
-  }
-
-  /**
-   * Trigger whenever the type ID is updated (new selected page)
-   */
-  $:{
-    if(browser) unsavedChanges = localStorage.getItem((data.aircraft?.id ?? 'new-reg') + '.unsaved') === 'true';
-    $unsaved = unsavedChanges;
-  }
+  const formManager = new FormManager({ autoClearOnFormSuccess: true });
+  const unsavedChanges = formManager.getUnsavedChangesStore();
+  const unsavedUIDs = formManager.getUnsavedUIDsStore();
+  $: formManager.updateUID(data.aircraft?.id ?? 'new-reg');
+  $: formManager.updateForm(form);
 
   /**
    * Trigger whenever the page URL is updated
    */
   $:{
     $page.url.pathname;
-    if (browser) {
-      unsavedKeys = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)?.split('.')[0];
-        if (key !== undefined) unsavedKeys.push(key);
-      }
-    }
+    data.aircraft?.id;
+    checkRegistrationExists();
   }
+
 
   let urlActiveParam: string;
   let isMobileSize: boolean;
 
-
-  const update = () => {
-    console.log('update on page');
-    unsavedChanges = true;
-
-    if (!unsavedKeys.includes(data.aircraft?.id ?? 'new-reg')) {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith(data.aircraft?.id ?? 'new-reg')) {
-          unsavedKeys.push(data.aircraft?.id ?? 'new-reg');
-          unsavedKeys = unsavedKeys;
-          break;
-        }
-      }
+  let selectedReg: string | null;
+  let registrationExists = false;
+  const checkRegistrationExists = () => {
+    if (selectedReg !== null && selectedReg !== undefined && selectedReg.trim().toUpperCase() !== data.aircraft?.registration && data.tails.includes(selectedReg.trim().toUpperCase())) {
+      registrationExists = true;
+    } else {
+      registrationExists = false;
     }
   }
 
@@ -87,9 +50,11 @@
   }
 
   let submitting = false;
+  let deleting = false;
 
   const ref = $page.url.searchParams.get('ref');
   const reg = $page.url.searchParams.get('reg');
+
 
 </script>
 
@@ -113,12 +78,10 @@
             <a href="/aircraft/entry/{ac.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-1 py-2 {ac.id === data.params.id && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
               {#if ac.imageId !== null}
                 <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
-                  <!-- <Image id={ac.imageId} size={32} class="aspect-1 object-cover w-full h-full" alt="Icon for the {ac.registration}, {ac.type.make} {ac.type.model}"/> -->
                   <Badge class="h-full">{ac._count.legs}</Badge>
                 </div>
               {:else if ac.type.imageId !== null}
                 <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
-                  <!-- <Image id={ac.type.imageId} size={32} class="aspect-1 object-cover w-full h-full" alt="Icon for the {ac.registration}, {ac.type.make} {ac.type.model}"/> -->
                   <Badge class="h-full">{ac._count.legs}</Badge>
                 </div>
               {:else}
@@ -127,9 +90,9 @@
                 </div>
               {/if}
               <div class="flex flex-col gap-0.5 overflow-hidden flex-initial">
-                <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
+                <div class="uppercase inline-flex items-center gap-1 font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
                   {ac.registration}
-                  {#if unsavedKeys.includes(ac.id)}
+                  {#if $unsavedUIDs.includes(ac.id)}
                     <Tag>UNSAVED</Tag>
                   {:else if ac.simulator === true}
                     <Tag>SIM</Tag>
@@ -155,7 +118,7 @@
       return async ({ update }) => {
         await update({ reset: false });
         submitting = false;
-        setTimeout(clearLocalStorageIfSuccess, 1);
+        if (form?.ok !== false) formManager.clearUID(false);
       };
     }}>
 
@@ -172,21 +135,20 @@
         </MenuForm.FormHeader>
       {/if}
 
-
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
-        <Select {form} uid={data.aircraft?.id ?? 'new-reg'} required={true} title="Type" name="type" options={data.typeOptions} placeholder={"Unset"} value={data.aircraft?.aircraftTypeId} update={update} />
-        <Input {form} uid={data.aircraft?.id ?? 'new-reg'} required={true} title="Tail Number" name="tail" placeholder="N4321J" uppercase={true} update={update} value={(data.aircraft === null && reg !== null) ? reg :  data.aircraft?.registration} />
-        <Input {form} uid={data.aircraft?.id ?? 'new-reg'} title="Year" name="year" placeholder="1969" update={update} validator={validate} useNumberPattern={true} value={data.aircraft?.year === null || data.aircraft?.year === undefined ? null : String(data.aircraft?.year)} />
-        <Input {form} uid={data.aircraft?.id ?? 'new-reg'} title="Serial" name="serial" placeholder="1969-0-2-22" update={update} value={data.aircraft?.serial} />
+        <Entry.Select required={true} title="Type" name="type" options={data.typeOptions} placeholder={"Unset"} defaultValue={data.aircraft?.aircraftTypeId ?? null} />
+        <Entry.Input required={true} title="Tail Number" name="tail" placeholder="N4321J" uppercase={true} error={registrationExists ? 'Already exists' : ''} update={checkRegistrationExists} bind:value={selectedReg} defaultValue={(data.aircraft === null && reg !== null) ? reg : data.aircraft?.registration ?? null} />
+        <Entry.Input title="Year" name="year" placeholder="1969" validator={validate} useNumberPattern={true} defaultValue={data.aircraft?.year === null || data.aircraft?.year === undefined ? null : String(data.aircraft?.year)} />
+        <Entry.Input title="Serial" name="serial" placeholder="1969-0-2-22" defaultValue={data.aircraft?.serial ?? null} />
       </Section>
       <Section title="Configuration">
-        <Switch {form} uid={data.aircraft?.id ?? 'new-reg'} title="Simulator" name="sim" value={data.aircraft?.simulator ?? false} update={update} />
+        <Entry.Switch title="Simulator" name="sim" defaultValue={data.aircraft?.simulator ?? false} />
       </Section>
       <Section title="Aircraft Image" error={form !== null && form.ok === false && form.action === '?/default' && form.name === 'image' ? form.message : null}>
-        <ImageUpload uid={data.aircraft?.id ?? 'new-reg'} name="image" imageRequired={data.aircraft === null} initialImageId={data.aircraft?.imageId ?? null} maxMB={data.MAX_MB} update={update}/>
+        <Entry.ImageUpload name="image" imageRequired={data.aircraft === null} initialImageId={data.aircraft?.imageId ?? null} maxMB={data.MAX_MB}/>
       </Section>
       <Section title="Notes">
-        <TextField uid={data.aircraft?.id ?? 'new-reg'} name="notes" placeholder="Enter Notes" value={data.aircraft?.notes} update={update} />
+        <Entry.TextField name="notes" placeholder="Enter Notes" defaultValue={data.aircraft?.notes ?? null} />
       </Section>
 
       <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
@@ -199,7 +161,7 @@
               return async ({ update }) => {
                 await update({ invalidateAll: true });
                 deleting = false;
-                setTimeout(clearLocalStorageIfSuccess, 1);
+                if (form?.ok !== false) formManager.clearUID(false);
               };
             }
           }}>
@@ -207,9 +169,9 @@
             <Submit class="w-full" failed={form?.ok === false && form.action === '?/default'} submitting={deleting} theme={{primary: 'red'}} actionText={'Delete'} actionTextInProgress={'Deleting'} />
           </form>
         {/if}
-        {#if unsavedChanges}
-          <button type="button" on:click={clearUnsaved} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
-          <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.aircraft !== null ? 'Update' : 'Create'} actionTextInProgress={data.aircraft !== null ? 'Updating' : 'Creating'} />
+        {#if $unsavedChanges || data.params.id === 'new'}
+          <button type="button" on:click={() => clearUID()} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
+          <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" disabled={registrationExists} failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.aircraft !== null ? 'Update' : 'Create'} actionTextInProgress={data.aircraft !== null ? 'Updating' : 'Creating'} />
         {/if}
       </div>
     </form>

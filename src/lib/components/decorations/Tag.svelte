@@ -4,7 +4,7 @@
 
 </script>
 
-<span class="font-mono text-xxs px-[6px] py-[3px] overflow-hidden whitespace-nowrap text-ellipsis rounded-full bg-sky-600 text-white font-bold">
+<span class="font-mono text-xxs px-[6px] py-[0px] -my-2 overflow-hidden whitespace-nowrap text-ellipsis rounded-full bg-sky-600 text-white font-bold {$$restProps.class}">
   {#if text !== null}
     {text}
   {/if}

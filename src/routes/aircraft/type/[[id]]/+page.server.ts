@@ -58,7 +58,6 @@ export const actions = {
 
     const id = (params.id !== 'new' ? params.id : undefined) ?? uuidv4();
 
-
     const data = await request.formData();
     await delay(500);
     for (const key of data.keys()) {

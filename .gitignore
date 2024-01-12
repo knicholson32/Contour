@@ -6,3 +6,4 @@
 /package
 vite.config.js.timestamp-*
 /library
+*.bak

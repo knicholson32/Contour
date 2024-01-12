@@ -1,76 +1,55 @@
 <script lang="ts">
-  import { browser } from "$app/environment";
-  import Switch from "$lib/components/buttons/Switch.svelte";
-  import type { API } from "$lib/types";
-  import { onMount } from "svelte";
   import Frame from "./Frame.svelte";
+  import { LocalStorageManager } from "./localStorage";
+  import { writable } from "svelte/store";
+  import { form } from "./entryStore";
 
-  export let value: boolean = false;
-  export let updatedValue: boolean | null = null;
+  export let defaultValue: boolean;
+  export let value: boolean = defaultValue;
 	export let name: string;
   export let title: string;
 	export let disabled: boolean = false;
   export let action: string = '?/default';
-  export let form: null | API.Form.Type = null
 
   export let update: () => void = () => {};
+  const _update = () => update();
 
-  const _update = () => {
-    if (uid !== null) {
-      updatedValue = value;
-      localStorage.setItem(uid + '.' + name, value ? 'true' : 'false');
-      localStorage.setItem(uid + '.unsaved', 'true');
-    }
-    update();
-  }
-
-  let focus: () => void;
 
   // ----------------------------------------------------------------------------
   // Local Storage Support
   // ----------------------------------------------------------------------------
-  export let uid: string | null = null;
-  /**
-   * Check local storage. If it exists and is not null, use that value
-   */
-  const checkLocalStorage = () => {
-    if (!browser) return;
-    const savedValue = localStorage.getItem(uid + '.' + name);
-    if (savedValue !== null && (savedValue === 'true' || savedValue === 'false')) value = savedValue === 'true';
-  }
-
-  /**
-   * Check for a storage update. If the update matches the key and is not null,
-   * use that value
-   */
-  const checkStorageUpdate = (e: StorageEvent) => {
-    if (uid === null) return;
-    if (e.key !== uid + '.' + name || e.newValue === null || (e.newValue !== 'true' && e.newValue !== 'false')) return;
-    value = e.newValue === 'true';
-    updatedValue = value;
-  }
-
-  /**
-   * If uid or name changes, the entry element has been re-assigned. Check local
-   * storage and assign if required
-   */
-  $:{
-    name;
-    if (uid !== null) checkLocalStorage();
-  }
-
-  /**
-   * Attach a handler to listen for the storage event, which is emitted when
-   * local storage changes. Remove if off mount.
-   */
-  onMount(() => {
-    window.addEventListener('storage', checkStorageUpdate)
-    return () => window.removeEventListener('storage', checkStorageUpdate)
+  // Create a writable for the name
+  const nameStore = writable(name);
+  $: nameStore.set(name);
+  $: name = $nameStore;
+  // Initialize the local storage manager
+  const local = new LocalStorageManager(nameStore, defaultValue ? 'true' : 'false', (v) => {
+    if (v === null) value = defaultValue;
+    else value = v === 'true';
+    if (name === 'taa') {
+      console.log('TAA UPDATE', v, value);
+    }
+    _update();
   });
+  const unsaved = local.getUnsavedStore();
+
+  // Attach the local storage manager to value and default value
+  $: local.setDefault(defaultValue ? 'true' : 'false');
+  $: local.set(value ? 'true' : 'false');
+
+	export const click = () => {
+		value = !value;
+    _update();
+	}
+
 
 </script>
 
-
-<Frame {name} {action} {form} required={false} bind:title focus={focus} bind:disabled>
-  <Switch type="submit" bind:click={focus} disableClick={true} bind:value changed={_update} bind:valueName={name} {disabled} />
+<Frame {name} {action} unsaved={$unsaved} restore={() => local.clear(true)} form={$form} required={false} bind:title focus={click} bind:disabled>
+  <div class="flex items-center">
+    <input {disabled} type="hidden" bind:value name={name} />
+    <div class="touch-manipulation shadow-sm rounded-full {value ? disabled ? 'bg-gray-200' : 'bg-indigo-600' : 'bg-gray-200'} disabled:cursor-not-allowed relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">
+      <span aria-hidden="true" class="{value ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"/>
+    </div>
+  </div>
 </Frame>

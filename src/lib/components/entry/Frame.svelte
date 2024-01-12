@@ -4,9 +4,16 @@
 	export let disabled: boolean = false;
   export let action: string = '?/default';
   export let required: boolean;
+  export let unsaved: boolean = false;;
   export let name: string;
   export let form: null | API.Form.Type;
   export let focus: () => void = () => {};
+  export let restore: (() => void) | null = null;
+
+  const _restore = (e: Event) => {
+    e.stopPropagation();
+    if (restore !== null && restore !== undefined) restore();
+  }
 
   export let error='';
 
@@ -21,6 +28,11 @@
       {title}
       {#if required}
         <span class="text-xxs uppercase {red ? 'text-red-500' : 'text-gray-400'}">required</span>
+      {/if}
+      {#if restore !== null && restore !== undefined && unsaved}
+        <button tabindex="-1"  on:click={_restore} type="button" class="touch-manipulation select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 w-[4.5rem] rounded-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-sky-300 betterhover:hover:bg-sky-50 betterhover:hover:text-sky-700 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white focus-visible:outline-grey-500">
+          UNDO
+        </button>
       {/if}
     </dt>
     <div>
