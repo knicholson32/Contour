@@ -2,81 +2,30 @@
   import { enhance } from '$app/forms';
   import Section from '$lib/components/Section.svelte';
   import * as Entry from '$lib/components/entry';
-  import Image from '$lib/components/Image.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
   import { browser } from '$app/environment';
-  import { goto, invalidateAll } from '$app/navigation';
-  import { unsaved } from '$lib/stores';
-  import Badge from '$lib/components/decorations/Badge.svelte';
   import * as MenuForm from '$lib/components/menuForm';
-  import Stats from '$lib/components/decorations/Stats.svelte';
-  import Tag from '$lib/components/decorations/Tag.svelte';
   import { Submit } from '$lib/components/buttons';
-  import { updateUID, updateForm } from '$lib/components/entry/entryStore';
-  import { clearUID } from '$lib/components/entry/localStorage';
+  import { FormManager } from '$lib/components/entry/localStorage';
 
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
-  let deleting = false;
-  let unsavedChanges = false;
-  let unsavedKeys: string[] = [];
+  const formManager = new FormManager();
+  const unsavedChanges = formManager.getUnsavedChangesStore();
+  const unsavedUIDs = formManager.getUnsavedUIDsStore();
+  $: formManager.updateUID(data.entry?.id ?? 'new-reg');
+  $: formManager.updateForm(form);
 
-  const clearUnsaved = () => {
-    clearUID();
-    invalidateAll();
-  }
-
-  const clearLocalStorageIfSuccess = () => {
-    console.log('clear if form ok');
-    if (form?.ok !== false) clearUID();
-  }
-
-  /**
-   * Trigger whenever the type ID is updated (new selected page)
-   */
-  $:{
-    if(browser) unsavedChanges = localStorage.getItem((data.entry?.id ?? 'new-entry') + '.unsaved') === 'true';
-    $unsaved = unsavedChanges;
-  }
-
-  /**
-   * Trigger whenever the page URL is updated
-   */
-  $:{
-    $page.url.pathname;
-    updateUID(data.entry?.id ?? 'new-entry');
-    if (browser) {
-      unsavedKeys = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)?.split('.')[0];
-        if (key !== undefined) unsavedKeys.push(key);
-      }
-    }
-  }
-  $: updateForm(form);
 
   let urlActiveParam: string;
   let isMobileSize: boolean;
 
   const update = () => {
     if(!browser) return;
-    console.log('update on page');
-    unsavedChanges = true;
-
-    if (!unsavedKeys.includes(data.entry?.id ?? 'new-entry')) {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith(data.entry?.id ?? 'new-entry')) {
-          unsavedKeys.push(data.entry?.id ?? 'new-entry');
-          unsavedKeys = unsavedKeys;
-          break;
-        }
-      }
-    }
-
+    // console.log('update on page');
   }
 
   const validate = (text: string): boolean => {
@@ -85,6 +34,7 @@
   }
 
   let submitting = false;
+  let deleting = false;
 
   const ref = $page.url.searchParams.get('ref');
   const reg = $page.url.searchParams.get('reg');
@@ -152,16 +102,16 @@
       return async ({ update }) => {
         await update({ reset: false });
         submitting = false;
-        setTimeout(clearLocalStorageIfSuccess, 1);
+        if (form?.ok !== false) formManager.clearUID(false);
       };
     }}>
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.TimePicker {form} required={true} title="Date" name="date" dateOnly={true} update={update} />
-        <Entry.AircraftPicker {form} required={true} title="Aircraft" name="aircraft" aircraft={data.aircraft} initialValue={data.entry?.aircraft.registration} update={update} />
+        <Entry.AircraftPicker {form} required={true} title="Aircraft" name="aircraft" aircraft={data.aircraft} defaultValue={data.entry?.aircraft.registration ?? null} update={update} />
         <Entry.AirportPicker {form} required={true} airports={data.airports} title="From" name="from" initialValue={data.entry?.originAirportId} update={update} />
         <Entry.AirportPicker {form} required={true} airports={data.airports} title="To" name="to" initialValue={data.entry?.destinationAirportId} update={update} />
-        <Entry.Input title="Route" name="route" uppercase={true} validator={validate} update={update} defaultValue="" />
+        <Entry.Input title="Route" name="route" uppercase={true} validator={validate} update={update} defaultValue={null} />
         <Entry.Ticker title="Passengers" name="pax" defaultValue={data.entry?.passengers ?? null} update={update} />
       </Section>
 
@@ -210,7 +160,7 @@
               return async ({ update }) => {
                 await update({ invalidateAll: true });
                 deleting = false;
-                setTimeout(clearLocalStorageIfSuccess, 1);
+                if (form?.ok !== false) formManager.clearUID(false);
               };
             }
           }}>
@@ -218,8 +168,8 @@
             <Submit class="w-full" failed={form?.ok === false && form.action === '?/default'} submitting={deleting} theme={{primary: 'red'}} actionText={'Delete'} actionTextInProgress={'Deleting'} />
           </form>
         {/if}
-        {#if unsavedChanges}
-          <button type="button" on:click={clearUnsaved} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
+        {#if $unsavedChanges}
+          <button type="button" on:click={() => formManager.clearUID()} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
           <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.entry !== null ? 'Update' : 'Create'} actionTextInProgress={data.entry !== null ? 'Updating' : 'Creating'} />
         {/if}
       </div>

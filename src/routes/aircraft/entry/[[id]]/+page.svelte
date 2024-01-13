@@ -15,7 +15,7 @@
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
-  const formManager = new FormManager({ autoClearOnFormSuccess: true });
+  const formManager = new FormManager();
   const unsavedChanges = formManager.getUnsavedChangesStore();
   const unsavedUIDs = formManager.getUnsavedUIDsStore();
   $: formManager.updateUID(data.aircraft?.id ?? 'new-reg');

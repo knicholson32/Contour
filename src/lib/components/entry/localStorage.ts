@@ -46,6 +46,7 @@ export const clearUID = (invalidate = true) => {
  */
 export const clearFormIfSuccess = () => {
   if (get(form)?.ok === true) {
+    console.log('clear from clearFormIfSuccess');
     clearUID();
   }
 }
@@ -58,7 +59,7 @@ export class FormManager {
 
   currentPathname: string;
 
-  constructor( options: { autoClearOnFormSuccess?: boolean } ) {
+  constructor( options?: { } ) {
 
     // Initialize unsaved changes as false
     FormManager.unsavedChanges.set(false);
@@ -68,18 +69,11 @@ export class FormManager {
 
     // Set up an onMount that will be executed when the page loads, and destructed when the page unloads
     onMount(() => {
+      // Check unsaved
+      FormManager._checkUnsaved();
+
       // Create an unsubscribe array that we can add destructor functions to
       const unsubscribe: (() => void)[] = [];
-
-      // Subscribe to autoClear
-      if (options.autoClearOnFormSuccess === true) {
-        // If the user has elected to auto-clear on form success, set that up
-        unsubscribe.push(form.subscribe((formVal) => {
-          if (formVal?.ok !== true) {
-            clearUID(false);
-          }
-        }));
-      }
 
       // Subscribe to local unsavedChanges and propagate that to the menu bar
       unsubscribe.push(FormManager.unsavedChanges.subscribe((val) => unsaved.set(val)));
@@ -95,6 +89,7 @@ export class FormManager {
           if (key === undefined || key.length === 0 || key[0] === u) continue;
           if (!FormManager.unsavedUIDsLocal.includes(key[0])) FormManager.unsavedUIDsLocal.push(key[0]);
         }
+        FormManager._checkUnsaved();
       }));
 
       // $page.url.pathname;
@@ -160,6 +155,7 @@ export class FormManager {
   }
 
   clearUID (invalidate = true) {
+    console.log('clear from form manager');
     clearUID(invalidate);
   }
     
@@ -292,8 +288,10 @@ export class LocalStorageManager {
     if (value !== null && value !== this.default) {
       localStorage.setItem(this.uid + '.' + this.name, value);
       // localStorage.setItem(this.uid + '.unsaved', 'true');
-      this.unsavedChanges.set(true);
-      FormManager._checkUnsaved();
+      if (get(this.unsavedChanges) !== true) {
+        this.unsavedChanges.set(true);
+        FormManager._checkUnsaved();
+      }
     } else this.clear();
   }
 
@@ -303,8 +301,10 @@ export class LocalStorageManager {
   clear (forceUpdate = false): void {
     if (!browser || this.uid === null) return;
     localStorage.removeItem(this.uid + '.' + this.name);
-    this.unsavedChanges.set(false);
-    FormManager._checkUnsaved();
+    if (get(this.unsavedChanges) !== false) {
+      this.unsavedChanges.set(false);
+      FormManager._checkUnsaved();
+    }
     if(forceUpdate) this.onUpdate(null);
   }
 
@@ -315,8 +315,11 @@ export class LocalStorageManager {
   check (_?: any): string | null {
     if (!browser || this.uid === null) return null;
     const savedValue = localStorage.getItem(this.uid + '.' + this.name);
-    this.unsavedChanges.set((savedValue === null) ? false : ((savedValue === this.default) ? false : true));
-    FormManager._checkUnsaved();
+    const newUnsavedChangesValue = (savedValue === null) ? false : ((savedValue === this.default) ? false : true);
+    if (get(this.unsavedChanges) !== newUnsavedChangesValue) {
+      this.unsavedChanges.set(newUnsavedChangesValue);
+      FormManager._checkUnsaved();
+    }
     return savedValue
   }
 }

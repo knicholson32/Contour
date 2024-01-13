@@ -110,21 +110,21 @@
   $: name = $nameStore;
   // Initialize the local storage manager
   const local = new LocalStorageManager(nameStore, defaultValue?.toFixed(1) ?? null, (v) => {
-    if (name === 'pic-time') console.log(v);
     if (v === null) value = defaultValue?.toFixed(1) ?? null;
     else value = v;
 
     // format();
     _update();
   });
+  const unsaved = local.getUnsavedStore();
   // Attach the local storage manager to value and default value
-  $: local.set(value);
   $: local.setDefault(defaultValue?.toFixed(1) ?? null);
+  $: local.set(value);
 
 </script>
 
 
-<Frame {name} {action} form={$form} {required} bind:title focus={focus} bind:disabled>
+<Frame {name} {action} form={$form} unsaved={$unsaved} restore={() => local.clear(true)} {required} bind:title focus={focus} bind:disabled>
   <div slot="outsideButton">
     {#if autoFill !== null && autoFill !== undefined && autoFill !== ''}
       <button tabindex="-1" disabled={disabled} on:click={autoFillFunc} type="button" class="touch-manipulation absolute right-24 top-2 select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 w-[4.5rem] rounded-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-sky-300 betterhover:hover:bg-sky-50 betterhover:hover:text-sky-700 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white focus-visible:outline-grey-500">

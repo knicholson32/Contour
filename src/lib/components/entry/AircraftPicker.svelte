@@ -4,11 +4,12 @@
   import Frame from './Frame.svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';  
-  import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
+  import { writable } from 'svelte/store';
+  import { LocalStorageManager } from './localStorage';
+    import { browser } from '$app/environment';
   
-  export let initialValue: string | null = null;
-  export let value: string | null = initialValue;
+  export let defaultValue: string | null;
+  export let value: string | null = defaultValue;
   export let aircraft: Prisma.AircraftGetPayload<{ select: { registration: true, type: { select: { typeCode: true, make: true, model: true }}}}>[];
 
   export let required: boolean = false;
@@ -37,27 +38,26 @@
    */
 	let _update = async () => {
     // Get the value input by the user
-    const v = select.value.toLocaleUpperCase().trim();
-    // Assign it back so the airport is capital and trimmed
-    select.value = v;
+    value = value?.toLocaleUpperCase().trim() ?? null;
+    if (value === null || value === '') return;
     // Loop through the airports we have access to and check if this is one we know about
     let found = false;
     for (const a of aircraft) {
-      if (a.registration.toLocaleUpperCase() === v) {
+      if (a.registration.toLocaleUpperCase() === value) {
         // It is, that is the new selected airport
         found = true;
         break;
       }
     }
 
-    if ($uid !== null) {
-      if (initialValue !== null) {
-        localStorage.setItem($uid + '.' + name, initialValue);
-        localStorage.setItem($uid + '.unsaved', 'true');
-      } else {
-        localStorage.removeItem($uid + '.' + name);
-      }
-    }
+    // if ($uid !== null) {
+    //   if (initialValue !== null) {
+    //     localStorage.setItem($uid + '.' + name, initialValue);
+    //     localStorage.setItem($uid + '.unsaved', 'true');
+    //   } else {
+    //     localStorage.removeItem($uid + '.' + name);
+    //   }
+    // }
     update();
 
     if (found === true) return;
@@ -67,9 +67,12 @@
 
     error = 'Plane does not exist'
 
+    if (!browser) return;
+
+    // TODO: Defer this question to when the browser exists
     if (confirm('This aircraft does not exist. Do you want to create it?')) {
       // Save it!
-      goto('/aircraft/entry/new?reg=' + v + '&ref=' + $page.url.pathname + '&active=form');
+      goto('/aircraft/entry/new?reg=' + value + '&ref=' + $page.url.pathname + '&active=form');
     }
 
   };
@@ -81,69 +84,86 @@
   // ----------------------------------------------------------------------------
   // Local Storage Support
   // ----------------------------------------------------------------------------
-  import { uid } from '$lib/components/entry/entryStore';
-  /**
-   * Check local storage. If it exists and is not null, use that value
-   */
-  const checkLocalStorage = () => {
-    if (!browser) return;
-    const savedValue = localStorage.getItem($uid + '.' + name);
-    if (savedValue !== null) {
-      initialValue = savedValue;
-      value = value;
-    }
-  }
-
-  /**
-   * Check for a storage update. If the update matches the key and is not null,
-   * use that value
-   */
-  const checkStorageUpdate = (e: StorageEvent) => {
-    if ($uid === null) return;
-    if (e.key !== $uid + '.' + name || e.newValue === null) return;
-    initialValue = e.newValue;
-    value = initialValue;
-  }
-
-  /**
-   * Transfer the contents of value to updatedValue whenever it changes
-   */
-  $: {
-    value = initialValue;
-  }
-
-  /**
-   * If $uid or name changes, the entry element has been re-assigned. Check local
-   * storage and assign if required
-   */
-  $:{
-    name;
-    form;
-    if ($uid !== null) checkLocalStorage();
-  }
-
-  /**
-   * Attach a handler to listen for the storage event, which is emitted when
-   * local storage changes. Remove if off mount.
-   */
-  onMount(() => {
-    // aircraft = aircraft.sort((a, b) => a.registration.localeCompare(b.registration));
-    window.addEventListener('storage', checkStorageUpdate)
-    return () => window.removeEventListener('storage', checkStorageUpdate)
+  // Create a writable for the name
+  const nameStore = writable(name);
+  $: nameStore.set(name);
+  $: name = $nameStore;
+  // Initialize the local storage manager
+  const local = new LocalStorageManager(nameStore, defaultValue, (v) => {
+    value = v ?? defaultValue;
+    _update();
   });
+  const unsaved = local.getUnsavedStore();
+  // Attach the local storage manager to value and default value
+  $: local.setDefault(defaultValue);
+  $: local.set(value);
 
-  // Set initial values
-  // tz = value?.timezone ?? null;
+  // // ----------------------------------------------------------------------------
+  // // Local Storage Support
+  // // ----------------------------------------------------------------------------
+  // import { uid } from '$lib/components/entry/entryStore';
+  // /**
+  //  * Check local storage. If it exists and is not null, use that value
+  //  */
+  // const checkLocalStorage = () => {
+  //   if (!browser) return;
+  //   const savedValue = localStorage.getItem($uid + '.' + name);
+  //   if (savedValue !== null) {
+  //     initialValue = savedValue;
+  //     value = value;
+  //   }
+  // }
+
+  // /**
+  //  * Check for a storage update. If the update matches the key and is not null,
+  //  * use that value
+  //  */
+  // const checkStorageUpdate = (e: StorageEvent) => {
+  //   if ($uid === null) return;
+  //   if (e.key !== $uid + '.' + name || e.newValue === null) return;
+  //   initialValue = e.newValue;
+  //   value = initialValue;
+  // }
+
+  // /**
+  //  * Transfer the contents of value to updatedValue whenever it changes
+  //  */
+  // $: {
+  //   value = initialValue;
+  // }
+
+  // /**
+  //  * If $uid or name changes, the entry element has been re-assigned. Check local
+  //  * storage and assign if required
+  //  */
+  // $:{
+  //   name;
+  //   form;
+  //   if ($uid !== null) checkLocalStorage();
+  // }
+
+  // /**
+  //  * Attach a handler to listen for the storage event, which is emitted when
+  //  * local storage changes. Remove if off mount.
+  //  */
+  // onMount(() => {
+  //   // aircraft = aircraft.sort((a, b) => a.registration.localeCompare(b.registration));
+  //   window.addEventListener('storage', checkStorageUpdate)
+  //   return () => window.removeEventListener('storage', checkStorageUpdate)
+  // });
+
+  // // Set initial values
+  // // tz = value?.timezone ?? null;
 </script>
 
-<Frame {name} {action} {form} {required} {error} bind:title={title} focus={focus} bind:disabled>
-  <input type="hidden" name={name} bind:value={initialValue} />
+<Frame {name} {action} {form} unsaved={$unsaved} restore={() => local.clear(true)} {required} {error} bind:title={title} focus={focus} bind:disabled>
+  <input type="hidden" name={name} bind:value />
   <form on:submit|preventDefault={() => {}} class="w-full">
-    <input tabindex="0" bind:this={select} disabled={disabled} on:change={_update} type="text" style="text-transform:uppercase" bind:value={initialValue} placeholder="" name="aircraft-visible" list="aircraft"
+    <input tabindex="0" bind:this={select} disabled={disabled} on:change={_update} type="text" style="text-transform:uppercase" bind:value placeholder="" name="aircraft-visible" list="aircraft"
       class="w-full text-right px-0 text-sm font-mono text-sky-400 font-bold flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
     <datalist id="aircraft">
       {#each aircraft as plane (plane.registration)}
-        <option selected={plane.registration === initialValue} value="{plane.registration}">{plane.type.typeCode} ({plane.type.make} {plane.type.model})</option>
+        <option selected={plane.registration === value} value="{plane.registration}">{plane.type.typeCode} ({plane.type.make} {plane.type.model})</option>
       {/each}
     </datalist>
   </form>

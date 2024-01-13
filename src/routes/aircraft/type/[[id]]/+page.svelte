@@ -19,7 +19,7 @@
   let submitting = false;
   let deleting = false;
 
-  const formManager = new FormManager({ autoClearOnFormSuccess: true });
+  const formManager = new FormManager();
   const unsavedChanges = formManager.getUnsavedChangesStore();
   const unsavedUIDs = formManager.getUnsavedUIDsStore();
   $: formManager.updateUID(data.type?.id ?? 'new-type');
