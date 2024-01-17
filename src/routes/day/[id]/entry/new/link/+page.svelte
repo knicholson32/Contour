@@ -5,24 +5,14 @@
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
   import { enhance } from '$app/forms';
-  import { validateURL } from '$lib/helpers';
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
   let submitting = false;
 
   const formManager = new FormManager();
-  const unsavedChanges = formManager.getUnsavedChangesStore();
   $: formManager.updateUID('new-day-leg');
   $: formManager.updateForm(form);
-
-  let startAirportTZ: string | null;
-  let endAirportTZ: string | null;
-
-  const _validateURL = (val: string): boolean => {
-    if (!validateURL(val)) return false;
-    return val.startsWith('https://www.flightaware.com/');
-  }
 
   let noCache: boolean;
 
@@ -45,7 +35,7 @@
       <Section title="Flight Aware Link" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Switch title="No Cache" name="no-cache" bind:value={noCache} defaultValue={false} />
         <Entry.Input required={noCache} title="Flight ID" name="flight-id" placeholder="EJA762" defaultValue={null} />
-        <Entry.Input required={true} title="Link" name="fa-link" placeholder="https://www.flightaware.com/live/flight/EJA762/history/20240114/1400Z/KAPF/KVNY" validator={_validateURL} defaultValue={null} />
+        <Entry.Input required={true} title="Link" name="fa-link" placeholder="https://www.flightaware.com/live/flight/EJA762/history/20240114/1400Z/KAPF/KVNY" defaultValue={null} />
       </Section>
 
       <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
