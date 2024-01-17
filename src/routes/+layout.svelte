@@ -15,7 +15,7 @@
   // Menu contents
   const menu = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Entry', href: '/entry' },
+    { title: 'Entry', href: '/day' },
     { title: 'Aircraft', href: '/aircraft' },
     { title: 'Logbook', href: '/log' },
     { title: 'Airports', href: '/airports' },

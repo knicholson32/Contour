@@ -4,7 +4,8 @@
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
-    import { enhance } from '$app/forms';
+  import { enhance } from '$app/forms';
+  import { page } from '$app/stores';
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
@@ -16,35 +17,29 @@
   $: formManager.updateUID('new-tour');
   $: formManager.updateForm(form);
 
-
+  let showAirportTZ: string | null;
+  let apt: string | null;
 
 </script>
 
-Tour
-
-{#if data.currentTour === null}
-  <a href="/tour/start">New tour</a>
-{:else}
-  Existing tour
-{/if}
-
 <OneColumn>
 
-  <!-- <div class="flex-shrink">
+  <div class="flex-shrink">
     <form method="post" enctype="multipart/form-data" use:enhance={() => {
       submitting = true;
       return async ({ update }) => {
         await update({ reset: false });
         submitting = false;
-        if (form?.ok !== false) formManager.clearUID(false);
+        setTimeout(() => {
+          if (form?.ok !== false) formManager.clearUID(false);
+        }, 1);
       };
     }}>
 
-    {JSON.stringify(form)}
-
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
-        <Entry.AirportPicker required={true} title="Show Airport" name="show-airport" airports={data.airports} bind:tz={showAirportTZ} initialValue={data.tourSettings['tour.defaultStartApt']} />
-        <Entry.TimePicker required={true} title="Show Time" name="show-time" dateOnly={false} bind:autoTZ={showAirportTZ} />
+        {apt} {showAirportTZ}
+        <Entry.AirportPicker required={true} title="Show Airport" name="show-airport" airports={data.airports} bind:value={apt} bind:tz={showAirportTZ} defaultValue={data.tourSettings['tour.defaultStartApt']} />
+        <Entry.TimePicker required={true} title="Show Time" name="show-time" dateOnly={false} bind:autoTZ={showAirportTZ} defaultValue={null} />
       </Section>
 
       <Section title="Details">
@@ -62,6 +57,6 @@ Tour
         <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Create" actionTextInProgress="Creating" />
       </div>
     </form>
-  </div> -->
+  </div>
 
 </OneColumn>

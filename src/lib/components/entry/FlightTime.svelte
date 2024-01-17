@@ -93,7 +93,7 @@
     input.type = "text";
     input.selectionStart = 0;
     input.selectionEnd = 10;
-    input.type = "number";
+    input.type = "text";
   }
 
   // When mounted, format the default input
@@ -132,6 +132,7 @@
       </button>
     {/if}
   </div>
-  <input {required} tabindex="0" maxlength="4" on:focus={enterFocus} on:blur={() => _focus = false} bind:this={input} disabled={disabled} bind:value={value} on:change={_update} on:input={_updateContinuous} pattern="[0-9]*" placeholder="0.0" name={name}
+  <!-- pattern="[0-9]*" -->
+  <input {required} type="text" tabindex="0" maxlength="4" on:focus={enterFocus} on:blur={() => _focus = false} bind:this={input} disabled={disabled} bind:value={value} on:change={_update} on:input={_updateContinuous} placeholder="0.0" name={name}
     class="text-ellipsis px-0 w-14 text-sm font-mono font-bold text-right flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
 </Frame>

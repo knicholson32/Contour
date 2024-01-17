@@ -6,7 +6,8 @@
   import { page } from '$app/stores';  
   import { writable } from 'svelte/store';
   import { LocalStorageManager } from './localStorage';
-    import { browser } from '$app/environment';
+  import { browser } from '$app/environment';
+  import { form } from './entryStore';
   
   export let defaultValue: string | null;
   export let value: string | null = defaultValue;
@@ -14,7 +15,6 @@
 
   export let required: boolean = false;
   export let action: string = '?/default';
-  export let form: null | API.Form.Type = null
 
 	export let name: string;
   export let title: string;
@@ -156,7 +156,7 @@
   // // tz = value?.timezone ?? null;
 </script>
 
-<Frame {name} {action} {form} unsaved={$unsaved} restore={() => local.clear(true)} {required} {error} bind:title={title} focus={focus} bind:disabled>
+<Frame {name} {action} form={$form} unsaved={$unsaved} restore={() => local.clear(true)} {required} {error} bind:title={title} focus={focus} bind:disabled>
   <input type="hidden" name={name} bind:value />
   <form on:submit|preventDefault={() => {}} class="w-full">
     <input tabindex="0" bind:this={select} disabled={disabled} on:change={_update} type="text" style="text-transform:uppercase" bind:value placeholder="" name="aircraft-visible" list="aircraft"

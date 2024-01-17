@@ -27,3 +27,12 @@ export enum ImageUploadState {
 	UPDATE = 'UPDATE',
 	DELETE = 'DELETE'
 }
+
+
+
+
+export enum DayNewEntryState {
+	NOT_STARTED = 'NOT_STARTED',
+	LINK_ENTERED = 'LINK_ENTERED',
+	LINK_CONFIRMED = 'LINK_CONFIRMED',
+}

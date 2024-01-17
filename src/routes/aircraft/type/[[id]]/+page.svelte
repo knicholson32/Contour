@@ -92,7 +92,9 @@
       return async ({ update }) => {
         await update({ reset: false });
         submitting = false;
-        if (form?.ok !== false) formManager.clearUID(false);
+        setTimeout(() => {
+          if (form?.ok !== false) formManager.clearUID(false);
+        }, 1);
       };
     }}>
 

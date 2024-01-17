@@ -118,7 +118,9 @@
       return async ({ update }) => {
         await update({ reset: false });
         submitting = false;
-        if (form?.ok !== false) formManager.clearUID(false);
+        setTimeout(() => {
+          if (form?.ok !== false) formManager.clearUID(false);
+        }, 1);
       };
     }}>
 
@@ -127,7 +129,7 @@
         <MenuForm.FormHeader title={`${data.aircraft.registration} - ${data.aircraft.type.make} ${data.aircraft.type.model}`}>
           <Stats values={[
             {title: 'Total Legs', value: data.aircraft._count.legs.toLocaleString()},
-            {title: 'Total FLight Time', value: `0.0 hr`},
+            {title: 'Total FLight Time', value: data.aircraftTimes[data.aircraft.id] + ' hr'},
             {title: 'Avg. Leg Length', value: '00:00'},
             {title: 'Diversion %', value: '0%'}
           ]}/>

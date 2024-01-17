@@ -2,9 +2,69 @@ import { browser } from '$app/environment';
 import * as https from 'https';
 import * as dateFns from 'date-fns';
 import icons from '$lib/components/icons';
-import { getTimeZones } from '@vvo/tzdb';
+import { getTimeZones, type TimeZone } from '@vvo/tzdb';
 
 const timeZonesWithUtc = getTimeZones({ includeUtc: true });
+
+/**
+ * Get a TimeZone object from the timezone string
+ * @param timezone the timezone string
+ * @returns the TimeZone object
+ */
+export const getTimezoneObjectFromTimezone = (timezone: string): TimeZone | null => {
+	const timeZones = getTimeZones({ includeUtc: true });
+	const tzObj = timeZones.find((timeZone) => timezone === timeZone.name || timeZone.group.includes(timezone));
+	if (tzObj === undefined) return null;
+	return tzObj;
+}
+
+/**
+ * Get a one-line short representation of a date string
+ * @param unix the date
+ * @returns the string
+ */
+export const getInlineDateUTC = (unix: number) => {
+	const now = new Date(unix * 1000);
+	return `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1, 2)}-${pad(now.getUTCDate(), 2)}`;
+}
+
+/**
+ * Convert a time string from the TimePicker Entry component to a UTC unix timestamp to store in the DB
+ * @param time the time string
+ * @param timezone the timezone
+ * @returns the unix timestamp
+ */
+export const timeStrAndTimeZoneToUTC = (time: string, timezone: string): {value: number, raw: TimeZone} | null => {
+	const timeZones = getTimeZones({ includeUtc: true });
+	const showTimeTZValue = timeZones.find((timeZone) => timezone === timeZone.name || timeZone.group.includes(timezone));
+	if (showTimeTZValue === undefined) return null;
+	return {
+		value: Math.floor(new Date(time + '+00:00').getTime() / 1000) - (showTimeTZValue.rawOffsetInMinutes * 60),
+		raw: showTimeTZValue
+	}
+}
+
+/**
+ * Convert a date object into a date string that the TimePicker Entry component can accept
+ * @param now the date object
+ * @param dateOnly whether this is date-only (no time)
+ * @returns the date string
+ */
+export const dateToDateStringForm = (unixTime: number, dateOnly: boolean, timezone: string) => {
+
+	const timeZones = getTimeZones({ includeUtc: true });
+	const tzValue = timeZones.find((timeZone) => {
+		return timezone === timeZone.name || timeZone.group.includes(timezone);
+	});
+
+	const now = new Date((unixTime + (tzValue?.rawOffsetInMinutes ?? 0) * 60) * 1000);
+
+	if (dateOnly) {
+		return `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1, 2)}-${pad(now.getUTCDate(), 2)}`;
+	} else {
+		return `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1, 2)}-${pad(now.getUTCDate(), 2)}T${pad(now.getUTCHours(), 2)}:${pad(now.getUTCMinutes(), 2)}`;
+	}
+}
 
 /**
  * Validate a URL

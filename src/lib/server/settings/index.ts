@@ -7,8 +7,13 @@ import type { Prisma } from '@prisma/client';
 export const TypeNames = {
 	// Entry ---------------------------------
 	'entry.tour.current': -1,
+	'entry.day.entry.state': types.DayNewEntryState.NOT_STARTED,
+	'entry.day.entry.fa_id': '',
+	'entry.day.entry.fa_link': '',
 	'entry.day.current': -1,
 	'entry.defaultFlightID': 'EJA',
+	// Tour ----------------------------------
+	'tour.defaultStartApt': 'KPDK',
 	// System --------------------------------
 	'system.debug': 0,
 	// General -------------------------------
@@ -22,7 +27,11 @@ export type TypeName = keyof typeof TypeNames;
 export type ObjectType<T extends TypeName> = 
 	T extends 'entry.tour.current' ? number : 		// Integer
 	T extends 'entry.day.current' ? number : 			// Integer
+	T extends 'entry.day.entry.state' ? types.DayNewEntryState : // DayNewEntryState
+	T extends 'entry.day.entry.fa_id' ? string :  // String
+	T extends 'entry.day.entry.fa_link' ? string :  // String
 	T extends 'entry.defaultFlightID' ? string : 	// String
+	T extends 'entry.defaultStartApt' ? string : 	// String
 	T extends 'system.debug' ? number : 					// Integer
 	T extends 'general.encKey' ? string : 				// String
 	T extends 'general.aeroAPI' ? string : 				// String
@@ -72,6 +81,9 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 
 			// String Conversion -------------------------------------------------------------------------
 			case 'entry.defaultFlightID':
+			case 'entry.day.entry.fa_id':
+			case 'entry.day.entry.fa_link':
+			case 'tour.defaultStartApt':
 			case 'general.encKey':
 			case 'general.timezone':
 				return settingVal.value as ObjectType<T>;
@@ -81,8 +93,8 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 				return (await helpers.decrypt(settingVal.value)) as ObjectType<T>;
 
 			// Enum Conversion ---------------------------------------------------------------------------
-			// case '':
-			// 	return settingVal.value as ObjectType<T>;
+			case 'entry.day.entry.state':
+				return settingVal.value as ObjectType<T>;
 
 			// Unknown -----------------------------------------------------------------------------------
 			default:

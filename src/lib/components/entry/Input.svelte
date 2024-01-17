@@ -28,6 +28,8 @@
   export let value: string | null = defaultValue;
 	export let name: string;
 
+  export let useCommonName: string | undefined = undefined;
+
   let lastValue = value;
   export let _update = () => {
     if (validator !== null && value !== null) {
@@ -66,6 +68,6 @@
 
 
 <Frame {name} {action} unsaved={$unsaved} restore={() => local.clear(true)} form={$form} {error} {required} bind:title focus={focus} bind:disabled>
-  <input bind:this={input} bind:value {required} disabled={disabled} on:input={_update} pattern={useNumberPattern ? '[0-9]*' : undefined} type="text" style="{uppercase ? 'text-transform:uppercase' : ''}" placeholder={placeholder} name={name}
+  <input bind:this={input} bind:value {required} disabled={disabled} on:input={_update} pattern={useNumberPattern ? '[0-9]*' : undefined} type="text" style="{uppercase ? 'text-transform:uppercase' : ''}" placeholder={placeholder} name={useCommonName !== undefined ? useCommonName : name}
     class="w-full text-ellipsis px-0 text-sm font-mono font-bold text-right flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-300 placeholder:text-xs focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
 </Frame>

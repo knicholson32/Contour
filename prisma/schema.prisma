@@ -79,18 +79,49 @@ model Tour {
   days    DutyDay[]
   options Option[]
 
+  startTime_utc       Int
+  startTimezone       String
+  startTimezoneOffset Int
+
+  endTime_utc       Int?
+  endTimezone       String?
+  endTimezoneOffset Int?
+
+  startAirportId String   @db.VarChar(5)
+  endAirportId   String?  @db.VarChar(5)
+  startAirport   Airport  @relation("startAirport", fields: [startAirportId], references: [id], onDelete: Restrict)
+  endAirport     Airport? @relation("endAirport", fields: [endAirportId], references: [id], onDelete: Restrict)
+
+  companyId String
+  lineCheck Boolean
+
+  notes String @default("") @db.VarChar(1024)
+
   @@map("tours")
 }
 
 model DutyDay {
-  id                  Int   @id @default(autoincrement())
-  tourId              Int
-  tour                Tour  @relation(fields: [tourId], references: [id], onDelete: Restrict)
-  legs                Leg[]
+  id Int @id @default(autoincrement())
+
+  tourId Int
+  tour   Tour @relation(fields: [tourId], references: [id], onDelete: Restrict)
+
+  legs Leg[]
+
   startTime_utc       Int
+  startTimezone       String
   startTimezoneOffset Int
-  endTime_utc         Int
-  endTimezoneOffset   Int
+
+  endTime_utc       Int
+  endTimezone       String
+  endTimezoneOffset Int
+
+  startAirportId String   @db.VarChar(5)
+  endAirportId   String  @db.VarChar(5)
+  startAirport   Airport  @relation("startAirport", fields: [startAirportId], references: [id], onDelete: Restrict)
+  endAirport     Airport @relation("endAirport", fields: [endAirportId], references: [id], onDelete: Restrict)
+
+  notes String @default("") @db.VarChar(1024)
 
   @@map("days")
 }
@@ -166,6 +197,8 @@ model FlightAwareData {
   cancelled    Boolean
   positionOnly Boolean
 
+  sourceLink String
+
   departureDelay      Int?
   arrivalDelay        Int?
   filedEte            Int?
@@ -195,7 +228,7 @@ model FlightAwareData {
   actualOn     Int?
 
   legId String @unique
-  leg   Leg    @relation(fields: [legId], references: [id])
+  leg   Leg    @relation(fields: [legId], references: [id], onDelete: Cascade)
 
   @@map("flightAwareData")
 }
@@ -252,8 +285,7 @@ model Leg {
   notes String @default("") @db.VarChar(1024)
 
   aircraft                  Aircraft @relation(fields: [aircraftId], references: [id], onDelete: Restrict)
-  aircraftId      String
-  flightAwareDataFaFlightId String?
+  aircraftId                String
 
   @@map("legs")
 }
@@ -294,7 +326,7 @@ model AircraftType {
 }
 
 model Aircraft {
-  id String @id
+  id           String @id
   registration String @unique
 
   aircraftTypeId String
@@ -353,6 +385,12 @@ model Airport {
   legOrigin      Leg[] @relation("originAirport")
   legDestination Leg[] @relation("destinationAirport")
   legDiversion   Leg[] @relation("diversionAirport")
+
+  tourStart Tour[] @relation("startAirport")
+  tourEnd   Tour[] @relation("endAirport")
+
+  dayStart DutyDay[] @relation("startAirport")
+  dayEnd   DutyDay[] @relation("endAirport")
 
   @@unique([latitude, longitude])
   @@map("airports")

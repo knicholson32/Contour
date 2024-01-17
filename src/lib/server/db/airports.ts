@@ -55,6 +55,7 @@ export const addAirport = async (airport_id: string, aeroAPIKey: string): Promis
  */
 export const addIfDoesNotExist = async (airport_id: string | null | undefined, aeroAPIKey: string): Promise<boolean> => {
   if (airport_id === null || airport_id === undefined) return false;
+  airport_id = airport_id.trim().toLocaleUpperCase();
   // Check if the airport exists
   if (await getAirport(airport_id) === undefined) {
     // It does not. Add it.

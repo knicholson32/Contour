@@ -5,16 +5,16 @@
   import Switch from '$lib/components/buttons/Switch.svelte';
   import { EscapeOrClickOutside } from '$lib/components/events';
   import icons from '$lib/components/icons';
-  import type { API } from '$lib/types';
-  import { browser } from '$app/environment';
-  import { onMount } from 'svelte';
+  import { form } from "./entryStore";
+  import { writable } from 'svelte/store';
+  import { LocalStorageManager } from './localStorage';
 
   const now = new Date();
 
   export let dateOnly = false;
-  export let initialValue: string | null = null;
-  if (initialValue === null) initialValue = dateOnly ? `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}` : `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}T${helpers.pad(now.getHours(), 2)}:${helpers.pad(now.getMinutes(), 2)}`;
-  export let value: string | null = initialValue;
+  export let defaultValue: string | null;
+  if (defaultValue === null) defaultValue = dateOnly ? `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}` : `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}T${helpers.pad(now.getHours(), 2)}:${helpers.pad(now.getMinutes(), 2)}`;
+  export let value: string | null = defaultValue;
 
   export let autoTZ: string | null = null;
   export let tz: string | null = null;
@@ -23,20 +23,19 @@
 	export let title: string;
   export let required: boolean = false;
   export let action: string = '?/default';
-  export let form: null | API.Form.Type = null
 	export let disabled: boolean = false;
 
 	export let update = () => {};
 
   let _update = () => {
-    if ($uid !== null) {
-      if (initialValue !== null) {
-        localStorage.setItem($uid + '.' + name, initialValue);
-        localStorage.setItem($uid + '.unsaved', 'true');
-      } else {
-        localStorage.removeItem($uid + '.' + name);
-      }
-    }
+    // if ($uid !== null) {
+    //   if (initialValue !== null) {
+    //     localStorage.setItem($uid + '.' + name, initialValue);
+    //     localStorage.setItem($uid + '.unsaved', 'true');
+    //   } else {
+    //     localStorage.removeItem($uid + '.' + name);
+    //   }
+    // }
     update();
   }
 
@@ -68,63 +67,80 @@
   // ----------------------------------------------------------------------------
   // Local Storage Support
   // ----------------------------------------------------------------------------
-  import { uid } from '$lib/components/entry/entryStore';
-  /**
-   * Check local storage. If it exists and is not null, use that value
-   */
-  const checkLocalStorage = () => {
-    if (!browser) return;
-    const savedValue = localStorage.getItem($uid + '.' + name);
-    if (savedValue !== null) initialValue = savedValue;
-  }
-
-  /**
-   * Check for a storage update. If the update matches the key and is not null,
-   * use that value
-   */
-  const checkStorageUpdate = (e: StorageEvent) => {
-    if ($uid === null) return;
-    if (e.key !== $uid + '.' + name || e.newValue === null) return;
-    initialValue = e.newValue;
-    value = initialValue;
-  }
-
-  /**
-   * Transfer the contents of value to updatedValue whenever it changes
-   */
-  $: {
-    value = initialValue;
-  }
-
-  /**
-   * If $uid or name changes, the entry element has been re-assigned. Check local
-   * storage and assign if required
-   */
-  $:{
-    name;
-    form;
-    if ($uid !== null) checkLocalStorage();
-  }
-
-  /**
-   * Attach a handler to listen for the storage event, which is emitted when
-   * local storage changes. Remove if off mount.
-   */
-  onMount(() => {
-    window.addEventListener('storage', checkStorageUpdate)
-    return () => window.removeEventListener('storage', checkStorageUpdate)
+  // Create a writable for the name
+  const nameStore = writable(name);
+  $: nameStore.set(name);
+  $: name = $nameStore;
+  // Initialize the local storage manager
+  const local = new LocalStorageManager(nameStore, defaultValue, (v) => {
+    value = v ?? defaultValue;
+    _update();
   });
+  const unsaved = local.getUnsavedStore();
+  // Attach the local storage manager to value and default value
+  $: local.setDefault(defaultValue);
+  $: local.set(value);
+
+  // // ----------------------------------------------------------------------------
+  // // Local Storage Support
+  // // ----------------------------------------------------------------------------
+  // import { uid } from '$lib/components/entry/entryStore';
+  // /**
+  //  * Check local storage. If it exists and is not null, use that value
+  //  */
+  // const checkLocalStorage = () => {
+  //   if (!browser) return;
+  //   const savedValue = localStorage.getItem($uid + '.' + name);
+  //   if (savedValue !== null) initialValue = savedValue;
+  // }
+
+  // /**
+  //  * Check for a storage update. If the update matches the key and is not null,
+  //  * use that value
+  //  */
+  // const checkStorageUpdate = (e: StorageEvent) => {
+  //   if ($uid === null) return;
+  //   if (e.key !== $uid + '.' + name || e.newValue === null) return;
+  //   initialValue = e.newValue;
+  //   value = initialValue;
+  // }
+
+  // /**
+  //  * Transfer the contents of value to updatedValue whenever it changes
+  //  */
+  // $: {
+  //   value = initialValue;
+  // }
+
+  // /**
+  //  * If $uid or name changes, the entry element has been re-assigned. Check local
+  //  * storage and assign if required
+  //  */
+  // $:{
+  //   name;
+  //   form;
+  //   if ($uid !== null) checkLocalStorage();
+  // }
+
+  // /**
+  //  * Attach a handler to listen for the storage event, which is emitted when
+  //  * local storage changes. Remove if off mount.
+  //  */
+  // onMount(() => {
+  //   window.addEventListener('storage', checkStorageUpdate)
+  //   return () => window.removeEventListener('storage', checkStorageUpdate)
+  // });
 
 </script>
 
-<Frame {name} {action} {form} {required} bind:title bind:disabled focus={focus}>
+<Frame {name} unsaved={$unsaved} restore={() => local.clear(true)} {action} form={$form} {required} bind:title bind:disabled focus={focus}>
 
 
   {#if dateOnly}
-    <input {required} tabindex="0" bind:this={input} type="date" name={name} {disabled} on:change={_update} bind:value={initialValue} class="text-right min-w-10 p-0 disabled:cursor-not-allowed disabled:text-gray-500 border-0 bg-transparent focus:outline-none focus-within:ring-0">
+    <input {required} tabindex="0" bind:this={input} type="date" name={name} {disabled} on:change={_update} bind:value class="text-right min-w-10 p-0 disabled:cursor-not-allowed disabled:text-gray-500 border-0 bg-transparent focus:outline-none focus-within:ring-0">
   {:else}
     <input type="hidden" name={name + '-tz'} bind:value={tz} />
-    <input {required} tabindex="0" bind:this={input} type="datetime-local" on:change={_update} name={name + '-date'} {disabled} bind:value={initialValue}
+    <input {required} tabindex="0" bind:this={input} type="datetime-local" on:change={_update} name={name + '-date'} {disabled} bind:value
       class="border-0 placeholder:text-gray-400 p-0 disabled:cursor-not-allowed bg-transparent disabled:text-gray-500 focus-within:ring-0 focus-within:border-0"/>
   {/if}
 

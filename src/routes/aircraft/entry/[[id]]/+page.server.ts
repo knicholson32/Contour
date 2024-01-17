@@ -30,7 +30,7 @@ export const load = async ({ fetch, params, url }) => {
     else aircraftTimes[ac.id] = (0).toFixed(1);
   }
 
-  const currentAircraft = await prisma.aircraft.findUnique({ where: { id: params.id }, include: { type: true, _count: true } });
+  const currentAircraft = await prisma.aircraft.findUnique({ where: { id: params.id }, include: { type: true, _count: true, legs: { select: { totalTime: true } } } });
   if (params.id !== 'new' && currentAircraft === null) throw redirect(301, '/aircraft/entry/new');
 
   let orderGroups: { typeCode: string, regs: (typeof aircrafts[0])[] }[] = []
