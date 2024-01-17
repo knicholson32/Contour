@@ -64,6 +64,12 @@
         </div>
       {/if}
 
+      {#if data.existingEntry === true}
+        <div class="p-3 text-red-500">
+          NOTICE: An entry with this FlightAware ID already exists
+        </div>
+      {/if}
+
       <a href="{data.entrySettings['entry.day.entry.fa_link']}" target="_blank">FlightAware Link</a>
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>

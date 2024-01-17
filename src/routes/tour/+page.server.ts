@@ -48,8 +48,8 @@ export const load = async ({ params, fetch }) => {
               id: 'asc'
             },
             select: {
-              startTime: true,
-              endTime: true
+              startTime_utc: true,
+              endTime_utc: true
             }
           }
         },

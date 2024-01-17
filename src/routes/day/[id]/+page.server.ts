@@ -4,9 +4,10 @@ import prisma from '$lib/server/prisma';
 import { API, ImageUploadState } from '$lib/types';
 import { delay, timeStrAndTimeZoneToUTC } from '$lib/helpers/index.js';
 import { v4 as uuidv4 } from 'uuid';
-
+import type * as Types from '@prisma/client';
 import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
+import { generateDeadheads } from '$lib/server/db/deadhead';
 
 const MAX_MB = 10;
 
@@ -31,7 +32,12 @@ export const load = async ({ fetch, params }) => {
     include: {
       legs: {
         orderBy: {
-          startTime: 'asc'
+          startTime_utc: 'asc'
+        }
+      },
+      deadheads: {
+        orderBy: {
+          startTime_utc: 'asc'
         }
       },
       startAirport: {
@@ -51,6 +57,14 @@ export const load = async ({ fetch, params }) => {
   });
   if (currentDay === null) throw redirect(301, '/day/new');
 
+  const legDeadheadCombo: ((typeof currentDay.deadheads[0] | typeof currentDay.legs[0]) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[] = [];
+  for (const leg of currentDay.legs) legDeadheadCombo.push({...leg, type: 'leg'});
+  for (const dead of currentDay.deadheads) legDeadheadCombo.push({...dead, type: 'deadhead', diversionAirportId: null});
+  legDeadheadCombo.sort((a, b) => {
+    if (a.startTime_utc === null || b.startTime_utc === null) return 0;
+    return a.startTime_utc - b.startTime_utc
+  });
+
   const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
 
   return {
@@ -58,6 +72,7 @@ export const load = async ({ fetch, params }) => {
     entrySettings,
     currentDay,
     currentTour,
+    legDeadheadCombo,
     days,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
   }
@@ -167,6 +182,8 @@ export const actions = {
         }
       });
 
+      await generateDeadheads(day.id);
+
       await settings.set('entry.day.current', day.id);
 
     } catch (e) {
@@ -187,12 +204,24 @@ export const actions = {
     if (id === null || id === '' || isNaN(parseInt(id))) return API.Form.formFailure('?/update', '*', 'Required Field');
 
     try {
-      await prisma.dutyDay.delete({ where: { id: parseInt(id) }})
+      await prisma.dutyDay.delete({ where: { id: parseInt(id) }});
     } catch (e) {
       console.log(e);
       return API.Form.formFailure('?/update', '*', 'Could not delete');
     }
 
     throw redirect(301, '/day');
+  },
+  deadhead: async ({ request, url, params }) => {
+    const data = await request.formData();
+    for (const key of data.keys()) {
+      console.log(key, data.getAll(key));
+    }
+
+
+    await generateDeadheads(parseInt(params.id));
+
+
+    return API.Form.formSuccess('?/deadhead');
   }
 };

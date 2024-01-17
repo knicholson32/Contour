@@ -58,26 +58,36 @@
     <MenuForm.Link href={'/day/' + data.params.id + '/entry/new?' + urlActiveParam} icon={icons.plus} text="Create a new leg" type="right"/>
     <MenuForm.SearchBar />
     <!-- Existing Legs -->
-    <Section title="Start @ {data.day.startAirportId}">
-      {#each data.legs as leg (leg.id)}
-        <a href="/day/{data.params.id}/entry/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.leg && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
-          <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
-            <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-              {leg.originAirportId} → {leg.destinationAirportId} 
-              {#if $unsavedUIDs.includes(leg.id)}
-                <Tag>UNSAVED</Tag>
-              {/if}
+    <Section title="Legs">
+      {#each data.legDeadheadCombo as leg (leg.id)}
+        {#if leg.type === 'leg'}
+          <a href="/day/{data.params.id}/entry/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.leg && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
+            <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
+              <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
+                {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId} 
+                {#if $unsavedUIDs.includes(leg.id)}
+                  <Tag>UNSAVED</Tag>
+                {/if}
+              </div>
+            </div>
+            <div class="absolute right-1">
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+                {@html icons.chevronRight}
+              </svg>
+            </div>
+          </a>
+        {:else}
+          <div class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 bg-gray-50">
+            <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
+              <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis text-gray-400">
+                {leg.originAirportId} → {leg.destinationAirportId} (Deadhead)
+              </div>
             </div>
           </div>
-          <div class="absolute right-1">
-            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
-              {@html icons.chevronRight}
-            </svg>
-          </div>
-        </a>
+        {/if}
       {/each}
     </Section>
-    <Section title="End @ {data.day.endAirportId}"/>
+    <!-- <Section title="End @ {data.day.endAirportId}"/> -->
   </nav>
   
   <!-- Form Side -->

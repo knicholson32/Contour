@@ -107,6 +107,7 @@ model DutyDay {
   tour   Tour @relation(fields: [tourId], references: [id], onDelete: Restrict)
 
   legs Leg[]
+  deadheads Deadhead[]
 
   startTime_utc       Int
   startTimezone       String
@@ -251,8 +252,8 @@ model Leg {
   destinationAirport   Airport  @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
   diversionAirport     Airport? @relation("diversionAirport", fields: [diversionAirportId], references: [id], onDelete: Restrict)
 
-  startTime Int?
-  endTime   Int?
+  startTime_utc Int?
+  endTime_utc   Int?
 
   totalTime Float @default(0)
   pic       Float @default(0)
@@ -288,6 +289,22 @@ model Leg {
   aircraftId                String
 
   @@map("legs")
+}
+
+model Deadhead {
+  id String @id @default(uuid())
+  dayId     Int?
+  day       DutyDay?   @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  originAirportId      String   @db.VarChar(5)
+  destinationAirportId String   @db.VarChar(5)
+  originAirport        Airport  @relation("deadheadStart", fields: [originAirportId], references: [id], onDelete: Restrict)
+  destinationAirport   Airport  @relation("deadheadEnd", fields: [destinationAirportId], references: [id], onDelete: Restrict)
+
+  startTime_utc Int
+  endTime_utc   Int
+
+  @@map("deadheads")
 }
 
 model Settings {
@@ -391,6 +408,9 @@ model Airport {
 
   dayStart DutyDay[] @relation("startAirport")
   dayEnd   DutyDay[] @relation("endAirport")
+
+  deadheadStart Deadhead[] @relation("deadheadStart")
+  deadheadEnd   Deadhead[] @relation("deadheadEnd")
 
   @@unique([latitude, longitude])
   @@map("airports")

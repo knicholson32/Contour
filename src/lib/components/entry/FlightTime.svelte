@@ -16,6 +16,8 @@
   export let autoFill: string | null = null;
   export let action: string = '?/default';
 
+  let userValue: string | null;
+
   export let update: () => void = () => {};
 
   
@@ -24,7 +26,14 @@
    * Each time the user enters a character, check the input
    */
   let _updateContinuous = () => {
-    console.log('input');
+    console.log('input', userValue);
+
+    if (userValue !== null) {
+      if (userValue.length >= 2) value = userValue.substring(0, userValue.length - 1) + '.' + userValue.charAt(userValue.length - 1);
+      else if (userValue.length === 1) value = userValue + '.0';
+      else if (userValue.length === 0) value = '0.0';
+    } else value = userValue;
+
     if (value === null) {
       value = lastValue;
       return;
@@ -74,7 +83,11 @@
   }
 
   let input: HTMLInputElement;
-  let focus = () => input.focus();
+  let userInput: HTMLInputElement;
+
+  let focus = () => {
+    input.focus();
+  }
   let _focus = false;
 
   /**
@@ -90,10 +103,11 @@
 
   const enterFocus = () => {
     _focus = true;
-    input.type = "text";
-    input.selectionStart = 0;
-    input.selectionEnd = 10;
-    input.type = "text";
+    input.blur();
+    userInput.value = value?.replaceAll('.', '') ?? '';
+    userInput.focus();
+    userInput.selectionStart = 0;
+    userInput.selectionEnd = 10;
   }
 
   // When mounted, format the default input
@@ -133,6 +147,9 @@
     {/if}
   </div>
   <!-- pattern="[0-9]*" -->
-  <input {required} type="text" tabindex="0" maxlength="4" on:focus={enterFocus} on:blur={() => _focus = false} bind:this={input} disabled={disabled} bind:value={value} on:change={_update} on:input={_updateContinuous} placeholder="0.0" name={name}
-    class="text-ellipsis px-0 w-14 text-sm font-mono font-bold text-right flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
+  <input {required} type="text" tabindex="0" maxlength="4" on:focus={enterFocus} bind:this={input} disabled={disabled} bind:value={value} on:change={_update} on:input={_updateContinuous} placeholder="0.0" name={name}
+    class="text-ellipsis px-0 w-14 text-sm font-mono font-bold text-right {_focus ? 'text-gray-500' : ''}  flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
+
+  <input type="text" disabled={disabled} bind:value={userValue} on:change={_update} on:blur={() => _focus = false} on:input={_updateContinuous} bind:this={userInput} pattern="[0-9]*"
+    class="opacity-0 absolute text-red-500 text-ellipsis px-0 w-14 text-sm font-mono font-bold text-right flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
 </Frame>

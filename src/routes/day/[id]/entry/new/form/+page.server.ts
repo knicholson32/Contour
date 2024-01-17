@@ -10,6 +10,7 @@ import * as Fixes from '$lib/server/db/fixes';
 import * as aero from '$lib/server/api/flightaware';
 import { v4 as uuidv4 } from 'uuid';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
+import { generateDeadheads } from '$lib/server/db/deadhead';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -78,6 +79,8 @@ export const load = async ({ params, fetch }) => {
 
   const totalTime = ((entry.endTime - entry.startTime) / 60 / 60)
 
+  const existingFData = await prisma.flightAwareData.findUnique({ where: { faFlightId: entry.faFlightId } });
+
 
   return {
     entry,
@@ -86,6 +89,7 @@ export const load = async ({ params, fetch }) => {
     currentTour,
     currentDay,
     totalTime,
+    existingEntry: existingFData !== null,
     startTime: originAirport === null ? null : helpers.dateToDateStringForm(entry.startTime, false, originAirport.timezone),
     startTimezone: originAirport === null ? null : helpers.getTimezoneObjectFromTimezone(originAirport.timezone),
     endTime: destinationAirport === null ? null : helpers.dateToDateStringForm(entry.endTime, false, destinationAirport.timezone),
@@ -104,6 +108,8 @@ export const actions = {
 
     let entry = await options.getFlightOptionFaFlightID(fa);
     if (entry === undefined) return API.Form.formFailure('?/default', '*', 'No FA Entry');
+
+    if (await prisma.flightAwareData.findUnique({ where: { faFlightId: fa } }) !== null) return API.Form.formFailure('?/default', '*', 'Entry with FA already exists');
 
     const id = uuidv4();
 
@@ -292,8 +298,8 @@ export const actions = {
 
         aircraftId: aircraftId,
 
-        startTime: startUTC.value,
-        endTime: endUTC.value,
+        startTime_utc: startUTC.value,
+        endTime_utc: endUTC.value,
 
         totalTime: totalTime === null ? undefined : parseFloat(totalTime),
         pic: picTime === null ? undefined : parseFloat(picTime),
@@ -382,6 +388,8 @@ export const actions = {
           try {
             const route = await aero.getFlightRoute(flightAwareData.faFlightId, aeroAPIKey);
             await Fixes.storeFixes(route.fixes, leg.id);
+
+            await generateDeadheads(parseInt(params.id));
 
             // If we made it here, we are done!
             await settings.set('entry.day.entry.fa_id', '');

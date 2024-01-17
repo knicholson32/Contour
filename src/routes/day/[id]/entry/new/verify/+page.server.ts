@@ -63,13 +63,16 @@ export const load = async ({ params, fetch }) => {
     }
   }
 
-  const totalTime = ((entry.endTime - entry.startTime) / 60 / 60)
+  const totalTime = ((entry.endTime - entry.startTime) / 60 / 60);
+
+  const existingFData = await prisma.flightAwareData.findUnique({ where: { faFlightId: entry.faFlightId}});
 
 
   return {
     entry,
-    params,
+    id: params.id,
     entrySettings,
+    existingEntry: existingFData !== null,
     startTime: originAirport === null ? null : helpers.dateToDateStringForm(entry.startTime, false, originAirport.timezone) + ' ' + helpers.getTimezoneObjectFromTimezone(originAirport.timezone)?.abbreviation,
     startTimezone: originAirport === null ? null : originAirport.timezone,
     endTime: destinationAirport === null ? null : helpers.dateToDateStringForm(entry.endTime, false, destinationAirport.timezone) + ' ' + helpers.getTimezoneObjectFromTimezone(destinationAirport.timezone)?.abbreviation,

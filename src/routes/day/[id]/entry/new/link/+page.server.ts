@@ -54,13 +54,15 @@ export const actions = {
 
     const data = await request.formData();
 
-    const link = data.get('fa-link') as null | string;
+    let link = data.get('fa-link') as null | string;
     const flightID = data.get('flight-id') as null | string;
     const noCache = data.get('no-cache') as null | string === 'true' ? true : false;
 
     if (link === null || link === '') return API.Form.formFailure('?/default', 'fa-link', 'Required field');
     if (!helpers.validateURL(link)) return API.Form.formFailure('?/default', 'fa-link', 'Invalid URL');
-    if (!link.startsWith('https://www.flightaware.com/') && !link.startsWith('https://flightaware.com/')) return API.Form.formFailure('?/default', 'fa-link', 'Not a FlightAware link');
+    if (link.startsWith('https://flightaware.com/')) link = 'https://www.' + link.substring(8);
+    console.log(link);
+    if (!link.startsWith('https://www.flightaware.com/')) return API.Form.formFailure('?/default', 'fa-link', 'Not a FlightAware link');
 
     try {
 

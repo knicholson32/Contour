@@ -12,7 +12,6 @@ const EIGHT_HOURS = 8 * 60 * 60;
 // Commands
 // ------------------------------------------------------------------------------------------------
 
-
 /**
  * Create a cache-format flight from an AeroAPI flight
  */

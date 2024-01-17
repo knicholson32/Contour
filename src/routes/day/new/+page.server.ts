@@ -8,6 +8,7 @@ import { finalizeFlight } from '$lib/server/db/legs';
 import { API } from '$lib/types';
 import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
+import { generateDeadheads } from '$lib/server/db/deadhead';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -130,7 +131,7 @@ export const actions = {
 
 
     console.log(flightIDs);
-    if (flightIDs !== null) {
+    if (flightIDs !== null && flightIDs.length > 0) {
       try {
         // Make a single request and cache the leg data concerning these Flight IDs from flightaware
         await options.getOptionsAndCache(aeroAPIKey, currentTour.id, flightIDs);
@@ -160,6 +161,8 @@ export const actions = {
       }});
 
       redirectId = day.id.toFixed(0);
+
+      await generateDeadheads(day.id);
 
       await settings.set('entry.day.current', day.id);
 

@@ -98,11 +98,14 @@
       <div class="p-3">
         This day has {data.currentDay.legs.length} legs
       </div>
+      <div class="p-3">
+        This day has {data.currentDay.deadheads.length} deadheads
+      </div>
 
       <div class="flex flex-col gap-1">
-        {#each data.currentDay.legs as leg, i (leg.id)}
+        {#each data.legDeadheadCombo as leg, i (leg.id)}
           <div class="inline-flex w-full items-center">
-            {i + 1} : {leg.originAirportId} → {leg.destinationAirportId}
+            {i + 1} : {leg.type === 'deadhead' ? 'Deadhead' : 'Leg' } {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId}
           </div>
         {/each}
       </div>
@@ -139,6 +142,9 @@
             <Submit disabled={data.currentDay.legs.length > 0} hoverTitle={data.currentDay.legs.length > 0 ? 'Disabled because legs still exist' : 'Delete Day'} class="w-full" failed={form?.ok === false && form.action === '?/default'} submitting={deleting} theme={{primary: 'red'}} actionText={'Delete'} actionTextInProgress={'Deleting'} />
           </form>
         {/if}
+        <form class="flex-grow max-w-[33%] md:w-48 md:flex-grow-0 flex items-start" action="?/deadhead" method="post">
+          <Submit class="w-full" failed={form?.ok === false && form.action === '?/delete'} submitting={deleting} theme={{primary: 'white'}} actionText={'Update DH'} actionTextInProgress={'Updating'} />
+        </form>
         <a href="/day/{data.currentDay.id}/entry?active=menu" class="flex-grow w-full text-center md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">
           {#if data.currentDay.legs.length === 0}
             Create First Leg

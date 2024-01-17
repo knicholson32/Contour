@@ -14,7 +14,7 @@ export const load = async ({ params, fetch }) => {
     include: {
       legs: {
         orderBy: {
-          startTime: 'desc'
+          startTime_utc: 'desc'
         }
       },
       startAirport: {
@@ -45,7 +45,7 @@ export const load = async ({ params, fetch }) => {
       id: true,
     },
     orderBy: {
-      startTime: 'desc'
+      startTime_utc: 'desc'
     },
     take: 1
   });

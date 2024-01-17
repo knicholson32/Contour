@@ -111,6 +111,7 @@
   };
 
   const focus = () => {
+    value = '';
     select.focus();
   }
 
