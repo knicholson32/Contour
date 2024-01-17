@@ -8,6 +8,8 @@ import { finalizeFlight } from '$lib/server/db/legs';
 import { API, DayNewEntryState } from '$lib/types';
 import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
+import type * as Types from '@prisma/client';
+import { generateAirportList } from '$lib/server/helpers';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -78,6 +80,7 @@ export const load = async ({ params, fetch }) => {
     endTime: destinationAirport === null ? null : helpers.dateToDateStringForm(entry.endTime, false, destinationAirport.timezone) + ' ' + helpers.getTimezoneObjectFromTimezone(destinationAirport.timezone)?.abbreviation,
     endTimezone: destinationAirport === null ? null : destinationAirport.timezone,
     totalTime,
+    airportList: await generateAirportList(entry.originAirportId, entry.destinationAirportId, entry.diversionAirportId),
     airports
   };
 };

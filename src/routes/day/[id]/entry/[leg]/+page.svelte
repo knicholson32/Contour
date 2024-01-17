@@ -4,6 +4,7 @@
   import Submit from '$lib/components/buttons/Submit.svelte';
   import Image from '$lib/components/Image.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
+  import * as Map from '$lib/components/map';
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
   import { goto} from '$app/navigation';
@@ -95,6 +96,9 @@
     {#if data.leg === null}
       No Leg
     {:else}
+
+      <Map.Leg positions={data.positions} fixes={data.fixes} airports={data.airportList} />
+
       <form action="?/update" method="post" enctype="multipart/form-data" use:enhance={() => {
         submitting = true;
         return async ({ update }) => {

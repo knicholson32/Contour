@@ -8,6 +8,7 @@ import type * as Types from '@prisma/client';
 import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
+import { generateAirportList } from '$lib/server/helpers';
 
 const MAX_MB = 10;
 
@@ -33,11 +34,18 @@ export const load = async ({ fetch, params }) => {
       legs: {
         orderBy: {
           startTime_utc: 'asc'
+        },
+        include: {
+          positions: true
         }
       },
       deadheads: {
         orderBy: {
           startTime_utc: 'asc'
+        },
+        include: {
+          originAirport: true,
+          destinationAirport: true
         }
       },
       startAirport: {
@@ -67,12 +75,22 @@ export const load = async ({ fetch, params }) => {
 
   const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
 
+  const airportsInOrder: (string | null)[] = [];
+  for (const l of legDeadheadCombo) {
+    airportsInOrder.push(l.originAirportId);
+    airportsInOrder.push(l.destinationAirportId);
+    airportsInOrder.push(l.diversionAirportId);
+  }
+
+  console.log(airportsInOrder);
+  console.log(await generateAirportList(...airportsInOrder));
+
   return {
     params,
     entrySettings,
     currentDay,
     currentTour,
-    legDeadheadCombo,
+    airportList: await generateAirportList(...airportsInOrder),
     days,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
   }

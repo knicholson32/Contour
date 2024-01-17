@@ -3,8 +3,21 @@ import * as https from 'https';
 import * as dateFns from 'date-fns';
 import icons from '$lib/components/icons';
 import { getTimeZones, type TimeZone } from '@vvo/tzdb';
+import type API from '$lib/types/api';
 
 const timeZonesWithUtc = getTimeZones({ includeUtc: true });
+
+/**
+ * Get an airport from the ICAO identifier
+ * @param icao the ICAO identifier
+ * @param airports the list of airports (from the API)
+ * @returns the airport, if it exists
+ */
+export const getAirportFromICAO = (icao: string | null, airports: API.Types.Airport[]): API.Types.Airport | null => {
+	if (icao === null) return null;
+	for (const airport of airports) if (airport.id === icao) return airport;
+	return null;
+}
 
 /**
  * Get a TimeZone object from the timezone string

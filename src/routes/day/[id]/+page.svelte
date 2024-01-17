@@ -7,6 +7,7 @@
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
   import { goto} from '$app/navigation';
+  import * as Map from '$lib/components/map';
   import Badge from '$lib/components/decorations/Badge.svelte';
   import * as MenuForm from '$lib/components/menuForm';
   import Tag from '$lib/components/decorations/Tag.svelte';
@@ -75,6 +76,9 @@
   
   <!-- Form Side -->
   <div slot="form" class="flex-shrink">
+
+    <Map.Day legs={data.currentDay.legs} airports={data.airportList} deadheads={data.currentDay.deadheads} />
+
     <form action="?/update" method="post" enctype="multipart/form-data" use:enhance={() => {
       submitting = true;
       return async ({ update }) => {
@@ -100,14 +104,6 @@
       </div>
       <div class="p-3">
         This day has {data.currentDay.deadheads.length} deadheads
-      </div>
-
-      <div class="flex flex-col gap-1">
-        {#each data.legDeadheadCombo as leg, i (leg.id)}
-          <div class="inline-flex w-full items-center">
-            {i + 1} : {leg.type === 'deadhead' ? 'Deadhead' : 'Leg' } {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId}
-          </div>
-        {/each}
       </div>
 
       <Section title="Start" error={form !== null && form.ok === false && form.action === '?/update' && form.name === '*' ? form.message : null}>

@@ -5,8 +5,43 @@ import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '$lib/server/prisma';
 import * as helpers from '$lib/helpers';
+import type * as Types from '@prisma/client';
 
 const ENC_SALT = 'CONTOUR_SALT'
+
+
+/**
+ * Generate a list of airport objects from airport ICAO codes
+ * @param airports the base airport list
+ * @param args the variable ICAO airport codes
+ * @returns the list of airport obkects
+ */
+export const generateAirportList = async (...args: (string | null)[]): Promise<Types.Airport[]> => {
+	const icaoOptions: string[] = [];
+	for (const a of args) if (a !== null) icaoOptions.push(a);
+	const airports = await prisma.airport.findMany({ where: { id: { in: icaoOptions } } });
+	const exportAirports: Types.Airport[] = [];
+
+	let lastAirport: Types.Airport | null = null;
+
+	for (const icao of icaoOptions) {
+		let search: Types.Airport | null = null;
+		for (const airport of airports) {
+			if (icao === airport.id) {
+				search = airport;
+				break;
+			}
+		}
+		if (search !== null) {
+			if (search !== lastAirport) {
+				lastAirport = search;
+				exportAirports.push(search);
+			}
+		}
+	}
+
+	return exportAirports;
+}
 
 
 export type Images = {

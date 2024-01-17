@@ -5,7 +5,7 @@
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
   import { enhance } from '$app/forms';
-  import { dateToDateStringForm, validateURL } from '$lib/helpers';
+  import * as Map from '$lib/components/map';
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
@@ -19,6 +19,9 @@
 <OneColumn>
 
   <div class="flex-shrink">
+
+    <Map.Airports airports={data.airportList} />
+
     <form method="post" enctype="multipart/form-data" use:enhance={() => {
       submitting = true;
       return async ({ update }) => {

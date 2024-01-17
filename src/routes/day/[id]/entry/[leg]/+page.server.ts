@@ -5,10 +5,12 @@ import { API, ImageUploadState } from '$lib/types';
 import { dateToDateStringForm, delay, getTimezoneObjectFromTimezone, timeStrAndTimeZoneToUTC } from '$lib/helpers/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import * as helpers from '$lib/helpers';
+import * as i from '$lib';
 
 import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
+import { generateAirportList } from '$lib/server/helpers';
 
 const MAX_MB = 10;
 
@@ -71,12 +73,15 @@ export const load = async ({ fetch, params }) => {
     leg,
     // legs,
     day,
+    positions: await prisma.position.findMany({ where: { legId: params.leg } }),
+    fixes: await prisma.fix.findMany({ where: { legId: params.leg } }),
     legDeadheadCombo,
     startTime: originAirport === null || leg === null ? null : dateToDateStringForm(leg?.startTime_utc ?? 0, false, originAirport.timezone),
     startTimezone: originAirport === null || leg === null ? null : getTimezoneObjectFromTimezone(originAirport.timezone),
     endTime: destinationAirport === null || leg === null ? null : dateToDateStringForm(leg?.endTime_utc ?? 0, false, destinationAirport.timezone),
     endTimezone: destinationAirport === null || leg === null ? null : getTimezoneObjectFromTimezone(destinationAirport.timezone),
     airports,
+    airportList: await generateAirportList(leg?.originAirportId ?? null, leg?.destinationAirportId ?? null, leg?.diversionAirportId ?? null),
     aircraft
   }
 }

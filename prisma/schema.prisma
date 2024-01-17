@@ -395,8 +395,8 @@ model Airport {
   name        String
   city        String
   infoURL     String?
-  latitude    Decimal
-  longitude   Decimal
+  latitude    Float
+  longitude   Float
   countryCode String
 
   legOrigin      Leg[] @relation("originAirport")
@@ -422,8 +422,8 @@ model Position {
   altitudeChange AltitudeChange
   groundspeed    Int
   heading        Int
-  latitude       Decimal
-  longitude      Decimal
+  latitude       Float
+  longitude      Float
   timestamp      Int
   updateType     UpdateType?
 
@@ -437,11 +437,11 @@ model Fix {
   id                    Int      @id @default(autoincrement())
   legId                 String
   name                  String
-  latitude              Decimal?
-  longitude             Decimal?
-  distanceFromOrigin    Decimal?
-  distanceThisLeg       Decimal?
-  distanceToDestination Decimal?
+  latitude              Float?
+  longitude             Float?
+  distanceFromOrigin    Float?
+  distanceThisLeg       Float?
+  distanceToDestination Float?
   outboundCourse        Int?
   type                  String
 
