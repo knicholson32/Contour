@@ -64,7 +64,7 @@
         </div>
       {/if}
 
-      <a href="{data.entrySettings['entry.day.entry.fa_link']}" target="_blank">{data.entrySettings['entry.day.entry.fa_link']}</a>
+      <a href="{data.entrySettings['entry.day.entry.fa_link']}" target="_blank">FlightAware Link</a>
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.entry.ident} />

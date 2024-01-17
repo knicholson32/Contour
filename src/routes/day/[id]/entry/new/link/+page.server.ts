@@ -60,7 +60,7 @@ export const actions = {
 
     if (link === null || link === '') return API.Form.formFailure('?/default', 'fa-link', 'Required field');
     if (!helpers.validateURL(link)) return API.Form.formFailure('?/default', 'fa-link', 'Invalid URL');
-    if (!link.startsWith('https://www.flightaware.com/')) return API.Form.formFailure('?/default', 'fa-link', 'Not a FlightAware link');
+    if (!link.startsWith('https://www.flightaware.com/') && !link.startsWith('https://flightaware.com/')) return API.Form.formFailure('?/default', 'fa-link', 'Not a FlightAware link');
 
     try {
 
