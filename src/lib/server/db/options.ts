@@ -68,6 +68,8 @@ export const aeroFlightToOption = (tourID: number, flight: aero.schema.Flight): 
         inaccurate_timing = true;
     }
 
+
+
     // Create a flight
     const optionDB: Types.Option = {
         id: 'flt-' + uuidv4(),
@@ -84,7 +86,7 @@ export const aeroFlightToOption = (tourID: number, flight: aero.schema.Flight): 
         cancelled: flight.cancelled,
         positionOnly: flight.position_only,
         originAirportId: flight.origin.code,
-        destinationAirportId: flight.destination.code,
+        destinationAirportId: flight.destination?.code ?? null,
         diversionAirportId: null,
         departureDelay: flight.departure_delay,
         arrivalDelay: flight.arrival_delay,
@@ -274,7 +276,7 @@ export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, fligh
         const diversionModifications: DiversionDetails[] = [];
         for (const flight of flights) {
             // Check if the flight was diverted. If it was, add details about the diversion
-            if (flight.diverted === true && flight.destination.code !== null) diversionModifications.push({ faFlightId: flight.fa_flight_id, diversion: flight.destination.code });
+            if (flight.diverted === true && (flight.destination?.code ?? null) !== null) diversionModifications.push({ faFlightId: flight.fa_flight_id, diversion: (flight.destination?.code ?? '') });
             // If no, add the flight to the cache
             else cacheFlights.push(aeroFlightToOption(tour, flight));
         }

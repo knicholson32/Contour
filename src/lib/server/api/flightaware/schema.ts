@@ -39,7 +39,7 @@ export type Flight = {
         name?: string | null,                       // Common name of airport
         city?: string | null,                       // Closest city to the airport
         airport_info_url: string | null,            // The URL to more information about the airport. Will be null for position-only flights.
-    }
+    } | null,
     departure_delay: number | null,                 // Arrival delay (in seconds) based on either actual or estimated gate arrival time. If gate time is unavailable then based on runway arrival time. A negative value indicates the flight is early.
     arrival_delay: number | null,                   // Departure delay (in seconds) based on either actual or estimated gate departure time. If gate time is unavailable then based on runway departure time. A negative value indicates the flight is early.
     filed_ete: number | null,                       // Runway-to-runway filed duration (seconds).

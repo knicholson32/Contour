@@ -4,7 +4,6 @@ import * as helpers from '$lib/helpers';
 import * as aeroAPI from '$lib/server/api/flightaware';
 import { redirect } from '@sveltejs/kit';
 import * as options from '$lib/server/db/options';
-import { finalizeFlight } from '$lib/server/db/legs';
 import type { API } from '$lib/types';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;

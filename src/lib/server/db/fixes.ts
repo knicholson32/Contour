@@ -1,6 +1,6 @@
 import type * as aero from '$lib/server/api/flightaware';
 import prisma from '$lib/server/prisma';
-import * as Types from '@prisma/client';
+import type * as Types from '@prisma/client';
 
 /**
  * Convert from the AeroAPI format to the format saved to the database
@@ -12,11 +12,11 @@ export const aeroToDB = (fix: aero.schema.Fix, legID: string): Types.Prisma.FixU
     const f: Types.Prisma.FixUncheckedCreateInput = {
         legId: legID,
         name: fix.name,
-        latitude: (fix.latitude === null) ? null : new Types.Prisma.Decimal(fix.latitude),
-        longitude: (fix.longitude === null) ? null : new Types.Prisma.Decimal(fix.longitude),
-        distanceFromOrigin: (fix.distance_from_origin == null) ? null : new Types.Prisma.Decimal(fix.distance_from_origin),
-        distanceThisLeg: (fix.distance_this_leg == null) ? null : new Types.Prisma.Decimal(fix.distance_this_leg),
-        distanceToDestination: (fix.distance_to_destination == null) ? null : new Types.Prisma.Decimal(fix.distance_to_destination),
+        latitude: (fix.latitude === null) ? null : fix.latitude,
+        longitude: (fix.longitude === null) ? null : fix.longitude,
+        distanceFromOrigin: (fix.distance_from_origin == null) ? null : fix.distance_from_origin,
+        distanceThisLeg: (fix.distance_this_leg == null) ? null : fix.distance_this_leg,
+        distanceToDestination: (fix.distance_to_destination == null) ? null : fix.distance_to_destination,
         outboundCourse: fix.outbound_course,
         type: fix.type,
     };

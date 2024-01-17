@@ -59,10 +59,10 @@
       <Section title="Airports">
         <Entry.Input disabled={true} title="Origin" name="" defaultValue="{data.entry.originAirportId} at {data.startTime}" />
         {#if data.entry.diversionAirportId === null}
-          <Entry.Input disabled={true} title="Origin" name="" defaultValue="{data.entry.destinationAirportId} at {data.endTime}" />
+          <Entry.Input disabled={true} title="Destination" name="" defaultValue="{data.entry.destinationAirportId} at {data.endTime}" />
         {:else}
-          <Entry.Input disabled={true} title="Origin" name="" defaultValue="{data.entry.destinationAirportId} -> DIVERT" />
-          <Entry.Input disabled={true} title="Origin" name="" defaultValue="{data.entry.diversionAirportId} at {data.endTime}" />
+          <Entry.Input disabled={true} title="Destination" name="" defaultValue="{data.entry.destinationAirportId} -> DIVERT" />
+          <Entry.Input disabled={true} title="Divert" name="" defaultValue="{data.entry.diversionAirportId} at {data.endTime}" />
         {/if}
         <Entry.FlightTime disabled={true} title="Total Time" name="" defaultValue={data.totalTime} />
       </Section>

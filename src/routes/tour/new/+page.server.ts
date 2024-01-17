@@ -4,7 +4,6 @@ import * as helpers from '$lib/helpers';
 import * as aeroAPI from '$lib/server/api/flightaware';
 import { redirect } from '@sveltejs/kit';
 import * as options from '$lib/server/db/options';
-import { finalizeFlight } from '$lib/server/db/legs';
 import { API } from '$lib/types';
 import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
