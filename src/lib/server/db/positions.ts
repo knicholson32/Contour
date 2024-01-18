@@ -1,6 +1,8 @@
 import type * as aero from '$lib/server/api/flightaware';
 import prisma from '$lib/server/prisma';
-import * as Types from '@prisma/client';
+import type * as Types from '@prisma/client';
+import crypto from 'node:crypto';
+import { DB } from '$lib/types';
 
 // ------------------------------------------------------------------------------------------------
 // DB Tools
@@ -18,16 +20,16 @@ export const aeroToDB = (position: aero.schema.Position, legID: string): Types.P
     let altitudeChange;
     switch(position.altitude_change) {
         case "C":
-            altitudeChange = Types.AltitudeChange.CLIMBING
+            altitudeChange = DB.AltitudeChange.CLIMBING
             break;
         case "D":
-            altitudeChange = Types.AltitudeChange.DESCENDING
+            altitudeChange = DB.AltitudeChange.DESCENDING
             break;
         case "-":
-            altitudeChange = Types.AltitudeChange.LEVEL
+            altitudeChange = DB.AltitudeChange.LEVEL
             break;
         default:
-            altitudeChange = Types.AltitudeChange.UNKNOWN
+            altitudeChange = DB.AltitudeChange.UNKNOWN
             break;
     }
 
@@ -35,31 +37,31 @@ export const aeroToDB = (position: aero.schema.Position, legID: string): Types.P
     let updateType;
     switch(position.update_type) {
         case 'P': // P = projected
-            updateType = Types.UpdateType.PROJECTED;
+            updateType = DB.UpdateType.PROJECTED;
             break;
         case 'O': // O = oceanic
-            updateType = Types.UpdateType.OCEANIC;
+            updateType = DB.UpdateType.OCEANIC;
             break;
         case 'Z': // Z = radar
-            updateType = Types.UpdateType.RADAR;
+            updateType = DB.UpdateType.RADAR;
             break;
         case 'A': // A = ADS-B
-            updateType = Types.UpdateType.ADSB;
+            updateType = DB.UpdateType.ADSB;
             break;
         case 'M': // M = multilateration
-            updateType = Types.UpdateType.MULTILATERATION;
+            updateType = DB.UpdateType.MULTILATERATION;
             break;
         case 'D': // D = datalink
-            updateType = Types.UpdateType.DATALINK;
+            updateType = DB.UpdateType.DATALINK;
             break;
         case 'X': // X = surface and near surface(ADS - B and ASDE - X)
-            updateType = Types.UpdateType.ADSB_ASDEX;
+            updateType = DB.UpdateType.ADSB_ASDEX;
             break;
         case 'S': // S = space - based
-            updateType = Types.UpdateType.SPACE;
+            updateType = DB.UpdateType.SPACE;
             break;
         default:
-            updateType = Types.UpdateType.UNKNOWN;
+            updateType = DB.UpdateType.UNKNOWN;
     }
 
     const pos: Types.Position = {
@@ -68,8 +70,8 @@ export const aeroToDB = (position: aero.schema.Position, legID: string): Types.P
         altitudeChange: altitudeChange,
         groundspeed: Math.round(position.groundspeed),
         heading: Math.round(position.heading),
-        latitude: new Types.Prisma.Decimal(position.latitude),
-        longitude: new Types.Prisma.Decimal(position.longitude),
+        latitude: position.latitude,
+        longitude: position.longitude,
         timestamp: Math.round(new Date(position.timestamp).getTime() / 1000),
         updateType: updateType
     };
@@ -91,15 +93,28 @@ export const storePositions = async (positions: aero.schema.Position[], legID: s
     // Delete any positions that might already be associated with this flight
     await deletePositions(legID);
 
-    // Format the aero schema positions into the DB format
-    const positionsDB = [];
-    for (const pos of positions) positionsDB.push(aeroToDB(pos, legID));
+    // Create some arrays to hold the inserts and hashes created in the loop
+    const inserts: Types.Prisma.PrismaPromise<any>[] = [];
+    const pointHashes: string[] = [];
 
-    // Run the db transaction function
-    await prisma.position.createMany({
-        data: positionsDB,
-        skipDuplicates: true
-    })
+    // Loop through each position
+    for (const pos of positions) {
+        // Create a hash of the leg ID, timestamp, and lat/long. These together must be unique, so make a hash so we can ensure there isn't a collision
+        const hash = crypto.createHash('md5').update(`${legID}.${pos.timestamp}.${pos.latitude.toFixed(4)}.${pos.longitude.toFixed(4)}`).digest('hex');
+        // If this point already exists, skip it
+        if (pointHashes.includes(hash)) continue;
+        // Create a promise to inser it
+        inserts.push(prisma.position.create({ data: aeroToDB(pos, legID) }));
+        // Record the point hash
+        pointHashes.push(hash)
+    }
+
+    try {
+        // Execute the prisma transaction that will add all the points
+        await prisma.$transaction(inserts)
+    } catch (e) {
+        console.log('Unable to add positions!', e);
+    }
 }
 
 /**

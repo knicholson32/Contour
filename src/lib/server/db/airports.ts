@@ -36,8 +36,8 @@ export const addAirport = async (airport_id: string, aeroAPIKey: string): Promis
       name: aeroAirport.name,
       city: aeroAirport.city,
       infoURL: aeroAirport.wiki_url,
-      latitude: new Prisma.Decimal(aeroAirport.latitude),
-      longitude: new Prisma.Decimal(aeroAirport.longitude),
+      latitude: aeroAirport.latitude,
+      longitude: aeroAirport.longitude,
       countryCode: aeroAirport.country_code
     };
     // Add the airport to the DB

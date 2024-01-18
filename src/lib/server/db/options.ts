@@ -135,7 +135,19 @@ export const cache = async (option: Types.Option): Promise<void> => {
  * @param flights the flights to cache
  */
 export const cacheMany = async (flights: Types.Option[]): Promise<void> => {
-    await prisma.option.createMany({ data: flights, skipDuplicates: true });
+
+    const inserts: Types.Prisma.PrismaPromise<any>[] = [];
+    // Loop through each position
+    for (const flight of flights) inserts.push(prisma.option.create({ data: flight }));
+
+    try {
+        // Execute the prisma transaction that will add all the points
+        await prisma.$transaction(inserts)
+    } catch (e) {
+        console.log('Unable to add options!', e);
+    }
+
+    // await prisma.option.createMany({ data: flights, skipDuplicates: true });
 }
 
 /**

@@ -2,8 +2,6 @@ import { redirect } from '@sveltejs/kit';
 import * as settings from '$lib/server/settings';
 import prisma from '$lib/server/prisma';
 import { API, ImageUploadState } from '$lib/types';
-import { CategoryClass, EngineType, GearType } from '@prisma/client';
-import { categoryClassToString, engineTypeToString, gearTypeToString } from '$lib/types/prisma';
 import { delay } from '$lib/helpers/index.js';
 import { v4 as uuidv4 } from 'uuid';
 

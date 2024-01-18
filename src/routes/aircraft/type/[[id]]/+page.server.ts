@@ -2,10 +2,9 @@ import { redirect } from '@sveltejs/kit';
 import * as settings from '$lib/server/settings';
 import prisma from '$lib/server/prisma';
 import { API, ImageUploadState } from '$lib/types';
-import { CategoryClass, EngineType, GearType } from '@prisma/client';
-import { categoryClassToString, engineTypeToString, gearTypeToString } from '$lib/types/prisma';
 import { delay } from '$lib/helpers/index.js';
 import { v4 as uuidv4 } from 'uuid';
+import { DB } from '$lib/types';
 
 import * as helpers from '$lib/server/helpers';
 
@@ -46,9 +45,9 @@ export const load = async ({ fetch, params }) => {
     orderGroups,
     params,
     enums: {
-      categoryClass: Object.keys(CategoryClass).map((v) => { return { value: v, title: `${categoryClassToString(v as CategoryClass)} (${v})` }; }),
-      gearType: Object.keys(GearType).map((v) => { return { value: v, title: `${gearTypeToString(v as GearType)} (${v})` }; }),
-      engineType: Object.keys(EngineType).map((v) => { return { value: v, title: `${engineTypeToString(v as EngineType)} (${v})` }; }),
+      categoryClass: Object.keys(DB.CategoryClass).map((v) => { return { value: v, title: `${DB.categoryClassToString(v as DB.CategoryClass)} (${v})` }; }),
+      gearType: Object.keys(DB.GearType).map((v) => { return { value: v, title: `${DB.gearTypeToString(v as DB.GearType)} (${v})` }; }),
+      engineType: Object.keys(DB.EngineType).map((v) => { return { value: v, title: `${DB.engineTypeToString(v as DB.EngineType)} (${v})` }; }),
     }
   }
 }
@@ -87,6 +86,11 @@ export const actions = {
     if (highPerformance === null || highPerformance === '') return API.Form.formFailure('?/default', 'highPerformance', 'Required field');
     if (pressurized === null || pressurized === '') return API.Form.formFailure('?/default', 'pressurized', 'Required field');
 
+    // Check enums
+    if (!DB.validate.categoryClass(catClass as string)) return API.Form.formFailure('?/default', 'catClass', 'Invalid selection');
+    if (!DB.validate.gearType(gear as string)) return API.Form.formFailure('?/default', 'gear', 'Invalid selection');
+    if (!DB.validate.engineType(engine as string)) return API.Form.formFailure('?/default', 'engine', 'Invalid selection');
+
     if (params.id === 'new') {
       try {
         const data = {
@@ -95,9 +99,9 @@ export const actions = {
           subCode: (subCode as string).toLocaleUpperCase(),
           make: make as string,
           model: model as string,
-          catClass: catClass as CategoryClass,
-          gear: gear as GearType,
-          engine: engine as EngineType,
+          catClass: catClass as string,
+          gear: gear as string,
+          engine: engine as string,
           complex: complex === 'true',
           taa: taa === 'true',
           highPerformance: highPerformance === 'true',
@@ -117,9 +121,9 @@ export const actions = {
           subCode: (subCode as string).toLocaleUpperCase(),
           make: make as string,
           model: model as string,
-          catClass: catClass as CategoryClass,
-          gear: gear as GearType,
-          engine: engine as EngineType,
+          catClass: catClass as string,
+          gear: gear as string,
+          engine: engine as string,
           complex: complex === 'true',
           taa: taa === 'true',
           highPerformance: highPerformance === 'true',

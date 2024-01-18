@@ -5,7 +5,6 @@
   import Input from '$lib/components/entry/Input.svelte';
   import Switch from '$lib/components/entry/Switch.svelte';
   import Button from '$lib/components/entry/Button.svelte';
-  import ImageUpload from '$lib/components/entry/ImageUpload.svelte';
   import { Submit } from '$lib/components/buttons';
   import { enhance } from '$app/forms';
     import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';

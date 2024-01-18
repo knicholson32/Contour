@@ -1,6 +1,7 @@
 import type * as aero from '$lib/server/api/flightaware';
 import prisma from '$lib/server/prisma';
 import type * as Types from '@prisma/client';
+import crypto from 'node:crypto';
 
 /**
  * Convert from the AeroAPI format to the format saved to the database
@@ -37,15 +38,16 @@ export const storeFixes = async (fixes: aero.schema.Fix[], legID: string): Promi
     // Delete any positions that might already be associated with this flight
     await deleteFixes(legID);
 
-    // Format the aero schema positions into the DB format
-    const fixesDB = [];
-    for (const fix of fixes) fixesDB.push(aeroToDB(fix, legID));
+    const inserts: Types.Prisma.PrismaPromise<any>[] = [];
+    // Loop through each position
+    for (const pos of fixes) inserts.push(prisma.fix.create({ data: aeroToDB(pos, legID) }));
 
-    // Run the db transaction function
-    await prisma.fix.createMany({
-        data: fixesDB,
-        skipDuplicates: false
-    });
+    try {
+        // Execute the prisma transaction that will add all the points
+        await prisma.$transaction(inserts)
+    } catch (e) {
+        console.log('Unable to add fixes!', e);
+    }
 }
 
 /**

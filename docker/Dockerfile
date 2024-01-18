@@ -47,6 +47,7 @@ ARG SERVER_PORT
 ENV AAXtoMP3_VERSION=${AAXtoMP3_VERSION}
 ENV TONE_VERSION=${TONE_VERSION}
 ENV PORT=${SERVER_PORT}
+ENV DATABASE_URL="file:/db/contour.db?connection_limit=1"
 # ENV DATABASE_URL="file:/db/unabridged.db?connection_limit=1"
 ENV ORIGIN="http://localhost:${SERVER_PORT}"
 ENV PROC_SHELL='/bin/sh'

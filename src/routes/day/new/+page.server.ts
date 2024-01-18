@@ -129,11 +129,13 @@ export const actions = {
     }
 
 
-    console.log(flightIDs);
-    if (flightIDs !== null && flightIDs.length > 0) {
+    const filteredFlightIDs: string[] = [];
+    if (flightIDs !== null) for (const id of flightIDs) if (id !== null && id !== '') filteredFlightIDs.push(id);
+    console.log('Flight IDs', filteredFlightIDs);
+    if (filteredFlightIDs.length > 0) {
       try {
         // Make a single request and cache the leg data concerning these Flight IDs from flightaware
-        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, flightIDs);
+        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, filteredFlightIDs);
       } catch (e) {
         console.log('Unable to cache options', e);
       }

@@ -1,28 +1,28 @@
 version: '3'
 services:
-  db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: contour-root-password
-      MYSQL_DATABASE: contour
-      MYSQL_USER: contour
-      MYSQL_PASSWORD: contour-password
-    ports:
-      - 3306:3306
-    volumes:
-      - ../library/db:/var/lib/mysql
+  # db:
+  #   image: mysql
+  #   command: --default-authentication-plugin=mysql_native_password
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: contour-root-password
+  #     MYSQL_DATABASE: contour
+  #     MYSQL_USER: contour
+  #     MYSQL_PASSWORD: contour-password
+  #   ports:
+  #     - 3306:3306
+  #   volumes:
+  #     - ../library/db:/var/lib/mysql
 
-  phpmyadmin:
-    image: phpmyadmin
-    restart: always
-    ports:
-      - 8080:80
-    environment:
-      PMA_ARBITRARY: 1
-    depends_on:
-      - db
+  # phpmyadmin:
+  #   image: phpmyadmin
+  #   restart: always
+  #   ports:
+  #     - 8080:80
+  #   environment:
+  #     PMA_ARBITRARY: 1
+  #   depends_on:
+  #     - db
 
   dev:
     image: node:20.10.0-alpine3.18
@@ -30,11 +30,13 @@ services:
     volumes:
       - ../node_modules:/app/node_modules
       - ../:/app
+      - ../library/db:/db
+      - ../library/files:/files
 
     environment:
       ORIGIN: 'http://localhost:5173'
       TZ: 'America/New_York'
-      DATABASE_URL: 'mysql://contour:contour-password@db:/contour'
+      # DATABASE_URL: 'mysql://contour:contour-password@db:/contour'
 
     stop_signal: SIGKILL
     working_dir: /app
@@ -44,5 +46,5 @@ services:
       - 5173:5173
     tty: true
     stdin_open: true
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
