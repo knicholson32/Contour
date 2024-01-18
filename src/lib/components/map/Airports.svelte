@@ -62,7 +62,7 @@
     mounted = true;
 
     const createMap = (container: HTMLDivElement): L.Map => {
-      let m = L.map(container);
+      let m = L.map(container, { dragging: !L.Browser.mobile });
       L.tileLayer(
         'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
         {
@@ -99,4 +99,4 @@
 </script>
 <svelte:window on:resize={resizeMap} />
 
-<div bind:this={element} style="height:400px;width:100%" class="" />
+<div bind:this={element} style="height:400px;width:100%" {...$$restProps} />

@@ -42,6 +42,13 @@ export const getInlineDateUTC = (unix: number) => {
 }
 
 /**
+ * Get HH:MM Z from a date object
+ * @param date the date object
+ * @returns the string
+ */
+export const getHoursMinutesUTC = (date: Date, includeZ = true) => `${pad(date.getUTCHours(), 2)}:${pad(date.getMinutes(), 2)}${includeZ ? 'Z' : ''}`;
+
+/**
  * Convert a time string from the TimePicker Entry component to a UTC unix timestamp to store in the DB
  * @param time the time string
  * @param timezone the timezone

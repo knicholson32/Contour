@@ -70,7 +70,7 @@ export const actions = {
 
       if (noCache) {
         if (flightID === null || flightID === '') return API.Form.formFailure('?/default', 'flight-id', 'Not cached. Required for efficiency.');
-        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID], true);
+        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], true);
       }
 
       console.log(fa_flight_id);
@@ -80,7 +80,7 @@ export const actions = {
 
       if (entry === undefined) {
         if (flightID === null || flightID === '') return API.Form.formFailure('?/default', 'flight-id', 'Not cached. Required for efficiency.');
-        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID]);
+        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()]);
         entry = await options.getFlightOptionFaFlightID(fa_flight_id);
         if (entry === undefined) {
           return API.Form.formFailure('?/default', 'fa-link', 'Flight could not be found');

@@ -14,13 +14,32 @@
   let startAirportTZ: string | null;
   let endAirportTZ: string | null;
 
+  import { v4 as uuidv4 } from 'uuid';
+  import { onMount } from 'svelte';
+  let mapKey = uuidv4();
+  const resetMap = () => {
+    mapKey = uuidv4();
+  }
+
+  $: {
+    form;
+    data;
+    resetMap();
+  }
+
+  onMount(() => {
+    setTimeout(resetMap, 1);
+  });
+
 </script>
 
 <OneColumn>
 
   <div class="flex-shrink">
 
-    <Map.Airports airports={data.airportList} />
+    {#key mapKey}
+      <Map.Airports airports={data.airportList} />
+    {/key}
 
     <form method="post" enctype="multipart/form-data" use:enhance={() => {
       submitting = true;
@@ -48,8 +67,6 @@
         </div>
       {/if}
 
-      {data.entry.faFlightId}
-
       <Section title="General">
         <Entry.Input disabled={true} title="Flight ID" name="" defaultValue={data.entry.ident} />
         <Entry.Input disabled={true} title="Registration" name="" defaultValue={data.entry.registration} />
@@ -64,12 +81,9 @@
           <Entry.Input disabled={true} title="Destination" name="" defaultValue="{data.entry.destinationAirportId} -> DIVERT" />
           <Entry.Input disabled={true} title="Divert" name="" defaultValue="{data.entry.diversionAirportId} at {data.endTime}" />
         {/if}
-        <Entry.FlightTime disabled={true} title="Total Time" name="" defaultValue={data.totalTime} />
       </Section>
-
-      <Section title="Diversion">
-        <!-- <Entry.Switch disabled={true} title="Diverted" name="" defaultValue={data.entry.diverted} /> -->
-        <Entry.AirportPicker disabled={true} title="Diversion" name="" airports={data.airports} defaultValue={data.entry.diversionAirportId} />
+      <Section title="Timing">
+        <Entry.FlightTime disabled={true} title="Total Time" name="" defaultValue={data.totalTime} />
       </Section>
 
       <Section title="Route">

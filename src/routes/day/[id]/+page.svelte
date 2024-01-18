@@ -2,8 +2,10 @@
   import { enhance } from '$app/forms';
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
+  import { Timeline } from '$lib/components/timeline';
   import Image from '$lib/components/Image.svelte';
-  import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
+  import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte'
+  import { v4 as uuidv4 } from 'uuid';
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
   import { goto} from '$app/navigation';
@@ -14,6 +16,7 @@
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
   import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
+    import { onMount } from 'svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -35,6 +38,23 @@
 
   let urlActiveParam: string;
   let isMobileSize: boolean;
+
+  let mapKey = uuidv4();
+  const resetMap = () => {
+    mapKey = uuidv4();
+  }
+
+  $: {
+    form;
+    data;
+    resetMap();
+  }
+
+  onMount(() => {
+    setTimeout(resetMap, 1);
+  })
+
+  let map: Map.Day;
 
   const ref = $page.url.searchParams.get('ref');
 
@@ -77,19 +97,12 @@
   <!-- Form Side -->
   <div slot="form" class="flex-shrink">
 
-    <Map.Day legs={data.currentDay.legs} airports={data.airportList} deadheads={data.currentDay.deadheads} />
+    {#key mapKey}
+      <Map.Day bind:this={map} class="" legs={data.currentDay.legs} airports={data.airportList} deadheads={data.currentDay.deadheads} />
+      <Timeline class="" data={data.legDeadheadCombo} day={data.currentDay} />
+    {/key}
 
-    <form action="?/update" method="post" enctype="multipart/form-data" use:enhance={() => {
-      submitting = true;
-      return async ({ update }) => {
-        await update({ reset: false });
-        submitting = false;
-        setTimeout(() => {
-          if (form?.ok !== false) formManager.clearUID(false);
-        }, 1);
-      };
-    }}>
-
+    <!-- <div class="sticky top-0 bg-red-500">
       <div class="p-3">
         <a href="/tour">
           {#if data.currentDay.tour.id === data.currentTour?.id}
@@ -105,6 +118,18 @@
       <div class="p-3">
         This day has {data.currentDay.deadheads.length} deadheads
       </div>
+    </div> -->
+
+    <form action="?/update" method="post" enctype="multipart/form-data" use:enhance={() => {
+      submitting = true;
+      return async ({ update }) => {
+        await update({ reset: false });
+        submitting = false;
+        setTimeout(() => {
+          if (form?.ok !== false) formManager.clearUID(false);
+        }, 1);
+      };
+    }}>
 
       <Section title="Start" error={form !== null && form.ok === false && form.action === '?/update' && form.name === '*' ? form.message : null}>
         <Entry.AirportPicker action="?/update" required={true} title="Airport" name="start-airport" airports={data.airports} bind:tz={startAirportTZ} defaultValue={data.currentDay.startAirport.id} />
@@ -138,15 +163,8 @@
             <Submit disabled={data.currentDay.legs.length > 0} hoverTitle={data.currentDay.legs.length > 0 ? 'Disabled because legs still exist' : 'Delete Day'} class="w-full" failed={form?.ok === false && form.action === '?/default'} submitting={deleting} theme={{primary: 'red'}} actionText={'Delete'} actionTextInProgress={'Deleting'} />
           </form>
         {/if}
-        <form class="flex-grow max-w-[33%] md:w-48 md:flex-grow-0 flex items-start" action="?/deadhead" method="post">
-          <Submit class="w-full" failed={form?.ok === false && form.action === '?/delete'} submitting={deleting} theme={{primary: 'white'}} actionText={'Update DH'} actionTextInProgress={'Updating'} />
-        </form>
         <a href="/day/{data.currentDay.id}/entry?active=menu" class="flex-grow w-full text-center md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">
-          {#if data.currentDay.legs.length === 0}
-            Create First Leg
-          {:else}
-            Edit Legs
-          {/if}
+          Legs
         </a>
         {#if $unsavedChanges}
           <button type="button" on:click={() => clearUID(true)} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>

@@ -46,6 +46,23 @@
     else goto(ref);
   }
 
+  import { v4 as uuidv4 } from 'uuid';
+  import { onMount } from 'svelte';
+  let mapKey = uuidv4();
+  const resetMap = () => {
+    mapKey = uuidv4();
+  }
+
+  $: {
+    form;
+    data;
+    resetMap();
+  }
+
+  onMount(() => {
+    setTimeout(resetMap, 1);
+  });
+
   const ref = $page.url.searchParams.get('ref');
 
 </script>
@@ -97,7 +114,9 @@
       No Leg
     {:else}
 
-      <Map.Leg positions={data.positions} fixes={data.fixes} airports={data.airportList} />
+      {#key mapKey}
+        <Map.Leg positions={data.positions} fixes={data.fixes} airports={data.airportList} />
+      {/key}
 
       <form action="?/update" method="post" enctype="multipart/form-data" use:enhance={() => {
         submitting = true;

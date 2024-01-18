@@ -91,13 +91,14 @@ export const load = async ({ fetch, params }) => {
     currentDay,
     currentTour,
     airportList: await generateAirportList(...airportsInOrder),
+    legDeadheadCombo,
     days,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
   }
 }
 
 export const actions = {
-  update: async ({ request, url }) => {
+  update: async ({ request, url, params }) => {
 
     const aeroAPIKey = await settings.get('general.aeroAPI');
     if (aeroAPIKey === '') return API.Form.formFailure('?/default', '*', 'Configure Aero API key in settings');
@@ -106,7 +107,7 @@ export const actions = {
 
     const currentTour = await prisma.tour.findUnique({ where: { id: entrySettings['entry.tour.current'] } });
     if (currentTour === null) throw redirect(301, '/tour/new');
-    const currentDay = await prisma.dutyDay.findUnique({where: { id: entrySettings['entry.day.current'] } });
+    const currentDay = await prisma.dutyDay.findUnique({ where: { id: parseInt(params.id) } });
     if (currentDay === null) throw redirect(301, '/day/new');
 
     const data = await request.formData();
@@ -229,17 +230,5 @@ export const actions = {
     }
 
     throw redirect(301, '/day');
-  },
-  deadhead: async ({ request, url, params }) => {
-    const data = await request.formData();
-    for (const key of data.keys()) {
-      console.log(key, data.getAll(key));
-    }
-
-
-    await generateDeadheads(parseInt(params.id));
-
-
-    return API.Form.formSuccess('?/deadhead');
   }
 };

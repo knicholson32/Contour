@@ -30,13 +30,32 @@
 
   let totalTime: string | null;
 
+  import { v4 as uuidv4 } from 'uuid';
+  import { onMount } from 'svelte';
+  let mapKey = uuidv4();
+  const resetMap = () => {
+    mapKey = uuidv4();
+  }
+
+  $: {
+    form;
+    data;
+    resetMap();
+  }
+
+  onMount(() => {
+    setTimeout(resetMap, 1);
+  });
+
 </script>
 
 <OneColumn>
 
   <div class="flex-shrink">
 
-    <Map.Airports airports={data.airportList} />
+    {#key mapKey}
+      <Map.Airports airports={data.airportList} />
+    {/key}
 
     <form method="post" enctype="multipart/form-data" use:enhance={() => {
       submitting = true;
