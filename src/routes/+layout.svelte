@@ -66,7 +66,7 @@
 -->
 
 <nav bind:this={menuHeaderBar} class="relative z-50 border-b border-gray-200 bg-white h-16">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 justify-between select-none">
       <div class="flex">
         {#if $backArrow}
