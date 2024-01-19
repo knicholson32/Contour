@@ -90,20 +90,44 @@
 
 </script>
 
-<div class="w-full relative overflow-y-hidden overflow-x-scroll bg-zinc-900 backdrop-blur-lg">
-  <div class="{$$restProps.class} w-full relative flex flex-row items-start text-white pt-3 pb-[1.25rem] px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
-    {#each Array(data.length + 5) as _, i}
-      <div class="absolute -z-10 h-1 left-0 right-0 border-t border-gray-200/5" style="top: {(i - 2) * spacing + 1.85}rem"/>
-    {/each}
-    {#each dataFormatted as entry}
-      {#if entry.entity.type === 'blank'}
-        <Blank entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc}/>
-      {:else}
-        <Schedule entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc} />
-      {/if}
-    {/each}
+<!-- <div class="w-full relative mb-3 bg-zinc-900">
+  <div class="w-full relative overflow-y-hidden overflow-x-scroll backdrop-blur-lg pb-4">
+    <div class="{$$restProps.class} w-full relative flex flex-row items-start text-white pt-3 pb-[1.25rem] px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
+      {#each dataFormatted as entry}
+        {#if entry.entity.type === 'blank'}
+          <Blank entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc}/>
+        {:else}
+          <Schedule entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc} />
+        {/if}
+      {/each}
+    </div>
   </div>
-  <div class="text-xxs text-gray-300 w-full flex flex-row px-1 pb-1 pt-3">
+  {#each Array(data.length + 4) as _, i}
+    <div class="absolute z-0 h-1 left-0 right-0 border-t border-gray-200/5" style="top: {(i - 2) * spacing + 1.85}rem"/>
+  {/each}
+  <div class="absolute bottom-1 text-xxs text-gray-300 w-full flex flex-row px-1">
+    <span>{helpers.getHoursMinutesUTC(new Date(day.startTime_utc * 1000))}</span>
+    <span class="flex-grow text-center">{dutyDayLength} hr</span>
+    <span>{helpers.getHoursMinutesUTC(new Date(day.endTime_utc * 1000))}</span>
+  </div>
+</div> -->
+
+<div class="w-full relative bg-gray-50 dark:bg-zinc-900">
+  <div class="w-full relative z-10 overflow-y-hidden overflow-x-scroll pb-3">
+    <div class="{$$restProps.class} w-full relative flex flex-row items-start text-zinc-800 dark:text-white pt-3 pb-[1.25rem] px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
+      {#each dataFormatted as entry}
+        {#if entry.entity.type === 'blank'}
+          <Blank entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc}/>
+        {:else}
+          <Schedule entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc} />
+        {/if}
+      {/each}
+    </div>
+  </div>
+  {#each Array(data.length + 4) as _, i}
+    <div class="absolute z-0 h-1 left-0 right-0 border-t border-zinc-800/5 dark:border-gray-200/5" style="top: {(i - 2) * spacing + 1.85}rem"/>
+  {/each}
+  <div class="absolute bottom-1 text-xxs text-gray-600 dark:text-gray-300 w-full flex flex-row px-1">
     <span>{helpers.getHoursMinutesUTC(new Date(day.startTime_utc * 1000))}</span>
     <span class="flex-grow text-center">{dutyDayLength} hr</span>
     <span>{helpers.getHoursMinutesUTC(new Date(day.endTime_utc * 1000))}</span>

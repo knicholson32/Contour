@@ -140,7 +140,7 @@
 
 <Frame {name} {action} form={$form} unsaved={$unsaved} restore={() => local.clear(true)} {required} bind:title focus={focus} bind:disabled>
   <div slot="outsideButton">
-    {#if autoFill !== null && autoFill !== undefined && autoFill !== ''}
+    {#if autoFill !== null && autoFill !== undefined && autoFill !== '' && autoFill !== 'NaN'}
       <button tabindex="-1" disabled={disabled} on:click={autoFillFunc} type="button" class="touch-manipulation absolute right-24 top-2 select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 w-[4.5rem] rounded-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-sky-300 betterhover:hover:bg-sky-50 betterhover:hover:text-sky-700 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white focus-visible:outline-grey-500">
         USE {autoFill}
       </button>

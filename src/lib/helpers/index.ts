@@ -54,7 +54,8 @@ export const getHoursMinutesUTC = (date: Date, includeZ = true) => `${pad(date.g
  * @param timezone the timezone
  * @returns the unix timestamp
  */
-export const timeStrAndTimeZoneToUTC = (time: string, timezone: string): {value: number, raw: TimeZone} | null => {
+export const timeStrAndTimeZoneToUTC = (time: string | null, timezone: string): {value: number, raw: TimeZone} | null => {
+	if (time === null || time === undefined) return null;
 	const timeZones = getTimeZones({ includeUtc: true });
 	const showTimeTZValue = timeZones.find((timeZone) => timezone === timeZone.name || timeZone.group.includes(timezone));
 	if (showTimeTZValue === undefined) return null;

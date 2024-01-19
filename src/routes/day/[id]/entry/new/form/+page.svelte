@@ -17,8 +17,8 @@
   let divertApt: string | null;
   let myLeg: boolean = true;
 
-  let outTime: string;
-  let inTime: string;
+  let outTime: string | null = data.startTime;
+  let inTime: string | null = data.endTime;
 
   // Default to UTC
   let outTZ: string | null = 'UTC';
@@ -26,7 +26,7 @@
 
   $: outTimeUTC = outTZ === null ? null : timeStrAndTimeZoneToUTC(outTime, outTZ);
   $: inTimeUTC = inTZ === null ? null : timeStrAndTimeZoneToUTC(inTime, inTZ);
-  $: calcTotalTime = outTimeUTC === null || inTimeUTC === null ? null : ((inTimeUTC.value - outTimeUTC.value) / 60 / 60);
+  $: calcTotalTime = outTimeUTC === null || inTimeUTC === null || isNaN(outTimeUTC.value) || isNaN(inTimeUTC.value) ? null : ((inTimeUTC.value - outTimeUTC.value) / 60 / 60);
 
   let runwayOperations = data.runwayOperations;
 
@@ -81,9 +81,9 @@
 
   <div class="flex-shrink">
 
-    {#key mapKey}
+    <!-- {#key mapKey}
       <Map.Airports airports={data.airportList} />
-    {/key}
+    {/key} -->
 
     <form method="post" enctype="multipart/form-data" use:enhance={() => {
       submitting = true;
@@ -122,9 +122,9 @@
       {/if}
 
 
-      <Section title="FlightAware">
+      <!-- <Section title="FlightAware">
         <Entry.Link href={data.entrySettings['entry.day.entry.fa_link']} title="FlightAware Source" />
-      </Section>
+      </Section> -->
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.entry.ident} />

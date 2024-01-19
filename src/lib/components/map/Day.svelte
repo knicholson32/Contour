@@ -4,6 +4,7 @@
   import * as helpers from './helpers';
   import { onMount } from 'svelte';
   import type * as Types from '@prisma/client';
+    import { browser } from '$app/environment';
 
   type T = Types.Prisma.LegGetPayload<{ include: { positions: true} }>;
   type D = Types.Prisma.DeadheadGetPayload<{ include: { originAirport: true, destinationAirport: true} }>;
@@ -83,12 +84,19 @@
 
   onMount(async () => {
     // import * as L from 'leaflet';
+
+    if (!browser) return;
+
     L = (await import('leaflet')).default
     mounted = true;
 
     const createMap = (container: HTMLDivElement): L.Map => {
+
+      let theme: helpers.Theme = 'voyager';
+      if (browser && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) theme = 'darkMatterNoLabels';
+
       let m = L.map(container, { dragging: !L.Browser.mobile, attributionControl: false });
-      const tileLayer = helpers.generateTileLayer(L, 'darkMatterNoLabels');
+      const tileLayer = helpers.generateTileLayer(L, theme);
       
       tileLayer.addTo(m);
 

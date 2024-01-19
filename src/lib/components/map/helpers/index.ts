@@ -1,4 +1,6 @@
-export const generateTileLayer = (L: typeof import('leaflet'), theme: 'smoothDark' | 'voyager' | 'darkMatter'| 'darkMatterNoLabels'): L.TileLayer => {
+export type Theme = 'smoothDark' | 'voyager' | 'darkMatter' | 'darkMatterNoLabels';
+
+export const generateTileLayer = (L: typeof import('leaflet'), theme: Theme): L.TileLayer => {
   let tileLayer;
   switch (theme) {
     case 'smoothDark':

@@ -83,7 +83,7 @@
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink" aria-label="Directory">
     <MenuForm.Title title="Duty Day Legs" />
-    <MenuForm.Link href={ref ?? '/day/' + data.params.id + '?active=form'} type="left" text="Go Back" />
+    <MenuForm.Link href={ref ?? '/day/' + data.params.id + '?active=form'} type="left" text="Back to Day" />
     <MenuForm.Link href={'/day/' + data.params.id + '/entry/new?' + urlActiveParam} icon={icons.plus} text="Create a new leg" type="right"/>
     <MenuForm.SearchBar />
     <!-- Existing Legs -->
