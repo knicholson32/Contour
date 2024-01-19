@@ -35,6 +35,7 @@
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.10.1",
 		"prisma": "^5.1.1",
+		"suncalc": "^1.9.0",
 		"svelte": "^4.0.5",
 		"svelte-check": "^3.4.3",
 		"svelte-persisted-store": "^0.8.0",

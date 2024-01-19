@@ -6,7 +6,8 @@
   import Submit from '$lib/components/buttons/Submit.svelte';
   import { enhance } from '$app/forms';
   import * as Map from '$lib/components/map';
-  import { dateToDateStringForm, getInlineDateUTC, validateURL } from '$lib/helpers';
+
+  import { dateToDateStringForm, getInlineDateUTC, timeStrAndTimeZoneToUTC, validateURL } from '$lib/helpers';
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
@@ -14,6 +15,29 @@
 
   let endApt: string | null;
   let divertApt: string | null;
+  let myLeg: boolean = true;
+
+  let outTime: string;
+  let inTime: string;
+
+  $: outTimeUTC = startAirportTZ === null ? null : timeStrAndTimeZoneToUTC(outTime, startAirportTZ);
+  $: inTimeUTC = endAirportTZ === null ? null : timeStrAndTimeZoneToUTC(inTime, endAirportTZ);
+  $: calcTotalTime = outTimeUTC === null || inTimeUTC === null ? null : ((inTimeUTC.value - outTimeUTC.value) / 60 / 60);
+
+  let runwayOperations = data.runwayOperations;
+
+  $: {
+    if (myLeg) {
+      runwayOperations = data.runwayOperations
+    } else {
+      runwayOperations = {
+        dayTO: 0,
+        dayLdg: 0,
+        nightTO: 0,
+        nightLdg: 0
+      }
+    }
+  }
 
   const formManager = new FormManager();
   const unsavedChanges = formManager.getUnsavedChangesStore();
@@ -68,21 +92,21 @@
       };
     }}>
 
-      <div class="p-3">
+      <!-- <div class="p-3">
         <a href="/tour">NOTE: Will be assigned the tour that started {getInlineDateUTC(data.currentTour.startTime_utc)}</a>
         <br/>
         <a href="/tour">NOTE: Will be assigned the day that started {getInlineDateUTC(data.currentDay.startTime_utc)}</a>
-      </div>
+      </div> -->
 
       {#if data.entry.progressPercent !== null && data.entry.progressPercent !== 100}
-        <div class="p-3">
+        <div class="p-3 text-red-500">
           NOTICE: The cache entry is NOT complete. The flight is still in progress. Make sure the flight has finished, and reload with "No Cache" enabled.
         </div>
       {/if}
 
 
       {#if data.entry.inaccurateTiming === true}
-        <div class="p-3">
+        <div class="p-3 text-red-500">
           NOTICE: This entry has inaccurate timing. Verify the start and end times.
         </div>
       {/if}
@@ -93,7 +117,10 @@
         </div>
       {/if}
 
-      <a href="{data.entrySettings['entry.day.entry.fa_link']}" target="_blank">FlightAware Link</a>
+
+      <Section title="FlightAware">
+        <Entry.Link href={data.entrySettings['entry.day.entry.fa_link']} title="FlightAware Source" />
+      </Section>
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.entry.ident} />
@@ -106,8 +133,9 @@
       </Section>
 
       <Section title="Block Times">
-        <Entry.TimePicker required={true} title="Out" name="out" bind:autoTZ={startAirportTZ} defaultValue={data.startTime} />
-        <Entry.TimePicker required={true} title="In" name="in" autoTZ={outTZ} defaultValue={data.endTime} />
+        <Entry.TimePicker required={true} title="Out" name="out" bind:autoTZ={startAirportTZ} bind:value={outTime} defaultValue={data.startTime} />
+        <Entry.TimePicker required={true} title="In" name="in" autoTZ={outTZ} bind:value={inTime} defaultValue={data.endTime} />
+        <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
       </Section>
 
       <Section title="Times">
@@ -115,14 +143,15 @@
         <Entry.FlightTime title="PIC" name="pic-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="SIC" name="sic-time" bind:autoFill={totalTime} defaultValue={data.totalTime} />
         <Entry.FlightTime title="Night" name="night-time" bind:autoFill={totalTime} defaultValue={null} />
-        <Entry.FlightTime title="Cross Country" name="xc-time" bind:autoFill={totalTime} defaultValue={data.totalTime} />
+        <Entry.FlightTime title="Cross Country" name="xc-time" bind:autoFill={totalTime} defaultValue={data.xc} />
       </Section>
 
       <Section title="Takeoffs & Landings">
-        <Entry.Ticker title="Day Takeoffs" name="day-takeoffs" defaultValue={null} />
-        <Entry.Ticker title="Day Landings" name="day-landings" defaultValue={null} />
-        <Entry.Ticker title="Night Takeoffs" name="night-takeoffs" defaultValue={null} />
-        <Entry.Ticker title="Night Landings" name="night-landings" defaultValue={null} />
+        <Entry.Switch title="My Leg" name="my-leg" noLocalStorage={true} bind:value={myLeg} defaultValue={true} />
+        <Entry.Ticker title="Day Takeoffs" name="day-takeoffs" defaultValue={runwayOperations.dayTO} />
+        <Entry.Ticker title="Day Landings" name="day-landings" defaultValue={runwayOperations.dayLdg} />
+        <Entry.Ticker title="Night Takeoffs" name="night-takeoffs" defaultValue={runwayOperations.nightTO} />
+        <Entry.Ticker title="Night Landings" name="night-landings" defaultValue={runwayOperations.nightLdg} />
       </Section>
 
       <Section title="Instrument">

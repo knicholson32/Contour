@@ -67,6 +67,10 @@
         </div>
       {/if}
 
+      <Section title="FlightAware">
+        <Entry.Link href={data.entrySettings['entry.day.entry.fa_link']} title="FlightAware Source" />
+      </Section>
+
       <Section title="General">
         <Entry.Input disabled={true} title="Flight ID" name="" defaultValue={data.entry.ident} />
         <Entry.Input disabled={true} title="Registration" name="" defaultValue={data.entry.registration} />

@@ -1,6 +1,7 @@
 <script lang="ts">
   import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
   import * as Entry from '$lib/components/entry';
+  import * as MenuForm from '$lib/components/menuForm';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
@@ -36,8 +37,9 @@
       };
     }}>
 
+      <MenuForm.Title title="New Tour" />
+
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
-        {apt} {showAirportTZ}
         <Entry.AirportPicker required={true} title="Show Airport" name="show-airport" airports={data.airports} bind:value={apt} bind:tz={showAirportTZ} defaultValue={data.tourSettings['tour.defaultStartApt']} />
         <Entry.TimePicker required={true} title="Show Time" name="show-time" dateOnly={false} bind:autoTZ={showAirportTZ} defaultValue={null} />
       </Section>

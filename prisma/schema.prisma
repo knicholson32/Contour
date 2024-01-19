@@ -88,8 +88,8 @@ model Tour {
   endTimezone       String?
   endTimezoneOffset Int?
 
-  startAirportId String   // @db.VarChar(5)
-  endAirportId   String?  // @db.VarChar(5)
+  startAirportId String // @db.VarChar(5)
+  endAirportId   String? // @db.VarChar(5)
   startAirport   Airport  @relation("startAirport", fields: [startAirportId], references: [id], onDelete: Restrict)
   endAirport     Airport? @relation("endAirport", fields: [endAirportId], references: [id], onDelete: Restrict)
 
@@ -107,7 +107,7 @@ model DutyDay {
   tourId Int
   tour   Tour @relation(fields: [tourId], references: [id], onDelete: Restrict)
 
-  legs Leg[]
+  legs      Leg[]
   deadheads Deadhead[]
 
   startTime_utc       Int
@@ -118,8 +118,8 @@ model DutyDay {
   endTimezone       String
   endTimezoneOffset Int
 
-  startAirportId String  // @db.VarChar(5)
-  endAirportId   String  // @db.VarChar(5)
+  startAirportId String // @db.VarChar(5)
+  endAirportId   String // @db.VarChar(5)
   startAirport   Airport @relation("startAirport", fields: [startAirportId], references: [id], onDelete: Restrict)
   endAirport     Airport @relation("endAirport", fields: [endAirportId], references: [id], onDelete: Restrict)
 
@@ -135,7 +135,7 @@ model Option {
   tour   Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
 
   inaccurateTiming  Boolean
-  ident             String  // @db.VarChar(16)
+  ident             String // @db.VarChar(16)
   faFlightId        String
   operator          String? // @db.VarChar(16)
   flightNumber      String? // @db.VarChar(16)
@@ -205,7 +205,7 @@ model FlightAwareData {
   arrivalDelay        Int?
   filedEte            Int?
   progressPercent     Int?
-  status              String  // @db.VarChar(64)
+  status              String // @db.VarChar(64)
   aircraftType        String? // @db.VarChar(32)
   routeDistance       Int?
   filedAirspeed       Int?
@@ -246,9 +246,9 @@ model Leg {
 
   ident String? // @db.VarChar(16)
 
-  originAirportId      String   // @db.VarChar(5)
-  destinationAirportId String   // @db.VarChar(5)
-  diversionAirportId   String?  // @db.VarChar(5)
+  originAirportId      String // @db.VarChar(5)
+  destinationAirportId String // @db.VarChar(5)
+  diversionAirportId   String? // @db.VarChar(5)
   originAirport        Airport  @relation("originAirport", fields: [originAirportId], references: [id], onDelete: Restrict)
   destinationAirport   Airport  @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
   diversionAirport     Airport? @relation("diversionAirport", fields: [diversionAirportId], references: [id], onDelete: Restrict)
@@ -286,19 +286,28 @@ model Leg {
 
   notes String @default("") // @db.VarChar(1024)
 
-  aircraft                  Aircraft @relation(fields: [aircraftId], references: [id], onDelete: Restrict)
-  aircraftId                String
+  aircraft   Aircraft @relation(fields: [aircraftId], references: [id], onDelete: Restrict)
+  aircraftId String
+
+  images LegImage[]
 
   @@map("legs")
 }
 
-model Deadhead {
-  id String @id @default(uuid())
-  dayId     Int?
-  day       DutyDay?   @relation(fields: [dayId], references: [id], onDelete: Cascade)
+model LegImage {
+  id    String @id
+  image Image  @relation(fields: [id], references: [id])
+  legId String
+  leg   Leg    @relation(fields: [legId], references: [id])
+}
 
-  originAirportId      String  // @db.VarChar(5)
-  destinationAirportId String  // @db.VarChar(5)
+model Deadhead {
+  id    String   @id @default(uuid())
+  dayId Int?
+  day   DutyDay? @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  originAirportId      String // @db.VarChar(5)
+  destinationAirportId String // @db.VarChar(5)
   originAirport        Airport @relation("deadheadStart", fields: [originAirportId], references: [id], onDelete: Restrict)
   destinationAirport   Airport @relation("deadheadEnd", fields: [destinationAirportId], references: [id], onDelete: Restrict)
 
@@ -326,9 +335,9 @@ model AircraftType {
   subCode         String?
   make            String
   model           String
-  catClass        String  // @db.VarChar(5) // ENUM: CategoryClass
-  gear            String  // @db.VarChar(2) // ENUM: GearType
-  engine          String  // @db.VarChar(2) // ENUM: EngineType
+  catClass        String // @db.VarChar(5) // ENUM: CategoryClass
+  gear            String // @db.VarChar(2) // ENUM: GearType
+  engine          String // @db.VarChar(2) // ENUM: EngineType
   complex         Boolean
   taa             Boolean
   highPerformance Boolean
@@ -386,6 +395,7 @@ model Image {
 
   aircraft     Aircraft?
   aircraftType AircraftType?
+  leg          LegImage?
 
   @@map("images")
 }
@@ -420,7 +430,7 @@ model Airport {
 model Position {
   legId          String
   altitude       Int
-  altitudeChange String  // @db.VarChar(10) //ENUM: AltitudeChange
+  altitudeChange String // @db.VarChar(10) //ENUM: AltitudeChange
   groundspeed    Int
   heading        Int
   latitude       Float
@@ -435,7 +445,7 @@ model Position {
 }
 
 model Fix {
-  id                    Int      @id @default(autoincrement())
+  id                    Int    @id @default(autoincrement())
   legId                 String
   name                  String
   latitude              Float?

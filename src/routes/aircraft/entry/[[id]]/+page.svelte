@@ -66,7 +66,7 @@
     {#if ref !== null}
       <MenuForm.Link href={ref} icon={icons.chevronLeft} text="Go Back" type={'left'} />
     {/if}
-    <MenuForm.Link href={'/aircraft/type'} icon={icons.circleStack} text="View Aircraft Types" type={'right'} selected={$page.url.pathname.endsWith('type/new') && !isMobileSize} />
+    <MenuForm.Link href={'/aircraft/type' + $page.url.search} icon={icons.circleStack} text="View Aircraft Types" type={'right'} selected={$page.url.pathname.endsWith('type/new') && !isMobileSize} />
     {#if data.orderGroups.length === 0}
       <MenuForm.BlankMenu href={'/aircraft/entry/new?' + urlActiveParam} title="No aircraft" subtitle="Get started by creating a new aircraft." buttonText="New Aircraft" />
     {:else}

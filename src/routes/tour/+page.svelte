@@ -1,5 +1,6 @@
 <script lang="ts">
   import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
+  import * as MenuForm from '$lib/components/menuForm';
   import * as Entry from '$lib/components/entry';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import Section from '$lib/components/Section.svelte';
@@ -20,15 +21,18 @@
 
 </script>
 
-Tour
 
-{#if data.currentTour === null}
-  <a href="/tour/start">New tour</a>
-{:else}
-  Existing tour
-{/if}
 
 <OneColumn>
+
+  <MenuForm.Title title="Tours" />
+
+  {#if data.currentTour === null}
+    No active tour.
+    <a href="/tour/new">Start a new tour</a>
+  {:else}
+    
+  {/if}
 
   <!-- <div class="flex-shrink">
     <form method="post" enctype="multipart/form-data" use:enhance={() => {

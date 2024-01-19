@@ -35,8 +35,19 @@ export const load = async ({ params, fetch }) => {
     }
   });
 
+  const aeroAPIKey = await settings.get('general.aeroAPI');
+  if (aeroAPIKey === '') throw redirect(301, '/settings');
+
   if (currentTour !== null) throw redirect(301, '/tour');
   const tourSettings = await settings.getSet('tour');
+
+  if (tourSettings['tour.defaultStartApt'] !== '') {
+    try {
+      await addIfDoesNotExist(tourSettings['tour.defaultStartApt'], aeroAPIKey);
+    } catch (e) {
+
+    }
+  }
 
   const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
 

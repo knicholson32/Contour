@@ -10,7 +10,7 @@ import * as helpers from '$lib/server/helpers';
 
 const MAX_MB = 10;
 
-export const load = async ({ fetch, params }) => {
+export const load = async ({ fetch, params, url }) => {
 
   const entrySettings = await settings.getSet('entry');
 
@@ -19,7 +19,7 @@ export const load = async ({ fetch, params }) => {
   const types = await prisma.aircraftType.findMany({ select: { typeCode: true, make: true, model: true, catClass: true, id: true, imageId: true, _count: true }, orderBy: [{ make: 'asc' }, { model: 'asc' }] });
   if (params.id === undefined) {
     if (types.length > 0) throw redirect(301, '/aircraft/type/' + types[0].id + '?active=menu')
-    else throw redirect(301, '/aircraft/type/new')
+    else throw redirect(301, '/aircraft/type/new' + url.search)
   }
 
   const currentType = await prisma.aircraftType.findUnique({ where: { id: params.id } });

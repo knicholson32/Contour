@@ -10,3 +10,4 @@ export { default as Switch } from './Switch.svelte';
 export { default as TextField } from './TextField.svelte';
 export { default as Ticker } from './Ticker.svelte';
 export { default as TimePicker } from './TimePicker.svelte';
+export { default as Link } from './Link.svelte';

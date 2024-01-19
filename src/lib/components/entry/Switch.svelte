@@ -7,6 +7,7 @@
   export let defaultValue: boolean;
   export let value: boolean = defaultValue;
 	export let name: string;
+  export let noLocalStorage = false;
   export let title: string;
 	export let disabled: boolean = false;
   export let action: string = '?/default';
@@ -25,6 +26,7 @@
   $: name = $nameStore;
   // Initialize the local storage manager
   const local = new LocalStorageManager(nameStore, defaultValue ? 'true' : 'false', (v) => {
+    if (noLocalStorage) return _update();
     if (v === null) value = defaultValue;
     else value = v === 'true';
     if (name === 'taa') {
@@ -35,8 +37,8 @@
   const unsaved = local.getUnsavedStore();
 
   // Attach the local storage manager to value and default value
-  $: local.setDefault(defaultValue ? 'true' : 'false');
-  $: local.set(value ? 'true' : 'false');
+  $: local.setDefault(noLocalStorage ? null : defaultValue ? 'true' : 'false');
+  $: local.set(noLocalStorage ? null : value ? 'true' : 'false');
 
 	export const click = () => {
 		value = !value;
@@ -46,7 +48,7 @@
 
 </script>
 
-<Frame {name} {action} unsaved={$unsaved} restore={() => local.clear(true)} form={$form} {required} bind:title focus={click} bind:disabled>
+<Frame {name} {action} unsaved={$unsaved} restore={noLocalStorage ? null : () => local.clear(true)} form={$form} {required} bind:title focus={click} bind:disabled>
   <div class="flex items-center">
     <input {disabled} {required} type="hidden" bind:value name={name} />
     <div class="touch-manipulation shadow-sm rounded-full {value ? disabled ? 'bg-gray-200' : 'bg-indigo-600' : 'bg-gray-200'} disabled:cursor-not-allowed relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">

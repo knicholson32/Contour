@@ -39,7 +39,7 @@
   let urlActiveParam: string;
   let isMobileSize: boolean;
 
-  let mapKey = uuidv4();
+  let mapKey: string;
   const resetMap = () => {
     mapKey = uuidv4();
   }

@@ -11,7 +11,7 @@ import * as aero from '$lib/server/api/flightaware';
 import { v4 as uuidv4 } from 'uuid';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
-import { generateAirportList } from '$lib/server/helpers';
+import { generateAirportList, isNightOperation } from '$lib/server/helpers';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -38,7 +38,11 @@ export const load = async ({ params, fetch }) => {
   if (entrySettings['entry.day.entry.fa_id'] === '' || entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED) throw redirect(301, '../link');
   if (aeroAPIKey === '') throw redirect(301, '/settings');
 
+
+  
   let entry = await options.getFlightOptionFaFlightID(entrySettings['entry.day.entry.fa_id']);
+
+
   const airportsRaw = await ((await fetch('/api/airports')).json()) as API.Airports;
   const airports = (airportsRaw.ok === true) ? airportsRaw.airports : [] as API.Types.Airport[]
 
@@ -50,6 +54,20 @@ export const load = async ({ params, fetch }) => {
   }
 
   console.log(entry);
+
+  const aircraft = await prisma.aircraft.findMany({ select: { registration: true, id: true, type: { select: { typeCode: true, make: true, model: true } } }, orderBy: { registration: 'asc' } });
+
+  if (entry.registration !== null) {
+    let unknownAircraft = true;
+    for (const a of aircraft) {
+      if (a.registration === entry.registration) {
+        unknownAircraft = false;
+        break;
+      }
+    }
+
+    if (unknownAircraft) throw redirect(301, `/aircraft/entry/new?reg=${entry.registration}&ref=/day/${params.id}/entry/new/form&active=form`)
+  }
 
   // Create airport if it does not exist
   try {
@@ -78,6 +96,33 @@ export const load = async ({ params, fetch }) => {
     }
   }
 
+  const airportList = await generateAirportList(entry.originAirportId, entry.destinationAirportId, entry.diversionAirportId);
+
+  const runwayOperations = {
+    dayTO: 0,
+    dayLdg: 0,
+    nightTO: 0,
+    nightLdg: 0
+  }
+
+  if (originAirport !== null) {
+    const apt = airportList.find((v) => v.id === originAirport?.id);
+    if (apt !== undefined) {
+      const nightOp = isNightOperation(new Date(entry.startTime * 1000), apt.latitude, apt.longitude);
+      if (nightOp) runwayOperations.nightTO++;
+      else runwayOperations.dayTO++;
+    }
+  }
+
+  if (destinationAirport !== null) {
+    const apt = airportList.find((v) => v.id === destinationAirport?.id);
+    if (apt !== undefined) {
+      const nightOp = isNightOperation(new Date(entry.startTime * 1000), apt.latitude, apt.longitude);
+      if (nightOp) runwayOperations.nightLdg++;
+      else runwayOperations.dayLdg++;
+    }
+  }
+
   const totalTime = ((entry.endTime - entry.startTime) / 60 / 60)
 
   const existingFData = await prisma.flightAwareData.findUnique({ where: { faFlightId: entry.faFlightId } });
@@ -90,14 +135,16 @@ export const load = async ({ params, fetch }) => {
     currentTour,
     currentDay,
     totalTime,
+    runwayOperations,
+    xc: entry.diversionAirportId === null ? (entry.originAirportId === entry.destinationAirportId ? null : totalTime) : (entry.originAirportId === entry.diversionAirportId ? null : totalTime),
     existingEntry: existingFData !== null,
     startTime: originAirport === null ? null : helpers.dateToDateStringForm(entry.startTime, false, originAirport.timezone),
     startTimezone: originAirport === null ? null : helpers.getTimezoneObjectFromTimezone(originAirport.timezone),
     endTime: destinationAirport === null ? null : helpers.dateToDateStringForm(entry.endTime, false, destinationAirport.timezone),
     endTimezone: destinationAirport === null ? null : helpers.getTimezoneObjectFromTimezone(destinationAirport.timezone),
     airports,
-    airportList: await generateAirportList(entry.originAirportId, entry.destinationAirportId, entry.diversionAirportId),
-    aircraft: await prisma.aircraft.findMany({ select: { registration: true, id: true, type: { select: { typeCode: true, make: true, model: true } } }, orderBy: { registration: 'asc' } })
+    airportList,
+    aircraft: aircraft
   };
 };
 

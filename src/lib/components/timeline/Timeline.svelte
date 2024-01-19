@@ -77,7 +77,7 @@
 
 </script>
 
-<div class="w-full relative overflow-y-hidden overflow-x-scroll bg-slate-900 backdrop-blur-lg">
+<div class="w-full relative overflow-y-hidden overflow-x-scroll bg-zinc-900 backdrop-blur-lg">
   <div class="{$$restProps.class} w-full relative flex flex-row items-start text-white pt-3 pb-[1.25rem] px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
     {#each Array(data.length + 5) as _, i}
       <div class="absolute -z-10 h-1 left-0 right-0 border-t border-gray-200/5" style="top: {(i - 2) * spacing + 1.85}rem"/>

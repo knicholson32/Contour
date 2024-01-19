@@ -1,6 +1,7 @@
 <script lang="ts">
   
   import 'leaflet/dist/leaflet.css';
+  import * as helpers from './helpers';
   import { onMount } from 'svelte';
   import type * as Types from '@prisma/client';
 
@@ -87,15 +88,9 @@
 
     const createMap = (container: HTMLDivElement): L.Map => {
       let m = L.map(container, { dragging: !L.Browser.mobile });
-      L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-        {
-          attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
-            &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
-          subdomains: 'abcd',
-          maxZoom: 14,
-        }
-      ).addTo(m);
+      const tileLayer = helpers.generateTileLayer(L, 'darkMatterNoLabels');
+      
+      tileLayer.addTo(m);
 
       return m;
     }

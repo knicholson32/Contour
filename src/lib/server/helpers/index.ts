@@ -1,5 +1,6 @@
 import * as settings from '$lib/server/settings';
 import * as crypto from 'node:crypto';
+import sunCalc from 'suncalc';
 import zlib from 'node:zlib';
 import fs from 'node:fs';
 import sharp from 'sharp';
@@ -11,6 +12,13 @@ import { MEDIA_FOLDER } from '$lib/server/env';
 
 const ENC_SALT = 'CONTOUR_SALT'
 
+
+export const isNightOperation = (now: Date, lat: number, lon: number): boolean => {
+	const calc = sunCalc.getTimes(now, lat, lon);
+	const sunsetPlus1Hr = new Date(calc.dusk.getTime() + 1 * 60 * 60 * 1000);
+	const sunriseMinus1Hr = new Date(calc.dawn.getTime() - 1 * 60 * 60 * 1000);
+	return now < sunriseMinus1Hr || now > sunsetPlus1Hr;
+}
 
 /**
  * Generate a list of airport objects from airport ICAO codes

@@ -1,18 +1,15 @@
 import { redirect } from '@sveltejs/kit';
 import * as settings from '$lib/server/settings';
 import prisma from '$lib/server/prisma';
-import { API, ImageUploadState } from '$lib/types';
-import { delay, timeStrAndTimeZoneToUTC } from '$lib/helpers/index.js';
-import { v4 as uuidv4 } from 'uuid';
-import type * as Types from '@prisma/client';
-import { getTimeZones } from '@vvo/tzdb';
+import { API } from '$lib/types';
+import { timeStrAndTimeZoneToUTC } from '$lib/helpers';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
 import { generateAirportList } from '$lib/server/helpers';
 
 const MAX_MB = 10;
 
-export const load = async ({ fetch, params }) => {
+export const load = async ({ fetch, params, parent }) => {
 
   const entrySettings = await settings.getSet('entry');
 
