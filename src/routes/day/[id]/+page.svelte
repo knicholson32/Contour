@@ -60,7 +60,7 @@
 
 </script>
 
-<TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" defaultRatio={0.33} >
+<TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back">
 
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink" aria-label="Directory">

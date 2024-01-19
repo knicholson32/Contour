@@ -44,8 +44,9 @@
    * Sizes for each column
    */
   export let minSizes = { menu: 200, form: 475 };
-  export let defaultRatio = 0.33;
+  export let defaultRatio = 0.25;
   // TODO: Save this ratio so when the user loads it defaults to that (no layout shifting though)
+  // TODO: Instead of using a ratio, use width of the menu, that way the menu initially starts as the same size no matter the window size
   export let ratio = defaultRatio;
 
   /**
