@@ -93,12 +93,12 @@
 
       <Section title="Start" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.AirportPicker required={true} title="Airport" name="start-airport" airports={data.airports} bind:tz={startAirportTZ} defaultValue={null} />
-        <Entry.TimePicker required={true} title="Time" name="start-time" dateOnly={false} bind:autoTZ={startAirportTZ} defaultValue={null} />
+        <Entry.TimePicker required={true} title="Time" name="start-time" dateOnly={false} tz="UTC" bind:autoTZ={startAirportTZ} defaultValue={null} />
       </Section>
 
       <Section title="End" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.AirportPicker required={true} title="Airport" name="end-airport" airports={data.airports}  bind:tz={endAirportTZ} defaultValue={null} />
-        <Entry.TimePicker required={true} title="Time" name="end-time" dateOnly={false} bind:autoTZ={endAirportTZ} defaultValue={null} />
+        <Entry.TimePicker required={true} title="Time" name="end-time" dateOnly={false} tz="UTC" bind:autoTZ={endAirportTZ} defaultValue={null} />
       </Section>
 
       <Section title="Flight IDs (API Caching)">

@@ -41,7 +41,7 @@
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.AirportPicker required={true} title="Show Airport" name="show-airport" airports={data.airports} bind:value={apt} bind:tz={showAirportTZ} defaultValue={data.tourSettings['tour.defaultStartApt']} />
-        <Entry.TimePicker required={true} title="Show Time" name="show-time" dateOnly={false} bind:autoTZ={showAirportTZ} defaultValue={null} />
+        <Entry.TimePicker required={true} title="Show Time" name="show-time" dateOnly={false} tz="UTC" bind:autoTZ={showAirportTZ} defaultValue={null} />
       </Section>
 
       <Section title="Details">

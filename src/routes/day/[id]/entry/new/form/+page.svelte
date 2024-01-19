@@ -20,8 +20,12 @@
   let outTime: string;
   let inTime: string;
 
-  $: outTimeUTC = startAirportTZ === null ? null : timeStrAndTimeZoneToUTC(outTime, startAirportTZ);
-  $: inTimeUTC = endAirportTZ === null ? null : timeStrAndTimeZoneToUTC(inTime, endAirportTZ);
+  // Default to UTC
+  let outTZ: string | null = 'UTC';
+  let inTZ: string | null = 'UTC';
+
+  $: outTimeUTC = outTZ === null ? null : timeStrAndTimeZoneToUTC(outTime, outTZ);
+  $: inTimeUTC = inTZ === null ? null : timeStrAndTimeZoneToUTC(inTime, inTZ);
   $: calcTotalTime = outTimeUTC === null || inTimeUTC === null ? null : ((inTimeUTC.value - outTimeUTC.value) / 60 / 60);
 
   let runwayOperations = data.runwayOperations;
@@ -50,7 +54,7 @@
   let divertAirportTZ: string | null = data.endTimezone?.name ?? null;
 
 
-  $: outTZ = (divertAirportTZ === null) ? endAirportTZ : divertAirportTZ;
+  $: outTZAuto = (divertAirportTZ === null) ? endAirportTZ : divertAirportTZ;
 
   let totalTime: string | null;
 
@@ -133,17 +137,17 @@
       </Section>
 
       <Section title="Block Times">
-        <Entry.TimePicker required={true} title="Out" name="out" bind:autoTZ={startAirportTZ} bind:value={outTime} defaultValue={data.startTime} />
-        <Entry.TimePicker required={true} title="In" name="in" autoTZ={outTZ} bind:value={inTime} defaultValue={data.endTime} />
+        <Entry.TimePicker required={true} title="Out" name="out" bind:autoTZ={startAirportTZ} bind:tz={outTZ} bind:value={outTime} defaultValue={data.startTime} />
+        <Entry.TimePicker required={true} title="In" name="in" autoTZ={outTZAuto} bind:tz={inTZ} bind:value={inTime} defaultValue={data.endTime} />
         <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
       </Section>
 
       <Section title="Times">
-        <Entry.FlightTime required={true} title="Total Time" name="total-time" autoFill={null} bind:value={totalTime} defaultValue={data.totalTime} />
+        <Entry.FlightTime required={true} title="Total Time" name="total-time" autoFill={null} bind:value={totalTime} defaultValue={calcTotalTime} />
         <Entry.FlightTime title="PIC" name="pic-time" bind:autoFill={totalTime} defaultValue={null} />
-        <Entry.FlightTime title="SIC" name="sic-time" bind:autoFill={totalTime} defaultValue={data.totalTime} />
+        <Entry.FlightTime title="SIC" name="sic-time" bind:autoFill={totalTime} defaultValue={calcTotalTime} />
         <Entry.FlightTime title="Night" name="night-time" bind:autoFill={totalTime} defaultValue={null} />
-        <Entry.FlightTime title="Cross Country" name="xc-time" bind:autoFill={totalTime} defaultValue={data.xc} />
+        <Entry.FlightTime title="Cross Country" name="xc-time" bind:autoFill={totalTime} defaultValue={data.xc ? calcTotalTime : null} />
       </Section>
 
       <Section title="Takeoffs & Landings">

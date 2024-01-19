@@ -12,6 +12,8 @@ import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
 import { generateAirportList } from '$lib/server/helpers';
 
+// TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
+
 const MAX_MB = 10;
 
 export const load = async ({ fetch, params }) => {

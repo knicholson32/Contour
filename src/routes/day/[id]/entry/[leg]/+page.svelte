@@ -13,7 +13,7 @@
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
-  import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
+  import { dateToDateStringForm, getInlineDateUTC, timeStrAndTimeZoneToUTC } from '$lib/helpers';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -34,7 +34,18 @@
   let endApt: string | null;
   let divertApt: string | null;
 
-  $: outTZ = (divertAirportTZ === null) ? endAirportTZ : divertAirportTZ;
+  let outTime: string;
+  let inTime: string;
+
+  // Default to UTC
+  let outTZ: string | null = 'UTC';
+  let inTZ: string | null = 'UTC';
+
+  $: outTimeUTC = outTZ === null ? null : timeStrAndTimeZoneToUTC(outTime, outTZ);
+  $: inTimeUTC = inTZ === null ? null : timeStrAndTimeZoneToUTC(inTime, inTZ);
+  $: calcTotalTime = outTimeUTC === null || inTimeUTC === null ? null : ((inTimeUTC.value - outTimeUTC.value) / 60 / 60);
+
+  $: outTZBind = (divertAirportTZ === null) ? endAirportTZ : divertAirportTZ;
 
   let totalTime: string | null;
 
@@ -144,8 +155,9 @@
       </Section>
 
       <Section title="Block Times">
-        <Entry.TimePicker required={true} title="Out" name="out" bind:autoTZ={startAirportTZ} defaultValue={data.startTime} />
-        <Entry.TimePicker required={true} title="In" name="in" autoTZ={outTZ} defaultValue={data.endTime} />
+        <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTime} />
+        <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZBind} defaultValue={data.endTime} />
+        <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
       </Section>
 
       <Section title="Times">
