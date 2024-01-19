@@ -103,7 +103,9 @@
       {/if}
     {/each}
   </div>
-  <div class="text-xxs text-gray-300 w-full text-right px-1 py-1">
-    {dutyDayLength} hr
+  <div class="text-xxs text-gray-300 w-full flex flex-row px-1 pb-1 pt-3">
+    <span>{helpers.getHoursMinutesUTC(new Date(day.startTime_utc * 1000))}</span>
+    <span class="flex-grow text-center">{dutyDayLength} hr</span>
+    <span>{helpers.getHoursMinutesUTC(new Date(day.endTime_utc * 1000))}</span>
   </div>
 </div>
