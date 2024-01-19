@@ -1,11 +1,13 @@
 import * as settings from '$lib/server/settings';
 import * as crypto from 'node:crypto';
 import zlib from 'node:zlib';
+import fs from 'node:fs';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '$lib/server/prisma';
 import * as helpers from '$lib/helpers';
 import type * as Types from '@prisma/client';
+import { MEDIA_FOLDER } from '$lib/server/env';
 
 const ENC_SALT = 'CONTOUR_SALT'
 
@@ -45,88 +47,115 @@ export const generateAirportList = async (...args: (string | null)[]): Promise<T
 
 
 export type Images = {
-	original: Buffer;
-	fullJpeg: Buffer; 
-	fullAvif: Buffer;
-	i2048Jpeg: Buffer;
-	i2048Avif: Buffer;
-	i1024Jpeg: Buffer;
-	i1024Avif: Buffer;
-	i768Jpeg: Buffer;
-	i768Avif: Buffer;
-	i512Jpeg: Buffer;
-	i512Avif: Buffer;
+	original: string;
+	fullJpeg: string; 
+	fullAvif: string;
+	i2048Jpeg: string;
+	i2048Avif: string;
+	i1024Jpeg: string;
+	i1024Avif: string;
+	i768Jpeg: string;
+	i768Avif: string;
+	i512Jpeg: string;
+	i512Avif: string;
 	i256Jpeg: Buffer;
 	i256Avif: Buffer;
 	i128Jpeg: Buffer;
 	i128Avif: Buffer;
 };
 
-export const cropImages = async (image: ArrayBuffer): Promise<Images | null> => {
+export const cropImages = async (image: ArrayBuffer, id: string): Promise<Images | null> => {
 	const imageBuffer = helpers.toBuffer(image);
 	const initial = sharp(imageBuffer).rotate();
 
 	const promiseList: Promise<void>[] = [];
-	const ret: Images = {
-		original: imageBuffer
-	} as Images;
-	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+	const ret: Images = { } as Images;
+	
+	promiseList.push(new Promise<void>(async (resolve, reject) => {
 		try {
-			ret.fullJpeg = await initial.clone().jpeg().toBuffer();
+			const name = `${id}-original.jpeg`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, imageBuffer);
+			ret.original = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
 	promiseList.push(new Promise<void>(async (resolve, reject) => { 
 		try {
-			ret.fullAvif = await initial.clone().avif().toBuffer();
+			const name = `${id}-full.jpeg`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().jpeg().toBuffer());
+			ret.fullJpeg = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
 	promiseList.push(new Promise<void>(async (resolve, reject) => { 
 		try {
-			ret.i2048Jpeg = await initial.clone().resize({ width: 2048, withoutEnlargement: true }).jpeg().toBuffer();
+			const name = `${id}-full.avif`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().avif().toBuffer());
+			ret.fullAvif = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
 	promiseList.push(new Promise<void>(async (resolve, reject) => { 
 		try {
-			ret.i2048Avif = await initial.clone().resize({ width: 2048, withoutEnlargement: true }).avif().toBuffer();
+			const name = `${id}-2048.jpeg`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().resize({ width: 2048, withoutEnlargement: true }).jpeg().toBuffer());
+			ret.i2048Jpeg = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
 	promiseList.push(new Promise<void>(async (resolve, reject) => { 
 		try {
-			ret.i1024Jpeg = await initial.clone().resize({ width: 1024, withoutEnlargement: true }).jpeg().toBuffer();
+			const name = `${id}-2048.avif`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().resize({ width: 2048, withoutEnlargement: true }).avif().toBuffer());
+			ret.i2048Avif = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
 	promiseList.push(new Promise<void>(async (resolve, reject) => { 
 		try {
-			ret.i1024Avif = await initial.clone().resize({ width: 1024, withoutEnlargement: true }).avif().toBuffer();
+			const name = `${id}-1024.jpeg`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().resize({ width: 1024, withoutEnlargement: true }).jpeg().toBuffer());
+			ret.i1024Jpeg = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
 	promiseList.push(new Promise<void>(async (resolve, reject) => { 
 		try {
-			ret.i768Jpeg = await initial.clone().resize({ width: 768, withoutEnlargement: true }).jpeg().toBuffer();
+			const name = `${id}-1024.avif`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().resize({ width: 1024, withoutEnlargement: true }).avif().toBuffer());
+			ret.i1024Avif = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
 	promiseList.push(new Promise<void>(async (resolve, reject) => { 
 		try {
-			ret.i768Avif = await initial.clone().resize({ width: 768, withoutEnlargement: true }).avif().toBuffer();
+			const name = `${id}-768.jpeg`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().resize({ width: 768, withoutEnlargement: true }).jpeg().toBuffer());
+			ret.i768Jpeg = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
 	promiseList.push(new Promise<void>(async (resolve, reject) => { 
 		try {
-			ret.i512Jpeg = await initial.clone().resize({ width: 512, withoutEnlargement: true }).jpeg().toBuffer();
+			const name = `${id}-768.avif`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().resize({ width: 768, withoutEnlargement: true }).avif().toBuffer());
+			ret.i768Avif = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
 	promiseList.push(new Promise<void>(async (resolve, reject) => { 
 		try {
-			ret.i512Avif = await initial.clone().resize({ width: 512, withoutEnlargement: true }).avif().toBuffer();
+			const name = `${id}-512.jpeg`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().resize({ width: 512, withoutEnlargement: true }).jpeg().toBuffer());
+			ret.i512Jpeg = name;
+		} catch (e) { reject(e) }
+		resolve()
+	}));
+	promiseList.push(new Promise<void>(async (resolve, reject) => { 
+		try {
+			const name = `${id}-512.avif`;
+			fs.writeFileSync(`${MEDIA_FOLDER}/${name}`, await initial.clone().resize({ width: 512, withoutEnlargement: true }).avif().toBuffer());
+			ret.i512Avif = name;
 		} catch (e) { reject(e) }
 		resolve()
 	}));
@@ -218,7 +247,7 @@ export const uploadImage = async (image: string | File, maxMB = 10): Promise<Upl
 	const id = uuidv4();
 
 	try {
-		const images = await cropImages(arrayBuf);
+		const images = await cropImages(arrayBuf, id);
 		if (images === null) return { success: false, message: 'Unsupported image' };
 		// Store the image
 		await prisma.image.create({
@@ -240,12 +269,40 @@ export const uploadImage = async (image: string | File, maxMB = 10): Promise<Upl
  */
 export const clearHangingImages = async (): Promise<boolean> => {
 	try {
-		await prisma.image.deleteMany({ where: {
-			AND: {
+		const toDelete = await prisma.image.findMany({
+			where: { AND: {
 				aircraft: { is: null },
 				aircraftType: { is: null }
-			}
-		}});
+			}},
+		});
+
+
+		// Create some arrays to hold the inserts and hashes created in the loop
+		const deletes: Types.Prisma.PrismaPromise<any>[] = [];
+
+		// Loop through each position
+		for (const entry of toDelete) deletes.push(prisma.image.delete({ where: { id: entry.id } }));
+
+		// Execute the prisma transaction that will add all the points
+		await prisma.$transaction(deletes)
+
+		// Delete the files from the folder
+		for (const entry of toDelete) {
+			try {
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.original}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.fullJpeg}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.fullAvif}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.i2048Jpeg}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.i2048Avif}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.i1024Jpeg}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.i1024Avif}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.i768Jpeg}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.i768Avif}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.i512Jpeg}`);
+				fs.unlinkSync(`${MEDIA_FOLDER}/${entry.i512Avif}`);
+			} catch (e) {}
+		}
+
 	} catch (e) {
 		console.log('Error during clearHangingImages', e);
 		return false;

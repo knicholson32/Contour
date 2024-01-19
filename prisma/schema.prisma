@@ -368,17 +368,17 @@ model Aircraft {
 
 model Image {
   id        String @unique
-  original  Bytes
-  fullJpeg  Bytes
-  fullAvif  Bytes
-  i2048Jpeg Bytes
-  i2048Avif Bytes
-  i1024Jpeg Bytes
-  i1024Avif Bytes
-  i768Jpeg  Bytes
-  i768Avif  Bytes
-  i512Jpeg  Bytes
-  i512Avif  Bytes
+  original  String
+  fullJpeg  String
+  fullAvif  String
+  i2048Jpeg String
+  i2048Avif String
+  i1024Jpeg String
+  i1024Avif String
+  i768Jpeg  String
+  i768Avif  String
+  i512Jpeg  String
+  i512Avif  String
   i256Jpeg  Bytes
   i256Avif  Bytes
   i128Jpeg  Bytes
