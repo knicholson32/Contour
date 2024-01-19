@@ -13,11 +13,14 @@
 
   export let dateOnly = false;
   export let defaultValue: string | null;
-  if (defaultValue === null) defaultValue = dateOnly ? `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}` : `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}T${helpers.pad(now.getHours(), 2)}:${helpers.pad(now.getMinutes(), 2)}`;
   export let value: string | null = defaultValue;
-
+  
   export let autoTZ: string | null = null;
   export let tz: string | null = null;
+  if (defaultValue === null) {
+    if (tz === 'UTC') defaultValue = dateOnly ? `${now.getUTCFullYear()}-${helpers.pad(now.getUTCMonth() + 1, 2)}-${helpers.pad(now.getUTCDate(), 2)}` : `${now.getUTCFullYear()}-${helpers.pad(now.getUTCMonth() + 1, 2)}-${helpers.pad(now.getUTCDate(), 2)}T${helpers.pad(now.getUTCHours(), 2)}:${helpers.pad(now.getUTCMinutes(), 2)}`;
+    else defaultValue = dateOnly ? `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}` : `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}T${helpers.pad(now.getHours(), 2)}:${helpers.pad(now.getMinutes(), 2)}`;
+  }
 	export let options: string[] = ['UTC'].concat(timeZonesNames);
 	export let name: string;
 	export let title: string;
