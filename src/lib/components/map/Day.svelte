@@ -87,10 +87,14 @@
     mounted = true;
 
     const createMap = (container: HTMLDivElement): L.Map => {
-      let m = L.map(container, { dragging: !L.Browser.mobile });
+      let m = L.map(container, { dragging: !L.Browser.mobile, attributionControl: false });
       const tileLayer = helpers.generateTileLayer(L, 'darkMatterNoLabels');
       
       tileLayer.addTo(m);
+
+      L.control.attribution({
+        position: 'topright'
+      }).addTo(m);
 
       return m;
     }
