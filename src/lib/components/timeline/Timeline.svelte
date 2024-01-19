@@ -17,6 +17,8 @@
   //   dateObjects.push(new Date(day.startTime_utc * 1000 + i * interval));
   // }
 
+  let dutyDayLength = ((day.endTime_utc - day.startTime_utc) / 60 / 60).toFixed(1);
+
 
   const dataFormatted: {
     entity: (typeof data[0] | {
@@ -36,13 +38,24 @@
 
 
   if (dataCleaned.length > 0) {
+    let lastEntry = dataCleaned[0];
+    let index = 0;
+    if (lastEntry.startTime_utc ?? 0 > day.startTime_utc) {
+      dataFormatted.push({
+        entity: {
+            type: 'blank',
+            startTime_utc: day.startTime_utc,
+            endTime_utc: lastEntry.startTime_utc ?? 0,
+          },
+          i: index
+      });
+    }
     if (dataCleaned.length > 1) {
-      let lastEntry = dataCleaned[0];
       dataFormatted.push({
         entity: lastEntry,
-        i: 0
+        i: index++
       });
-      let index = 1;
+      
       for (let i = 1; i < dataCleaned.length; i++) {
         const entry = dataCleaned[i];
         if ((entry.startTime_utc ?? 0) > (lastEntry.endTime_utc ?? 0)) {
@@ -89,5 +102,8 @@
         <Schedule entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc} />
       {/if}
     {/each}
+  </div>
+  <div class="text-xxs text-gray-300 w-full text-right px-1 py-1">
+    {dutyDayLength} hr
   </div>
 </div>
