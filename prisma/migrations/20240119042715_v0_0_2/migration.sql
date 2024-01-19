@@ -1,0 +1,7 @@
+-- CreateTable
+CREATE TABLE "LegImage" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "legId" TEXT NOT NULL,
+    CONSTRAINT "LegImage_id_fkey" FOREIGN KEY ("id") REFERENCES "images" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "LegImage_legId_fkey" FOREIGN KEY ("legId") REFERENCES "legs" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
