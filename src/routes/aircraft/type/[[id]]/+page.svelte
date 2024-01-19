@@ -5,6 +5,7 @@
   import Image from '$lib/components/Image.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
   import { icons } from '$lib/components';
+  import Stats from '$lib/components/decorations/Stats.svelte';
   import { page } from '$app/stores';
   import { goto} from '$app/navigation';
   import Badge from '$lib/components/decorations/Badge.svelte';
@@ -97,6 +98,18 @@
         }, 1);
       };
     }}>
+
+      {#if data.type !== null}
+        <MenuForm.FormHeader title={`${data.type.make} ${data.type.model}`}>
+          <Stats values={[
+            {title: 'Total Legs', value: data.numLegs.toLocaleString()},
+            {title: 'Total Flight Time', value: data.totalTime.toFixed(1) + ' hr'},
+            {title: 'Avg. Leg Length', value: (data.totalTime / data.numLegs).toFixed(1) + ' hr'},
+            {title: 'Diversion %', value: '0%'}
+          ]}/>
+          <div class="w-full h-1"></div>
+        </MenuForm.FormHeader>
+      {/if}
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Input required={true} title="Type Code" name="typeCode" defaultValue={data.type?.typeCode ?? null} placeholder="CL30" uppercase={true} />

@@ -38,11 +38,19 @@ export const load = async ({ fetch, params, url }) => {
   }
   if (currentMake !== '') orderGroups.push({ make: currentMake, types: currentGroup });
 
+  const legs = await prisma.leg.findMany({ where: { aircraft: { aircraftTypeId: params.id } }, select: { totalTime: true }});
+
+  let totalTime = 0;
+  for (const l of legs) totalTime += l.totalTime;
+
+
   return {
     entrySettings,
     types,
     type: currentType,
     orderGroups,
+    numLegs: legs.length,
+    totalTime,
     params,
     enums: {
       categoryClass: Object.keys(DB.CategoryClass).map((v) => { return { value: v, title: `${DB.categoryClassToString(v as DB.CategoryClass)} (${v})` }; }),

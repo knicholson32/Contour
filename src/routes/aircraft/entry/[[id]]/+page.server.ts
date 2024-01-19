@@ -55,6 +55,14 @@ export const load = async ({ fetch, params, url }) => {
     });
   }
 
+  let avgLegLen = 0;
+  if (currentAircraft !== null) {
+    for (const leg of currentAircraft.legs) {
+      avgLegLen += leg.totalTime;
+    }
+    avgLegLen = avgLegLen / currentAircraft.legs.length
+  }
+
   // Get all tail numbers (so we know if one exists)
   const tails = aircrafts.map((v) => v.registration);
   return {
@@ -64,6 +72,7 @@ export const load = async ({ fetch, params, url }) => {
     aircraft: currentAircraft,
     typeOptions,
     orderGroups,
+    avgLegLen,
     tails,
     types,
     params,

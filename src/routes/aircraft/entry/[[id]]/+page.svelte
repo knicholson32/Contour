@@ -129,8 +129,8 @@
         <MenuForm.FormHeader title={`${data.aircraft.registration} - ${data.aircraft.type.make} ${data.aircraft.type.model}`}>
           <Stats values={[
             {title: 'Total Legs', value: data.aircraft._count.legs.toLocaleString()},
-            {title: 'Total FLight Time', value: data.aircraftTimes[data.aircraft.id] + ' hr'},
-            {title: 'Avg. Leg Length', value: '00:00'},
+            {title: 'Total Flight Time', value: data.aircraftTimes[data.aircraft.id] + ' hr'},
+            {title: 'Avg. Leg Length', value: data.avgLegLen.toFixed(1) + ' hr'},
             {title: 'Diversion %', value: '0%'}
           ]}/>
           <MenuForm.Link theme='FormHeader' href={`/aircraft/type/${data.aircraft.type.id}?active=form&ref=/aircraft/entry/${data.aircraft.id}?active=form`} icon={icons.circleStack} text={`Edit ${data.aircraft.type.make} ${data.aircraft.type.model} Type`} />
