@@ -122,12 +122,14 @@
           <span class="font-medium text-md text-gray-900 dark:text-gray-100">Configure Timezone</span>
           <hr class="mb-1 border-zinc-700"/>
             <div class="flex flex-row gap-3 items-center relative">
-              <Switch bind:value={autoTZSwitch} title="Auto TZ"/>
+              <!-- TODO: Remove this force disable when I know this component works properly -->
+              <Switch bind:value={autoTZSwitch} disabled title="Auto TZ"/>
               {#if tz !== 'UTC'}
                 <button disabled={disabled} on:click={convertToUTC} type="button" class="touch-manipulation select-none relative whitespace-nowrap text-xs transition-colors flex justify-center items-center px-3 py-2 rounded-md font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-100 betterhover:hover:bg-gray dark:betterhover:hover:bg-zinc-900 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200">Convert to UTC</button>
               {/if}
             </div>
-          <select on:change={_update} disabled={disabled || autoTZSwitch} title={"Timezone"} bind:value={tz}
+          <!-- TODO: Remove this force disable when I know this component works properly -->
+          <select on:change={_update} disabled={disabled || autoTZSwitch || true} title={"Timezone"} bind:value={tz}
             class="w-full xs:w-auto sm:max-w-md text-sm border-0 rounded-md text-gray-900 dark:text-gray-100 dark:bg-transparent shadow-sm ring-1 placeholder:text-gray-400 disabled:cursor-not-allowed select:disabled:text-red-500 disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:text-gray-500 dark:disabled:text-gray-600 disabled:ring-gray-200 ring-gray-300 dark:ring-zinc-500 focus:border-gray-900 focus-within:ring-2 focus-within:ring-sky-600 focus-within:border-0">
             <option selected={tz === null} disabled value={null}>Unset</option>
             {#each options as option}
