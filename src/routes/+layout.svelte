@@ -65,20 +65,21 @@
   ```
 -->
 
-<nav bind:this={menuHeaderBar} class="relative z-50 border-b border-gray-200 bg-white h-16">
+<nav bind:this={menuHeaderBar} class="relative z-50 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 h-16">
   <div class="mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 justify-between select-none">
       <div class="flex">
         {#if $backArrow}
           <div class="flex items-center gap-2 justify-center">
-            <button on:click={$backButtonClicked} type="button" class="touch-manipulation text-center flex-grow select-none inline-flex items-center gap-1 transition-colors pl-1 pr-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-gray-300 ring-inset bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">
+            <button on:click={$backButtonClicked} type="button" class="touch-manipulation text-center flex-grow select-none inline-flex items-center gap-1 transition-colors pl-1 pr-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+              ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-950 text-gray-800 dark:text-gray-100 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white">
               <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
                 {@html icons.chevronLeft}
               </svg>
               {$backText}
             </button>
             {#if $unsaved}
-              <span class="font-mono text-xxs px-2 rounded-full bg-sky-600 text-white font-bold block sm:hidden">UNSAVED</span>
+              <span class="font-mono text-xxs px-2 rounded-full bg-sky-600 text-white dark:bg-transparent dark:border dark:border-sky-400 dark:text-sky-400 font-bold block sm:hidden">UNSAVED</span>
             {/if}
           </div>
         {:else}
@@ -90,7 +91,7 @@
 
         {#if data.entrySettings["entry.tour.current"] !== -1}
           <div class="m-3 flex items-center">
-            <a href="/tour" class="uppercase select-none border border-sky-400 text-sky-500 rounded-md py-2 px-3 whitespace-nowrap">
+            <a href="/tour" class="uppercase select-none border border-sky-400 text-sky-400 rounded-md py-2 px-3 whitespace-nowrap">
               On Tour
             </a>
           </div>
@@ -102,15 +103,15 @@
           {#each menu as m}
             <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
             {#if $page.url.pathname.startsWith(m.href)}
-              <a href="{m.href}" class="border-indigo-500 relative z-40 text-gray-900 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">{m.title}</a>  
+              <a href="{m.href}" class="border-sky-500 relative z-40 text-gray-900 dark:text-white inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">{m.title}</a>  
             {:else}
-              <a href="{m.href}" class="border-transparent relative z-40 text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</a>  
+              <a href="{m.href}" class="border-transparent relative z-40 text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</a>  
             {/if}
           {/each}
         </div>
       </div>
       <div class="hidden sm:ml-6 sm:flex sm:items-center">
-        <button type="button" class="relative rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+        <button type="button" class="relative rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
           <span class="absolute -inset-1.5"></span>
           <span class="sr-only">View notifications</span>
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -141,13 +142,13 @@
           {#if profileMenuVisible}
             <div in:fade={{ duration: 200, easing: cubicOut }} out:fade={{ duration: 75, easing: cubicIn }}>
               <div in:scale={{ duration: 200, easing: cubicOut}} out:scale={{ duration: 75, easing: cubicIn }}>
-                <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-zinc-900 py-1 shadow-lg ring-1 ring-black dark:ring-zinc-800 ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                   <!-- Active: "bg-gray-100", Not Active: "" -->
                   {#each profileMenu as m}
                     {#if $page.url.pathname.startsWith(m.href)}
-                      <a href="{m.href}" on:click={closeAccountDropdown} class="bg-gray-100 block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
+                      <a href="{m.href}" on:click={closeAccountDropdown} class="bg-gray-100 dark:bg-zinc-800 block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
                     {:else}
-                      <a href="{m.href}" on:click={closeAccountDropdown} class="hover:bg-gray-50 block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
+                      <a href="{m.href}" on:click={closeAccountDropdown} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
                     {/if}
                   {/each}
                 </div>
@@ -158,7 +159,7 @@
       </div>
       <div class="-mr-2 flex items-center sm:hidden">
         <!-- Mobile menu button -->
-        <button type="button" on:click={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md  p-2 text-gray-400 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-500 {mobileNavMenuVisible ? 'bg-gray-100' : 'bg-white'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
+        <button type="button" on:click={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md  p-2 text-gray-400 dark:text-gray-200 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-500 dark:betterhover:hover:text-white {mobileNavMenuVisible ? 'bg-gray-100 dark:bg-zinc-800' : 'bg-white dark:bg-zinc-950'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
           <span class="absolute -inset-0.5"></span>
           <span class="sr-only">Open main menu</span>
           <!-- Menu open: "hidden", Menu closed: "block" -->
@@ -178,28 +179,28 @@
   {#if mobileNavMenuVisible}
     <div in:fade={{ duration: 100, easing: cubicOut }} out:fade={{ duration: 75, easing: cubicIn }}
       use:EscapeOrClickOutside={{ callback: closeMobileMenu, except: menuHeaderBar }} 
-      class="sm:hidden select-none absolute left-0 right-0 bg-white z-50 shadow-md" id="mobile-menu">
+      class="sm:hidden select-none absolute left-0 right-0 bg-white dark:bg-zinc-900 z-50 shadow-md dark:border-zinc-600 dark:border-b-2" id="mobile-menu">
       <div class="space-y-1 pb-3 pt-2">
         <!-- Mobile Menu -->
         {#each menu as m}
           <!-- Current: "border-indigo-500 bg-indigo-50 text-indigo-700", Default: "border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800" -->
           {#if $page.url.pathname.startsWith(m.href)}
-            <a href="{m.href}" on:click={closeMobileMenu} class="border-indigo-500 bg-indigo-50 text-indigo-700 block border-l-4 py-2 pl-3 pr-4 text-base font-medium" aria-current="page">{m.title}</a>  
+            <a href="{m.href}" on:click={closeMobileMenu} class="border-sky-500 bg-sky-50/50 dark:bg-slate-800/25 text-sky-500 block border-l-4 py-2 pl-3 pr-4 text-base font-medium" aria-current="page">{m.title}</a>  
           {:else}
-            <a href="{m.href}" on:click={closeMobileMenu} class="border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">{m.title}</a>  
+            <a href="{m.href}" on:click={closeMobileMenu} class="border-transparent text-gray-600 dark:text-gray-400 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">{m.title}</a>  
           {/if}
         {/each}
       </div>
-      <div class="border-t bg-white border-gray-200 pb-3 pt-4">
+      <div class="border-t bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 pb-3 pt-4">
         <div class="flex items-center px-4">
           <div class="flex-shrink-0">
             <img class="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
           </div>
           <div class="ml-3">
-            <div class="text-base font-medium text-gray-800">Tom Cook</div>
+            <div class="text-base font-medium text-gray-800 dark:text-gray-200">Tom Cook</div>
             <div class="text-sm font-medium text-gray-500">tom@example.com</div>
           </div>
-          <button type="button" class="relative ml-auto flex-shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          <button type="button" class="relative ml-auto flex-shrink-0 rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
             <span class="absolute -inset-1.5"></span>
             <span class="sr-only">View notifications</span>
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -210,9 +211,9 @@
         <div class="mt-3 space-y-1">
           {#each profileMenu as m}
             {#if $page.url.pathname.startsWith(m.href)}
-              <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium border-indigo-500 bg-indigo-50 text-indigo-700">{m.title}</a>
+              <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium border-indigo-500 bg-indigo-50 dark:bg-slate-800/25 text-sky-700 dark:text-sky-400">{m.title}</a>
             {:else}
-              <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800">{m.title}</a>
+              <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200">{m.title}</a>
             {/if}
           {/each}
         </div>

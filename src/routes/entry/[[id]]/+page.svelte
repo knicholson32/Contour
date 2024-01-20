@@ -46,7 +46,7 @@
 <TwoColumn {ref} menu="scroll" form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" >
 
   <!-- Menu Side -->
-  <nav slot="menu" class="flex-shrink" aria-label="Directory">
+  <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
     <MenuForm.Title title="Entries" />
     {#if ref !== null}
       <MenuForm.Link href={ref} icon={icons.chevronLeft} text="Go Back" type={'left'} />

@@ -41,7 +41,7 @@
 <TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" onMenuBack={onMenuBack} >
 
   <!-- Menu Side -->
-  <nav slot="menu" class="flex-shrink" aria-label="Directory">
+  <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
     <MenuForm.Title title="Aircraft Types" />
     <MenuForm.Link href={ref ?? '/aircraft'} type="left" text="Go Back" />
     {#if data.orderGroups.length === 0}
@@ -53,7 +53,7 @@
       {#each data.orderGroups as group (group.make)}
         <Section title={group.make}>
           {#each group.types as type (type.id)}
-            <a href="/aircraft/type/{type.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {type.id === data.params.id && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
+            <a href="/aircraft/type/{type.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {type.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
               {#if type.imageId !== null}
                 <div class="h-12 w-12 my-2 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
                   <Image id={type.imageId} size={48} class="aspect-1 object-cover w-full h-full" alt="Icon for the {type.make} {type.model}"/>

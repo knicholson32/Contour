@@ -81,7 +81,7 @@
 <TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" onMenuBack={onMenuBack}>
 
   <!-- Menu Side -->
-  <nav slot="menu" class="flex-shrink" aria-label="Directory">
+  <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
     <MenuForm.Title title="Duty Day Legs" />
     <MenuForm.Link href={ref ?? '/day/' + data.params.id + '?active=form'} type="left" text="Back to Day" />
     <MenuForm.Link href={'/day/' + data.params.id + '/entry/new?' + urlActiveParam} icon={icons.plus} text="Create a new leg" type="right"/>

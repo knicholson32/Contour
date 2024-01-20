@@ -1,0 +1,17 @@
+.leaflet-control-layers-expanded {
+  background: #ff0000;
+}
+
+.leaflet-container {
+  background: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .leaflet-control-layers-expanded {
+      background: #ff0000;
+  }
+
+  .leaflet-container {
+    background: #000;
+  }
+}

@@ -62,16 +62,16 @@
 		case 'red':
 			themeClassesStatic = '';
 			themeClassesDefault =
-				'bg-red-600 text-white betterhover:hover:bg-red-500 disabled:text-gray-200 disabled:bg-gray-800 disabled:betterhover:hover:bg-gray-800 focus-visible:outline-red-500';
+				'bg-red-600 text-white betterhover:hover:bg-red-500 disabled:text-gray-200 dark:disabled:text-gray-600 disabled:bg-gray-800 dark:disabled:bg-zinc-900 dark:disabled:ring-zinc-600 dark:disabled:ring-1 disabled:betterhover:hover:bg-gray-800 dark:disabled:betterhover:hover:bg-zinc-800 focus-visible:outline-red-500';
 			themeClassesSubmitting = 'bg-red-600 text-white cursor-default';
 			spinnerClasses = 'fill-white text-red-700';
 			spinnerProgressClasses = 'text-white';
 			break;
 		case 'white':
 			themeClassesStatic =
-				'ring-1 ring-inset ring-gray-300 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200';
+				'ring-1 ring-inset ring-gray-300 dark:ring-zinc-600';
 			themeClassesDefault =
-				'bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500';
+				'bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 disabled:text-gray-500 dark:disabled:text-gray-600 disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:ring-gray-200 dark:disabled:ring-zinc-600 dark:disabled:ring-1 disabled:betterhover:hover:bg-gray-800 dark:disabled:betterhover:hover:bg-zinc-800';
 			themeClassesSubmitting = 'bg-white text-gray-800 cursor-default';
 			spinnerClasses = 'text-gray-100 fill-gray-800';
 			spinnerProgressClasses = 'text-gray-800';

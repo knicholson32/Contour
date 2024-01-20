@@ -1,3 +1,21 @@
+import { browser } from '$app/environment';
+
+export const createMap = (L: typeof import('leaflet'), container: HTMLDivElement): L.Map => {
+
+  let theme: Theme = 'voyager';
+  if (browser && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) theme = 'darkMatterNoLabels';
+
+  let m = L.map(container, { dragging: !L.Browser.mobile, attributionControl: false });
+  const tileLayer = generateTileLayer(L, theme);
+  tileLayer.addTo(m);
+
+  L.control.attribution({
+    position: 'bottomleft'
+  }).addTo(m);
+
+  return m;
+}
+
 export type Theme = 'smoothDark' | 'voyager' | 'darkMatter' | 'darkMatterNoLabels';
 
 export const generateTileLayer = (L: typeof import('leaflet'), theme: Theme): L.TileLayer => {

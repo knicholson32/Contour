@@ -61,7 +61,7 @@
 <TwoColumn {ref} menu="scroll" form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back">
 
   <!-- Menu Side -->
-  <nav slot="menu" class="flex-shrink" aria-label="Directory">
+  <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
     <MenuForm.Title title="Aircraft Definitions" />
     {#if ref !== null}
       <MenuForm.Link href={ref} icon={icons.chevronLeft} text="Go Back" type={'left'} />
@@ -75,13 +75,13 @@
       {#each data.orderGroups as group (group.typeCode)}
         <Section title={group.typeCode} subtitle={`${group.regs.length} Aircraft`} collapsable={true} >
           {#each group.regs as ac (ac.id)}
-            <a href="/aircraft/entry/{ac.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-1 py-2 {ac.id === data.params.id && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
+            <a href="/aircraft/entry/{ac.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-1 py-2 {ac.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
               {#if ac.imageId !== null}
-                <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
+                <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
                   <Badge class="h-full">{ac._count.legs}</Badge>
                 </div>
               {:else if ac.type.imageId !== null}
-                <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
+                <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
                   <Badge class="h-full">{ac._count.legs}</Badge>
                 </div>
               {:else}

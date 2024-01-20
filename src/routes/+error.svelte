@@ -26,16 +26,16 @@
 
 </script>
 
-<div class="flex min-h-full flex-col">
+<div class="flex min-h-full flex-col dark:bg-zinc-900">
   <main class="mx-auto flex w-full max-w-7xl flex-auto flex-col justify-center px-6 py-24 sm:py-64 lg:px-8">
-    <p class="text-base font-semibold leading-8 text-indigo-600">{$page.status}</p>
-    <h1 class="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl">{error}</h1>
-    <p class="mt-6 text-base leading-7 text-gray-600">{longQuip}</p>
+    <p class="text-base font-semibold leading-8 text-sky-600">{$page.status}</p>
+    <h1 class="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-200 sm:text-5xl">{error}</h1>
+    <p class="mt-6 text-base leading-7 text-gray-600 dark:text-gray-400">{longQuip}</p>
     <div class="mt-10">
-      <a href="/" class="text-sm font-semibold leading-7 text-indigo-600"><span aria-hidden="true">&larr;</span> Back to home</a>
+      <a href="/" class="text-sm font-semibold leading-7 text-sky-600"><span aria-hidden="true">&larr;</span> Back to home</a>
     </div>
     <div class="">
-      <button type="button" on:click={() => history.back()} class="text-sm font-semibold leading-7 text-indigo-600"><span aria-hidden="true">&larr;</span> Back to previous</button>
+      <button type="button" on:click={() => history.back()} class="text-sm font-semibold leading-7 text-sky-600"><span aria-hidden="true">&larr;</span> Back to previous</button>
     </div>
   </main>
 </div>

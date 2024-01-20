@@ -23,7 +23,7 @@
 
 </script>
 
-<li class="w-full relative inline-flex items-center px-3 bg-white py-1 gap-2 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500' : ''} {link ? 'betterhover:hover:bg-gray-50' : ''}">
+<li class="w-full relative inline-flex items-center px-3 bg-white dark:bg-zinc-900 py-1 gap-2 {disabled ? 'cursor-not-allowed bg-gray-50 dark:bg-zinc-950 text-gray-500' : ''} {link ? 'betterhover:hover:bg-gray-50 dark:betterhover:hover:bg-gray-800' : ''}">
   {#if !link}
     <button {disabled} tabindex="-1" type="button" title="" on:click={focus} 
       class="touch-manipulation w-full {disabled ? 'cursor-not-allowed' : 'cursor-default'} inline-flex items-center gap-2 ring-0 focus-within:ring-0">
@@ -33,7 +33,7 @@
           <span class="text-xxs uppercase {red ? 'text-red-500' : 'text-gray-400'}">required</span>
         {/if}
         {#if restore !== null && restore !== undefined && unsaved}
-          <button tabindex="-1"  on:click={_restore} type="button" class="touch-manipulation select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 w-[4.5rem] rounded-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-sky-300 betterhover:hover:bg-sky-50 betterhover:hover:text-sky-700 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white focus-visible:outline-grey-500">
+          <button tabindex="-1"  on:click={_restore} type="button" class="touch-manipulation select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 w-[4.5rem] rounded-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-sky-300 dark:ring-sky-600 bg-white dark:bg-transparent betterhover:hover:bg-gray dark:betterhover:hover:bg-zinc-900 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200">
             UNDO
           </button>
         {/if}

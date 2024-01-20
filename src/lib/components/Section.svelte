@@ -13,7 +13,7 @@
 </script>
 
 {#if collapsable}
-  <button tabindex="-1" type="button" on:click={click} class="touch-manipulation select-none -mt-[1px] py-2 sticky top-0 z-[1] border-y border-gray-200 inline-flex gap-2 w-full items-center cursor-default text-left px-3 uppercase font-medium text-sm bg-gray-50 text-gray-900">
+  <button tabindex="-1" type="button" on:click={click} class="touch-manipulation select-none -mt-[1px] py-2 sticky top-0 z-[1] border-y border-gray-200 dark:border-zinc-700 inline-flex gap-2 w-full items-center cursor-default text-left px-3 uppercase font-medium text-sm bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-gray-200">
     <span class="inline-flex items-center gap-2">
       {title}
       {#if subtitle !== null}
@@ -37,7 +37,7 @@
     </span>
   </button>
 {:else}
-  <div class="select-none -mt-[1px] py-2 sticky top-0 z-[1] border-y border-gray-200 inline-flex w-full gap-2 items-center cursor-default text-left px-3 uppercase font-medium text-sm bg-gray-50 text-gray-900">
+  <div class="select-none -mt-[1px] py-2 sticky top-0 z-[1] border-y border-gray-200 dark:border-zinc-700 inline-flex w-full gap-2 items-center cursor-default text-left px-3 uppercase font-medium text-sm bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-gray-200">
     <span class="inline-flex items-center gap-2">
       {title}
       {#if subtitle !== null}
@@ -50,6 +50,6 @@
     <slot name="message"/>
   </div>
 {/if}
-<ul role="list" class="divide-y divide-gray-100 {!visible ? 'hidden' : ''} {$$restProps.class}">
+<ul role="list" class="divide-y divide-gray-100 dark:divide-zinc-800 {!visible ? 'hidden' : ''} {$$restProps.class}">
   <slot />
 </ul>
