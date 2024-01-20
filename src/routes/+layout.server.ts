@@ -6,6 +6,7 @@ export const load = async ({  }) => {
 
   return {
     entrySettings: await settings.getSet('entry'),
+    generalSettings: await settings.getSet('general'),
     MAX_MB,
   };
 };

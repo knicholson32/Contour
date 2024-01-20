@@ -12,6 +12,12 @@
 	let aeroAPIUnsavedChanges = false;
 	let aeroAPI = data.settingValues['general.aeroAPI'];
 
+	// Email
+	let emailUpdate: () => {};
+	let emailUnsavedChanges = false;
+	let name = data.settingValues['general.name'];
+	let email = data.settingValues['general.email'];
+
 	// Localization
 	let localizationUpdate: () => {};
 	let localizationUnsavedChanges = false;
@@ -19,7 +25,7 @@
 
 	// Utilities
 	beforeNavigate(({ cancel }) => {
-		if (aeroAPIUnsavedChanges || localizationUnsavedChanges) {
+		if (aeroAPIUnsavedChanges || emailUnsavedChanges || localizationUnsavedChanges) {
 			if (!confirm( 'Are you sure you want to leave this page? You have unsaved changes that will be lost.')) {
 				cancel();
 			}
@@ -42,6 +48,17 @@
 	</Settings.Password>
 
 	<!-- <Settings.Select {form} name="general.aeroAPI" title="Aero API Key" update={aeroAPIUpdate} bind:value={aeroAPI} options={timeZonesNames.concat('UTC')} /> -->
+</Settings.List>
+
+
+<!-- Personalization -->
+<Settings.List class="" {form} action="?/updateEmail" bind:unsavedChanges={emailUnsavedChanges} bind:update={emailUpdate} >
+	<span slot="title">Personalization</span>
+	<span slot="description">Configure a name and email address for Contour to use.</span>
+
+	<Settings.Input {form} name="general.name" title="Name" update={emailUpdate} bind:value={name} />
+	<Settings.Input {form} name="general.email" title="Email" update={emailUpdate} bind:value={email} />
+
 </Settings.List>
 
 

@@ -19,6 +19,9 @@ export const TypeNames = {
 	// General -------------------------------
 	'general.encKey': 'UNSET',
 	'general.aeroAPI': '',
+	'general.email': '',
+	'general.name': '',
+	'general.gravatar.hash': '00000000000000000000000000000000',
 	'general.timezone': process.env.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone
 };
 
@@ -35,6 +38,9 @@ export type ObjectType<T extends TypeName> =
 	T extends 'system.debug' ? number : 					// Integer
 	T extends 'general.encKey' ? string : 				// String
 	T extends 'general.aeroAPI' ? string : 				// String
+	T extends 'general.email' ? string : 				  // String
+	T extends 'general.name' ? string : 				  // String
+	T extends 'general.gravatar.hash' ? string : 	// String
 	T extends 'general.timezone' ? string : 			// String
 	string;
 
@@ -85,6 +91,9 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			case 'entry.day.entry.fa_link':
 			case 'tour.defaultStartApt':
 			case 'general.encKey':
+			case 'general.email':
+			case 'general.name':
+			case 'general.gravatar.hash':
 			case 'general.timezone':
 				return settingVal.value as ObjectType<T>;
 

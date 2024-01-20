@@ -90,7 +90,7 @@
     <Section title="Legs">
       {#each data.legDeadheadCombo as leg (leg.id)}
         {#if leg.type === 'leg'}
-          <a href="/day/{data.params.id}/entry/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.leg && !isMobileSize ? 'bg-gray-200' : 'betterhover:hover:bg-gray-200 betterhover:hover:text-black'}">
+          <a href="/day/{data.params.id}/entry/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.leg && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
             <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
               <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
                 {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId} 
@@ -106,9 +106,9 @@
             </div>
           </a>
         {:else}
-          <div class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 bg-gray-50">
+          <div class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 bg-gray-50 dark:bg-zinc-950/50">
             <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
-              <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis text-gray-400">
+              <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis text-gray-400 dark:text-zinc-700">
                 {leg.originAirportId} → {leg.destinationAirportId} (Deadhead)
               </div>
             </div>

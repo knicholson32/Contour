@@ -80,14 +80,19 @@ export const actions = {
 
       if (entry === undefined) {
         if (flightID === null || flightID === '') return API.Form.formFailure('?/default', 'flight-id', 'Not cached. Required for efficiency.');
-        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()]);
-        entry = await options.getFlightOptionFaFlightID(fa_flight_id);
+        if (!noCache) {
+          await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()]);
+          entry = await options.getFlightOptionFaFlightID(fa_flight_id);
+        } else {
+          await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], true, true);
+          entry = await options.getFlightOptionFaFlightID(fa_flight_id);
+        }
         if (entry === undefined) {
           return API.Form.formFailure('?/default', 'fa-link', 'Flight could not be found');
         }
       }
 
-      console.log(entry);
+      console.log('Linked Option', entry);
 
       await settings.set('entry.day.entry.fa_id', fa_flight_id);
       await settings.set('entry.day.entry.fa_link', link);

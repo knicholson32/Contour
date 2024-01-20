@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client';
 import type * as Types from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import * as aero from '$lib/server/api/flightaware';
+import chalk from 'chalk';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -136,9 +137,19 @@ export const cache = async (option: Types.Option): Promise<void> => {
  */
 export const cacheMany = async (flights: Types.Option[]): Promise<void> => {
 
+    const currentIDs = (await prisma.option.findMany({ select: { faFlightId: true } })).map((v) => v.faFlightId);
+
     const inserts: Types.Prisma.PrismaPromise<any>[] = [];
     // Loop through each position
-    for (const flight of flights) inserts.push(prisma.option.create({ data: flight }));
+    for (const flight of flights) {
+        if (currentIDs.includes(flight.faFlightId)) {
+            console.log('updating', flight.faFlightId);
+            inserts.push(prisma.option.update({ where: { faFlightId: flight.faFlightId }, data: flight }));
+        } else {
+            console.log('cache', flight.faFlightId);
+            inserts.push(prisma.option.create({ data: flight }));
+        }
+    }
 
     try {
         // Execute the prisma transaction that will add all the points
@@ -154,17 +165,27 @@ export const cacheMany = async (flights: Types.Option[]): Promise<void> => {
  * Clear the options list that has to do with a specific tour
  * @param tourID the tour to clear based
  */
-export const clear = async (tourID: number): Promise<void> => {
-    try {
-        console.log('Clearing options for ' + tourID);
-        await prisma.option.deleteMany({
-            where: {
-                tourId: tourID
-            }
-        });
-    } catch(e) {
-        console.error(e);
-        return;
+export const clear = async (tourID?: number): Promise<void> => {
+    if (tourID === undefined) {
+        try {
+            console.log('Clearing all flight cache');
+            await prisma.option.deleteMany({});
+        } catch (e) {
+            console.error(e);
+            return;
+        }
+    } else {
+        try {
+            console.log('Clearing options for ' + tourID);
+            await prisma.option.deleteMany({
+                where: {
+                    tourId: tourID
+                }
+            });
+        } catch(e) {
+            console.error(e);
+            return;
+        }
     }
 }
 
@@ -255,11 +276,11 @@ export const getFlightOptionFaFlightID = async (fa_flight_id?: string): Promise<
  * Go through all the searches, make all API requests to gather the data, and add the data to cache
  * @param aeroAPIKey the AeroAPI key to use for this transaction
  * @param flightIDs a list of the unique flightIDs to cache. The larger this list is the more efficient the API usage
- * @param clear_cache whether or not to erase the associated cache and redo it. False by default.
+ * @param clearCache whether or not to erase the associated cache and redo it. False by default.
  */
-export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, flightIDs: string[], clear_cache = false): Promise<void> => {
+export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, flightIDs: string[], clearCache = false, forceExpansiveSearch = false): Promise<void> => {
     // If required, clear the cache so we can get latest info
-    if (clear_cache) {
+    if (clearCache) {
         console.log('CLEAR CACHE');
         // Clear the cache so we can be sure we won't have a cache collision
         await clear(tour);
@@ -278,8 +299,13 @@ export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, fligh
     // Go through each consolidated search and process it
     for (const flightID of flightIDs) {
         // Execute the search which will get all possible flights for this group
-        const flights = await aero.getFlightsBulk(flightID, aeroAPIKey, Math.floor(Date.now() / 1000) - TWENTY_FOUR_HOURS, Math.floor(Date.now() / 1000) + EIGHT_HOURS, {});
-        console.log(JSON.stringify(flights))
+        // With time support: { times: { startTime: Math.floor(Date.now() / 1000) - TWENTY_FOUR_HOURS, endTime: Math.floor(Date.now() / 1000) + EIGHT_HOURS} }
+        let flights: aero.schema.Flight[];
+        if (forceExpansiveSearch) {
+            console.log(chalk.yellow('Expansive Search'));
+            flights = await aero.getFlightsBulk(flightID, aeroAPIKey, { });
+        }
+        else flights = await aero.getFlightsBulk(flightID, aeroAPIKey, { times: { startTime: Math.floor(Date.now() / 1000) - TWENTY_FOUR_HOURS, endTime: Math.floor(Date.now() / 1000) + EIGHT_HOURS } });
 
         // Convert the flights to a cache format and collect diversion information
         const cacheFlights: Types.Option[] = [];
@@ -296,7 +322,8 @@ export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, fligh
         // Consolidate diverted flights
         for (const diversionDetail of diversionModifications) {
             console.log('DIVERSION: ', diversionDetail);
-            // Search for the diverted flight and assign the diversion destination
+            // Search for the diverted flight and assign the diversion destination. First, search by matching FA flight IDs (simplest solution)
+            let matchingDiversionFound = false;
             for (const search_flt of cacheFlights) {
                 // Check if we have found the other flight
                 if (search_flt.faFlightId === diversionDetail.faFlightId) {
@@ -305,13 +332,18 @@ export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, fligh
                     search_flt.destinationAirportId = diversionDetail.diversion;
                     search_flt.diversionAirportId = dest;
                     console.log('DIVERSION FOUND: ', search_flt);
+                    matchingDiversionFound = true;
                     break;
                 }
             }
+            // If the diversion was still not found, do a more complex search
+            if (!matchingDiversionFound) {
+                // Try and find a flight that has the same origin and inbound_fa_flight_id that was
+                console.log(chalk.red('DIVERSION NOT FOUND'));
+                // 
+            }
         }
 
-        console.log('ADDED FLIGHT CACHE');
-        console.log(JSON.stringify(cacheFlights))
         // Add the cached flights
         // Make an array to hold the cached flights for this search specially
         const specificCacheFlights: Types.Option[] = [];
@@ -324,8 +356,6 @@ export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, fligh
             // Add the flight to the cache list
             specificCacheFlights.push(cacheFlight);
         }
-        // Save the cache
-        console.log(JSON.stringify(specificCacheFlights));
         await cacheMany(specificCacheFlights);
     }
 }

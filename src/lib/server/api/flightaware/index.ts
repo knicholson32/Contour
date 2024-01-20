@@ -99,15 +99,37 @@ export const getFlights = async (callsign: string, aeroAPIKey: string, options: 
  * @param endTime time in unix format
  * @returns The flight in schema.Flights format
  */
-export type GetFlightBulkOptions = { ident_type?: schema.IdentType }
-export const getFlightsBulk = async (callsign: string, aeroAPIKey: string, startTime: number, endTime: number, options: GetFlightBulkOptions): Promise<schema.Flight[]> => {
-    // Check that the times are't too far apart and ara valid
-    if (endTime < startTime) throw new Error(`Invalid times for a bulk search`, { cause: 'TIME_OUT_OF_ORDER' });
-    if (Math.abs(endTime - startTime) > MAX_BULK_SEARCH_TIME_SPAN_S) throw new Error(`Invalid times for a bulk search`, {cause: 'TIME_SPAN_TOO_LONG'});
+export type GetFlightBulkOptions = { ident_type?: schema.IdentType, times?: { startTime?: number, endTime?: number } }
+export const getFlightsBulk = async (callsign: string, aeroAPIKey: string, options: GetFlightBulkOptions): Promise<schema.Flight[]> => {
+    // Log the bulk request
+    console.log(chalk.red('AeroAPI: ') + chalk.grey(`getFlightsBulk(${callsign}, ####, ${JSON.stringify(options)})`) + ' -> Requested');
     // Resolve the ident_type
     if (options.ident_type === undefined) options.ident_type = 'designator';
-    // Calculate the URL
-    let request = `/flights/${callsign}?ident_type=${options.ident_type}&start=${encodeURIComponent(new Date(startTime * 1000).toISOString())}&end=${encodeURIComponent(new Date(endTime * 1000).toISOString())}`
+    // Declare the request
+    let request: string;
+    // See if we are using times
+    if (options.times !== undefined) {
+        // Check that the times are't too far apart and ara valid
+        if (options.times.endTime !== undefined && options.times.startTime !== undefined) {
+            if (options.times.endTime < options.times.startTime) throw new Error(`Invalid times for a bulk search`, { cause: 'TIME_OUT_OF_ORDER' });
+            if (Math.abs(options.times.endTime - options.times.startTime) > MAX_BULK_SEARCH_TIME_SPAN_S) throw new Error(`Invalid times for a bulk search`, {cause: 'TIME_SPAN_TOO_LONG'});
+            request = `/flights/${callsign}?ident_type=${options.ident_type}&start=${encodeURIComponent(new Date(options.times.startTime * 1000).toISOString())}&end=${encodeURIComponent(new Date(options.times.endTime * 1000).toISOString())}`;
+        } else {
+            if (options.times.endTime === undefined && options.times.startTime === undefined) {
+                request = `/flights/${callsign}?ident_type=${options.ident_type}`;
+            } else {
+                if (options.times.startTime !== undefined) {
+                    request = `/flights/${callsign}?ident_type=${options.ident_type}&start=${encodeURIComponent(new Date(options.times.startTime * 1000).toISOString())}`;
+                } else if (options.times.endTime !== undefined) {
+                    request = `/flights/${callsign}?ident_type=${options.ident_type}&end=${encodeURIComponent(new Date(options.times.endTime * 1000).toISOString())}`;
+                } else {
+                    throw new Error(`Invalid times for a bulk search`, { cause: 'MISSING TIME VARIABLES' });
+                }
+            }
+        }
+    } else {
+        request = `/flights/${callsign}?ident_type=${options.ident_type}`;
+    }
     // Set up some variables
     let flights: schema.Flight[] = []
     let searching = true;
@@ -125,6 +147,11 @@ export const getFlightsBulk = async (callsign: string, aeroAPIKey: string, start
         // Increment the page number
         pages = pages + 1;
     }
+
+    // Log the results
+    console.log(chalk.red('AeroAPI: ') + chalk.grey(`getFlightsBulk(${callsign}, ####, ${JSON.stringify(options)})`));
+    console.log(chalk.blue(JSON.stringify(flights)));
+
     return flights;
 }
 
