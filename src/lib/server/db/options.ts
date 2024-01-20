@@ -339,8 +339,22 @@ export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, fligh
             // If the diversion was still not found, do a more complex search
             if (!matchingDiversionFound) {
                 // Try and find a flight that has the same origin and inbound_fa_flight_id that was
-                console.log(chalk.red('DIVERSION NOT FOUND'));
-                // 
+                console.log(chalk.red('DIVERSION NOT FOUND: ' + chalk.gray('Searching direct for: ') + chalk.blue(diversionDetail.faFlightId)));
+                // Make a request for the specific FA Flight ID
+                const flights = await aero.getFlightsBulk(diversionDetail.faFlightId, aeroAPIKey, {});
+                for (const search_flt of flights) {
+                    const flight = aeroFlightToOption(tour, search_flt);
+                    // Check if we have found the other flight
+                    if (flight.faFlightId === diversionDetail.faFlightId && flight.diverted === false) {
+                        // If so, assign the diversion and stop looking
+                        const dest = flight.destinationAirportId;
+                        flight.destinationAirportId = diversionDetail.diversion;
+                        flight.diversionAirportId = dest;
+                        cacheFlights.push(flight);
+                        console.log('DIVERSION FOUND: ', flight);
+                        break;
+                    }
+                }
             }
         }
 
