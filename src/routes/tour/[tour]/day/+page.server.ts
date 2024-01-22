@@ -10,7 +10,12 @@ export const load = async ({ params, fetch }) => {
   // const currentDay = await prisma.dutyDay.findUnique({where: { id: entrySettings["entry.day.current"] }});
   // if (currentDay !== null) throw redirect(301, '/day/' + currentDay.id);
 
+  if (isNaN(parseInt(params.tour))) throw redirect(301, '/tour');
+
   const days = await prisma.dutyDay.findMany({
+    where: {
+      tourId: parseInt(params.tour)
+    },
     select: {id: true},
     orderBy: {
       startTime_utc: 'desc'

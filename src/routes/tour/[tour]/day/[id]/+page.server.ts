@@ -20,6 +20,9 @@ export const load = async ({ fetch, params, parent }) => {
   if (currentTour === null) throw redirect(301, '/tour/new');
 
   const days = await prisma.dutyDay.findMany({
+    where: {
+      tourId: parseInt(params.tour)
+    },
     select: {
       id: true,
       startAirportId: true,
@@ -32,7 +35,9 @@ export const load = async ({ fetch, params, parent }) => {
   });
 
   const currentDay = await prisma.dutyDay.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { 
+      id: parseInt(params.id)
+    },
     include: {
       legs: {
         orderBy: {
