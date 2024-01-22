@@ -18,8 +18,9 @@ export const load = async ({ params, fetch }) => {
 
   const entrySettings = await settings.getSet('entry');
 
+  if (isNaN(parseInt(params.tour))) throw redirect(301, '/tour');
   const currentTour = await prisma.tour.findUnique({
-    where: { id: entrySettings['entry.tour.current'] },
+    where: { id: parseInt(params.tour) },
   });
 
   if (currentTour === null) throw redirect(301, '/tour/new');
@@ -45,17 +46,17 @@ export const load = async ({ params, fetch }) => {
 };
 
 export const actions = {
-  default: async ({ request, url }) => {
+  default: async ({ request, params, url }) => {
 
     const aeroAPIKey = await settings.get('general.aeroAPI');
     if (aeroAPIKey === '') return API.Form.formFailure('?/default', '*', 'Configure Aero API key in settings');
 
     const entrySettings = await settings.getSet('entry');
 
+    if (isNaN(parseInt(params.tour))) throw redirect(301, '/tour');
     const currentTour = await prisma.tour.findUnique({
-      where: { id: entrySettings['entry.tour.current'] },
+      where: { id: parseInt(params.tour) },
     });
-
     if (currentTour === null) throw redirect(301, '/tour/new');
 
     const data = await request.formData();
@@ -135,7 +136,7 @@ export const actions = {
     if (filteredFlightIDs.length > 0) {
       try {
         // Make a single request and cache the leg data concerning these Flight IDs from flightaware
-        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, filteredFlightIDs);
+        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, filteredFlightIDs, { startTime: startUTC.value, endTime: endUTC.value});
       } catch (e) {
         console.log('Unable to cache options', e);
       }
@@ -172,7 +173,7 @@ export const actions = {
       return API.Form.formFailure('?/default', '*', 'Error creating duty day');
     }
 
-    throw redirect(301, '/day/' + redirectId);
+    throw redirect(301, '/tour/' + currentTour.id + '/day/' + redirectId);
 
     // return API.Form.formFailure('?/default', '*', 'test');
 

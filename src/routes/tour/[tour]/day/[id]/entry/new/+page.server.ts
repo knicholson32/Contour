@@ -17,8 +17,8 @@ export const load = async ({ params, fetch }) => {
 
   const entrySettings = await settings.getSet('entry');
 
-  if (entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED) throw redirect(301, `/day/${params.id}/entry/new/link`);
-  else if (entrySettings['entry.day.entry.state'] === DayNewEntryState.LINK_ENTERED) throw redirect(301, `/day/${params.id}/entry/new/verify`);
-  else if (entrySettings['entry.day.entry.state'] === DayNewEntryState.LINK_CONFIRMED) throw redirect(301, `/day/${params.id}/entry/new/form`);
+  if (entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED) throw redirect(301, `/tour/${params.tour}/day/${params.id}/entry/new/link`);
+  else if (entrySettings['entry.day.entry.state'] === DayNewEntryState.LINK_ENTERED) throw redirect(301, `/tour/${params.tour}/day/${params.id}/entry/new/verify`);
+  else if (entrySettings['entry.day.entry.state'] === DayNewEntryState.LINK_CONFIRMED) throw redirect(301, `/tour/${params.tour}/day/${params.id}/entry/new/form`);
 
 };

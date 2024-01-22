@@ -13,8 +13,11 @@ export const load = async ({ fetch, params, parent }) => {
 
   const entrySettings = await settings.getSet('entry');
 
-  const currentTour = await prisma.tour.findUnique({ where: { id: entrySettings['entry.tour.current'] } });
-  // if (currentTour === null) throw redirect(301, '/tour/new');
+  if (isNaN(parseInt(params.tour))) throw redirect(301, '/tour');
+  const currentTour = await prisma.tour.findUnique({
+    where: { id: parseInt(params.tour) },
+  });
+  if (currentTour === null) throw redirect(301, '/tour/new');
 
   const days = await prisma.dutyDay.findMany({
     select: {
@@ -22,6 +25,9 @@ export const load = async ({ fetch, params, parent }) => {
       startAirportId: true,
       endAirportId: true,
       startTime_utc: true,
+    },
+    orderBy: {
+      startTime_utc: 'asc'
     }
   });
 
@@ -60,7 +66,7 @@ export const load = async ({ fetch, params, parent }) => {
       tour: true
     },
   });
-  if (currentDay === null) throw redirect(301, '/day/new');
+  if (currentDay === null) throw redirect(301, '/tour/' + currentTour.id + '/day/new');
 
   const legDeadheadCombo: ((typeof currentDay.deadheads[0] | typeof currentDay.legs[0]) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[] = [];
   for (const leg of currentDay.legs) legDeadheadCombo.push({...leg, type: 'leg'});
@@ -102,10 +108,14 @@ export const actions = {
 
     const entrySettings = await settings.getSet('entry');
 
-    const currentTour = await prisma.tour.findUnique({ where: { id: entrySettings['entry.tour.current'] } });
+    if (isNaN(parseInt(params.tour))) throw redirect(301, '/tour');
+    const currentTour = await prisma.tour.findUnique({
+      where: { id: parseInt(params.tour) },
+    });
     if (currentTour === null) throw redirect(301, '/tour/new');
+
     const currentDay = await prisma.dutyDay.findUnique({ where: { id: parseInt(params.id) } });
-    if (currentDay === null) throw redirect(301, '/day/new');
+    if (currentDay === null) throw redirect(301, '/tour/' + currentTour.id + '/day/new');
 
     const data = await request.formData();
     for (const key of data.keys()) {
@@ -209,7 +219,7 @@ export const actions = {
     return API.Form.formSuccess('?/update');
   },
 
-  delete: async ({ request, url }) => {
+  delete: async ({ request, params, url }) => {
     const data = await request.formData();
     for (const key of data.keys()) {
       console.log(key, data.getAll(key));
@@ -226,6 +236,6 @@ export const actions = {
       return API.Form.formFailure('?/update', '*', 'Could not delete');
     }
 
-    throw redirect(301, '/day');
+    throw redirect(301, '/tour/' + params.tour + '/day');
   }
 };

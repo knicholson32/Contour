@@ -7,7 +7,7 @@ export const load = async ({ params, fetch }) => {
 
   const entrySettings = await settings.getSet('entry');
 
-  if (isNaN(parseInt(params.id))) throw redirect(301, '/day');
+  if (isNaN(parseInt(params.id))) throw redirect(301, '/tour/' + params.tour + '/day');
 
   const currentDay = await prisma.dutyDay.findUnique({
     where: { id: parseInt(params.id) },
@@ -33,7 +33,7 @@ export const load = async ({ params, fetch }) => {
     },
   });
 
-  if (currentDay === null) throw redirect(301, '/day');
+  if (currentDay === null) throw redirect(301, '/tour/' + params.tour + '/day');
 
   const legs = await prisma.leg.findMany({
     where: {
@@ -52,8 +52,8 @@ export const load = async ({ params, fetch }) => {
 
   console.log(legs);
 
-  if (legs.length > 0) throw redirect(301, '/day/' + params.id + '/entry/' + legs[0].id);
+  if (legs.length > 0) throw redirect(301, '/tour/' + params.tour + '/day/' + params.id + '/entry/' + legs[0].id);
 
-  throw redirect(301, '/day/' + params.id + '/entry/new');
+  throw redirect(301, '/tour/' + params.tour + '/day/' + params.id + '/entry/new');
 };
 

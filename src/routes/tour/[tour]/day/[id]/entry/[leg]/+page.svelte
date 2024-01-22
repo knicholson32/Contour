@@ -7,7 +7,7 @@
   import * as Map from '$lib/components/map';
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
-  import { goto} from '$app/navigation';
+  import { afterNavigate, goto} from '$app/navigation';
   import Badge from '$lib/components/decorations/Badge.svelte';
   import * as MenuForm from '$lib/components/menuForm';
   import Tag from '$lib/components/decorations/Tag.svelte';
@@ -53,7 +53,7 @@
   let isMobileSize: boolean;
 
   const onMenuBack = () => {
-    if (ref === null) goto('/day/' + data.params.id + '?active=form');
+    if (ref === null) goto('/tour/' + data.params.tour + '/day/' + data.params.id + '?active=form');
     else goto(ref);
   }
 
@@ -70,7 +70,8 @@
     resetMap();
   }
 
-  onMount(() => {
+  
+  afterNavigate(() => {
     setTimeout(resetMap, 1);
   });
 
@@ -83,14 +84,14 @@
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
     <MenuForm.Title title="Duty Day Legs" />
-    <MenuForm.Link href={ref ?? '/day/' + data.params.id + '?active=form'} type="left" text="Back to Day" />
-    <MenuForm.Link href={'/day/' + data.params.id + '/entry/new?' + urlActiveParam} icon={icons.plus} text="Create a new leg" type="right"/>
+    <MenuForm.Link href={ref ?? ('/tour/' + data.params.tour + '/day/' + data.params.id + '?active=form')} type="left" text="Back to Day" />
+    <MenuForm.Link href={'/tour/' + data.params.tour + '/day/' + data.params.id + '/entry/new?' + urlActiveParam} icon={icons.plus} text="Create a new leg" type="right"/>
     <MenuForm.SearchBar />
     <!-- Existing Legs -->
     <Section title="Legs">
       {#each data.legDeadheadCombo as leg (leg.id)}
         {#if leg.type === 'leg'}
-          <a href="/day/{data.params.id}/entry/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.leg && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
+          <a href="/tour/{data.params.tour}/day/{data.params.id}/entry/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.leg && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
             <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
               <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
                 {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId} 

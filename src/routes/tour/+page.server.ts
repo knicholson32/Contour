@@ -33,44 +33,18 @@ export const load = async ({ params, fetch }) => {
     }
   });
 
+  if (currentTour !== null) throw redirect(301, 'tour/' + currentTour.id);
+
   const tourOptions = await prisma.tour.findMany({
     where: {},
     take: 5,
     orderBy: {
       id: 'desc'
-    },
-    include: {
-      days: {
-        include: {
-          legs: {
-            orderBy: {
-              id: 'asc'
-            },
-            select: {
-              startTime_utc: true,
-              endTime_utc: true
-            }
-          }
-        },
-        orderBy: {
-          id: 'asc'
-        }
-      }
     }
   });
 
-  const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
+  if (tourOptions.length === 0) throw redirect(301, 'tour/new');
 
-  return {
-    entrySettings,
-    currentTour,
-    tourOptions,
-    airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
-  };
-};
+  throw redirect(301, 'tour/' + tourOptions[0].id);
 
-export const actions = {
-  default: async ({ request }) => {
-
-  }
 };

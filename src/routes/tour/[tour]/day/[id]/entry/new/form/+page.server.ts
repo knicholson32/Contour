@@ -23,17 +23,18 @@ export const load = async ({ params, fetch }) => {
   const entrySettings = await settings.getSet('entry');
   const aeroAPIKey = await settings.get('general.aeroAPI');
 
+  if (isNaN(parseInt(params.tour))) throw redirect(301, '/tour');
   const currentTour = await prisma.tour.findUnique({
-    where: { id: entrySettings['entry.tour.current'] },
+    where: { id: parseInt(params.tour) },
   });
   if (currentTour === null) throw redirect(301, '/tour/new');
 
-  if (isNaN(parseInt(params.id))) throw redirect(301, '/day');
+  if (isNaN(parseInt(params.id))) throw redirect(301, '/tour/' + params.tour + '/day');
   const currentDay = await prisma.dutyDay.findUnique({
     where: { id: parseInt(params.id) },
     include: { legs: true },
   });
-  if (currentDay === null) throw redirect(301, '/day');
+  if (currentDay === null) throw redirect(301, '/tour/' + params.tour + '/day');
 
   if (entrySettings['entry.day.entry.fa_id'] === '' || entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED) throw redirect(301, '../link');
   if (aeroAPIKey === '') throw redirect(301, '/settings');
@@ -66,7 +67,7 @@ export const load = async ({ params, fetch }) => {
       }
     }
 
-    if (unknownAircraft) throw redirect(301, `/aircraft/entry/new?reg=${entry.registration}&ref=/day/${params.id}/entry/new/form&active=form`)
+    if (unknownAircraft) throw redirect(301, `/aircraft/entry/new?reg=${entry.registration}&ref=/tour/${params.tour}/day/${params.id}/entry/new/form&active=form`)
   }
 
   // Create airport if it does not exist
@@ -470,6 +471,6 @@ export const actions = {
 
     // return API.Form.formSuccess('?/default');
 
-    throw redirect(301, '/day/' + params.id + '/entry/' + id);
+    throw redirect(301, '/tour/' + params.tour + '/day/' + params.id + '/entry/' + id);
   }
 };

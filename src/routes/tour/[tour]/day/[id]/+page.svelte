@@ -8,7 +8,7 @@
   import { v4 as uuidv4 } from 'uuid';
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
-  import { goto} from '$app/navigation';
+  import { afterNavigate, goto} from '$app/navigation';
   import * as Map from '$lib/components/map';
   import Badge from '$lib/components/decorations/Badge.svelte';
   import * as MenuForm from '$lib/components/menuForm';
@@ -50,7 +50,7 @@
     resetMap();
   }
 
-  onMount(() => {
+  afterNavigate(() => {
     setTimeout(resetMap, 1);
   })
 
@@ -65,13 +65,13 @@
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
     <MenuForm.Title title="Duty Day" />
-    <MenuForm.Link href={'/tour?' + urlActiveParam} icon={icons.chevronLeft} text="Edit Tour" type="left"/>
-    <MenuForm.Link href={'/day/new?' + urlActiveParam} selected={$page.url.pathname.endsWith('new') && !isMobileSize} icon={icons.plus} text="Create a new day" type="right"/>
+    <MenuForm.Link href={'/tour/' + data.params.tour + '/?' + urlActiveParam} icon={icons.chevronLeft} text="Edit Tour" type="left"/>
+    <MenuForm.Link href={'/tour/' + data.params.tour + '/day/new?' + urlActiveParam} selected={$page.url.pathname.endsWith('new') && !isMobileSize} icon={icons.plus} text="Create a new day" type="right"/>
     <MenuForm.SearchBar />
     <!-- Existing Aircraft -->
     <Section title="Days">
       {#each data.days as day (day.id)}
-        <a href="/day/{day.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {day.id === parseInt(data.params.id) && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
+        <a href="/tour/{data.params.tour}/day/{day.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {day.id === parseInt(data.params.id) && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
           <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
             <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
               {day.startAirportId} - {day.endAirportId} 
@@ -163,7 +163,7 @@
             <Submit disabled={data.currentDay.legs.length > 0} hoverTitle={data.currentDay.legs.length > 0 ? 'Disabled because legs still exist' : 'Delete Day'} class="w-full" failed={form?.ok === false && form.action === '?/default'} submitting={deleting} theme={{primary: 'red'}} actionText={'Delete'} actionTextInProgress={'Deleting'} />
           </form>
         {/if}
-        <a href="/day/{data.currentDay.id}/entry?active=menu" class="flex-grow w-full text-center md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900">
+        <a href="/tour/{data.params.tour}/day/{data.currentDay.id}/entry?active=menu" class="flex-grow w-full text-center md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900">
           Legs
         </a>
         {#if $unsavedChanges}

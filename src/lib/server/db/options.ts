@@ -278,9 +278,18 @@ export const getFlightOptionFaFlightID = async (fa_flight_id?: string): Promise<
  * @param flightIDs a list of the unique flightIDs to cache. The larger this list is the more efficient the API usage
  * @param clearCache whether or not to erase the associated cache and redo it. False by default.
  */
-export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, flightIDs: string[], clearCache = false, forceExpansiveSearch = false): Promise<void> => {
+export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, flightIDs: string[], options?: { clearCache?: boolean, forceExpansiveSearch?: boolean, startTime?: number, endTime?: number }): Promise<void> => {
+
+    if (options === undefined) options = {};
+    if (options.clearCache === undefined) options.clearCache = false;
+    if (options.forceExpansiveSearch === undefined) options.forceExpansiveSearch = false;
+    if (options.startTime === undefined) options.startTime = Math.floor(Date.now() / 1000) - TWENTY_FOUR_HOURS;
+    if (options.endTime === undefined) options.endTime = Math.floor(Date.now() / 1000) + EIGHT_HOURS;
+
+    console.log(`getOptionsAndCache(####, ${tour}, [${flightIDs.join(', ')}], { clearCache: ${options.clearCache}, forceExpansiveSearch: ${options.forceExpansiveSearch}, startTime: ${options.startTime}, endTime: ${options.endTime} })`)
+
     // If required, clear the cache so we can get latest info
-    if (clearCache) {
+    if (options.clearCache) {
         console.log('CLEAR CACHE');
         // Clear the cache so we can be sure we won't have a cache collision
         await clear(tour);
@@ -301,11 +310,11 @@ export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, fligh
         // Execute the search which will get all possible flights for this group
         // With time support: { times: { startTime: Math.floor(Date.now() / 1000) - TWENTY_FOUR_HOURS, endTime: Math.floor(Date.now() / 1000) + EIGHT_HOURS} }
         let flights: aero.schema.Flight[];
-        if (forceExpansiveSearch) {
+        if (options.forceExpansiveSearch) {
             console.log(chalk.yellow('Expansive Search'));
             flights = await aero.getFlightsBulk(flightID, aeroAPIKey, { });
         }
-        else flights = await aero.getFlightsBulk(flightID, aeroAPIKey, { times: { startTime: Math.floor(Date.now() / 1000) - TWENTY_FOUR_HOURS, endTime: Math.floor(Date.now() / 1000) + EIGHT_HOURS } });
+        else flights = await aero.getFlightsBulk(flightID, aeroAPIKey, { times: { startTime: options.startTime - EIGHT_HOURS, endTime: options.endTime + EIGHT_HOURS } });
 
         // Convert the flights to a cache format and collect diversion information
         const cacheFlights: Types.Option[] = [];

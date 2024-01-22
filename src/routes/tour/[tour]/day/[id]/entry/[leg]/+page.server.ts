@@ -35,7 +35,7 @@ export const load = async ({ fetch, params }) => {
     }},
   });
 
-  if (day === null) throw redirect(301, '/day');
+  if (day === null) throw redirect(301, '/tour/' + params.tour + '/day');
 
   const airportsRaw = await ((await fetch('/api/airports')).json()) as API.Airports;
   const airports = (airportsRaw.ok === true) ? airportsRaw.airports : [] as API.Types.Airport[]
@@ -340,9 +340,9 @@ export const actions = {
     const c = await prisma.leg.count({ where: { dayId: parseInt(params.id)}});
 
     if (c > 0) {
-      throw redirect(301, '/day/' + params.id + '/entry?active=menu');
+      throw redirect(301, '/tour/' + params.tour + '/day/' + params.id + '/entry?active=menu');
     } else {
-      throw redirect(301, '/day/' + params.id);
+      throw redirect(301, '/tour/' + params.tour + '/day/' + params.id);
     }
   }
 };

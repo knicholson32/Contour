@@ -72,6 +72,7 @@ export const load = async ({ params, fetch }) => {
   return {
     entry,
     id: params.id,
+    params,
     entrySettings,
     existingEntry: existingFData !== null,
     startTime: originAirport === null ? null : helpers.dateToDateStringForm(entry.startTime, false, originAirport.timezone) + ' ' + helpers.getTimezoneObjectFromTimezone(originAirport.timezone)?.abbreviation,
@@ -87,6 +88,6 @@ export const load = async ({ params, fetch }) => {
 export const actions = {
   default: async ({ request, url, params }) => {
     await settings.set('entry.day.entry.state', DayNewEntryState.LINK_CONFIRMED);
-    throw redirect(301, '/day/' + params.id + '/entry/new/form');
+    throw redirect(301, '/tour/' + params.tour + '/day/' + params.id + '/entry/new/form');
   }
 };

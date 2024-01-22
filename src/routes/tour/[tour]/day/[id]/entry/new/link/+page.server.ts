@@ -17,17 +17,18 @@ export const load = async ({ params, fetch }) => {
 
   const entrySettings = await settings.getSet('entry');
 
+  if (isNaN(parseInt(params.tour))) throw redirect(301, '/tour');
   const currentTour = await prisma.tour.findUnique({
-    where: { id: entrySettings['entry.tour.current'] },
+    where: { id: parseInt(params.tour) },
   });
   if (currentTour === null) throw redirect(301, '/tour/new');
 
-  if (isNaN(parseInt(params.id))) throw redirect(301, '/day');
+  if (isNaN(parseInt(params.id))) throw redirect(301, '/tour/' + params.tour + '/day');
   const currentDay = await prisma.dutyDay.findUnique({
     where: { id: parseInt(params.id) },
     include: { legs: true },
   });
-  if (currentDay === null) throw redirect(301, '/day');
+  if (currentDay === null) throw redirect(301, '/tour/' + params.tour + '/day');
 
   const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
 
@@ -45,11 +46,17 @@ export const actions = {
     const aeroAPIKey = await settings.get('general.aeroAPI');
     if (aeroAPIKey === '') return API.Form.formFailure('?/default', '*', 'Configure Aero API key in settings');
 
-    const entrySettings = await settings.getSet('entry');
+    if (isNaN(parseInt(params.tour))) throw redirect(301, '/tour');
     const currentTour = await prisma.tour.findUnique({
-      where: { id: entrySettings['entry.tour.current'] },
+      where: { id: parseInt(params.tour) },
     });
     if (currentTour === null) throw redirect(301, '/tour/new');
+
+    const currentDay = await prisma.dutyDay.findUnique({
+      where: { id: parseInt(params.id) },
+      include: { legs: true },
+    });
+    if (currentDay === null) throw redirect(301, '/tour/' + params.tour + '/day');
 
     const data = await request.formData();
 
@@ -70,7 +77,7 @@ export const actions = {
 
       if (noCache) {
         if (flightID === null || flightID === '') return API.Form.formFailure('?/default', 'flight-id', 'Not cached. Required for efficiency.');
-        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], true);
+        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], { clearCache: true, startTime: currentDay.startTime_utc, endTime: currentDay.endTime_utc });
       }
 
       console.log(fa_flight_id);
@@ -81,10 +88,10 @@ export const actions = {
       if (entry === undefined) {
         if (flightID === null || flightID === '') return API.Form.formFailure('?/default', 'flight-id', 'Not cached. Required for efficiency.');
         if (!noCache) {
-          await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()]);
+          await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], { startTime: currentDay.startTime_utc, endTime: currentDay.endTime_utc });
           entry = await options.getFlightOptionFaFlightID(fa_flight_id);
         } else {
-          await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], true, true);
+          await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], { clearCache: true, forceExpansiveSearch: true });
           entry = await options.getFlightOptionFaFlightID(fa_flight_id);
         }
         if (entry === undefined) {
@@ -108,7 +115,7 @@ export const actions = {
       }
     }
 
-    throw redirect(301, '/day/' + params.id + '/entry/new/verify');
+    throw redirect(301, '/tour/' + params.tour + '/day/' + params.id + '/entry/new/verify');
 
     // return API.Form.formFailure('?/default', '*', 'test');
 

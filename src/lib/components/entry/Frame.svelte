@@ -30,7 +30,8 @@
       <dt class="font-bold inline-flex items-center gap-2 whitespace-nowrap {red ? 'text-red-500' : ''}">
         {title}
         {#if required}
-          <span class="text-xxs uppercase {red ? 'text-red-500' : 'text-gray-400'}">required</span>
+          <span class="text-xxs uppercase hidden xs:block {red ? 'text-red-500' : 'text-gray-400'}">required</span>
+          <span class="text-xxs uppercase xs:hidden {red ? 'text-red-500' : 'text-gray-400'}">req</span>
         {/if}
         {#if restore !== null && restore !== undefined && unsaved}
           <button tabindex="-1"  on:click={_restore} type="button" class="touch-manipulation select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 w-[4.5rem] rounded-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-sky-300 dark:ring-sky-600 bg-white dark:bg-transparent betterhover:hover:bg-gray dark:betterhover:hover:bg-zinc-900 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200">
