@@ -131,7 +131,7 @@
             {title: 'Total Legs', value: data.aircraft._count.legs.toLocaleString()},
             {title: 'Total Flight Time', value: data.aircraftTimes[data.aircraft.id] + ' hr'},
             {title: 'Avg. Leg Length', value: data.avgLegLen.toFixed(1) + ' hr'},
-            {title: 'Diversion %', value: '0%'}
+            {title: 'Diversion %', value: (data.diversionPercent * 100).toFixed(0) + '%'}
           ]}/>
           <MenuForm.Link theme='FormHeader' href={`/aircraft/type/${data.aircraft.type.id}?active=form&ref=/aircraft/entry/${data.aircraft.id}?active=form`} icon={icons.circleStack} text={`Edit ${data.aircraft.type.make} ${data.aircraft.type.model} Type`} />
         </MenuForm.FormHeader>

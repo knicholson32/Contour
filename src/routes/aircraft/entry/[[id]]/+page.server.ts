@@ -29,7 +29,7 @@ export const load = async ({ fetch, params, url }) => {
     else aircraftTimes[ac.id] = (0).toFixed(1);
   }
 
-  const currentAircraft = await prisma.aircraft.findUnique({ where: { id: params.id }, include: { type: true, _count: true, legs: { select: { totalTime: true } } } });
+  const currentAircraft = await prisma.aircraft.findUnique({ where: { id: params.id }, include: { type: true, _count: true, legs: { select: { totalTime: true, diversionAirportId: true } } } });
   if (params.id !== 'new' && currentAircraft === null) throw redirect(301, '/aircraft/entry/new');
 
   let orderGroups: { typeCode: string, regs: (typeof aircrafts[0])[] }[] = []
@@ -56,11 +56,14 @@ export const load = async ({ fetch, params, url }) => {
   }
 
   let avgLegLen = 0;
+  let diversionPercent = 0;
   if (currentAircraft !== null) {
     for (const leg of currentAircraft.legs) {
       avgLegLen += leg.totalTime;
+      if (leg.diversionAirportId !== null) diversionPercent++;
     }
-    avgLegLen = avgLegLen / currentAircraft.legs.length
+    avgLegLen = currentAircraft.legs.length === 0 ? 0 : avgLegLen / currentAircraft.legs.length;
+    diversionPercent = currentAircraft.legs.length === 0 ? 0 : diversionPercent / currentAircraft.legs.length;
   }
 
   // Get all tail numbers (so we know if one exists)
@@ -73,6 +76,7 @@ export const load = async ({ fetch, params, url }) => {
     typeOptions,
     orderGroups,
     avgLegLen,
+    diversionPercent,
     tails,
     types,
     params,

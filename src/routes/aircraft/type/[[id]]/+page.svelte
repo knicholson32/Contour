@@ -104,8 +104,8 @@
           <Stats values={[
             {title: 'Total Legs', value: data.numLegs.toLocaleString()},
             {title: 'Total Flight Time', value: data.totalTime.toFixed(1) + ' hr'},
-            {title: 'Avg. Leg Length', value: (data.totalTime / data.numLegs).toFixed(1) + ' hr'},
-            {title: 'Diversion %', value: '0%'}
+            {title: 'Avg. Leg Length', value: (data.numLegs === 0 ? 0 : (data.totalTime / data.numLegs).toFixed(1)) + ' hr'},
+            {title: 'Diversion %', value: (data.numLegs === 0 ? 0 : (100 * data.numDiversions / data.numLegs).toFixed(0)) + '%'}
           ]}/>
           <div class="w-full h-1"></div>
         </MenuForm.FormHeader>

@@ -38,10 +38,14 @@ export const load = async ({ fetch, params, url }) => {
   }
   if (currentMake !== '') orderGroups.push({ make: currentMake, types: currentGroup });
 
-  const legs = await prisma.leg.findMany({ where: { aircraft: { aircraftTypeId: params.id } }, select: { totalTime: true }});
+  const legs = await prisma.leg.findMany({ where: { aircraft: { aircraftTypeId: params.id } }, select: { totalTime: true, diversionAirportId: true }});
 
   let totalTime = 0;
-  for (const l of legs) totalTime += l.totalTime;
+  let numDiversions = 0;
+  for (const l of legs) {
+    totalTime += l.totalTime;
+    if (l.diversionAirportId !== null) numDiversions++;
+  }
 
 
   return {
@@ -50,6 +54,7 @@ export const load = async ({ fetch, params, url }) => {
     type: currentType,
     orderGroups,
     numLegs: legs.length,
+    numDiversions,
     totalTime,
     params,
     enums: {
