@@ -89,12 +89,12 @@
     <MenuForm.SearchBar />
     <!-- Existing Legs -->
     <Section title="Legs">
-      {#each data.legDeadheadCombo as leg (leg.id)}
+      {#each data.legDeadheadCombo as leg,i (leg.id)}
         {#if leg.type === 'leg'}
           <a href="/tour/{data.params.tour}/day/{data.params.id}/entry/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.leg && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
             <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
               <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-                {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId} 
+                <span class="font-mono">{i+1}: {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId} </span>
                 {#if $unsavedUIDs.includes(leg.id)}
                   <Tag>UNSAVED</Tag>
                 {/if}
@@ -109,8 +109,8 @@
         {:else}
           <div class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 bg-gray-50 dark:bg-zinc-950/50">
             <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
-              <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis text-gray-400 dark:text-zinc-700">
-                {leg.originAirportId} → {leg.destinationAirportId} (Deadhead)
+              <div class="uppercase font-bold font-mono text-xs overflow-hidden whitespace-nowrap text-ellipsis text-gray-400 dark:text-zinc-700">
+                {i+1}: {leg.originAirportId} → {leg.destinationAirportId} (Deadhead)
               </div>
             </div>
           </div>
@@ -219,8 +219,8 @@
           {/if}
           {#if $unsavedChanges}
             <button type="button" on:click={() => clearUID(true)} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
+            <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Update" actionTextInProgress="Update" />
           {/if}
-          <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Update" actionTextInProgress="Update" />
         </div>
       </form>
     {/if}

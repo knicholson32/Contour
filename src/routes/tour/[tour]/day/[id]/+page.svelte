@@ -73,8 +73,8 @@
       {#each data.days as day,i (day.id)}
         <a href="/tour/{data.params.tour}/day/{day.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {day.id === parseInt(data.params.id) && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
           <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
-            <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-              Day {i+1}: {day.startAirportId} - {day.endAirportId} 
+            <div class="uppercase font-bold font-mono text-xs overflow-hidden whitespace-nowrap text-ellipsis">
+              <span class="font-mono text-xxs">Day {i+1}: </span>{day.startAirportId} → {day.endAirportId} 
               <span class="lowercase text-gray-400">
                 on
                 {getInlineDateUTC(day.startTime_utc)}
@@ -169,8 +169,8 @@
         {#if $unsavedChanges}
           <button type="button" on:click={() => clearUID(true)} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
             ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900">Clear</button>
+          <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Update" actionTextInProgress="Update" />
         {/if}
-        <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Update" actionTextInProgress="Update" />
       </div>
     </form>
   </div>
