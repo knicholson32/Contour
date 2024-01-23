@@ -183,8 +183,8 @@
         {#if $unsavedChanges}
           <button type="button" on:click={() => clearUID(true)} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
             ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900">Clear</button>
+          <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.params.tour === 'new' ? 'Create' : 'Update'} actionTextInProgress={data.params.tour === 'new' ? 'Creating' : 'Updating'} />
         {/if}
-        <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.params.tour === 'new' ? 'Create' : 'Update'} actionTextInProgress={data.params.tour === 'new' ? 'Creating' : 'Updating'} />
       </div>
     </form>
   </div>
