@@ -438,21 +438,27 @@ export const actions = {
           try {
             const route = await aero.getFlightRoute(flightAwareData.faFlightId, aeroAPIKey);
             await Fixes.storeFixes(route.fixes, leg.id);
+          } catch (e) {
+            console.log(e);
+            // It is OK if we can't store the route?
+          }
 
+          try {
             await generateDeadheads(parseInt(params.id));
 
             // If we made it here, we are done!
             await settings.set('entry.day.entry.fa_id', '');
             await settings.set('entry.day.entry.fa_link', '');
             await settings.set('entry.day.entry.state', DayNewEntryState.NOT_STARTED);
-
           } catch (e) {
             console.log(e);
             await Positions.deletePositions(leg.id);
+            await Fixes.deleteFixes(leg.id);
             await prisma.flightAwareData.delete({ where: { faFlightId: flightAwareData.faFlightId } });
             await prisma.leg.delete({ where: { id: leg.id } });
-            return API.Form.formFailure('?/default', '*', 'Could not store fixes');
+            return API.Form.formFailure('?/default', '*', 'Could not create deadheads');
           }
+
         } catch (e) {
           console.log(e);
           await prisma.flightAwareData.delete({ where: { faFlightId: flightAwareData.faFlightId } });

@@ -76,8 +76,8 @@ export const actions = {
       if (fa_flight_id === null || typeof fa_flight_id !== 'string' || fa_flight_id.length === 0) return API.Form.formFailure('?/default', 'fa-link', 'Invalid FlightAware link');
 
       if (noCache) {
-        if (flightID === null || flightID === '') return API.Form.formFailure('?/default', 'flight-id', 'Not cached. Required for efficiency.');
-        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], { clearCache: true, startTime: currentDay.startTime_utc, endTime: currentDay.endTime_utc });
+        if (flightID === null || flightID === '') await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [fa_flight_id], {});
+        else await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], { clearCache: true, startTime: currentDay.startTime_utc, endTime: currentDay.endTime_utc });
       }
 
       console.log(fa_flight_id);
@@ -86,17 +86,12 @@ export const actions = {
       let entry = await options.getFlightOptionFaFlightID(fa_flight_id);
 
       if (entry === undefined) {
-        if (flightID === null || flightID === '') return API.Form.formFailure('?/default', 'flight-id', 'Not cached. Required for efficiency.');
-        if (!noCache) {
-          await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], { startTime: currentDay.startTime_utc, endTime: currentDay.endTime_utc });
-          entry = await options.getFlightOptionFaFlightID(fa_flight_id);
-        } else {
+        if(noCache) {
+          if (flightID === null || flightID === '') return API.Form.formFailure('?/default', 'flight-id', 'Not cached. Required for efficiency.');
           await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], { clearCache: true, forceExpansiveSearch: true });
-          entry = await options.getFlightOptionFaFlightID(fa_flight_id);
-        }
-        if (entry === undefined) {
-          return API.Form.formFailure('?/default', 'fa-link', 'Flight could not be found');
-        }
+        } else await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [fa_flight_id], { });
+        entry = await options.getFlightOptionFaFlightID(fa_flight_id);
+        if (entry === undefined) return API.Form.formFailure('?/default', 'fa-link', 'Flight could not be found');
       }
 
       console.log('Linked Option', entry);

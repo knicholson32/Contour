@@ -17,6 +17,7 @@
   import { v4 as uuidv4 } from 'uuid';
   import { onMount } from 'svelte';
     import { afterNavigate } from '$app/navigation';
+    import Warning from '$lib/components/Warning.svelte';
   let mapKey = uuidv4();
   const resetMap = () => {
     mapKey = uuidv4();
@@ -50,23 +51,19 @@
       };
     }}>
 
-      {#if data.entry.progressPercent !== null && data.entry.progressPercent !== 100}
-        <div class="p-3">
-          NOTICE: The cache entry is NOT complete. The flight is still in progress. Make sure the flight has finished, and reload with "No Cache" enabled.
-        </div>
-      {/if}
+      <Section title="Warnings" warning={true}>
+        {#if data.entry.progressPercent !== null && data.entry.progressPercent !== 100}
+          <Warning>The flight is still in progress. Make sure the flight has finished, and reload with <span class="font-mono text-xs">"Clear Cache"</span> enabled.</Warning>
+        {/if}
 
-      {#if data.entry.inaccurateTiming === true}
-        <div class="p-3">
-          NOTICE: This entry has inaccurate timing. Verify the start and end times.
-        </div>
-      {/if}
+        {#if data.entry.inaccurateTiming === true}
+          <Warning error={true}>This entry has inaccurate timing. Verify the start and end times.</Warning>
+        {/if}
 
-      {#if data.existingEntry === true}
-        <div class="p-3 text-red-500">
-          NOTICE: An entry with this FlightAware ID already exists
-        </div>
-      {/if}
+        {#if data.existingEntry === true}
+          <Warning error={true}>An entry with this FlightAware ID already exists.</Warning>
+        {/if}
+      </Section>
 
       <Section title="FlightAware">
         <Entry.Link href={data.entrySettings['entry.day.entry.fa_link']} title="FlightAware Source" />

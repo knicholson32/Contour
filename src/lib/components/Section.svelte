@@ -4,6 +4,7 @@
   export let subtitle: string | null = null;
   export let error: string | null = null;
   export let visible: boolean = true;
+  export let warning: boolean = false;
   export let collapsable = false;
 
   let click = () => {
@@ -51,5 +52,13 @@
   </div>
 {/if}
 <ul role="list" class="divide-y divide-gray-100 dark:divide-zinc-800 {!visible ? 'hidden' : ''} {$$restProps.class}">
-  <slot />
+  {#if warning}
+    <slot>
+      <div class="w-full inline-flex items-center justify-center h-11 bg-gray-100 dark:bg-zinc-950 text-gray-500">
+        No Warnings
+      </div>
+    </slot>
+  {:else}
+    <slot />
+  {/if}
 </ul>

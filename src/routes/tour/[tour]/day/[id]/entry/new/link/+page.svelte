@@ -33,7 +33,7 @@
     }}>
 
       <Section title="Flight Aware Link" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
-        <Entry.Switch title="No Cache" name="no-cache" bind:value={noCache} defaultValue={false} />
+        <Entry.Switch title="Clear Cache" name="no-cache" bind:value={noCache} defaultValue={false} />
         <Entry.Input required={noCache} uppercase={true} title="Flight ID" name="flight-id" placeholder="EJA762" defaultValue={null} />
         <Entry.Input required={true} title="Link" name="fa-link" placeholder="https://www.flightaware.com/live/flight/EJA762/history/20240114/1400Z/KAPF/KVNY" defaultValue={null} />
       </Section>
