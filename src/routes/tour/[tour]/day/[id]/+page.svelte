@@ -70,11 +70,11 @@
     <MenuForm.SearchBar />
     <!-- Existing Aircraft -->
     <Section title="Days">
-      {#each data.days as day (day.id)}
+      {#each data.days as day,i (day.id)}
         <a href="/tour/{data.params.tour}/day/{day.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {day.id === parseInt(data.params.id) && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
           <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
             <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-              {day.startAirportId} - {day.endAirportId} 
+              Day {i+1}: {day.startAirportId} - {day.endAirportId} 
               <span class="lowercase text-gray-400">
                 on
                 {getInlineDateUTC(day.startTime_utc)}
