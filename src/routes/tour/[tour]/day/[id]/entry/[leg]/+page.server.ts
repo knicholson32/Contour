@@ -20,20 +20,27 @@ export const load = async ({ fetch, params }) => {
 
   const entrySettings = await settings.getSet('entry');
 
-  const legs = await prisma.leg.findMany({ 
-    where: { dayId: parseInt(params.id) },
-    select: { id: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, aircraftId: true },
-    orderBy: { startTime_utc: 'asc' }
-  });
-
-  const leg = await prisma.leg.findUnique({ where: { id: params.leg }, include: { flightAwareData: true, day: true, aircraft: true }});
-
   const day = await prisma.dutyDay.findUnique({
-    where: { id: entrySettings['entry.day.current'] },
-    include: { legs: true, deadheads: {
-      orderBy: { startTime_utc: 'asc' }
-    }},
+    where: { id: parseInt(params.id) },
+    include: {
+      legs: { select: { id: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, aircraftId: true }, orderBy: { startTime_utc: 'asc' } },
+      deadheads: { orderBy: { startTime_utc: 'asc' } }
+    },
   });
+
+
+  const leg = await prisma.leg.findUnique({
+    where: { id: params.leg },
+    include: {
+      flightAwareData: true,
+      day: true,
+      aircraft: true,
+      positions: true,
+      fixes: true
+    }
+  });
+
+  console.log('day', day);
 
   if (day === null) throw redirect(301, '/tour/' + params.tour + '/day');
 
@@ -60,8 +67,8 @@ export const load = async ({ fetch, params }) => {
 
   const aircraft = await prisma.aircraft.findMany({ select: { registration: true, id: true, type: { select: { typeCode: true, make: true, model: true } } }, orderBy: { registration: 'asc' } });
 
-  const legDeadheadCombo: ((typeof day.deadheads[0] | typeof legs[0]) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[] = [];
-  for (const leg of legs) legDeadheadCombo.push({ ...leg, type: 'leg' });
+  const legDeadheadCombo: ((typeof day.deadheads[0] | typeof day.legs[0]) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[] = [];
+  for (const leg of day.legs) legDeadheadCombo.push({ ...leg, type: 'leg' });
   for (const dead of day.deadheads) legDeadheadCombo.push({ ...dead, type: 'deadhead', diversionAirportId: null });
   legDeadheadCombo.sort((a, b) => {
     if (a.startTime_utc === null || b.startTime_utc === null) return 0;
@@ -75,8 +82,8 @@ export const load = async ({ fetch, params }) => {
     leg,
     // legs,
     day,
-    positions: await prisma.position.findMany({ where: { legId: params.leg } }),
-    fixes: await prisma.fix.findMany({ where: { legId: params.leg } }),
+    // positions: await prisma.position.findMany({ where: { legId: params.leg } }),
+    // fixes: await prisma.fix.findMany({ where: { legId: params.leg } }),
     legDeadheadCombo,
     startTime: dateToDateStringForm(leg?.startTime_utc ?? 0, false, 'UTC'),
     startTimezone: originAirport === null || leg === null ? null : getTimezoneObjectFromTimezone(originAirport.timezone),

@@ -127,7 +127,7 @@
     {:else}
 
       {#key mapKey}
-        <Map.Leg positions={data.positions} fixes={data.fixes} airports={data.airportList} />
+        <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} />
       {/key}
 
       <form action="?/update" method="post" enctype="multipart/form-data" use:enhance={() => {

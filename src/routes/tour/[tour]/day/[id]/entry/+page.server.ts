@@ -34,25 +34,10 @@ export const load = async ({ params, fetch }) => {
   });
 
   if (currentDay === null) throw redirect(301, '/tour/' + params.tour + '/day');
+  
+  console.log('legs', currentDay.legs);
 
-  const legs = await prisma.leg.findMany({
-    where: {
-      day: {
-        id: currentDay.id
-      }
-    },
-    select: {
-      id: true,
-    },
-    orderBy: {
-      startTime_utc: 'desc'
-    },
-    take: 1
-  });
-
-  console.log(legs);
-
-  if (legs.length > 0) throw redirect(301, '/tour/' + params.tour + '/day/' + params.id + '/entry/' + legs[0].id);
+  if (currentDay.legs.length > 0) throw redirect(301, '/tour/' + params.tour + '/day/' + params.id + '/entry/' + currentDay.legs[0].id);
 
   throw redirect(301, '/tour/' + params.tour + '/day/' + params.id + '/entry/new');
 };
