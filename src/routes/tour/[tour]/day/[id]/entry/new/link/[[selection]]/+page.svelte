@@ -14,6 +14,7 @@
     import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
     import BlankMenu from '$lib/components/menuForm/BlankMenu.svelte';
     import icons from '$lib/components/icons';
+    import Frame from '$lib/components/entry/Frame.svelte';
   
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
@@ -63,6 +64,22 @@
     progress = false;
   });
 
+  console.log(data.flightIDOptions);
+
+  let flightIDs: string;
+  const addOption = (option: string) => {
+    const fids = flightIDs === null || flightIDs === undefined ? '' : flightIDs;
+    let parsed = fids.split(',').map((v) => {
+      if(v.indexOf('-') !== -1) return v.trim();
+      else return v.trim().toUpperCase();
+    });
+    if (parsed.length === 1 && parsed[0] === '') parsed = [];
+    option = option.trim().toUpperCase();
+    if (!parsed.includes(option)) parsed.push(option);
+    console.log('2', parsed);
+    flightIDs = parsed.join(', ');
+  }
+
 </script>
 
 <svelte:head>
@@ -81,16 +98,26 @@
   <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
 
     <form method="get">
-
       <Section title="Flight Aware Options" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Switch title="Poll FlightAware" name="no-cache" bind:value={noCache} defaultValue={false} />
+        
         {#if noCache === true}
           <Entry.Switch title="Expansive Search" name="expansive" bind:value={expansive} defaultValue={false} />
         {/if}
-        <!-- <Entry.Switch title="Fetch Airports" name="fetch-airports" bind:value={fetchAirports} defaultValue={false} /> -->
-        <Entry.Input required={noCache} uppercase={true} title="Flight ID" name="flight-id" placeholder="EJA762" defaultValue={$page.url.searchParams.get('flight-id')} />
+        <Entry.Input required={noCache} uppercase={true} title="Flight ID" name="flight-id" placeholder="EJA762" bind:value={flightIDs} defaultValue={$page.url.searchParams.get('flight-id')} />
+        <Frame title="Options" required={false} name="" form={null} class="relative">
+          <div class="w-full overflow-x-scroll whitespace-nowrap absolute top-0 bottom-0 right-0 left-0">
+            <div class="flex flex-row gap-2 items-center h-full">
+              {#each data.flightIDOptions as o}
+                <button type="button" on:click={() => addOption(o)} class="text-xs first:ml-auto px-2 rounded-full bg-sky-500 text-white font-bold">{o}</button>
+              {/each}
+              {#each data.flightIDOptions as o}
+                <button type="button" on:click={() => addOption(o)} class="text-xs px-1 rounded-full bg-sky-500 text-white font-bold">{o}</button>
+              {/each}
+            </div>
+          </div>
+        </Frame>
         <Entry.Submit bind:title={searchTitle}/>
-        <!-- <Entry.Input required={true} title="Link" name="fa-link" placeholder="https://www.flightaware.com/live/flight/EJA762/history/20240114/1400Z/KAPF/KVNY" defaultValue={null} /> -->
       </Section>
 
     </form>
@@ -99,7 +126,8 @@
       {#if data.options.length === 0}
         <Entry.Text>No Results</Entry.Text>
       {:else}
-        <table role="list" class="w-full divide-y divide-gray-100 dark:divide-zinc-800 text-xs">
+      <!-- divide-y divide-gray-100 dark:divide-zinc-800  -->
+        <table role="list" class="w-full text-xs"> 
           <tr class="text-left h-12">
             <th class="pl-2 text-center hidden md:table-cell">Ident</th>
             <th class="pl-2 md:pl-0"></th>
@@ -110,7 +138,7 @@
             <th class="text-center">Duration</th>
           </tr>
           {#each data.options as o}
-            <tr on:click={() => nav(`/tour/${data.params.tour}/day/${data.params.id}/entry/new/link/${o.fa_flight_id}?flight-id=${o.ident}&active=form`)} class="{progress ? '' : 'cursor-pointer'} betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-950/40 {data.params.selection === o.fa_flight_id ? 'bg-gray-200 dark:bg-zinc-950' : 'even:bg-gray-50 dark:even:bg-zinc-800/40'} {o.exists ? 'opacity-40 dark:opacity-20' : ''}">
+            <tr on:click={() => nav(`/tour/${data.params.tour}/day/${data.params.id}/entry/new/link/${o.fa_flight_id}?flight-id=${$page.url.searchParams.get('flight-id')}&active=form`)} class="{progress ? '' : 'cursor-pointer'} betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-950/40 {data.params.selection === o.fa_flight_id ? 'bg-gray-200 dark:bg-zinc-950' : 'even:bg-gray-50 dark:even:bg-zinc-800/40'} {o.exists ? 'opacity-40 dark:opacity-20' : ''}">
               <td class="pl-2 text-center hidden md:table-cell"><a class="text-sky-400 inline-flex gap-1" target="_blank" href="https://www.flightaware.com/live/flight/id/{o.fa_flight_id}:0">
                 {o.ident}
               </a></td>

@@ -34,7 +34,11 @@ export const load = async ({ params, fetch, url }) => {
   });
   if (currentDay === null) throw redirect(301, '/tour/' + params.tour + '/day');
 
-  const flightID = url.searchParams.get('flight-id');
+  const flightIDRaw = url.searchParams.get('flight-id');
+  const flightIDs = flightIDRaw === null ? [] : flightIDRaw.split(',').map((v) => {
+    if (v.indexOf('-') !== -1) return v.trim()
+    else return v.trim().toUpperCase()
+  });
   const noCache = url.searchParams.get('no-cache') === 'true';
   const expansive = url.searchParams.get('expansive') === 'true';
   const fetchAirports = url.searchParams.get('fetch-airports') === 'true';
@@ -43,20 +47,29 @@ export const load = async ({ params, fetch, url }) => {
 
 
 
-  if ((flightID === null || flightID === '') && settingsResults['entry.flight_id.last'] !== '') throw redirect(301, `/tour/${currentTour.id}/day/${currentDay.id}/entry/new/link?flight-id=${settingsResults['entry.flight_id.last']}`);
+  if ((flightIDs.length === 0) && settingsResults['entry.flight_id.last'] !== '') throw redirect(301, `/tour/${currentTour.id}/day/${currentDay.id}/entry/new/link?flight-id=${settingsResults['entry.flight_id.last']}`);
 
-  if (noCache && flightID !== null && flightID !== ''){
-    if (expansive) {
-      await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], { clearCache: true, forceExpansiveSearch: true });
-    } else {
-      await options.getOptionsAndCache(aeroAPIKey, currentTour.id, [flightID.trim().toUpperCase()], { clearCache: true, startTime: currentDay.startTime_utc, endTime: currentDay.endTime_utc });
+  if (noCache && flightIDs.length !== 0){
+    try {
+      if (expansive) {
+        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, flightIDs, { forceExpansiveSearch: true });
+      } else {
+        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, flightIDs, { startTime: currentDay.startTime_utc, endTime: currentDay.endTime_utc });
+      }
+    } catch (e) {
+      console.log('ERROR', e);
     }
   }
 
-  if (flightID !== null && flightID !== '') await settings.set('entry.flight_id.last', flightID);
+  if (flightIDs.length !== 0) await settings.set('entry.flight_id.last', flightIDs.join(', '));
   
-  const availableOptions = flightID === null ? [] : await prisma.option.findMany({ where: { cancelled: false, ident: flightID }, orderBy: { startTime: 'desc' }, select: { faFlightId: true, startTime: true, endTime: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, ident: true, inaccurateTiming: true, progressPercent: true, aircraftType: true }})
+  const availableOptions = flightIDs.length === 0 ? [] : await prisma.option.findMany({ where: { cancelled: false, OR: [ { ident: { in: flightIDs } }, {faFlightId: { in: flightIDs } }] }, orderBy: { startTime: 'desc' }, select: { faFlightId: true, startTime: true, endTime: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, ident: true, inaccurateTiming: true, progressPercent: true, aircraftType: true }})
   
+
+  const flightIDOptions: string[] = [];
+  const availableOptionsTotal = await prisma.option.findMany({ where: { cancelled: false }, select: { ident: true } });
+  console.log(availableOptionsTotal);
+  for (const o of availableOptionsTotal) if (!flightIDOptions.includes(o.ident)) flightIDOptions.push(o.ident);
 
   if (fetchAirports === true) {
     for (const o of availableOptions) {
@@ -190,6 +203,7 @@ export const load = async ({ params, fetch, url }) => {
   return {
     entrySettings,
     options: optionsExport,
+    flightIDOptions,
     selected,
     startTime: selected === null || originAirport === null ? null : helpers.dateToDateStringForm(selected.startTime, false, originAirport.timezone) + ' ' + helpers.getTimezoneObjectFromTimezone(originAirport.timezone)?.abbreviation,
     startTimezone: selected === null || originAirport === null ? null : originAirport.timezone,

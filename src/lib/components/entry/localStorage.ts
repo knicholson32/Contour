@@ -5,7 +5,7 @@ import { page } from '$app/stores';
 import { uid, form } from "./entryStore";
 import { unsaved } from "$lib/stores";
 import type API from "$lib/types/api";
-import { invalidateAll } from "$app/navigation";
+import { afterNavigate, invalidateAll } from "$app/navigation";
 
 /**
  * Geth whether or not there are unsaved items used by the current uid
@@ -105,6 +105,7 @@ export class FormManager {
       return () => {
         // Run every unsubscribe function on page unload
         for (const u of unsubscribe) u();
+        unsaved.set(false);
       }
     });
   }

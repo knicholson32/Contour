@@ -48,7 +48,7 @@
           {/if}
         {/if}
       </div>
-      <dd class="flex-grow flex items-center overflow-hidden {red ? 'text-red-500' : 'text-sky-400'} h-9 justify-end">
+      <dd class="flex-grow flex items-center overflow-hidden {red ? 'text-red-500' : 'text-sky-400'} h-9 justify-end {$$restProps.class}">
         <slot/>
       </dd>
     </button>

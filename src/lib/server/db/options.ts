@@ -310,7 +310,8 @@ export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, fligh
         // Execute the search which will get all possible flights for this group
         // With time support: { times: { startTime: Math.floor(Date.now() / 1000) - TWENTY_FOUR_HOURS, endTime: Math.floor(Date.now() / 1000) + EIGHT_HOURS} }
         let flights: aero.schema.Flight[];
-        if (options.forceExpansiveSearch) {
+        if (options.forceExpansiveSearch || flightID.indexOf('-') !== -1) {
+            // We do an expansive search if requested or if we have been given a FA Flight ID directly (in which it will only return 1 entry)
             console.log(chalk.yellow('Expansive Search'));
             flights = await aero.getFlightsBulk(flightID, aeroAPIKey, { });
         }
