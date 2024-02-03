@@ -10,6 +10,7 @@ export const TypeNames = {
 	'entry.day.entry.state': types.DayNewEntryState.NOT_STARTED,
 	'entry.day.entry.fa_id': '',
 	'entry.day.entry.fa_link': '',
+	'entry.flight_id.last': '',
 	'entry.day.current': -1,
 	'entry.defaultFlightID': 'EJA',
 	// Tour ----------------------------------
@@ -33,6 +34,7 @@ export type ObjectType<T extends TypeName> =
 	T extends 'entry.day.entry.state' ? types.DayNewEntryState : // DayNewEntryState
 	T extends 'entry.day.entry.fa_id' ? string :  // String
 	T extends 'entry.day.entry.fa_link' ? string :  // String
+	T extends 'entry.flight_id.last' ? string :		// String
 	T extends 'entry.defaultFlightID' ? string : 	// String
 	T extends 'entry.defaultStartApt' ? string : 	// String
 	T extends 'system.debug' ? number : 					// Integer
@@ -89,6 +91,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			case 'entry.defaultFlightID':
 			case 'entry.day.entry.fa_id':
 			case 'entry.day.entry.fa_link':
+			case 'entry.flight_id.last':
 			case 'tour.defaultStartApt':
 			case 'general.encKey':
 			case 'general.email':

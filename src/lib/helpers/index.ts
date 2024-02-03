@@ -19,12 +19,25 @@ export const getAirportFromICAO = (icao: string | null, airports: API.Types.Airp
 	return null;
 }
 
+export const timeToTimezoneToString = (unix: number, timezone: TimeZone | null) => {
+	if (timezone === null) return null;
+	const date = new Date((unix + timezone.rawOffsetInMinutes * 60) * 1000);
+	return `${pad(date.getUTCHours(), 2)}:${pad(date.getUTCMinutes(), 2)} ${timezone.abbreviation}`;
+}
+
+export const duration = (start: number, end: number) => {
+	const diff = end - start;
+	const date = new Date(diff * 1000);
+	return `${date.getUTCHours()}h ${date.getUTCMinutes()}m`
+}
+
 /**
  * Get a TimeZone object from the timezone string
  * @param timezone the timezone string
  * @returns the TimeZone object
  */
-export const getTimezoneObjectFromTimezone = (timezone: string): TimeZone | null => {
+export const getTimezoneObjectFromTimezone = (timezone: string | null): TimeZone | null => {
+	if (timezone === null) return null;
 	const timeZones = getTimeZones({ includeUtc: true });
 	const tzObj = timeZones.find((timeZone) => timezone === timeZone.name || timeZone.group.includes(timezone));
 	if (tzObj === undefined) return null;
@@ -39,6 +52,23 @@ export const getTimezoneObjectFromTimezone = (timezone: string): TimeZone | null
 export const getInlineDateUTC = (unix: number) => {
 	const now = new Date(unix * 1000);
 	return `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1, 2)}-${pad(now.getUTCDate(), 2)}`;
+}
+
+/**
+ * Get a one-line short representation of a date string
+ * @param unix the date
+ * @returns the string
+ */
+export const getInlineDateUTCFA = (unix: number) => {
+	const now = new Date(unix * 1000);
+	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	return `${pad(now.getUTCDate(), 2)}-${months[now.getUTCMonth()]}-${now.getUTCFullYear()}`;
+}
+
+export const getWeekdayUTC = (unix: number) => {
+	const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+	const now = new Date(unix * 1000);
+	return days[now.getUTCDay()];
 }
 
 /**
@@ -138,6 +168,19 @@ export const deleteQueries = (params: string[]) => {
 	for (const param of params) url.searchParams.delete(param);
 	history.replaceState({}, '', url);
 };
+
+
+/**
+ * Take a URL and modify the active param while keeping other params intact
+ * @param url the URL
+ * @param active what to set active to
+ * @returns the search params as a string, without the '?'
+ */
+export const setActive = (url: URL, active: 'form' | 'menu') => {
+	url.searchParams.delete('active');
+	url.searchParams.append('active', active);
+	return url.searchParams.toString();
+}
 
 // https://gist.github.com/jonleighton/958841
 export const base64ArrayBuffer = (arrayBuffer: ArrayBuffer): string => {

@@ -63,6 +63,7 @@
   }
 
   export let onMenuBack: (() => void) | null = null;
+  export let afterDrag = () => {};
 
   let wrapper: HTMLDivElement;
   let _menu: HTMLDivElement;
@@ -85,6 +86,8 @@
     activeOnSingleCol = activeOnSingleCol;
   };
 
+  let moved = false;
+  let initialRatio = ratio;
 
   const dragStart = () => {
     dragging = true;
@@ -95,6 +98,8 @@
     dragging = false;
     wrapper.ontouchend = undefined;
     wrapper.ontouchmove = undefined;
+    if (moved) afterDrag();
+    moved = false;
   }
   const mouseMove = (e: MouseEvent | TouchEvent) => {
     if (!dragging) return false;
@@ -117,6 +122,8 @@
     // * 8px is the left/right spacing between .handler and its inner pseudo-element
     const w = (Math.min(Math.max(boxAminWidth, pointerRelativeXpos - 4), containerOffsetWidth - boxBminWidth));
     ratio = w / containerOffsetWidth;
+    if (ratio !== initialRatio) moved = true;
+    initialRatio = ratio;
   }
 
   onMount(() => {
@@ -136,9 +143,9 @@
 <svelte:window bind:innerWidth />
 
 <!-- Menu -->
-<div bind:this={wrapper} class="h-full w-full flex flex-row relative overflow-hidden" style="--column-width: {ratio * 100}%;" role="presentation">
+<div bind:this={wrapper} class="h-full w-full flex flex-row relative overflow-hidden" style="--column-width: {ratio * 100}%; --menu-min-width: {minSizes.menu}px;" role="presentation">
   {#if menu === 'safe'}
-    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border mb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-900 md:w-[--column-width] flex-shrink-0 flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
+    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border mb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-900 md:w-[--column-width] min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
       <slot name="menu"/>
     </div>
     <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
@@ -147,7 +154,7 @@
       </slot>
     </div> -->
   {:else}
-    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-900 md:w-[--column-width] flex-shrink-0 flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
+    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-900 md:w-[--column-width] min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
       <slot name="menu"/>
     </div>
     <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">

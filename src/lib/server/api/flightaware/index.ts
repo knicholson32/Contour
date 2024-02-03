@@ -220,7 +220,8 @@ export const getFlightIDFromURL = async (url: string): Promise<string | null> =>
         return null
     }
     try {
-        const lines = (await (await fetch(url)).text()).split('\n');
+        const text = await (await fetch(url)).text();
+        const lines = text.split('\n');
         for (const l of lines) {
             if (l.indexOf('trackpollBootstrap') !== -1) {
                 const start = l.indexOf('{');
@@ -243,6 +244,8 @@ export const getFlightIDFromURL = async (url: string): Promise<string | null> =>
                 return flightID
             }
         }
+        console.log('ERR: getFlightIDFromURL: No trackpollBootstrap found.');
+        console.log(text);
         return null;
     } catch(e) {
         console.log('ERR: getFlightIDFromURL: General: ', e);

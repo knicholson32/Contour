@@ -11,3 +11,5 @@ export { default as TextField } from './TextField.svelte';
 export { default as Ticker } from './Ticker.svelte';
 export { default as TimePicker } from './TimePicker.svelte';
 export { default as Link } from './Link.svelte';
+export { default as Submit } from './Submit.svelte';
+export { default as Text } from './Text.svelte';
