@@ -23,6 +23,8 @@ namespace API {
 				name: true
 			}
 		}>
+
+		export type ApproachOption = Prisma.ApproachOptionsGetPayload<{}>
 	}
 
 	// Export the basic response with all the available API responses
@@ -32,6 +34,7 @@ namespace API {
 		| Boolean
 		| Airports
 		| Airport
+		| Approach
 
 	// Create a basic API interface that all other APIs will extend
 	interface API {
@@ -78,6 +81,11 @@ namespace API {
 	export interface Airport extends Success {
 		type: 'airport';
 		airport: Types.Airport
+	}
+
+	export interface Approach extends Success {
+		type: 'approach';
+		options: Types.ApproachOption[]
 	}
 }
 

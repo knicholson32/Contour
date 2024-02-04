@@ -5,7 +5,11 @@
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
   import { enhance } from '$app/forms';
+  import type * as Types from '@prisma/client';
   import * as Map from '$lib/components/map';
+  import { v4 as uuidv4 } from 'uuid';
+  import { onMount } from 'svelte';
+  import Warning from '$lib/components/Warning.svelte';
 
   import { dateToDateStringForm, getInlineDateUTC, timeStrAndTimeZoneToUTC, validateURL } from '$lib/helpers';
   export let data: import('./$types').PageData;
@@ -58,9 +62,17 @@
 
   let totalTime: string | null;
 
-  import { v4 as uuidv4 } from 'uuid';
-  import { onMount } from 'svelte';
-    import Warning from '$lib/components/Warning.svelte';
+  let approaches: {id: string, approach: Types.Approach | null, modified: Types.Approach | null}[] = [];
+
+  const addApproach = () => {
+    approaches.push({ id: uuidv4(), approach: null, modified: null});
+    approaches = approaches;
+  }
+
+  const deleteApproach = (id: string) => {
+    approaches = approaches.filter((v) => v.id !== id);
+  }
+
   let mapKey = uuidv4();
   const resetMap = () => {
     mapKey = uuidv4();
@@ -152,9 +164,13 @@
         <Entry.FlightTime title="Actual Instrument" name="actual-instrument-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="simulated Instrument" name="simulated-instrument-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.Ticker title="Holds" name="holds" defaultValue={null} />
+        {#each approaches as approach (approach.id)}
+          <Entry.InstrumentApproach name={`approach`} id={approach.id} airports={data.airports} defaultAirport={endApt} defaultValue={approach.approach} value={null} onDelete={deleteApproach} />
+        {/each}
+        <Entry.Button title="Add Approach" focus={addApproach} />
       </Section>
 
-      <Section title="Training & Other" collapsable={true} visible={false}>
+      <Section title="Training & Other" collapsable={false} visible={true}>
         <Entry.FlightTime title="Solo" name="solo-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Given" name="dual-given-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Received" name="dual-received-time" bind:autoFill={totalTime} defaultValue={null} />

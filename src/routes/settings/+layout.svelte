@@ -30,6 +30,14 @@
 						System
 					</a>
 				</li>
+				<li>
+					<a href="/settings/data" class="{$page.url.pathname === '/settings/data' ? subMenuActive : subMenuDefault} group flex gap-x-3 rounded-md py-2 pl-2 pr-3 text-sm leading-6 font-semibold" >
+						<svg class="h-6 w-6 shrink-0 {$page.url.pathname === '/settings/data' ? subMenuIconActive : subMenuIconDefault}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+							{@html icons.circleStack}
+						</svg>
+						Data
+					</a>
+				</li>
 			</ul>
 		</nav>
 	</aside>

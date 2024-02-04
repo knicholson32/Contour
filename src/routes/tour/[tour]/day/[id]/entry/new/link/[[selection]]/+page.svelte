@@ -111,9 +111,6 @@
               {#each data.flightIDOptions as o}
                 <button type="button" on:click={() => addOption(o)} class="text-xs first:ml-auto px-2 rounded-full bg-sky-500 text-white font-bold">{o}</button>
               {/each}
-              {#each data.flightIDOptions as o}
-                <button type="button" on:click={() => addOption(o)} class="text-xs px-1 rounded-full bg-sky-500 text-white font-bold">{o}</button>
-              {/each}
             </div>
           </div>
         </Frame>

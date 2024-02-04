@@ -2,13 +2,14 @@
 	import { enhance } from '$app/forms';
 	import { beforeNavigate } from '$app/navigation';
 	import { Submit } from '$lib/components/buttons';
+    import type { API } from '$lib/types';
 
 	let classExport: string = '';
 
 	export let action: string;
 	export { classExport as class };
 	export let confirmAction: ((f: FormData) => boolean) | string | null = null;
-	export let form: { success: boolean; action: string; invalidatedParams?: boolean } | null = null;
+	export let form: API.Form.Type | null = null;
 
 	export let submitting = false;
 	export let unsavedChanges = false;
@@ -18,12 +19,12 @@
 	};
 
 	$: {
-		form?.success;
+		form?.ok;
 		clearChangesFlag();
 	}
 
 	const clearChangesFlag = () => {
-		if (form?.success === false && form?.action === action && form?.invalidatedParams !== false)
+		if (form?.ok === false && form?.action === action)
 			unsavedChanges = true;
 		else unsavedChanges = false;
 	};
@@ -78,7 +79,7 @@
 					hoverTitle={!unsavedChanges ? 'No changes to save' : ''}
 					actionTextInProgress="Saving"
 					{submitting}
-					failed={form?.success === false && form?.action === action}
+					failed={form?.ok === false && form?.action === action}
 				/>
 				{#if unsavedChanges === true}
 					<span class="absolute flex h-3 w-3 -mt-1 -right-1">

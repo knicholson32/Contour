@@ -60,7 +60,7 @@
 
 </script>
 
-<TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back">
+<TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" afterDrag={resetMap}>
 
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">

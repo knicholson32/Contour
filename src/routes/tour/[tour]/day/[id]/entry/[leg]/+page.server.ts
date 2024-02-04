@@ -11,6 +11,7 @@ import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
 import { generateAirportList } from '$lib/server/helpers';
+import type * as Types from '@prisma/client';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
@@ -36,7 +37,8 @@ export const load = async ({ fetch, params }) => {
       day: true,
       aircraft: true,
       positions: true,
-      fixes: true
+      fixes: true,
+      approaches: true
     }
   });
 
@@ -317,6 +319,27 @@ export const actions = {
 
       await generateDeadheads(parseInt(params.id));
 
+      // ---------------------------------------------------------------------------------------------------------------
+      // Approaches
+      // ---------------------------------------------------------------------------------------------------------------
+
+      const approaches = data.getAll('approach') as string[];
+      await prisma.approach.deleteMany({ where: { legId: leg.id }});
+
+      try {
+        const inserts: Types.Prisma.PrismaPromise<any>[] = [];
+        for (const a of approaches) {
+          const approach = JSON.parse(a) as Types.Approach;
+          if (approach === null) continue;
+          approach.legId = leg.id;
+          await addIfDoesNotExist(approach.airportId, aeroAPIKey);
+          inserts.push(prisma.approach.create({ data: approach }));
+        }
+        await prisma.$transaction(inserts);
+      } catch (e) {
+        console.log('ERROR: Failed to parse approach', e);
+      }
+
       return API.Form.formSuccess('?/default');
 
     } catch (e) {
@@ -336,6 +359,7 @@ export const actions = {
     if (id === null || id === '') return API.Form.formFailure('?/delete', '*', 'Required Field');
 
     try {
+      await prisma.approach.deleteMany({ where: { legId: id } });
       await prisma.leg.delete({ where: { id } });
     } catch (e) {
       console.log(e);

@@ -17,6 +17,9 @@ export const TypeNames = {
 	'tour.defaultStartApt': 'KPDK',
 	// System --------------------------------
 	'system.debug': 0,
+	// Data ----------------------------------
+	'data.approaches.lastSync': -1,
+	'data.approaches.source': '',
 	// General -------------------------------
 	'general.encKey': 'UNSET',
 	'general.aeroAPI': '',
@@ -38,6 +41,8 @@ export type ObjectType<T extends TypeName> =
 	T extends 'entry.defaultFlightID' ? string : 	// String
 	T extends 'entry.defaultStartApt' ? string : 	// String
 	T extends 'system.debug' ? number : 					// Integer
+	T extends 'data.approaches.lastSync' ? number :	// Integer
+	T extends 'data.approaches.source' ? string :	// String
 	T extends 'general.encKey' ? string : 				// String
 	T extends 'general.aeroAPI' ? string : 				// String
 	T extends 'general.email' ? string : 				  // String
@@ -81,6 +86,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			case 'entry.tour.current':
 			case 'entry.day.current':
 			case 'system.debug':
+			case 'data.approaches.lastSync':
 				return parseInt(settingVal.value) as ObjectType<T>;
 
 			// Float Conversion --------------------------------------------------------------------------
@@ -93,6 +99,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			case 'entry.day.entry.fa_link':
 			case 'entry.flight_id.last':
 			case 'tour.defaultStartApt':
+			case 'data.approaches.source':
 			case 'general.encKey':
 			case 'general.email':
 			case 'general.name':

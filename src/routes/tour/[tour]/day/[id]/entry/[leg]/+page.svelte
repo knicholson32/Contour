@@ -2,18 +2,19 @@
   import { enhance } from '$app/forms';
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
-  import Image from '$lib/components/Image.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
   import * as Map from '$lib/components/map';
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
   import { afterNavigate, goto} from '$app/navigation';
-  import Badge from '$lib/components/decorations/Badge.svelte';
+  import type * as Types from '@prisma/client';
   import * as MenuForm from '$lib/components/menuForm';
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
-  import { dateToDateStringForm, getInlineDateUTC, timeStrAndTimeZoneToUTC } from '$lib/helpers';
+  import { timeStrAndTimeZoneToUTC } from '$lib/helpers';
+  import { v4 as uuidv4 } from 'uuid';
+  import { browser } from '$app/environment';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -57,8 +58,44 @@
     else goto(ref);
   }
 
-  import { v4 as uuidv4 } from 'uuid';
-  import { onMount } from 'svelte';
+  let approaches: {id: string, approach: Types.Approach | null, modified: Types.Approach | null}[] = [];
+
+  const resetApproaches = () => {
+    approaches = [];
+    if (browser) {
+      for (let i = 0; i < localStorage.length; i++) {
+        // Get the key
+        const key = localStorage.key(i);
+        // If it is not null and starts with the UID, add it to be removed.
+        // We can't remove it here because then our for loop gets out of sync.
+        if (key !== null && key.startsWith(data.leg?.id ?? 'unset' + '.approach-')) {
+          const v = localStorage.getItem(key);
+          if (v !== null) {
+            try {
+              const app = JSON.parse(v) as Types.Approach;
+              approaches.push({ id: app.id, modified: app, approach: null });
+            } catch (e) {}
+          }
+        }
+      }
+    }
+    for (const app of data.leg?.approaches ?? []) {
+      // Only add the approach from defaults if it isn't added via local storage
+      if (approaches.findIndex((a) => a.id === app.id) === -1) approaches.push({ id: app.id, approach: app, modified: null });
+    }
+    approaches = approaches;
+  }
+  resetApproaches();
+
+  const addApproach = () => {
+    approaches.push({ id: uuidv4(), approach: null, modified: null});
+    approaches = approaches;
+  }
+
+  const deleteApproach = (id: string) => {
+    approaches = approaches.filter((v) => v.id !== id);
+  }
+
   let mapKey = uuidv4();
   const resetMap = () => {
     mapKey = uuidv4();
@@ -68,6 +105,7 @@
     form;
     data;
     resetMap();
+    resetApproaches();
   }
 
   
@@ -79,7 +117,7 @@
 
 </script>
 
-<TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" onMenuBack={onMenuBack}>
+<TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" onMenuBack={onMenuBack} afterDrag={resetMap}>
 
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
@@ -136,7 +174,10 @@
           await update({ reset: false });
           submitting = false;
           setTimeout(() => {
-            if (form?.ok !== false) formManager.clearUID(false);
+            if (form?.ok !== false) {
+              formManager.clearUID(false);
+              resetApproaches();
+            }
           }, 1);
         };
       }}>
@@ -180,9 +221,19 @@
         <Entry.FlightTime title="Actual Instrument" name="actual-instrument-time" bind:autoFill={totalTime} defaultValue={data.leg.actualInstrument} />
         <Entry.FlightTime title="simulated Instrument" name="simulated-instrument-time" bind:autoFill={totalTime} defaultValue={data.leg.simulatedInstrument} />
         <Entry.Ticker title="Holds" name="holds" defaultValue={data.leg.holds} />
+        {#key data.params.leg}
+          {#each approaches as approach (approach.id)}
+            {#if approach.modified !== null}
+              <Entry.InstrumentApproach name={`approach`} id={approach.id} airports={data.airports} defaultAirport={endApt} defaultValue={null} value={approach.modified} onDelete={deleteApproach} />
+            {:else}
+              <Entry.InstrumentApproach name={`approach`} id={approach.id} airports={data.airports} defaultAirport={endApt} defaultValue={approach.approach} value={null} onDelete={deleteApproach} />
+            {/if}
+          {/each}
+        {/key}
+        <Entry.Button title="Add Approach" focus={addApproach} />
       </Section>
 
-      <Section title="Training & Other" collapsable={true} visible={false}>
+      <Section title="Training & Other" collapsable={true} visible={true}>
         <Entry.FlightTime title="Solo" name="solo-time" bind:autoFill={totalTime} defaultValue={data.leg.solo} />
         <Entry.FlightTime title="Dual Given" name="dual-given-time" bind:autoFill={totalTime} defaultValue={data.leg.dualGiven} />
         <Entry.FlightTime title="Dual Received" name="dual-received-time" bind:autoFill={totalTime} defaultValue={data.leg.dualReceived} />

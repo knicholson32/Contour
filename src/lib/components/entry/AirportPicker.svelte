@@ -28,7 +28,7 @@
   export let required: boolean = false;
   export let action: string = '?/default';
 
-	export let name: string;
+	export let name: string | null;
   export let title: string;
 	export let disabled: boolean = false;
 
@@ -122,9 +122,11 @@
   // Local Storage Support
   // ----------------------------------------------------------------------------
   // Create a writable for the name
-  const nameStore = writable(name);
-  $: nameStore.set(name);
-  $: name = $nameStore;
+  const nameStore = writable(name ?? '');
+  $: nameStore.set(name ?? '');
+  $: {
+    if (name !== null) name = $nameStore;
+  }
   // Initialize the local storage manager
   const local = new LocalStorageManager(nameStore, defaultValue, (v) => {
     value = v ?? defaultValue;
@@ -132,8 +134,12 @@
   });
   const unsaved = local.getUnsavedStore();
   // Attach the local storage manager to value and default value
-  $: local.setDefault(defaultValue);
-  $: local.set(value);
+  $: {
+    if (name !== null) local.setDefault(defaultValue);
+  }
+  $: {
+    if (name !== null) local.set(value);
+  }
 
   onMount(() => {
     mounted = true;
@@ -143,7 +149,7 @@
 
 </script>
 
-<Frame {name} {action} unsaved={$unsaved} restore={() => local.clear(true)} form={$form} {required} bind:title={title} focus={focus} bind:disabled error={warningMessage}>
+<Frame name={name ?? ''} {action} unsaved={$unsaved} restore={() => local.clear(true)} form={$form} {required} bind:title={title} focus={focus} bind:disabled error={warningMessage}>
   <input type="hidden" name={name} bind:value />
   <input type="hidden" name={name+'-tz'} bind:value={tz} />
   <form on:submit|preventDefault={() => {}} class="w-full">

@@ -3,6 +3,7 @@ import * as settings from '$lib/server/settings';
 import * as helpers from '$lib/helpers';
 import * as aeroAPI from '$lib/server/api/flightaware';
 import { redirect } from '@sveltejs/kit';
+import type * as Types from '@prisma/client';
 import * as options from '$lib/server/db/options';
 import { API, DayNewEntryState } from '$lib/types';
 import * as Positions from '$lib/server/db/positions';
@@ -443,22 +444,52 @@ export const actions = {
             // It is OK if we can't store the route?
           }
 
-          try {
-            await generateDeadheads(parseInt(params.id));
+          // If we made it here, it is time to store the approaches
 
-            // If we made it here, we are done!
-            await settings.set('entry.day.entry.fa_id', '');
-            await settings.set('entry.day.entry.fa_link', '');
-            await settings.set('entry.day.entry.state', DayNewEntryState.NOT_STARTED);
+          try {
+
+            const approaches = data.getAll('approach') as string[];
+
+            const inserts: Types.Prisma.PrismaPromise<any>[] = [];
+
+            for (const a of approaches) {
+              const approach = JSON.parse(a) as Types.Approach;
+              if (approach === null) continue;
+              approach.legId = leg.id;
+              await addIfDoesNotExist(approach.airportId, aeroAPIKey);
+              inserts.push(prisma.approach.create({ data: approach }));
+            }
+
+            await prisma.$transaction(inserts);
+
+            // If we made it here, it is time to store the deadheads
+
+            try {
+
+              await generateDeadheads(parseInt(params.id));
+
+              // If we made it here, we are done!
+              await settings.set('entry.day.entry.fa_id', '');
+              await settings.set('entry.day.entry.fa_link', '');
+              await settings.set('entry.day.entry.state', DayNewEntryState.NOT_STARTED);
+
+            } catch (e) {
+              console.log(e);
+              await prisma.approach.deleteMany({ where: { legId: leg.id }});
+              await Positions.deletePositions(leg.id);
+              await Fixes.deleteFixes(leg.id);
+              await prisma.flightAwareData.delete({ where: { faFlightId: flightAwareData.faFlightId } });
+              await prisma.leg.delete({ where: { id: leg.id } });
+              return API.Form.formFailure('?/default', '*', 'Could not create deadheads');
+            }
           } catch (e) {
             console.log(e);
             await Positions.deletePositions(leg.id);
             await Fixes.deleteFixes(leg.id);
             await prisma.flightAwareData.delete({ where: { faFlightId: flightAwareData.faFlightId } });
             await prisma.leg.delete({ where: { id: leg.id } });
-            return API.Form.formFailure('?/default', '*', 'Could not create deadheads');
+            return API.Form.formFailure('?/default', '*', 'Could not create approaches');
           }
-
         } catch (e) {
           console.log(e);
           await prisma.flightAwareData.delete({ where: { faFlightId: flightAwareData.faFlightId } });

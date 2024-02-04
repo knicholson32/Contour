@@ -293,7 +293,10 @@ export class LocalStorageManager {
         this.unsavedChanges.set(true);
         FormManager._checkUnsaved();
       }
-    } else this.clear();
+    } else {
+      console.log('CLEARs!', this.name);
+      this.clear();
+    }
   }
 
   /**

@@ -120,7 +120,7 @@
             </svg>
           </button>
           <span class="font-medium text-md text-gray-900 dark:text-gray-100">Configure Timezone</span>
-          <hr class="mb-1 border-zinc-700"/>
+          <hr class="mb-1 border-gray-200 dark:border-zinc-700"/>
             <div class="flex flex-row gap-3 items-center relative">
               <!-- TODO: Remove this force disable when I know this component works properly -->
               <Switch bind:value={autoTZSwitch} disabled title="Auto TZ"/>

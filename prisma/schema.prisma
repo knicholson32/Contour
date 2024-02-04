@@ -236,11 +236,12 @@ model FlightAwareData {
 }
 
 model Leg {
-  id        String     @id @default(uuid())
-  dayId     Int?
-  day       DutyDay?   @relation(fields: [dayId], references: [id], onDelete: Restrict)
-  positions Position[]
-  fixes     Fix[]
+  id         String     @id @default(uuid())
+  dayId      Int?
+  day        DutyDay?   @relation(fields: [dayId], references: [id], onDelete: Restrict)
+  positions  Position[]
+  fixes      Fix[]
+  approaches Approach[]
 
   flightAwareData FlightAwareData?
 
@@ -422,9 +423,38 @@ model Airport {
 
   deadheadStart Deadhead[] @relation("deadheadStart")
   deadheadEnd   Deadhead[] @relation("deadheadEnd")
+  Approach      Approach[]
 
   @@unique([latitude, longitude])
   @@map("airports")
+}
+
+model Approach {
+  id           String  @id @default(uuid())
+  type         String
+  runway       String?
+  tag          String?
+  composite    String
+  circleToLand Boolean
+  notes        String?
+
+  Leg       Leg?    @relation(fields: [legId], references: [id])
+  legId     String?
+  airport   Airport @relation(fields: [airportId], references: [id])
+  airportId String
+
+  @@map("approaches")
+}
+
+model ApproachOptions {
+  id        Int    @id @default(autoincrement())
+  airportId String
+  type      String
+  runway    String
+  tag       String
+  composite String
+
+  @@map("approachesOptions")
 }
 
 model Position {
