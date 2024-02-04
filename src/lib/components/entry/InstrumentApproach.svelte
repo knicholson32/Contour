@@ -88,7 +88,7 @@
   let mounted = false;
 
   const refreshApproachOptions = async () => {
-    if (!mounted) return;
+    if (!mounted || airport === '') return;
     const a = await fetch('/api/approaches/' + airport);
     const approaches = (await a.json()) as API.Approach;
     if (approaches.ok === true) {
@@ -99,6 +99,14 @@
   $: {
     airport;
     refreshApproachOptions();
+  }
+
+  const updateAirport = () => {
+    airport = value?.airportId ?? defaultAirport ?? '';
+  }
+  $: {
+    value;
+    updateAirport()
   }
 
   onMount(() => {
@@ -169,7 +177,7 @@
           </button>
         {/if}
       </span>
-      <AirportPicker title="Airport" name={null} bind:defaultValue={defaultAirport} airports={airports} bind:value={airport} />
+      <AirportPicker title="Airport" name={null} bind:defaultValue={airport} airports={airports} bind:value={airport} />
       <hr class="mb-1 border-gray-200 dark:border-zinc-700"/>
       <select bind:value={approachID} on:change={_update} title={"Approach"}
         class="w-full xs:w-auto sm:max-w-md text-sm border-0 rounded-md text-gray-900 dark:text-gray-100 dark:bg-transparent shadow-sm ring-1 placeholder:text-gray-400 disabled:cursor-not-allowed select:disabled:text-red-500 disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:text-gray-500 dark:disabled:text-gray-600 disabled:ring-gray-200 ring-gray-300 dark:ring-zinc-500 focus:border-gray-900 focus-within:ring-2 focus-within:ring-sky-600 focus-within:border-0">
