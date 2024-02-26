@@ -88,8 +88,10 @@
           </div>
         {:else}
           <div class="flex flex-shrink-0 items-center">
-            <img class="block w-9 h-auto lg:hidden" src="/logo-inverted.png" alt="Contour">
-            <img class="hidden w-9 h-auto lg:block" src="/logo-inverted.png" alt="Contour">
+            <a href="/">
+              <img class="block w-9 h-auto lg:hidden" src="/logo-inverted.png" alt="Contour">
+              <img class="hidden w-9 h-auto lg:block" src="/logo-inverted.png" alt="Contour">
+            </a>
           </div>
         {/if}
 
