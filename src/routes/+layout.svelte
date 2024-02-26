@@ -190,7 +190,7 @@
         <!-- Mobile Menu -->
         {#each menu as m}
           <!-- Current: "border-indigo-500 bg-indigo-50 text-indigo-700", Default: "border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800" -->
-          {#if $page.url.pathname.startsWith(m.href)}
+          {#if ($page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && $page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
             <a href="{m.href}" on:click={closeMobileMenu} class="border-sky-500 bg-sky-50/50 dark:bg-slate-800/25 text-sky-500 block border-l-4 py-2 pl-3 pr-4 text-base font-medium" aria-current="page">{m.title}</a>  
           {:else}
             <a href="{m.href}" on:click={closeMobileMenu} class="border-transparent text-gray-600 dark:text-gray-400 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">{m.title}</a>  
