@@ -45,11 +45,9 @@
   import { page } from "$app/stores";
   import { afterNavigate, goto } from "$app/navigation";
   import { browser } from "$app/environment";
-    import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
+  import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
 
   export let data: import('./$types').PageData;
-
-  // console.log(data.lastTour.startTime_utc)
 
   // Calculate some details about the last tour
   const lastTourStart = (data.lastTour?.startTime_utc !== undefined ? new Date(data.lastTour.startTime_utc * 1000) : null);
@@ -105,7 +103,7 @@
     goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: false, noScroll: false, invalidateAll: true });
   }
 
-  type DayStat = { id: number, startTime: number, flight: number, distance: number, duty: number };
+  type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, flight: number | null, distance: number | null, duty: number | null };
 
 
 	// const d = [
@@ -118,9 +116,11 @@
 	// 	{ id: 7, revenue: 11244 },
 	// 	{ id: 8, revenue: 26475 },
 	// ];
-	const x = (d: DayStat) => d.startTime;
+	const x = (d: DayStat) => d.index;
 
-  const tickFormat = (d: number) => {
+  const tickFormat = (i: number) => {
+    const d = data.async.data?.dutyDays.statistics[i].startTime;
+    if (d === undefined) return '';
     const date = new Date(d * 1000);
     return weekDaysShort[date.getDay()] + ' ' + pad(date.getMonth() + 1, 2) + '/' + pad(date.getDate(), 2);
   }
@@ -134,15 +134,14 @@
     }
   }
 
-  const yTourAreaDuty = (d: DayStat) => d.duty !== null ? maxDuty : 0;
-  const yTourAreaFlight = (d: DayStat) => d.duty !== null ? maxFlight : 0;
+  const yTourAreaDuty = (d: DayStat) => d.onTour === true ? maxDuty : 0;
+  const yTourAreaFlight = (d: DayStat) => d.onTour === true ? maxFlight : 0;
 
 	const yDist = (d: DayStat) => d.distance;
-  const yFlight = (d: DayStat) => d.flight / 60 / 60;
-  console.log(data.async.data?.dutyDays.statistics);
-  const flightTemplate = (d: DayStat) => tickFormat(d.startTime) + ' | ' + (d.flight / 60 / 60).toFixed(1) + ' hr';
-  const yDuty = (d: DayStat) => d.duty / 60 / 60;
-  const dutyTemplate = (d: DayStat) => tickFormat(d.startTime) + ' | ' + (d.duty / 60 / 60).toFixed(1) + ' hr';
+  const yFlight = (d: DayStat) => (d.flight ?? 0) / 60 / 60;
+  const flightTemplate = (d: DayStat) => (d.flight ?? 0).toFixed(1) + ' hr<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
+  const yDuty = (d: DayStat) => (d.duty ?? 0) / 60 / 60;
+  const dutyTemplate = (d: DayStat) =>  ((d.duty ?? 0) / 60 / 60).toFixed(1) + ' hr<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
 
 
   const events = {
@@ -234,7 +233,7 @@
                 </Card.Header>
                 <Card.Content class="p-4 pt-0">
                   <VisXYContainer data={data.async.data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
-                    <VisAxis gridLine={false} type="x" {tickFormat} minMaxTicksOnly={false} />
+                    <VisAxis gridLine={false} type="x" minMaxTicksOnly={false} {tickFormat} />
                     <VisCrosshair template={flightTemplate}/>
                     <VisTooltip/>
                     <VisLine {x} y={yFlight} color={color()} />
@@ -249,7 +248,7 @@
                 </Card.Header>
                 <Card.Content class="p-4 pt-0">
                   <VisXYContainer data={data.async.data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
-                    <VisAxis gridLine={false} type="x" {tickFormat} minMaxTicksOnly={false} />
+                    <VisAxis gridLine={false} type="x" minMaxTicksOnly={false} {tickFormat} />
                     <VisCrosshair template={dutyTemplate}/>
                     <VisTooltip/>
                     <VisLine {x} y={yDuty} color={color()} />
