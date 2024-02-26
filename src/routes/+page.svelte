@@ -189,7 +189,7 @@
                     <p class="text-xs text-muted-foreground">No aircraft activity during this window of time</p>
                   {:else}
                     <div class="text-2xl font-bold">{data.async.data.mostCommonAC.ac.typeCode}</div>
-                    <p class="text-xs text-muted-foreground">{data.async.data.mostCommonAC.ac.make} {data.async.data.mostCommonAC.ac.model} - {data.async.data.mostCommonAC.time} hr</p>
+                    <p class="text-xs text-muted-foreground">{data.async.data.mostCommonAC.ac.make} {data.async.data.mostCommonAC.ac.model} - {data.async.data.mostCommonAC.time.toFixed(1)} hr</p>
                   {/if}
                 </Card.Content>
               </Card.Root>

@@ -6,7 +6,7 @@ export const load = async ({ url }) => {
   const legs = await prisma.leg.findMany({ select: { totalTime: true } });
   const numTours = await prisma.tour.count();
   const days = await prisma.leg.findMany({ select: { startTime_utc: true, endTime_utc: true } });
-  const lastTour = await prisma.tour.findFirst({ orderBy: { startTime_utc: 'asc' }});
+  const lastTour = await prisma.tour.findFirst({ orderBy: { startTime_utc: 'desc' }});
 
   let legSum = 0;
   for (const l of legs) legSum += l.totalTime;
@@ -50,7 +50,7 @@ export const load = async ({ url }) => {
         { startTime_utc: { gte: s } },
         { endTime_utc: { lte: e } },
       ]
-    }, orderBy: { startTime_utc: 'asc' }, include: { legs: { include: { aircraft: true, positions: true, _count: { select: { approaches: true } } } }, deadheads: true } });
+    }, orderBy: { startTime_utc: 'desc' }, include: { legs: { include: { aircraft: true, positions: true, _count: { select: { approaches: true } } } }, deadheads: true } });
 
     const aircraftList: { [key: string]: number } = {}
     for (const day of days) {
