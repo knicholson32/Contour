@@ -71,7 +71,7 @@
 <!-- Localization -->
 <Settings.List class="" {form} action="?/updateLocalization" bind:unsavedChanges={localizationUnsavedChanges} bind:update={localizationUpdate} >
 	<span slot="title">Localization</span>
-	<span slot="description">Configure localization info for Unabridged.</span>
+	<span slot="description">Configure localization info for Contour.</span>
 
 	<Settings.Select {form} name="general.timezone" title="Local Timezone" update={localizationUpdate} bind:value={timezone} options={timeZonesNames.concat('UTC')}/>
 </Settings.List>

@@ -3,11 +3,11 @@
 	import { icons } from '$lib/components';
     import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
 
-	const subMenuActive = 'bg-gray-50 text-indigo-600';
-	const subMenuDefault = 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50';
+	const subMenuActive = 'bg-gray-50 dark:bg-zinc-800 text-sky-500';
+	const subMenuDefault = 'text-gray-700 dark:text-gray-200 hover:text-sky-500 hover:bg-gray-50 dark:hover:bg-zinc-800';
 
-	const subMenuIconActive = 'text-indigo-600';
-	const subMenuIconDefault = 'text-gray-400 group-hover:text-indigo-600';
+	const subMenuIconActive = 'text-sky-500';
+	const subMenuIconDefault = 'text-gray-400 group-hover:text-sky-500';
 </script>
 
 <OneColumn white={true} type={'safe'}>

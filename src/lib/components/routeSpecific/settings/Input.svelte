@@ -30,6 +30,6 @@
 				{leadingText.t}
 			</p>
 		{/if}
-		<input {disabled} title={hoverTitle} style="{uppercase ? 'text-transform:uppercase' : ''}" on:input={update} on:keyup={() => { updatedContents(value); }} type="text" {name} class="block {small ? 'w-[12em]' : 'min-w-[16em]'} {mono 	? 'font-mono' 	: ''} rounded-md border-0 py-1.5 text-gray-900 shadow-sm placeholder:text-gray-400 ring-1 ring-inset {error ? 'ring-red-300 focus:ring-red-600' : 'ring-gray-300 focus:ring-indigo-600'}  focus:ring-2 focus:ring-inset disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 sm:text-sm sm:leading-6" {placeholder} bind:value />
+		<input {disabled} title={hoverTitle} style="{uppercase ? 'text-transform:uppercase' : ''}" on:input={update} on:keyup={() => { updatedContents(value); }} type="text" {name} class="block {small ? 'w-[12em]' : 'min-w-[16em]'} {mono 	? 'font-mono' 	: ''} rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-200 dark:bg-transparent shadow-sm placeholder:text-gray-400 ring-1 ring-inset {error ? 'ring-red-300 focus:ring-red-600' : 'ring-gray-300 dark:ring-zinc-600 focus:ring-sky-500'}  focus:ring-2 focus:ring-inset disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 sm:text-sm sm:leading-6" {placeholder} bind:value />
 	</div>
 </Frame>

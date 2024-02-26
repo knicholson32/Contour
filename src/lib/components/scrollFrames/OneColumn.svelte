@@ -11,7 +11,7 @@
 
 {#if type === 'safe'}
   <div class="h-full w-full overflow-hidden pb-[env(safe-area-inset-bottom)]">
-    <div class="h-full w-full flex flex-col relative overflow-y-auto">
+    <div class="h-full w-full {white === true ? 'bg-white dark:bg-zinc-950' : 'bg-gray-100 dark:bg-zinc-900'} flex flex-col relative overflow-y-auto">
       <slot />    
     </div>
   </div>

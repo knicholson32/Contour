@@ -57,7 +57,7 @@
 	<div class="{classExport} border-b pb-6">
 		<div class="flex items-center gap-x-2">
 			<div class="max-w-md">
-				<h2 class="text-lg font-semibold leading-7 text-gray-900">
+				<h2 class="text-lg font-semibold leading-7 text-gray-900 dark:text-white">
 					<slot name="title">Settings</slot>
 					{#if unsavedChanges === true}
 						<span class="text-gray-400 text-xxs uppercase ml-2"> Unsaved Changes </span>
@@ -84,14 +84,14 @@
 				{#if unsavedChanges === true}
 					<span class="absolute flex h-3 w-3 -mt-1 -right-1">
 						<span
-							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"
+							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"
 						/>
-						<span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500" />
+						<span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500" />
 					</span>
 				{/if}
 			</div>
 		</div>
-		<dl class="mt-6 space-y-6 divide-y divide-gray-100 border-t border-gray-200 text-sm leading-6">
+		<dl class="mt-6 space-y-6 divide-y divide-gray-100 dark:divide-zinc-800 border-t border-gray-200 dark:border-zinc-800 text-sm leading-6">
 			<slot />
 		</dl>
 	</div>

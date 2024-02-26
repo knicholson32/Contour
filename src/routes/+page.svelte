@@ -281,8 +281,8 @@
               </Card.Content>
             </Card.Root>
           </div>
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
-            <Card.Root class="col-span-4">
+          <div class="grid gap-4 grid-cols-8">
+            <Card.Root class="col-span-8 lg:col-span-4">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Card.Title class="text-sm font-semibold">Flight Hours per Day</Card.Title>
                 <Table2 class="h-4 w-4 text-muted-foreground" />
@@ -298,7 +298,7 @@
                 </VisXYContainer>
               </Card.Content>
             </Card.Root>
-            <Card.Root class="col-span-4">
+            <Card.Root class="col-span-8 lg:col-span-4">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Card.Title class="text-sm font-semibold">Duty Hours per Day</Card.Title>
                 <Timer class="h-4 w-4 text-muted-foreground" />
