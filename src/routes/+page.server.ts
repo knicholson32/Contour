@@ -50,7 +50,7 @@ export const load = async ({ url }) => {
         { startTime_utc: { gte: s } },
         { endTime_utc: { lte: e } },
       ]
-    }, orderBy: { startTime_utc: 'desc' }, include: { legs: { include: { aircraft: true, positions: true, _count: { select: { approaches: true } } } }, deadheads: true } });
+    }, orderBy: { startTime_utc: 'asc' }, include: { legs: { include: { aircraft: true, positions: true, _count: { select: { approaches: true } } } }, deadheads: true } });
 
     const aircraftList: { [key: string]: number } = {}
     for (const day of days) {
