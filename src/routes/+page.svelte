@@ -38,7 +38,7 @@
   import pluralize from 'pluralize';
   import { pad, weekDaysShort } from '$lib/helpers';
 	import { DateRangePicker } from "$lib/components/ui/date-range-picker";
-  import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip } from "@unovis/svelte";
+  import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea } from "@unovis/svelte";
   import { Line, Scatter } from '@unovis/ts'
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import { CalendarDate } from "@internationalized/date";
@@ -124,6 +124,19 @@
     const date = new Date(d * 1000);
     return weekDaysShort[date.getDay()] + ' ' + pad(date.getMonth() + 1, 2) + '/' + pad(date.getDate(), 2);
   }
+
+  let maxFlight = 0;
+  let maxDuty = 0;
+  if (data.async.data !== null) {
+    for (const d of data.async.data.dutyDays.statistics) {
+      if (d.flight !== null && d.flight > maxFlight) maxFlight = d.flight;
+      if (d.duty !== null && d.duty > maxDuty) maxDuty = d.duty;
+    }
+  }
+
+  const yTourAreaDuty = (d: DayStat) => d.duty !== null ? maxDuty : 0;
+  const yTourAreaFlight = (d: DayStat) => d.duty !== null ? maxFlight : 0;
+
 	const yDist = (d: DayStat) => d.distance;
   const yFlight = (d: DayStat) => d.flight / 60 / 60;
   console.log(data.async.data?.dutyDays.statistics);
@@ -221,10 +234,11 @@
                 </Card.Header>
                 <Card.Content class="p-4 pt-0">
                   <VisXYContainer data={data.async.data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
-                    <VisAxis gridLine={false} type="x" {tickFormat} minMaxTicksOnly={true} />
+                    <VisAxis gridLine={false} type="x" {tickFormat} minMaxTicksOnly={false} />
                     <VisCrosshair template={flightTemplate}/>
                     <VisTooltip/>
                     <VisLine {x} y={yFlight} color={color()} />
+                    <VisArea curveType="basis" {x} y={yTourAreaFlight} color={color('0.2')} excludeFromDomainCalculation={true} />
                     <!-- <VisScatter {x} y={yFlight} {events} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
                   </VisXYContainer>
                 </Card.Content>
@@ -235,10 +249,11 @@
                 </Card.Header>
                 <Card.Content class="p-4 pt-0">
                   <VisXYContainer data={data.async.data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
-                    <VisAxis gridLine={false} type="x" {tickFormat} minMaxTicksOnly={true} />
+                    <VisAxis gridLine={false} type="x" {tickFormat} minMaxTicksOnly={false} />
                     <VisCrosshair template={dutyTemplate}/>
                     <VisTooltip/>
                     <VisLine {x} y={yDuty} color={color()} />
+                    <VisArea curveType="basis" {x} y={yTourAreaDuty} color={color('0.2')} excludeFromDomainCalculation={true} />
                     <!-- <VisScatter {x} y={yDuty} {events} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
                   </VisXYContainer>
                 </Card.Content>

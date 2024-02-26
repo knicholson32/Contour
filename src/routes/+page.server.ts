@@ -79,39 +79,95 @@ export const load = async ({ url }) => {
     let dutyDayDuration = 0;
     let longestDayDuration = 0;
 
-    type DayStat = { id: number, startTime: number, flight: number, distance: number, duty: number };
+    type DayStat = { id: number | null, startTime: number, flight: number | null, distance: number | null, duty: number | null };
 
     let statistics: DayStat[] = []
-    for (const day of days) {
-      const dayDuration = day.endTime_utc - day.startTime_utc;
-      let flightTime = 0;
-      let distance = 0;
-      dutyDayDuration += dayDuration;
-      if (dayDuration > longestDayDuration) longestDayDuration = dayDuration;
-      for (const leg of day.legs) {
-        if (leg.positions.length <= 1) continue;
-        let lastPos = leg.positions[0];
-        flightTime += leg.totalTime;
-        for (let i = 1; i < leg.positions.length; i++) {
-          const pos = leg.positions[i];
-          const dist = getDistanceFromLatLonInKm(lastPos.latitude, lastPos.longitude, pos.latitude, pos.longitude);
-          const duration = pos.timestamp - lastPos.timestamp;
-          miles += dist;
-          distance += dist;
-          timeCounter += duration;
-          groundSpeed += pos.groundspeed * duration;
-          lastPos = pos;
-        }
+
+    if (days.length > 0){
+
+      // Pad before days exist
+      for (let i = s; i < days[0].startTime_utc - 86400; i += 86400) {
+        statistics.push({
+          id: null,
+          startTime: i,
+          flight: null,
+          distance: null,
+          duty: null,
+        })
       }
-      statistics.push({
-        id: day.id,
-        startTime: day.startTime_utc,
-        flight: flightTime,
-        distance,
-        duty: dayDuration
-      })
+
+      for (const day of days) {
+        const dayDuration = day.endTime_utc - day.startTime_utc;
+        let flightTime = 0;
+        let distance = 0;
+        dutyDayDuration += dayDuration;
+        if (dayDuration > longestDayDuration) longestDayDuration = dayDuration;
+        for (const leg of day.legs) {
+          if (leg.positions.length <= 1) continue;
+          let lastPos = leg.positions[0];
+          flightTime += leg.totalTime;
+          for (let i = 1; i < leg.positions.length; i++) {
+            const pos = leg.positions[i];
+            const dist = getDistanceFromLatLonInKm(lastPos.latitude, lastPos.longitude, pos.latitude, pos.longitude);
+            const duration = pos.timestamp - lastPos.timestamp;
+            miles += dist;
+            distance += dist;
+            timeCounter += duration;
+            groundSpeed += pos.groundspeed * duration;
+            lastPos = pos;
+          }
+        }
+
+        // Check if there is a gap in days
+        // console.log(day.startTime_utc - statistics[statistics.length - 1].startTime);
+        if (statistics.length > 0 && day.startTime_utc - statistics[statistics.length-1].startTime >= 86400) {
+          for (let i = statistics[statistics.length - 1].startTime + 86400; i < day.startTime_utc - 86400; i += 86400) {
+            statistics.push({
+              id: null,
+              startTime: i,
+              flight: null,
+              distance: null,
+              duty: null,
+            })    
+          }
+        }
+
+
+        // Add the day to the statistics
+        statistics.push({
+          id: day.id,
+          startTime: day.startTime_utc,
+          flight: flightTime,
+          distance,
+          duty: dayDuration
+        })
+      }
+
+      // Pad after days end
+      for (let i = days[days.length - 1].startTime_utc + 86400; i < e; i += 86400) {
+        statistics.push({
+          id: null,
+          startTime: i,
+          flight: null,
+          distance: null,
+          duty: null,
+        })
+      }
+    } else {
+      // No days, just padding
+      for (let i = s; i < e; i += 86400) {
+        statistics.push({
+          id: null,
+          startTime: i,
+          flight: null,
+          distance: null,
+          duty: null,
+        })
+      }
     }
+
     miles = miles * 0.54;
+    console.log(statistics)
 
     if (days.length !== 0) dutyDayDuration = dutyDayDuration / days.length;
     if (timeCounter !== 0) groundSpeed = groundSpeed / timeCounter;
