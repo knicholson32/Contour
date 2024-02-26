@@ -17,6 +17,7 @@
   });
  
   export let value: DateRange | undefined = undefined;
+  export let highlights: string[] = [];
  
   let startValue: DateValue | undefined = undefined;
 </script>
@@ -49,6 +50,7 @@
     <RangeCalendar
       bind:value
       bind:startValue
+      bind:highlights
       initialFocus
       numberOfMonths={2}
       placeholder={value?.start}

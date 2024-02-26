@@ -192,7 +192,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between space-y-2">
         <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div class="flex flex-col md:flex-row items-start sm:items-center gap-4">
-          <DateRangePicker bind:value={dateRange} />
+          <DateRangePicker bind:value={dateRange} highlights={data.dutyDays.highlightDates} />
           <Popover.Root portal={null} bind:open={presetOpen}>
             <Popover.Trigger asChild let:builder>
               <Button builders={[builder]} variant="outline">Presets</Button>

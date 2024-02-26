@@ -3,11 +3,12 @@
 	import { buttonVariants } from "$lib/components/ui/button";
 	import { cn } from "$lib/utils";
 
-	type $$Props = RangeCalendarPrimitive.DayProps;
+	type $$Props = RangeCalendarPrimitive.DayProps & { highlight: boolean };
 	type $$Events = RangeCalendarPrimitive.DayEvents;
 
 	export let date: $$Props["date"];
 	export let month: $$Props["month"];
+	export let highlight = false;
 	let className: $$Props["class"] = undefined;
 	export { className as class };
 </script>
@@ -39,5 +40,8 @@
 >
 	<slot {disabled} {unavailable} {builder}>
 		{date.day}
+		{#if highlight}
+			<span class="w-1 h-1 bg-red-500 rounded-full absolute bottom-1"></span>
+		{/if}
 	</slot>
 </RangeCalendarPrimitive.Day>

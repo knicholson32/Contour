@@ -44,8 +44,26 @@ export const load = async ({ url }) => {
   let s = Math.floor(start.toDate(timeZone).getTime() / 1000);
   let sCal = start;
 
-  let e = Math.floor(end.toDate(timeZone).getTime() / 1000);
+  let e = Math.floor(end.toDate(timeZone).getTime() / 1000) + 86400;
   let eCal = end;
+
+  const highlightDates: string[] = [];
+
+  const toursSimple = await prisma.tour.findMany({ orderBy: { startTime_utc: 'asc' }, select: { startTime_utc: true, endTime_utc: true } });
+  for (const t of toursSimple) {
+    const sDate = new Date(t.startTime_utc * 1000);
+    const eDate = t.endTime_utc === null ? new Date() : new Date(t.endTime_utc * 1000);
+
+    const start = new CalendarDate(sDate.getFullYear(), sDate.getMonth() + 1, sDate.getDate());
+    const end = new CalendarDate(eDate.getFullYear(), eDate.getMonth() + 1, eDate.getDate());
+
+    let current = start.copy();
+    while (current.compare(end) <= 0) {
+      const str = current.toString();
+      if (!highlightDates.includes(str)) highlightDates.push(str);
+      current = current.add({ days: 1 });
+    }
+  }
 
   const tours = await prisma.tour.findMany({ where: {
     OR: [
@@ -239,6 +257,7 @@ export const load = async ({ url }) => {
         avg: dutyDayDuration,
         longest: longestDayDuration
       },
+      highlightDates,
       num: numDutyDays,
       statistics
     }

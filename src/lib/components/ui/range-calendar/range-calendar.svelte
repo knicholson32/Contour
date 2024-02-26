@@ -3,13 +3,16 @@
 	import * as RangeCalendar from ".";
 	import { cn } from "$lib/utils";
 
-	type $$Props = RangeCalendarPrimitive.Props;
+	type Highlights = string[];
+
+	type $$Props = RangeCalendarPrimitive.Props & { highlights: Highlights };
 	type $$Events = RangeCalendarPrimitive.Events;
 
 	export let value: $$Props["value"] = undefined;
 	export let placeholder: $$Props["placeholder"] = undefined;
 	export let weekdayFormat: $$Props["weekdayFormat"] = "short";
 	export let startValue: $$Props["startValue"] = undefined;
+	export let highlights: Highlights = [];
 
 	let className: $$Props["class"] = undefined;
 	export { className as class };
@@ -48,7 +51,7 @@
 						<RangeCalendar.GridRow class="mt-2 w-full">
 							{#each weekDates as date}
 								<RangeCalendar.Cell {date}>
-									<RangeCalendar.Day {date} month={month.value} />
+									<RangeCalendar.Day {date} month={month.value} highlight={highlights.includes(date.toString())} />
 								</RangeCalendar.Cell>
 							{/each}
 						</RangeCalendar.GridRow>
