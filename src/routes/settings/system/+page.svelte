@@ -33,6 +33,12 @@
 		}
 	});
 
+	let buttonText = 'Clear Unsaved Changes';
+	const clearUnsaved = () => {
+		localStorage.clear();
+		buttonText = 'Cleared';
+	}
+
 </script>
 
 <!-- Debug -->
@@ -51,6 +57,15 @@
 			{ title: 'Very Verbose', value: '3' }
 	]}
 	/>
+</Settings.List>
+
+<!-- Local Storage -->
+<Settings.List class="" {form} action="?/localStorage"  >
+	<span slot="title">Local Storage</span>
+	<span slot="description">Manage local storage features.</span>
+
+	<Settings.Button name="system.localStorage.clear" {form} title="Clear Unsaved Changes" buttonText={buttonText} hoverTitle={'Clear all unsaved changes stored on this local machine.'} onClick={clearUnsaved} />
+
 </Settings.List>
 
 <!-- Localization -->

@@ -5,17 +5,18 @@
    * or whether to treat it as an area that should be seen through (scroll)
    */
   export let type: 'safe' | 'scroll' = 'scroll';
+  export let white = false;
 
 </script>
 
 {#if type === 'safe'}
   <div class="h-full w-full overflow-hidden pb-[env(safe-area-inset-bottom)]">
-    <div class="h-full w-full flex flex-col relative overflow-y-scroll">
+    <div class="h-full w-full flex flex-col relative overflow-y-auto">
       <slot />    
     </div>
   </div>
 {:else}
-  <div style="-webkit-transform: translateZ(0);" class="h-full w-full bg-gray-100 dark:bg-zinc-900 flex flex-col relative overflow-y-scroll pb-[env(safe-area-inset-bottom)]">
+  <div style="-webkit-transform: translateZ(0);" class="h-full w-full {white === true ? 'bg-white' : 'bg-gray-100'} dark:bg-zinc-900 flex flex-col relative overflow-y-auto pb-[env(safe-area-inset-bottom)]">
     <slot />    
   </div>
 {/if}

@@ -21,8 +21,8 @@
 
   let submitting = false;
 
-  // const formManager = new FormManager();
-  // $: formManager.updateUID('new-day-leg');
+  const formManager = new FormManager();
+  $: formManager.updateUID('new-day-leg');
   // $: formManager.updateForm(form);
 
   let noCache: boolean;

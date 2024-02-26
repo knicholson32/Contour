@@ -113,7 +113,7 @@
 </div> -->
 
 <div class="w-full relative bg-gray-50 dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700">
-  <div class="w-full relative z-10 overflow-y-hidden overflow-x-scroll pb-3">
+  <div class="w-full relative z-10 overflow-y-hidden overflow-x-auto pb-3">
     <div class="{$$restProps.class} w-full relative flex flex-row items-start text-zinc-800 dark:text-white pt-3 pb-[1.25rem] px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
       {#each dataFormatted as entry}
         {#if entry.entity.type === 'blank'}

@@ -16,6 +16,7 @@
   import * as Entry from '$lib/components/entry';
   import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
     import { onMount } from 'svelte';
+    import { Calendar } from '$lib/components/calendar';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -135,6 +136,10 @@
         }, 1);
       };
     }}>
+
+      <!-- <div class="mx-4 my-6">
+        <Calendar startUnix={data.currentTour === null ? new Date().getTime() / 1000 : data.currentTour.startTime_utc } />
+      </div> -->
 
       <Section title="Tour Start" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.AirportPicker required={true} title="Show Airport" name="show-airport" airports={data.airports} bind:tz={showAirportTZ} defaultValue={data.currentTour?.startAirportId ?? data.tourSettings['tour.defaultStartApt'] ?? null} />
