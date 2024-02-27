@@ -22,8 +22,8 @@ export const load = async ({ url }) => {
 
 
   // Calculate some details about the last tour
-  const lastTourStart = (lastTour?.startTime_utc !== undefined ? new Date((lastTour.startTime_utc - 86400) * 1000) : null);
-  const lastTourEnd = (lastTour?.endTime_utc !== undefined && lastTour?.endTime_utc !== null ? new Date((lastTour.endTime_utc + 86400) * 1000) : null);
+  const lastTourStart = (lastTour?.startTime_utc !== undefined ? new Date((lastTour.startTime_utc - 86400) * 1000) : new Date());
+  const lastTourEnd = (lastTour?.endTime_utc !== undefined && lastTour?.endTime_utc !== null ? new Date((lastTour.endTime_utc + 86400) * 1000) : new Date((new Date()).getTime() + 86400 * 1000));
 
   // Get the start and end params
   let start: CalendarDate | null = null;
@@ -42,6 +42,8 @@ export const load = async ({ url }) => {
     const s = url.searchParams.get('end') as string;  // Eg: 2024-04-10
     end = new CalendarDate(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7)), parseInt(s.substring(8, 10)));
   }
+
+  console.log(start, end);
 
   if (start === null || end === null) return null;
 

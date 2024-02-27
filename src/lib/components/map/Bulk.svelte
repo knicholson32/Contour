@@ -82,7 +82,8 @@
  		}
   	markerLayer.addTo(map);
 
-    map.fitBounds(L.polyline(bound).getBounds(), { animate: false }).zoomOut(1, { animate: false });
+    if (bound.length > 0) map.fitBounds(L.polyline(bound).getBounds(), { animate: false }).zoomOut(1, { animate: false });
+    else map.fitBounds([[40.737, -95]], {animate: false }).zoomOut(11, { animate: false });
   }
 
   $: updateMapContents(pos);

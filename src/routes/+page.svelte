@@ -21,9 +21,9 @@
   export let data: import('./$types').PageData;
 
   // Calculate some details about the last tour
-  const lastTourStart = (data.lastTour?.startTime_utc !== undefined ? new Date((data.lastTour.startTime_utc - 86400) * 1000) : null);
+  const lastTourStart = (data.lastTour?.startTime_utc !== undefined ? new Date((data.lastTour.startTime_utc - 86400) * 1000) : new Date());
   const lastTourStartStr = lastTourStart === null ? null : lastTourStart.getFullYear() + '-' + pad(lastTourStart.getMonth() + 1, 2) + '-' + pad(lastTourStart.getDate() + 1, 2);
-  const lastTourEnd = (data.lastTour?.endTime_utc !== undefined && data.lastTour?.endTime_utc !== null ? new Date((data.lastTour.endTime_utc + 86400) * 1000) : null);
+  const lastTourEnd = (data.lastTour?.endTime_utc !== undefined && data.lastTour?.endTime_utc !== null ? new Date((data.lastTour.endTime_utc + 86400) * 1000) : new Date((new Date()).getTime() + 86400 * 1000));
   const lastTourEndStr = lastTourEnd === null ? null : lastTourEnd.getFullYear() + '-' + pad(lastTourEnd.getMonth() + 1, 2) + '-' + pad(lastTourEnd.getDate() + 1, 2);
 
   let dateRange: { start: CalendarDate | undefined, end: CalendarDate | undefined } | undefined = undefined;
@@ -269,8 +269,10 @@
                   <div class="text-2xl font-bold">None</div>
                   <p class="text-xs text-muted-foreground">No aircraft activity during this window of time</p>
                 {:else}
-                  <div class="text-2xl font-bold">{data.mostCommonAC.ac.typeCode}</div>
-                  <p class="text-xs text-muted-foreground">{data.mostCommonAC.ac.make} {data.mostCommonAC.ac.model} - {data.mostCommonAC.time.toFixed(1)} hr</p>
+                  <a href="/aircraft/type/{data.mostCommonAC.ac.id}?active=form">
+                    <div class="text-2xl font-bold">{data.mostCommonAC.ac.typeCode}</div>
+                    <p class="text-xs text-muted-foreground">{data.mostCommonAC.ac.make} {data.mostCommonAC.ac.model} - {data.mostCommonAC.time.toFixed(1)} hr</p>
+                  </a>
                 {/if}
               </Card.Content>
             </Card.Root>
