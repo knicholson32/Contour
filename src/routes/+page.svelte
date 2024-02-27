@@ -43,7 +43,6 @@
     } else {
       const s = $page.url.searchParams.get('start') as string;  // Eg: 2024-04-10
       start = new CalendarDate(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7)), parseInt(s.substring(8, 10)));
-      console.log(start);
     }
 
     if ($page.url.searchParams.get('end') === null) {
@@ -51,7 +50,6 @@
     } else {
       const s = $page.url.searchParams.get('end') as string;  // Eg: 2024-04-10
       end = new CalendarDate(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7)), parseInt(s.substring(8, 10)));
-      console.log(end);
     }
 
     if ($page.url.searchParams.get('end') !== null && $page.url.searchParams.get('start') !== null) currentPreset = $page.url.searchParams.get('preset');

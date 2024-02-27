@@ -13,8 +13,7 @@ const MAX_MB = 10;
 export const load = async ({ fetch, params, url }) => {
 
   const entrySettings = await settings.getSet('entry');
-
-  console.log(params);
+  // const debug = await settings.get('system.debug');
 
   const aircrafts = await prisma.aircraft.findMany({ include: { type: true, _count: true, legs: { select: { totalTime: true } } }, orderBy: [{ type: { typeCode: 'asc' } }, { registration: 'asc' }] });
   if (params.id === undefined) {
@@ -94,11 +93,11 @@ export const actions = {
 
     const id = (params.id !== 'new' ? params.id : undefined) ?? uuidv4();
 
+    const debug = await settings.get('system.debug');
+
     const data = await request.formData();
     await delay(500);
-    for (const key of data.keys()) {
-      console.log(key, data.getAll(key));
-    }
+    if (debug) for (const key of data.keys()) console.log(key, data.getAll(key));
 
     // return API.Form.formFailure('?/default', 'tail', 'Required field');
     
@@ -137,7 +136,7 @@ export const actions = {
           pressurized: press === null ? null : press === 'true',
           notes: notes as string | null
         };
-        console.log('create', data);
+        if (debug) console.log('create', data);
         await prisma.aircraft.create({ data });
       } catch (e) {
         console.log(e);
@@ -164,7 +163,7 @@ export const actions = {
           pressurized: press === null ? null : (press === 'true') === currentData?.type.pressurized ? null : (press === 'true'),
           notes: notes as string | null
         };
-        console.log('update', data);
+        if (debug) console.log('update', data);
         await prisma.aircraft.update({ where: { id }, data });
       } catch (e) {
         console.log(e);
@@ -174,11 +173,12 @@ export const actions = {
 
     try {
 
-      console.log(imageState);
+      if (debug) console.log(imageState);
 
       if (imageState as ImageUploadState === ImageUploadState.UPDATE) {
         if (image !== null && image !== '' && !(image instanceof File && image.size === 0)) {
           const results = await helpers.uploadImage(image, MAX_MB);
+          if (debug) console.log(image);
           if (results.success !== true) return API.Form.formFailure('?/default', 'image', results.message);
           try {
             await prisma.aircraft.update({ where: { id }, data: { imageId: results.id } });
@@ -203,7 +203,7 @@ export const actions = {
     await helpers.clearHangingImages()
 
     const ref = url.searchParams.get('ref');
-    console.log('ref',ref);
+    if (debug) console.log('ref',ref);
     if (ref !== null) throw redirect(301, ref);
     else throw redirect(301, '/aircraft/entry/' + id + '?active=form');
   },

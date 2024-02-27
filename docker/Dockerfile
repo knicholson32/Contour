@@ -50,6 +50,8 @@ ENV PORT=${SERVER_PORT}
 ENV DATABASE_URL="file:/db/contour.db?connection_limit=1"
 # ENV DATABASE_URL="file:/db/unabridged.db?connection_limit=1"
 ENV ORIGIN="http://localhost:${SERVER_PORT}"
+# 11MB Max body size (for image uploads)
+ENV BODY_SIZE_LIMIT=11000000
 ENV PROC_SHELL='/bin/sh'
 
 COPY --from=build "/app/prisma/" "/app/prisma"

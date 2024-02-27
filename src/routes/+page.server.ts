@@ -7,7 +7,9 @@ const TEN_DAYS = 10 * 24 * 60 * 60;
 
 export const load = async ({ url }) => {
 
-  const timeZone = await settings.get('general.timezone');
+  const sets = await settings.getMany('general.timezone', 'system.debug');
+  const timeZone = sets['general.timezone'];
+  const debug = sets['system.debug'];
 
   const legs = await prisma.leg.findMany({ select: { totalTime: true } });
   const numTours = await prisma.tour.count();
@@ -145,14 +147,10 @@ export const load = async ({ url }) => {
 
   let cal = sCal.copy();
 
-  console.log(sCal, eCal);
-
   while (cal.compare(eCal) <= 0) {
     const date = cal.toDate(timeZone);
     const start = Math.floor(date.getTime() / 1000);
     const end = Math.round(date.getTime() / 1000 + 86400);
-
-    console.log('starting', date, cal.compare(eCal), start, end);
 
     // Find if a tour fits this day
     let isOnTour = false;
@@ -195,7 +193,6 @@ export const load = async ({ url }) => {
         targetDay = d;
         break;
       }
-      console.log('day did not apply', start, d.startTime_utc, '|', end, d.endTime_utc);
     }
 
     const stat: DayStat = {
@@ -230,8 +227,6 @@ export const load = async ({ url }) => {
       stat.flight = flightTime;
       stat.distance = distance / 1.15;
       stat.duty = dayDuration
-    } else {
-      console.log('no target day');
     }
 
     statistics.push(stat);
