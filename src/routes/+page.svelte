@@ -3,11 +3,12 @@
 	import { Button } from "$lib/components/ui/button";
 	import * as Card from "$lib/components/ui/card";
 	import * as Tabs from "$lib/components/ui/tabs";
+  import * as Map from '$lib/components/map';
   import pluralize from 'pluralize';
   import { pad, weekDaysShort } from '$lib/helpers';
 	import { DateRangePicker } from "$lib/components/ui/date-range-picker";
+  import { v4 as uuidv4 } from 'uuid';
   import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea } from "@unovis/svelte";
-  import { Line, Scatter } from '@unovis/ts'
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import { CalendarDate } from "@internationalized/date";
   import { page } from "$app/stores";
@@ -67,6 +68,9 @@
       dateRange = { start, end };
       // console.log('After nav range', dateRange, start, end);
     }
+
+    setTimeout(resetMap, 1);
+
   });
 
   // Update the data range when the range selector is updated
@@ -173,13 +177,25 @@
   const dutyTemplate = (d: DayStat) =>  ((d.duty ?? 0) / 60 / 60).toFixed(1) + ' hr<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
 
 
-  const events = {
-    [Scatter.selectors.point]: {
-        click: (d: DayStat) => {
-          console.log('click', d.id)
-        },
-    },
+  // const events = {
+  //   [Scatter.selectors.point]: {
+  //       click: (d: DayStat) => {
+  //         console.log('click', d.id)
+  //       },
+  //   },
+  // }
+
+  let mapKey: string;
+  const resetMap = () => {
+    mapKey = uuidv4();
   }
+
+  $: {
+    data;
+    resetMap();
+  }
+
+  let map: Map.Bulk;
 
 </script>
 
@@ -312,9 +328,18 @@
                 </VisXYContainer>
               </Card.Content>
             </Card.Root>
+            <Card.Root class="col-span-8">
+              <Card.Content class="p-0 relative">
+                {#key mapKey}
+                  <Map.Bulk bind:this={map} class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" pos={data.positions} airports={data.airports} />
+                {/key}
+              </Card.Content>
+            </Card.Root>
           </div>
         </Tabs.Content>
       </Tabs.Root>
+      
     </div>
   </div>
+
 </OneColumn>

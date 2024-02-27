@@ -106,7 +106,7 @@
         {/if}
         <Entry.Input required={noCache} uppercase={true} title="Flight ID" name="flight-id" placeholder="EJA762" bind:value={flightIDs} defaultValue={$page.url.searchParams.get('flight-id')} />
         <Frame title="Options" required={false} name="" form={null} class="relative">
-          <div class="w-full overflow-x-scroll whitespace-nowrap absolute top-0 bottom-0 right-0 left-0">
+          <div class="w-full overflow-x-auto whitespace-nowrap absolute top-0 bottom-0 right-0 left-0">
             <div class="flex flex-row gap-2 items-center h-full">
               {#each data.flightIDOptions as o}
                 <button type="button" on:click={() => addOption(o)} class="text-xs first:ml-auto px-2 rounded-full bg-sky-500 text-white font-bold">{o}</button>

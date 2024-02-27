@@ -1,7 +1,9 @@
 import prisma from '$lib/server/prisma';
+import type * as Types from '@prisma/client';
 import { getDistanceFromLatLonInKm } from '$lib/server/helpers';
 import { CalendarDate } from '@internationalized/date';
 import * as settings from '$lib/server/settings';
+
 
 const TEN_DAYS = 10 * 24 * 60 * 60;
 
@@ -85,7 +87,10 @@ export const load = async ({ url }) => {
       { startTime_utc: { gte: s } },
       { endTime_utc: { lte: e } },
     ]
-  }, orderBy: { startTime_utc: 'asc' }, include: { legs: { include: { aircraft: true, positions: true, _count: { select: { approaches: true } } } }, deadheads: true } });
+  }, orderBy: { startTime_utc: 'asc' }, include: { legs: { include: { aircraft: true, positions: true, originAirport: true, destinationAirport: true, diversionAirport: true, _count: { select: { approaches: true } } } }, deadheads: true } });
+
+  const posGroups: [number, number][][] = [];
+  const airports: Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>[] = [];
 
   const aircraftList: { [key: string]: number } = {}
   for (const day of days) {
@@ -94,6 +99,16 @@ export const load = async ({ url }) => {
         aircraftList[leg.aircraft.aircraftTypeId] += leg.totalTime;
       } else {
         aircraftList[leg.aircraft.aircraftTypeId] = leg.totalTime;
+      }
+      const posGroup: [number, number][] = [];
+      for (const p of leg.positions) posGroup.push([p.latitude, p.longitude]);
+      posGroups.push(posGroup);
+
+      if (airports.findIndex((a) => a.id === leg.originAirportId) === -1) airports.push({ id: leg.originAirportId, latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude });
+      if (leg.diversionAirportId !== null && leg.diversionAirport !== null) {
+        if (airports.findIndex((a) => a.id === leg.diversionAirportId) === -1) airports.push({ id: leg.diversionAirportId, latitude: leg.diversionAirport.latitude, longitude: leg.diversionAirport.longitude });
+      } else {
+        if (airports.findIndex((a) => a.id === leg.destinationAirportId) === -1) airports.push({ id: leg.destinationAirportId, latitude: leg.destinationAirport.latitude, longitude: leg.destinationAirport.longitude });
       }
     }
   }
@@ -243,6 +258,8 @@ export const load = async ({ url }) => {
     lastTour,
     groundSpeed,
     miles,
+    positions: posGroups,
+    airports,
     mostCommonAC: {
       time: maxTime,
       ac: mostCommonAC,
