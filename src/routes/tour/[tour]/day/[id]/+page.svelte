@@ -99,7 +99,6 @@
 
     {#key mapKey}
       <Map.Day bind:this={map} class="" legs={data.currentDay.legs} airports={data.airportList} deadheads={data.currentDay.deadheads} />
-      <Map.Bulk class="" pos={[[{latitude: 80, longitude: 119}, {latitude: 81, longitude: 129}]]} />
       <Timeline class="" data={data.legDeadheadCombo} day={data.currentDay} />
     {/key}
 

@@ -494,15 +494,16 @@ export const pad = (num: number, size: number) => {
  * @param UNIX_timestamp the timestamp
  * @returns the string
  */
-export const timeConverter = (UNIX_timestamp: number, options?: {dateOnly?: boolean}) => {
+export const timeConverter = (UNIX_timestamp: number, options?: { dateOnly?: boolean, shortYear?: boolean}) => {
 	const a = new Date(UNIX_timestamp * 1000);
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	const year = (options !== undefined && options.dateOnly === true) ? a.getFullYear().toFixed(0).substring(2) : a.getFullYear();
 	if (options !== undefined && options.dateOnly === true) {
-		return `${pad(a.getMonth() + 1, 2)}/${pad(a.getDate(), 2)}/${a.getFullYear()}`;
+		return `${pad(a.getMonth() + 1, 2)}/${pad(a.getDate(), 2)}/${year}`;
 	} else {
 		const min = a.getMinutes() < 10 ? '0' + a.getMinutes() : a.getMinutes();
 		const sec = a.getSeconds() < 10 ? '0' + a.getSeconds() : a.getSeconds();
-		return a.getDate() + ' ' + months[a.getMonth()] + ' ' + a.getFullYear() + ' ' + a.getHours() + ':' + min + ':' + sec;
+		return a.getDate() + ' ' + months[a.getMonth()] + ' ' + year + ' ' + a.getHours() + ':' + min + ':' + sec;
 	}
 }
 
