@@ -41,7 +41,7 @@
         <div class="space-y-1 py-4 pr-4">
           <h4 class="text-sm font-semibold">{aircraft.registration}</h4>
           <p class="text-sm whitespace-nowrap">{aircraft.type.make} {aircraft.type.model}</p>
-          <p class="text-sm whitespace-nowrap text-foreground/60 font-medium">{time} hr this period</p>
+          <p class="text-sm whitespace-nowrap text-foreground/60 font-medium">{time.toFixed(1)} hr this period</p>
           {#if aircraft.year !== null}
             <div class="flex items-center pt-2">
               <CalendarDays class="mr-2 h-4 w-4 opacity-70" />{" "}
