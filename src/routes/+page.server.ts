@@ -17,12 +17,8 @@ export const load = async ({ url }) => {
   const timeZone = sets['general.timezone'];
   const debug = sets['system.debug'];
 
-  const legs = await prisma.leg.findMany({ select: { totalTime: true } });
   const numTours = await prisma.tour.count();
   const lastTour = await prisma.tour.findFirst({ orderBy: { startTime_utc: 'desc' }});
-
-  let legSum = 0;
-  for (const l of legs) legSum += l.totalTime;
 
 
   // Calculate some details about the last tour
@@ -97,14 +93,22 @@ export const load = async ({ url }) => {
   const airports: Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>[] = [];
   let operations = 0;
 
-  const aircraftList: { [key: string]: number } = {}
+  const acTypeList: { [key: string]: number } = {}
+  const acList: { [key: string]: number } = {}
   for (const day of days) {
     for (const leg of day.legs) {
-      if (leg.aircraft.aircraftTypeId in aircraftList) {
-        aircraftList[leg.aircraft.aircraftTypeId] += leg.totalTime;
+      if (leg.aircraft.aircraftTypeId in acTypeList) {
+        acTypeList[leg.aircraft.aircraftTypeId] += leg.totalTime;
       } else {
-        aircraftList[leg.aircraft.aircraftTypeId] = leg.totalTime;
+        acTypeList[leg.aircraft.aircraftTypeId] = leg.totalTime;
       }
+
+      if (leg.aircraftId in acList) {
+        acList[leg.aircraftId] += leg.totalTime;
+      } else {
+        acList[leg.aircraftId] = leg.totalTime;
+      }
+
       const posGroup: [number, number][] = [];
       for (const p of leg.positions) posGroup.push([p.latitude, p.longitude]);
       posGroups.push(posGroup);
@@ -122,8 +126,8 @@ export const load = async ({ url }) => {
 
   let mostCommonTypeID: string | null = null;
   let maxTime = -1;
-  for (const key of Object.keys(aircraftList)) {
-    const type = aircraftList[key];
+  for (const key of Object.keys(acTypeList)) {
+    const type = acTypeList[key];
     if (type > maxTime) {
       maxTime = type;
       mostCommonTypeID = key;
@@ -147,7 +151,6 @@ export const load = async ({ url }) => {
     dutyDayDuration += dayDuration;
     if (dayDuration > longestDayDuration) longestDayDuration = dayDuration;
 
-    console.log('day', new Date(day.startTime_utc * 1000).toISOString());
     // Calculate rest
     if (lastDayEndUTC !== -1 && day.startTime_utc - lastDayEndUTC <= 86400) {
       const rest = day.startTime_utc - lastDayEndUTC;
@@ -288,8 +291,6 @@ export const load = async ({ url }) => {
     }
   }
 
-  console.log(statistics);
-
   const mostCommonAC = mostCommonTypeID === null ? null : await prisma.aircraftType.findUnique({ where: { id: mostCommonTypeID } })
 
   const now = Math.floor((new Date()).getTime() / 1000);
@@ -314,9 +315,6 @@ export const load = async ({ url }) => {
   }
 
   return {
-    numLegs: legs.length,
-    numTours,
-    avgLegLength: legSum / legs.length,
     lastTour,
     groundSpeed,
     miles,
@@ -331,6 +329,7 @@ export const load = async ({ url }) => {
       time: maxTime,
       ac: mostCommonAC,
     },
+    acList,
     dutyDays: {
       duration: {
         avg: dutyDayDuration,

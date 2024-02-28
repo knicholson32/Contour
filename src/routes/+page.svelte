@@ -1,9 +1,11 @@
 <script lang="ts">
-	import {Activity, CreditCard, DollarSign, Plane, Table2, Users, Timer, Route, Gauge, TowerControl, BedDouble } from "lucide-svelte";
+	import {Activity, CreditCard, DollarSign, Plane, Plus, Table2, CalendarDays, Users, Timer, Route, Gauge, TowerControl, BedDouble, Fingerprint } from "lucide-svelte";
 	import { Button } from "$lib/components/ui/button";
+  import Image from "$lib/components/Image.svelte";
 	import * as Card from "$lib/components/ui/card";
 	import * as Tabs from "$lib/components/ui/tabs";
   import * as Map from '$lib/components/map';
+  import * as HoverCard from "$lib/components/ui/hover-card";
   import pluralize from 'pluralize';
   import { pad, weekDaysShort } from '$lib/helpers';
 	import { DateRangePicker } from "$lib/components/ui/date-range-picker";
@@ -15,10 +17,9 @@
   import { afterNavigate, goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
-  import { Label } from "$lib/components/ui/label";
   import * as Popover from "$lib/components/ui/popover";
-    import { Calendar } from "$lib/components/ui/calendar";
-    import { RangeCalendar } from "$lib/components/ui/range-calendar";
+  import { RangeCalendar } from "$lib/components/ui/range-calendar";
+    import AircraftHoverCard from "$lib/components/decorations/AircraftHoverCard.svelte";
 
   export let data: import('./$types').PageData;
 
@@ -220,6 +221,16 @@
 
   let map: Map.Bulk;
 
+  const test = {
+    blak: 123
+  }
+
+  const NUM_AC_VIS = 5;
+
+  $: flownAircraftKeys = Object.keys(data.acList).slice(0, NUM_AC_VIS);
+  $: extraAircraftKeys = Object.keys(data.acList).slice(NUM_AC_VIS);
+  $: moreAircraft = Object.keys(data.acList).length > NUM_AC_VIS;
+
 </script>
 
 <OneColumn>
@@ -229,6 +240,25 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between space-y-2">
         <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div class="relative flex flex-col md:flex-row items-start sm:items-center gap-4">
+          <div class="hidden md:inline-flex gap-1 items-center h-12">
+            {#if moreAircraft}
+            <HoverCard.Root>
+                <HoverCard.Trigger class="-ml-4">
+                  <div class="w-12 h-12 bg-primary border-4 border-gray-100 dark:border-zinc-900 rounded-full flex justify-center items-center text-background">
+                    <Plus class="h-4 w-4" />
+                  </div>
+                </HoverCard.Trigger>
+                <HoverCard.Content class="w-auto p-0 inline-flex bg-transparent border-0 -mt-0 pl-2">
+                  {#each extraAircraftKeys as key (key)}
+                    <AircraftHoverCard id={key} />
+                  {/each}
+                </HoverCard.Content>
+              </HoverCard.Root>
+            {/if}
+            {#each flownAircraftKeys as key (key)}
+              <AircraftHoverCard id={key} />
+            {/each}
+          </div>
           <DateRangePicker bind:value={dateRange} highlights={data.dutyDays.highlightDates} class="w-full sm:w-[300px]" />
           <div class="w-full sm:w-auto sm:absolute -bottom-14 right-0 ">
             <Popover.Root portal={null} bind:open={presetOpen}>
@@ -271,6 +301,11 @@
             </Popover.Root>
           </div>
         </div>
+      </div>
+      <div class="w-full px-2 sm:hidden gap-1 items-center h-12 grid justify-center place-items-center" style="grid-template-columns: repeat({Object.keys(data.acList).length}, minmax(0, 1fr));">
+        {#each Object.keys(data.acList) as key (key)}
+          <AircraftHoverCard id={key} compress={false} />
+        {/each}
       </div>
       <Tabs.Root value="overview" class="space-y-4">
         <Tabs.List class="w-full sm:w-auto">

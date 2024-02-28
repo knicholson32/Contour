@@ -27,6 +27,7 @@ namespace API {
 		export type ApproachOption = Prisma.ApproachOptionsGetPayload<{}>
 
 		export type Tour = Prisma.TourGetPayload<{}>
+		export type Aircraft = Prisma.AircraftGetPayload<{ include: { type: true } }>
 	}
 
 	// Export the basic response with all the available API responses
@@ -36,6 +37,7 @@ namespace API {
 		| Boolean
 		| Airports
 		| Airport
+		| Aircraft
 		| Approach
 		| TourList
 
@@ -84,6 +86,11 @@ namespace API {
 	export interface Airport extends Success {
 		type: 'airport';
 		airport: Types.Airport
+	}
+
+	export interface Aircraft extends Success {
+		type: 'aircraft';
+		aircraft: Types.Aircraft
 	}
 
 	export interface Approach extends Success {

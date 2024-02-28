@@ -14,6 +14,8 @@
 	export let startValue: $$Props["startValue"] = undefined;
 	export let highlights: Highlights = [];
 
+	export let numberOfMonths: $$Props["numberOfMonths"] = 1;
+
 	let className: $$Props["class"] = undefined;
 	export { className as class };
 </script>
@@ -24,6 +26,7 @@
 	bind:placeholder
 	bind:startValue
 	{weekdayFormat}
+	{numberOfMonths}
 	class={cn("p-3", className)}
 	{...$$restProps}
 	let:months
@@ -34,7 +37,7 @@
 		<RangeCalendar.Heading />
 		<RangeCalendar.NextButton />
 	</RangeCalendar.Header>
-	<RangeCalendar.Months class="justify-center">
+	<RangeCalendar.Months class="justify-center" numberOfMonths={numberOfMonths ?? 1}>
 		{#each months as month}
 			<RangeCalendar.Grid>
 				<RangeCalendar.GridHead>

@@ -45,7 +45,6 @@
   }
 
   const validate = (text: string): boolean => {
-    console.log(text);
     return /^[0-9]?[0-9]?[0-9]?[0-9]?$/.test(text)
   }
 
