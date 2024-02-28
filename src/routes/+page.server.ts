@@ -93,8 +93,8 @@ export const load = async ({ url }) => {
   const airports: Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>[] = [];
   let operations = 0;
 
-  const acTypeList: { [key: string]: number } = {}
-  const acList: { [key: string]: number } = {}
+  const acTypeList: { [key: string]: number } = {};
+  const acList: { id: string, time: number }[] = [];
   for (const day of days) {
     for (const leg of day.legs) {
       if (leg.aircraft.aircraftTypeId in acTypeList) {
@@ -103,10 +103,11 @@ export const load = async ({ url }) => {
         acTypeList[leg.aircraft.aircraftTypeId] = leg.totalTime;
       }
 
-      if (leg.aircraftId in acList) {
-        acList[leg.aircraftId] += leg.totalTime;
+      const idx = acList.findIndex((v) => v.id === leg.aircraftId);
+      if (idx !== -1) {
+        acList[idx].time += leg.totalTime;
       } else {
-        acList[leg.aircraftId] = leg.totalTime;
+        acList.push({ id: leg.aircraftId, time: leg.totalTime});
       }
 
       const posGroup: [number, number][] = [];
@@ -123,6 +124,8 @@ export const load = async ({ url }) => {
       }
     }
   }
+
+  acList.sort((a, b) => a.time - b.time);
 
   let mostCommonTypeID: string | null = null;
   let maxTime = -1;

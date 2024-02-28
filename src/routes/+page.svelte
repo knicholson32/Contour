@@ -227,9 +227,10 @@
 
   const NUM_AC_VIS = 5;
 
-  $: flownAircraftKeys = Object.keys(data.acList).slice(0, NUM_AC_VIS);
-  $: extraAircraftKeys = Object.keys(data.acList).slice(NUM_AC_VIS);
-  $: moreAircraft = Object.keys(data.acList).length > NUM_AC_VIS;
+  $: flownAircraftKeys = data.acList.slice(-NUM_AC_VIS);
+  $: extraAircraftKeys = data.acList.slice(0, -NUM_AC_VIS);
+
+  $: moreAircraft = extraAircraftKeys.length > 0;
 
 </script>
 
@@ -249,14 +250,14 @@
                   </div>
                 </HoverCard.Trigger>
                 <HoverCard.Content class="w-auto p-0 inline-flex bg-transparent border-0 -mt-0 pl-2">
-                  {#each extraAircraftKeys as key (key)}
-                    <AircraftHoverCard id={key} />
+                  {#each extraAircraftKeys as ac (ac.id)}
+                    <AircraftHoverCard id={ac.id} time={ac.time} />
                   {/each}
                 </HoverCard.Content>
               </HoverCard.Root>
             {/if}
-            {#each flownAircraftKeys as key (key)}
-              <AircraftHoverCard id={key} />
+            {#each flownAircraftKeys as ac (ac.id)}
+              <AircraftHoverCard id={ac.id} time={ac.time} />
             {/each}
           </div>
           <DateRangePicker bind:value={dateRange} highlights={data.dutyDays.highlightDates} class="w-full sm:w-[300px]" />
@@ -303,8 +304,8 @@
         </div>
       </div>
       <div class="w-full px-2 sm:hidden gap-1 items-center h-12 grid justify-center place-items-center" style="grid-template-columns: repeat({Object.keys(data.acList).length}, minmax(0, 1fr));">
-        {#each Object.keys(data.acList) as key (key)}
-          <AircraftHoverCard id={key} compress={false} />
+        {#each data.acList as ac (ac.id)}
+          <AircraftHoverCard id={ac.id} time={ac.time} compress={false} />
         {/each}
       </div>
       <Tabs.Root value="overview" class="space-y-4">
