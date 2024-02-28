@@ -9,7 +9,7 @@
 </script>
 
 <td
-	class={cn("px-4 py-1 align-middle [&:has([role=checkbox])]:pr-0", className)}
+	class={cn("px-2 xs:px-4 py-1 h-7 align-middle [&:has([role=checkbox])]:pr-0", className)}
 	{...$$restProps}
 	on:click
 	on:keydown
