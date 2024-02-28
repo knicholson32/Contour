@@ -5,7 +5,11 @@ import { CalendarDate } from '@internationalized/date';
 import * as settings from '$lib/server/settings';
 
 
-const TEN_DAYS = 10 * 24 * 60 * 60;
+const TWENTY_FOUR_HOURS = 24 * 60 * 60;
+const SEVEN_DAYS = 7 * TWENTY_FOUR_HOURS;
+const TEN_DAYS = 10 * TWENTY_FOUR_HOURS;
+const THIRTY_DAYS = 30 * TWENTY_FOUR_HOURS;
+
 
 export const load = async ({ url }) => {
 
@@ -42,8 +46,6 @@ export const load = async ({ url }) => {
     const s = url.searchParams.get('end') as string;  // Eg: 2024-04-10
     end = new CalendarDate(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7)), parseInt(s.substring(8, 10)));
   }
-
-  console.log(start, end);
 
   if (start === null || end === null) return null;
 
@@ -93,6 +95,7 @@ export const load = async ({ url }) => {
 
   const posGroups: [number, number][][] = [];
   const airports: Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>[] = [];
+  let operations = 0;
 
   const aircraftList: { [key: string]: number } = {}
   for (const day of days) {
@@ -105,6 +108,8 @@ export const load = async ({ url }) => {
       const posGroup: [number, number][] = [];
       for (const p of leg.positions) posGroup.push([p.latitude, p.longitude]);
       posGroups.push(posGroup);
+
+      operations += 2;
 
       if (airports.findIndex((a) => a.id === leg.originAirportId) === -1) airports.push({ id: leg.originAirportId, latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude });
       if (leg.diversionAirportId !== null && leg.diversionAirport !== null) {
@@ -131,11 +136,27 @@ export const load = async ({ url }) => {
   let dutyDayDuration = 0;
   let numDutyDays = days.length;
   let longestDayDuration = 0;
+  
+  let lastDayEndUTC = -1;
+  let avgRest = 0;
+  let restIndex = 0;
+  let shortestRest = -1;
 
   for (const day of days) {
     const dayDuration = day.endTime_utc - day.startTime_utc;
     dutyDayDuration += dayDuration;
     if (dayDuration > longestDayDuration) longestDayDuration = dayDuration;
+
+    console.log('day', new Date(day.startTime_utc * 1000).toISOString());
+    // Calculate rest
+    if (lastDayEndUTC !== -1 && day.startTime_utc - lastDayEndUTC <= 86400) {
+      const rest = day.startTime_utc - lastDayEndUTC;
+      if (shortestRest === -1 || rest < shortestRest) shortestRest = rest;
+      avgRest += rest;
+      restIndex++;
+    }
+    lastDayEndUTC = day.endTime_utc;
+
     for (const leg of day.legs) {
       if (leg.positions.length <= 1) continue;
       let lastPos = leg.positions[0];
@@ -150,6 +171,9 @@ export const load = async ({ url }) => {
       }
     }
   }
+
+  if (restIndex > 0) avgRest = avgRest / restIndex;
+  if (shortestRest <= 0) shortestRest = NaN;
 
   miles = miles * 0.54;
 
@@ -167,7 +191,7 @@ export const load = async ({ url }) => {
   while (cal.compare(eCal) <= 0) {
     const date = cal.toDate(timeZone);
     const start = Math.floor(date.getTime() / 1000);
-    const end = Math.round(date.getTime() / 1000 + 86400);
+    const end = Math.round(date.getTime() / 1000 + TWENTY_FOUR_HOURS);
 
     // Find if a tour fits this day
     let isOnTour = false;
@@ -251,7 +275,43 @@ export const load = async ({ url }) => {
     cal = cal.add({ days: 1 });
   }
 
+  let flightSum = 0;
+  let dutySum = 0;
+  let bestRatio = 0;
+  for (const s of statistics) {
+    if (s.flight !== null) flightSum += s.flight;
+    if (s.duty !== null) dutySum += (s.duty / 60 / 60);
+
+    if (s.flight !== null && s.duty !== null && s.duty !== 0){
+      const d = s.duty / 60 / 60;
+      if (s.flight / d > bestRatio) bestRatio = s.flight / d;
+    }
+  }
+
+  console.log(statistics);
+
   const mostCommonAC = mostCommonTypeID === null ? null : await prisma.aircraftType.findUnique({ where: { id: mostCommonTypeID } })
+
+  const now = Math.floor((new Date()).getTime() / 1000);
+  const flightTimeLegs = await prisma.leg.findMany({
+    where: {
+      AND: [
+        { startTime_utc: { gte: now - THIRTY_DAYS } },
+        { endTime_utc: { lte: now } },
+      ]
+    },
+    select: { totalTime: true, startTime_utc: true },
+    orderBy: { startTime_utc: 'asc' }
+  });
+
+  let one = 0;
+  let seven = 0;
+  let thirty = 0;
+  for (const l of flightTimeLegs) {
+    if (l.startTime_utc !== null && l.startTime_utc >= now - TWENTY_FOUR_HOURS) one += l.totalTime;
+    if (l.startTime_utc !== null && l.startTime_utc >= now - SEVEN_DAYS) seven += l.totalTime;
+    if (l.startTime_utc !== null && l.startTime_utc >= now - THIRTY_DAYS) thirty += l.totalTime;
+  }
 
   return {
     numLegs: legs.length,
@@ -260,8 +320,13 @@ export const load = async ({ url }) => {
     lastTour,
     groundSpeed,
     miles,
+    rest:{
+      avg: avgRest,
+      shortest: shortestRest,
+    },
     positions: posGroups,
     airports,
+    operations,
     mostCommonAC: {
       time: maxTime,
       ac: mostCommonAC,
@@ -273,7 +338,23 @@ export const load = async ({ url }) => {
       },
       highlightDates,
       num: numDutyDays,
-      statistics
+      statistics,
+      ratio: {
+        sum: {
+          flight: flightSum,
+          duty: dutySum
+        },
+        best: bestRatio,
+        avg: {
+          flight: statistics.length === 0 ? 0 : flightSum / statistics.length,
+          duty: statistics.length === 0 ? 0 : dutySum / statistics.length,
+        }
+      }
+    },
+    times: {
+      one,
+      seven,
+      thirty
     }
   }
   

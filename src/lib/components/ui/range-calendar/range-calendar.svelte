@@ -34,7 +34,7 @@
 		<RangeCalendar.Heading />
 		<RangeCalendar.NextButton />
 	</RangeCalendar.Header>
-	<RangeCalendar.Months>
+	<RangeCalendar.Months class="justify-center">
 		{#each months as month}
 			<RangeCalendar.Grid>
 				<RangeCalendar.GridHead>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {Activity, CreditCard, DollarSign, Plane, Table2, Users, Timer, Route, Gauge } from "lucide-svelte";
+	import {Activity, CreditCard, DollarSign, Plane, Table2, Users, Timer, Route, Gauge, TowerControl, BedDouble } from "lucide-svelte";
 	import { Button } from "$lib/components/ui/button";
 	import * as Card from "$lib/components/ui/card";
 	import * as Tabs from "$lib/components/ui/tabs";
@@ -17,6 +17,8 @@
   import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   import { Label } from "$lib/components/ui/label";
   import * as Popover from "$lib/components/ui/popover";
+    import { Calendar } from "$lib/components/ui/calendar";
+    import { RangeCalendar } from "$lib/components/ui/range-calendar";
 
   export let data: import('./$types').PageData;
 
@@ -32,6 +34,28 @@
   let presetOpen = false;
 
   let skipReact = false;
+
+
+  const presetToString = (preset: string | null) => {
+    switch(preset) {
+      case 'currentMonth':
+        return 'Current Month';
+      case 'lastMonth':
+        return 'Last Month';
+      case 'ytd':
+        return 'Year to Date';
+      case 'lastYear':
+        return 'Last Year';
+      case '12months':
+        return 'Last 12 Months';
+      case null:
+        return 'Presets';
+      default:
+        return 'Last Tour';
+    } 
+  }
+
+  $: presetAsString = presetToString(currentPreset);
 
   afterNavigate(() => {
 
@@ -60,13 +84,11 @@
     // Initialize the date range object
     dateRange = undefined;
 
-    // console.log(start, end);
 
     // If start and end are assigned, set the date range directly
     if (start !== null && end !== null) {
       skipReact = true;
       dateRange = { start, end };
-      // console.log('After nav range', dateRange, start, end);
     }
 
     setTimeout(resetMap, 1);
@@ -167,12 +189,13 @@
     if (d.duty !== null && d.duty > maxDuty) maxDuty = d.duty;
   }
 
-  const yTourAreaDuty = (d: DayStat) => d.onTour === true ? maxDuty : 0;
-  const yTourAreaFlight = (d: DayStat) => d.onTour === true ? maxFlight : 0;
+  const yTourAreaDuty = (d: DayStat) => d.onTour === true ? (maxDuty / 60 / 60) * 1000 : 0;
+  const yTourAreaFlight = (d: DayStat) => d.onTour === true ? maxFlight * 1000 : 0;
 
 	const yDist = (d: DayStat) => d.distance;
-  const yFlight = (d: DayStat) => (d.flight ?? 0) / 60 / 60;
+  const yFlight = (d: DayStat) => (d.flight ?? 0);
   const flightTemplate = (d: DayStat) => (d.flight ?? 0).toFixed(1) + ' hr<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
+  const dualTemplate = (d: DayStat) => (d.flight ?? 0).toFixed(1) + ' hr Flight<br/>' + ((d.duty ?? 0) / 60 / 60).toFixed(1) + ' hr Duty<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
   const yDuty = (d: DayStat) => (d.duty ?? 0) / 60 / 60;
   const dutyTemplate = (d: DayStat) =>  ((d.duty ?? 0) / 60 / 60).toFixed(1) + ' hr<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
 
@@ -205,61 +228,82 @@
     <div class="flex-1 space-y-4 p-3 md:p-6 pt-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between space-y-2">
         <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <div class="flex flex-col md:flex-row items-start sm:items-center gap-4">
-          <DateRangePicker bind:value={dateRange} highlights={data.dutyDays.highlightDates} />
-          <Popover.Root portal={null} bind:open={presetOpen}>
-            <Popover.Trigger asChild let:builder>
-              <Button builders={[builder]} variant="outline">Presets</Button>
-            </Popover.Trigger>
-            <Popover.Content class="w-64 mt-2" collisionPadding={0} align="start">
-              <div class="grid gap-4">
-                <div class="space-y-2">
-                  <h4 class="font-medium leading-none">Duration Presets</h4>
-                  <p class="text-sm text-muted-foreground">
-                    Select some common date ranges
-                  </p>
+        <div class="relative flex flex-col md:flex-row items-start sm:items-center gap-4">
+          <DateRangePicker bind:value={dateRange} highlights={data.dutyDays.highlightDates} class="w-full sm:w-[300px]" />
+          <div class="w-full sm:w-auto sm:absolute -bottom-14 right-0 ">
+            <Popover.Root portal={null} bind:open={presetOpen}>
+              <Popover.Trigger asChild let:builder>
+                <div class="flex flex-row items-center gap-2">
+                  <div class="hidden sm:block whitespace-nowrap">
+                    {pluralize('duty day', data.dutyDays.num, true)} <span class="text-sm text-muted-foreground">selected</span> 
+                  </div>
+                  <Button builders={[builder]} variant={currentPreset === null ? 'outline' : 'default'} class="w-full">{presetAsString}</Button>
                 </div>
-                <Button variant={currentPreset === 'lastTour' ? 'default' : 'outline'}  on:click={navigateNoRange} size="sm">
-                  Last Tour
-                </Button>
-                <Button variant={currentPreset === 'currentMonth' ? 'default' : 'outline'} on:click={() => setRange('currentMonth')} size="sm">
-                  Current Month
-                </Button>
-                <Button variant={currentPreset === 'lastMonth' ? 'default' : 'outline'} on:click={() => setRange('lastMonth')} size="sm">
-                  Last Month
-                </Button>
-                <Button variant={currentPreset === 'ytd' ? 'default' : 'outline'} on:click={() => setRange('ytd')} size="sm">
-                  Year to Date
-                </Button>
-                <Button variant={currentPreset === 'lastYear' ? 'default' : 'outline'} on:click={() => setRange('lastYear')} size="sm">
-                  Last Year
-                </Button>
-                <Button variant={currentPreset === '12months' ? 'default' : 'outline'} on:click={() => setRange('12months')} size="sm">
-                  Last 12 Months
-                </Button>
-              </div>
-            </Popover.Content>
-          </Popover.Root>
+              </Popover.Trigger>
+              <Popover.Content class="w-64 mt-2" collisionPadding={0} align="start">
+                <div class="grid gap-4">
+                  <div class="space-y-2">
+                    <h4 class="font-medium leading-none">Duration Presets</h4>
+                    <p class="text-sm text-muted-foreground">
+                      Select some common date ranges
+                    </p>
+                  </div>
+                  <Button variant={currentPreset === 'lastTour' ? 'default' : 'outline'}  on:click={navigateNoRange} size="sm">
+                    Last Tour
+                  </Button>
+                  <Button variant={currentPreset === 'currentMonth' ? 'default' : 'outline'} on:click={() => setRange('currentMonth')} size="sm">
+                    Current Month
+                  </Button>
+                  <Button variant={currentPreset === 'lastMonth' ? 'default' : 'outline'} on:click={() => setRange('lastMonth')} size="sm">
+                    Last Month
+                  </Button>
+                  <Button variant={currentPreset === 'ytd' ? 'default' : 'outline'} on:click={() => setRange('ytd')} size="sm">
+                    Year to Date
+                  </Button>
+                  <Button variant={currentPreset === 'lastYear' ? 'default' : 'outline'} on:click={() => setRange('lastYear')} size="sm">
+                    Last Year
+                  </Button>
+                  <Button variant={currentPreset === '12months' ? 'default' : 'outline'} on:click={() => setRange('12months')} size="sm">
+                    Last 12 Months
+                  </Button>
+                </div>
+              </Popover.Content>
+            </Popover.Root>
+          </div>
         </div>
       </div>
       <Tabs.Root value="overview" class="space-y-4">
-        <Tabs.List>
+        <Tabs.List class="w-full sm:w-auto">
           <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
-          <!-- <Tabs.Trigger value="overview2">Overview</Tabs.Trigger> -->
+          <Tabs.Trigger value="duty">Flight/Duty Time</Tabs.Trigger>
         </Tabs.List>
-        <Tabs.Content value="overview" class="space-y-4">
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card.Root>
+        <Tabs.Content value="overview" class="space-y-2">
+
+          <div class="grid gap-2 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-4">
+
+            <Card.Root class="row-span-3 sm:row-span-4 md:row-span-2 lg:col-span-2 lg:col-start-4 lg:row-start-1 xl:col-span-1 xl:col-start-4">
+              <Card.Content class="p-0 border-0 ring-0">
+                <RangeCalendar
+                  bind:value={dateRange}
+                  bind:highlights={data.dutyDays.highlightDates}
+                  numberOfMonths={1}
+                  placeholder={dateRange?.start}
+                />
+              </Card.Content>
+            </Card.Root>
+
+            <Card.Root class="">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Card.Title class="text-sm font-medium">Average Duty Day</Card.Title>
                 <Timer class="h-4 w-4 text-muted-foreground" />
               </Card.Header>
               <Card.Content>
-                <div class="text-2xl font-bold">{(data.dutyDays.duration.avg / 60 / 60).toFixed(1)} hr <span class="text-sm text-muted-foreground">over</span> {pluralize('day', data.dutyDays.num, true)}</div>
+                <div class="text-2xl font-bold">{(data.dutyDays.duration.avg / 60 / 60).toFixed(1)} hr</div>
                 <p class="text-xs text-muted-foreground">Longest day was {(data.dutyDays.duration.longest / 60 / 60).toFixed(1)} hr</p>
               </Card.Content>
             </Card.Root>
-            <Card.Root>
+
+            <Card.Root class="lg:row-start-2">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Card.Title class="text-sm font-medium">Primary Aircraft</Card.Title>
                 <Plane class="h-4 w-4 text-muted-foreground" />
@@ -267,7 +311,7 @@
               <Card.Content>
                 {#if data.mostCommonAC.ac === null}
                   <div class="text-2xl font-bold">None</div>
-                  <p class="text-xs text-muted-foreground">No aircraft activity during this window of time</p>
+                  <p class="text-xs text-muted-foreground">No aircraft activity during this window</p>
                 {:else}
                   <a href="/aircraft/type/{data.mostCommonAC.ac.id}?active=form">
                     <div class="text-2xl font-bold">{data.mostCommonAC.ac.typeCode}</div>
@@ -276,6 +320,34 @@
                 {/if}
               </Card.Content>
             </Card.Root>
+
+            <Card.Root>
+              <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card.Title class="text-sm font-medium">Average Rest</Card.Title>
+                <BedDouble class="h-4 w-4 text-muted-foreground" />
+              </Card.Header>
+              <Card.Content>
+                {#if isNaN(data.rest.shortest)}
+                  <div class="text-2xl font-bold">None</div>
+                  <p class="text-xs text-muted-foreground">No rest during this window</p>
+                {:else}
+                  <div class="text-2xl font-bold">{(data.rest.avg / 60 / 60).toFixed(1)} hr</div>
+                  <p class="text-xs text-muted-foreground">Shortest rest was {(data.rest.shortest / 60 / 60).toFixed(1)} hr</p>
+                {/if}
+              </Card.Content>
+            </Card.Root>
+
+            <Card.Root>
+              <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card.Title class="text-sm font-medium">Unique Airports</Card.Title>
+                <TowerControl class="h-4 w-4 text-muted-foreground" />
+              </Card.Header>
+              <Card.Content>
+                <div class="text-2xl font-bold">{data.airports.length}</div>
+                <p class="text-xs text-muted-foreground">{data.operations} operations</p>
+              </Card.Content>
+            </Card.Root>
+
             <Card.Root>
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Card.Title class="text-sm font-medium">Total Distance</Card.Title>
@@ -286,9 +358,10 @@
                 <p class="text-xs text-muted-foreground">{((data.miles) * 1.15).toFixed(0)} mi</p>
               </Card.Content>
             </Card.Root>
+
             <Card.Root>
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Card.Title class="text-sm font-medium">Average Groundspeed</Card.Title>
+                <Card.Title class="text-sm font-medium">Average Speed</Card.Title>
                 <Gauge class="h-4 w-4 text-muted-foreground" />
               </Card.Header>
               <Card.Content>
@@ -297,35 +370,35 @@
               </Card.Content>
             </Card.Root>
           </div>
-          <div class="grid gap-4 grid-cols-8">
+          <div class="grid gap-2 grid-cols-8">
             <Card.Root class="col-span-8 lg:col-span-4">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Card.Title class="text-sm font-semibold">Flight Hours per Day</Card.Title>
+                <Card.Title class="text-sm font-semibold">Flight Hours</Card.Title>
                 <Table2 class="h-4 w-4 text-muted-foreground" />
               </Card.Header>
               <Card.Content class="p-4 pt-0">
-                <VisXYContainer data={data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
+                <VisXYContainer data={data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}} yDomainMinConstraint={[0,0]}>
                   <VisAxis gridLine={false} type="x" minMaxTicksOnly={true} {tickFormat} />
                   <VisCrosshair template={flightTemplate}/>
                   <VisTooltip verticalPlacement={'top'}/>
                   <VisLine {x} y={yFlight} color={color()} />
-                  <VisArea curveType="linear" {x} y={yTourAreaFlight} color={color('0.2')} excludeFromDomainCalculation={true} />
-                  <!-- <VisScatter {x} y={yFlight} {events} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
+                  <VisArea curveType="linear" {x} y={yTourAreaFlight} color={color({ opacity: '0.2'})} excludeFromDomainCalculation={true} />
+                  <!-- <VisScatter {x} y={yFlight} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
                 </VisXYContainer>
               </Card.Content>
             </Card.Root>
             <Card.Root class="col-span-8 lg:col-span-4">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Card.Title class="text-sm font-semibold">Duty Hours per Day</Card.Title>
+                <Card.Title class="text-sm font-semibold">Duty Hours</Card.Title>
                 <Timer class="h-4 w-4 text-muted-foreground" />
               </Card.Header>
               <Card.Content class="p-4 pt-0">
-                <VisXYContainer data={data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
+                <VisXYContainer data={data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}} yDomainMinConstraint={[0,0]}>
                   <VisAxis gridLine={false} type="x" minMaxTicksOnly={true} {tickFormat} />
                   <VisCrosshair template={dutyTemplate}/>
                   <VisTooltip verticalPlacement={'top'}/>
                   <VisLine {x} y={yDuty} color={color()} />
-                  <VisArea curveType="linear" {x} y={yTourAreaDuty} color={color('0.2')} excludeFromDomainCalculation={true} />
+                  <VisArea curveType="linear" {x} y={yTourAreaDuty} color={color({ opacity: '0.2'})} excludeFromDomainCalculation={true} />
                   <!-- <VisScatter {x} y={yDuty} {events} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
                 </VisXYContainer>
               </Card.Content>
@@ -335,6 +408,74 @@
                 {#key mapKey}
                   <Map.Bulk bind:this={map} class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" pos={data.positions} airports={data.airports} />
                 {/key}
+              </Card.Content>
+            </Card.Root>
+          </div>
+        </Tabs.Content>
+        <Tabs.Content value="duty" class="space-y-2">
+          <div class="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
+            <Card.Root>
+              <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card.Title class="text-sm font-medium">Average Duty Day</Card.Title>
+                <Timer class="h-4 w-4 text-muted-foreground" />
+              </Card.Header>
+              <Card.Content>
+                <div class="text-2xl font-bold">{(data.dutyDays.duration.avg / 60 / 60).toFixed(1)} hr</div>
+                <p class="text-xs text-muted-foreground">Longest day was {(data.dutyDays.duration.longest / 60 / 60).toFixed(1)} hr</p>
+              </Card.Content>
+            </Card.Root>
+            <Card.Root>
+              <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card.Title class="text-sm font-medium">Flight-Duty Ratio</Card.Title>
+                <Timer class="h-4 w-4 text-muted-foreground" />
+              </Card.Header>
+              <Card.Content>
+                {#if data.dutyDays.ratio.sum.duty === 0}
+                  <div class="text-2xl font-bold">Unknown</div>
+                  <p class="text-xs text-muted-foreground">No duty during this window</p>
+                {:else}
+                  <div class="text-2xl font-bold">{(data.dutyDays.ratio.sum.flight / data.dutyDays.ratio.sum.duty * 100).toFixed(0)}%</div>
+                  <p class="text-xs text-muted-foreground">Best day was {(data.dutyDays.ratio.best * 100).toFixed(0)}%</p>
+                {/if}
+              </Card.Content>
+            </Card.Root>
+            <Card.Root>
+              <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card.Title class="text-sm font-medium">Flight Time in 7 days</Card.Title>
+                <Timer class="h-4 w-4 text-muted-foreground" />
+              </Card.Header>
+              <Card.Content>
+                <div class="text-2xl font-bold">{(data.times.seven).toFixed(1)} hr</div>
+                <p class="text-xs text-muted-foreground">{(data.times.seven / 7).toFixed(1)} hr / day avg.</p>
+              </Card.Content>
+            </Card.Root>
+            <Card.Root>
+              <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card.Title class="text-sm font-medium">Flight Time in 30 days</Card.Title>
+                <Timer class="h-4 w-4 text-muted-foreground" />
+              </Card.Header>
+              <Card.Content>
+                <div class="text-2xl font-bold">{(data.times.thirty).toFixed(1)} hr</div>
+                <p class="text-xs text-muted-foreground">{(data.times.thirty / 7).toFixed(1)} hr / day avg.</p>
+              </Card.Content>
+            </Card.Root>
+          </div>
+          <div class="grid gap-4 grid-cols-8">
+            <Card.Root class="col-span-8 lg:col-span-8">
+              <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card.Title class="text-sm font-semibold">Flight and Duty Hours</Card.Title>
+                <Table2 class="h-4 w-4 text-muted-foreground" />
+              </Card.Header>
+              <Card.Content class="p-4 pt-0">
+                <VisXYContainer data={data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
+                  <VisAxis gridLine={false} type="x" minMaxTicksOnly={true} {tickFormat} />
+                  <VisCrosshair template={dualTemplate}/>
+                  <VisTooltip verticalPlacement={'top'}/>
+                  <VisLine {x} y={yFlight} color={color({secondary: true})} />
+                  <VisLine {x} y={yDuty} color={color()} />
+                  <!-- <VisArea curveType="linear" {x} y={yTourAreaFlight} color={color('0.2')} excludeFromDomainCalculation={true} /> -->
+                  <!-- <VisScatter {x} y={yFlight} {events} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
+                </VisXYContainer>
               </Card.Content>
             </Card.Root>
           </div>

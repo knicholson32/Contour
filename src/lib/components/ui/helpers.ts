@@ -1,5 +1,9 @@
-export function color(opacity: string = "1") {
-  return () => `hsl(var(--primary) / ${opacity})`;
+export function color(options?: { opacity?: string, secondary?: boolean }) {
+  let o = "1";
+  let s = false;
+  if (options?.opacity !== undefined) o = options.opacity;
+  if (options?.secondary !== undefined) s = options.secondary;
+  return () => `hsl(var(--${s ? 'secondary' : 'primary'}) / ${o})`;
 }
 
 export type Data = { average: number; today: number; id: number };

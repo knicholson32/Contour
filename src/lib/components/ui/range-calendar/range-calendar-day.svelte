@@ -41,7 +41,7 @@
 	<slot {disabled} {unavailable} {builder}>
 		{date.day}
 		{#if highlight}
-			<span class="w-1 h-1 bg-red-500 rounded-full absolute bottom-1"></span>
+			<span class="w-1 h-1 bg-secondary rounded-full absolute bottom-1"></span>
 		{/if}
 	</slot>
 </RangeCalendarPrimitive.Day>

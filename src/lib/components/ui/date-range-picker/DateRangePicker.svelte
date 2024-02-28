@@ -18,6 +18,9 @@
  
   export let value: DateRange | undefined = undefined;
   export let highlights: string[] = [];
+
+  let className = '';
+  export { className as class };
  
   let startValue: DateValue | undefined = undefined;
 </script>
@@ -28,7 +31,8 @@
       variant="outline"
       class={cn(
         "w-[300px] justify-start text-left font-normal",
-        !value && "text-muted-foreground"
+        !value && "text-muted-foreground",
+        className
       )} builders={[builder]}>
       <CalendarIcon class="mr-2 h-4 w-4" />
       {#if value && value.start}

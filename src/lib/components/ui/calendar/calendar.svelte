@@ -3,7 +3,7 @@
 	import * as Calendar from ".";
 	import { cn } from "$lib/utils";
 
-	type $$Props = CalendarPrimitive.Props;
+	type $$Props = CalendarPrimitive.Props & { highlights?: string[] };
 
 	type $$Events = CalendarPrimitive.Events;
 
@@ -13,6 +13,7 @@
 
 	let className: $$Props["class"] = undefined;
 	export { className as class };
+	export let highlights: string[] = [];
 </script>
 
 <CalendarPrimitive.Root
@@ -30,7 +31,7 @@
 		<Calendar.Heading />
 		<Calendar.NextButton />
 	</Calendar.Header>
-	<Calendar.Months>
+	<Calendar.Months class="justify-center items-center">
 		{#each months as month}
 			<Calendar.Grid>
 				<Calendar.GridHead>
@@ -47,7 +48,7 @@
 						<Calendar.GridRow class="mt-2 w-full">
 							{#each weekDates as date}
 								<Calendar.Cell {date}>
-									<Calendar.Day {date} month={month.value} />
+									<Calendar.Day {date} month={month.value} highlight={highlights.includes(date.toString())} />
 								</Calendar.Cell>
 							{/each}
 						</Calendar.GridRow>
