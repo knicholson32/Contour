@@ -1,7 +1,6 @@
 <script lang="ts">
-	import {Activity, CreditCard, DollarSign, Plane, Plus, Table2, CalendarDays, Users, Timer, Route, Gauge, TowerControl, BedDouble, Fingerprint } from "lucide-svelte";
+	import {Plane, Plus, Table2, Timer, Route, Gauge, TowerControl, BedDouble } from "lucide-svelte";
 	import { Button } from "$lib/components/ui/button";
-  import Image from "$lib/components/Image.svelte";
 	import * as Card from "$lib/components/ui/card";
 	import * as Tabs from "$lib/components/ui/tabs";
   import * as Map from '$lib/components/map';
@@ -19,7 +18,7 @@
   import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   import * as Popover from "$lib/components/ui/popover";
   import { RangeCalendar } from "$lib/components/ui/range-calendar";
-    import AircraftHoverCard from "$lib/components/decorations/AircraftHoverCard.svelte";
+  import AircraftHoverCard from "$lib/components/decorations/AircraftHoverCard.svelte";
 
   export let data: import('./$types').PageData;
 

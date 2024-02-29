@@ -15,8 +15,7 @@
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
   import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
-    import { onMount } from 'svelte';
-    import { Calendar } from '$lib/components/calendar';
+  import * as Map from '$lib/components/map';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -124,6 +123,14 @@
 
     {#if data.entrySettings['entry.tour.current'] === data.currentTour?.id}
       <MenuForm.Title title="Active Tour" />
+    {/if}
+
+    {#if data.tourMap !== null}
+      <Section title="Tour Map">
+        {#key mapKey}
+          <Map.Bulk class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" pos={data.tourMap.positions} airports={data.tourMap.airports} />
+        {/key}
+      </Section>
     {/if}
 
     <form action="?/updateOrCreate" method="post" enctype="multipart/form-data" use:enhance={() => {

@@ -8,7 +8,7 @@ import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
 import { generateAirportList } from '$lib/server/helpers';
 import type { Prisma } from '@prisma/client';
-import { invalidateAll } from '$app/navigation';
+import type * as Types from '@prisma/client';
 
 const MAX_MB = 10;
 
@@ -38,10 +38,33 @@ export const load = async ({ fetch, params, parent }) => {
 
   const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
 
+  type T = [number, number][][];
+  type A = Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true } }>[];
+  let tourMap: { positions: T, airports: A } | null = null;
+
+  if (tour !== null) {
+    const tourExtended = await prisma.tour.findUnique({ where: { id: parseInt(params.tour)}, include: { days: { include: { legs: { include: { originAirport: true, destinationAirport: true, diversionAirport: true, positions: { select: { latitude: true, longitude: true }}}}}}}});
+    if (tourExtended !== null) {
+      tourMap = { positions: [], airports: []}
+      for (const d of tourExtended.days) {
+        for (const l of d.legs) {
+          tourMap.airports.push(l.originAirport);
+          if (l.diversionAirport !== null) tourMap.airports.push(l.diversionAirport);
+          else tourMap.airports.push(l.destinationAirport);
+          
+          const posGroup: [number, number][] = [];
+          for (const p of l.positions) posGroup.push([p.latitude, p.longitude]);
+          tourMap.positions.push(posGroup);
+        }
+      }
+    }
+  }
+
   return {
     params,
     entrySettings,
     currentTour: tour,
+    tourMap,
     tourSettings,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[],
     tours: tours
