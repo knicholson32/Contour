@@ -220,10 +220,6 @@
 
   let map: Map.Bulk;
 
-  const test = {
-    blak: 123
-  }
-
   const NUM_AC_VIS = 5;
 
   $: flownAircraftKeys = data.acList.slice(-NUM_AC_VIS);

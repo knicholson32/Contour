@@ -43,7 +43,7 @@
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
     <MenuForm.Title title="Aircraft Types" />
-    <MenuForm.Link href={ref ?? '/aircraft'} type="left" text="Go Back" />
+    <MenuForm.Link href={ref ?? '/aircraft'} type="left" text="Back to Aircraft" />
     {#if data.orderGroups.length === 0}
       <MenuForm.BlankMenu href={'/aircraft/type/new?' + urlActiveParam} title="No aircraft types" subtitle="Get started by creating a new aircraft type." buttonText="New Aircraft"/>
     {:else}
