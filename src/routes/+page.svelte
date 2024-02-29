@@ -406,8 +406,8 @@
               </Card.Content>
             </Card.Root>
           </div>
-          <div class="grid gap-2 grid-cols-5">
-            <Card.Root class="col-span-5 lg:col-span-3">
+          <div class="grid gap-2 grid-cols-5 xl:grid-cols-4">
+            <Card.Root class="col-span-5 lg:col-span-3 xl:col-span-3">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Card.Title class="text-sm font-semibold">Flight & Duty Hours</Card.Title>
                 <Table2 class="h-4 w-4 text-muted-foreground" />
@@ -424,7 +424,7 @@
                 </VisXYContainer>
               </Card.Content>
             </Card.Root>
-            <Card.Root class="col-span-5 lg:col-span-2">
+            <Card.Root class="col-span-5 lg:col-span-2 xl:col-span-1">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Card.Title class="text-sm font-medium">Flight & Duty Hours Summed</Card.Title>
                 <Timer class="h-4 w-4 text-muted-foreground" />
@@ -449,7 +449,7 @@
                 </VisXYContainer>
               </Card.Content>
             </Card.Root> -->
-            <Card.Root class="col-span-5">
+            <Card.Root class="col-span-5 xl:col-span-4">
               <Card.Content class="p-0 relative">
                 {#key mapKey}
                   <Map.Bulk bind:this={map} class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" pos={data.positions} airports={data.airports} />
