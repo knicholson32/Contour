@@ -143,6 +143,7 @@ export const load = async ({ url }) => {
   let dutyDayDuration = 0;
   let numDutyDays = days.length;
   let longestDayDuration = 0;
+  let periodFlight = 0;
   
   let lastDayEndUTC = -1;
   let avgRest = 0;
@@ -164,6 +165,7 @@ export const load = async ({ url }) => {
     lastDayEndUTC = day.endTime_utc;
 
     for (const leg of day.legs) {
+      periodFlight += leg.totalTime;
       if (leg.positions.length <= 1) continue;
       let lastPos = leg.positions[0];
       for (let i = 1; i < leg.positions.length; i++) {
@@ -356,7 +358,11 @@ export const load = async ({ url }) => {
     times: {
       one,
       seven,
-      thirty
+      thirty,
+      period: {
+        duty: timeCounter / 60 / 60,
+        flight: periodFlight
+      }
     }
   }
   

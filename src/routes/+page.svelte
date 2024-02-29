@@ -303,17 +303,17 @@
           </div>
         </div>
       </div>
-      <div class="w-full px-2 sm:hidden gap-1 items-center h-12 grid justify-center place-items-center" style="grid-template-columns: repeat({Object.keys(data.acList).length}, minmax(0, 1fr));">
-        {#each data.acList as ac (ac.id)}
-          <AircraftHoverCard id={ac.id} time={ac.time} compress={false} />
-        {/each}
-      </div>
       <Tabs.Root value="overview" class="space-y-4">
         <Tabs.List class="w-full sm:w-auto">
           <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
           <Tabs.Trigger value="duty">Flight/Duty Time</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="overview" class="space-y-2">
+          <div class="w-full px-2 sm:hidden gap-1 items-center h-12 grid justify-center place-items-center" style="grid-template-columns: repeat({Object.keys(data.acList).length}, minmax(0, 1fr));">
+            {#each data.acList as ac (ac.id)}
+              <AircraftHoverCard id={ac.id} time={ac.time} compress={false} />
+            {/each}
+          </div>
 
           <div class="grid gap-2 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-4">
 
@@ -406,24 +406,35 @@
               </Card.Content>
             </Card.Root>
           </div>
-          <div class="grid gap-2 grid-cols-8">
-            <Card.Root class="col-span-8 lg:col-span-4">
+          <div class="grid gap-2 grid-cols-5">
+            <Card.Root class="col-span-5 lg:col-span-3">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Card.Title class="text-sm font-semibold">Flight Hours</Card.Title>
+                <Card.Title class="text-sm font-semibold">Flight & Duty Hours</Card.Title>
                 <Table2 class="h-4 w-4 text-muted-foreground" />
               </Card.Header>
               <Card.Content class="p-4 pt-0">
                 <VisXYContainer data={data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}} yDomainMinConstraint={[0,0]}>
                   <VisAxis gridLine={false} type="x" minMaxTicksOnly={true} {tickFormat} />
-                  <VisCrosshair template={flightTemplate}/>
+                  <VisCrosshair template={dualTemplate}/>
                   <VisTooltip verticalPlacement={'top'}/>
-                  <VisLine {x} y={yFlight} color={color()} />
                   <VisArea curveType="linear" {x} y={yTourAreaFlight} color={color({ opacity: '0.2'})} excludeFromDomainCalculation={true} />
+                  <VisLine {x} y={yFlight} color={color({secondary: false})} />
+                  <VisLine {x} y={yDuty} color={color({ secondary: true })} />
                   <!-- <VisScatter {x} y={yFlight} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
                 </VisXYContainer>
               </Card.Content>
             </Card.Root>
-            <Card.Root class="col-span-8 lg:col-span-4">
+            <Card.Root class="col-span-5 lg:col-span-2">
+              <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card.Title class="text-sm font-medium">Flight & Duty Hours Summed</Card.Title>
+                <Timer class="h-4 w-4 text-muted-foreground" />
+              </Card.Header>
+              <Card.Content>
+                <div class="text-2xl font-bold">{data.times.period.flight.toFixed(1)} hr <span class="text-sm text-foreground/50">over</span> {pluralize('day', data.dutyDays.num, true)} <span class="text-sm text-muted-foreground"></span></div>
+                <p class="text-xs text-muted-foreground">{data.times.period.duty.toFixed(1)} duty hours</p>
+              </Card.Content>
+            </Card.Root>
+            <!-- <Card.Root class="col-span-8 lg:col-span-4">
               <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Card.Title class="text-sm font-semibold">Duty Hours</Card.Title>
                 <Timer class="h-4 w-4 text-muted-foreground" />
@@ -435,11 +446,10 @@
                   <VisTooltip verticalPlacement={'top'}/>
                   <VisLine {x} y={yDuty} color={color()} />
                   <VisArea curveType="linear" {x} y={yTourAreaDuty} color={color({ opacity: '0.2'})} excludeFromDomainCalculation={true} />
-                  <!-- <VisScatter {x} y={yDuty} {events} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
                 </VisXYContainer>
               </Card.Content>
-            </Card.Root>
-            <Card.Root class="col-span-8">
+            </Card.Root> -->
+            <Card.Root class="col-span-5">
               <Card.Content class="p-0 relative">
                 {#key mapKey}
                   <Map.Bulk bind:this={map} class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" pos={data.positions} airports={data.airports} />
@@ -507,8 +517,8 @@
                   <VisAxis gridLine={false} type="x" minMaxTicksOnly={true} {tickFormat} />
                   <VisCrosshair template={dualTemplate}/>
                   <VisTooltip verticalPlacement={'top'}/>
-                  <VisLine {x} y={yFlight} color={color({secondary: true})} />
-                  <VisLine {x} y={yDuty} color={color()} />
+                  <VisLine {x} y={yFlight} color={color({secondary: false})} />
+                  <VisLine {x} y={yDuty} color={color({ secondary: true })} />
                   <!-- <VisArea curveType="linear" {x} y={yTourAreaFlight} color={color('0.2')} excludeFromDomainCalculation={true} /> -->
                   <!-- <VisScatter {x} y={yFlight} {events} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
                 </VisXYContainer>
