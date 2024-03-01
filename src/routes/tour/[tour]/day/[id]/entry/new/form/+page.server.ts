@@ -119,7 +119,7 @@ export const load = async ({ params, fetch }) => {
   if (destinationAirport !== null) {
     const apt = airportList.find((v) => v.id === destinationAirport?.id);
     if (apt !== undefined) {
-      const nightOp = isNightOperation(new Date(entry.startTime * 1000), apt.latitude, apt.longitude);
+      const nightOp = isNightOperation(new Date(entry.endTime * 1000), apt.latitude, apt.longitude);
       if (nightOp) runwayOperations.nightLdg++;
       else runwayOperations.dayLdg++;
     }
