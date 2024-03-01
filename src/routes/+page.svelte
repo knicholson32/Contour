@@ -426,7 +426,11 @@
               </Card.Header>
               <Card.Content>
                 <div class="text-2xl font-bold">{data.times.period.flight.toFixed(1)} hr <span class="text-sm text-foreground/50">over</span> {pluralize('day', data.dutyDays.num, true)} <span class="text-sm text-muted-foreground"></span></div>
-                <p class="text-xs text-muted-foreground">{data.times.period.duty.toFixed(1)} duty hours</p>
+                <p class="text-xs text-muted-foreground">{data.times.period.duty.toFixed(1)} duty hours
+                  {#if data.times.period.duty !== 0}
+                    - {(data.times.period.flight / data.times.period.duty * 100).toFixed(1)}% utilization
+                  {/if}
+                </p>
               </Card.Content>
             </Card.Root>
             <!-- <Card.Root class="col-span-8 lg:col-span-4">

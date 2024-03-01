@@ -144,6 +144,7 @@ export const load = async ({ url }) => {
   let numDutyDays = days.length;
   let longestDayDuration = 0;
   let periodFlight = 0;
+  let periodDuty = 0;
   
   let lastDayEndUTC = -1;
   let avgRest = 0;
@@ -185,6 +186,7 @@ export const load = async ({ url }) => {
 
   miles = miles * 0.54;
 
+  periodDuty = dutyDayDuration;
   if (days.length !== 0) dutyDayDuration = dutyDayDuration / days.length;
   if (timeCounter !== 0) groundSpeed = groundSpeed / timeCounter;
 
@@ -360,7 +362,7 @@ export const load = async ({ url }) => {
       seven,
       thirty,
       period: {
-        duty: timeCounter / 60 / 60,
+        duty: periodDuty / 60 / 60,
         flight: periodFlight
       }
     }
