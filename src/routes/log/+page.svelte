@@ -83,6 +83,7 @@
         <Table.Head class="text-center">To</Table.Head>
         <Table.Head class="text-center">Total</Table.Head>
         <Table.Head class="text-center hidden xs:table-cell">Night</Table.Head>
+        <Table.Head class="text-center hidden xs:table-cell">Landings</Table.Head>
         <Table.Head class="text-left hidden xs:table-cell">Notes</Table.Head>
       </Table.Row>
     </Table.Header>
@@ -109,6 +110,7 @@
           {/if}
           <Table.Cell class="text-center">{leg.totalTime}</Table.Cell>
           <Table.Cell class="text-center hidden xs:table-cell">{leg.night.toFixed(1)}</Table.Cell>
+          <Table.Cell class="text-center hidden xs:table-cell">{leg.dayLandings + leg.nightLandings}</Table.Cell>
           <Table.Cell class="text-left hidden xs:table-cell">{leg.notes}</Table.Cell>
         </Table.Row>
       {/each}
@@ -139,6 +141,7 @@
         <Table.Head class="hidden xs:table-cell"></Table.Head>
         <Table.Head class="text-center">{totals.total.toFixed(1)}</Table.Head>
         <Table.Head class="text-center hidden xs:table-cell">{totals.night.toFixed(1)}</Table.Head>
+        <Table.Head class="hidden xs:table-cell"></Table.Head>
         <Table.Head class="hidden xs:table-cell"></Table.Head>
       </Table.Row>
     </Table.Header>
