@@ -108,9 +108,13 @@
           {:else}
             <Table.Cell class="text-center">{leg.destinationAirportId}-{leg.diversionAirportId}</Table.Cell>
           {/if}
-          <Table.Cell class="text-center">{leg.totalTime}</Table.Cell>
+          <Table.Cell class="text-center">{leg.totalTime.toFixed(1)}</Table.Cell>
           <Table.Cell class="text-center hidden xs:table-cell">{leg.night.toFixed(1)}</Table.Cell>
-          <Table.Cell class="text-center hidden xs:table-cell">{leg.dayLandings + leg.nightLandings}</Table.Cell>
+          <Table.Cell class="text-center hidden xs:table-cell">
+            {#if leg.dayLandings + leg.nightLandings > 0}
+              {leg.dayLandings + leg.nightLandings}
+            {/if}
+          </Table.Cell>
           <Table.Cell class="text-left hidden xs:table-cell">{leg.notes}</Table.Cell>
         </Table.Row>
       {/each}
