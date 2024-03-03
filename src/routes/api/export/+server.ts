@@ -119,8 +119,8 @@ export const GET = async ({ setHeaders }) => {
       while (legCount > 0) {
         // Get the next batch of types
         let legs: Prisma.LegGetPayload<{ include: { approaches: true, aircraft: { select: { registration: true, simulator: true }}}}>[] = [];
-        if (lastLegId === null) legs = await prisma.leg.findMany({ include: { approaches: true, aircraft: { select: { registration: true, simulator: true } } }, take: TAKE_LEG, orderBy: { id: 'asc' } });
-        else legs = await prisma.leg.findMany({ include: { approaches: true, aircraft: { select: { registration: true, simulator: true } } }, take: TAKE_LEG, cursor: { id: lastLegId }, orderBy: { id: 'asc' } });
+        if (lastLegId === null) legs = await prisma.leg.findMany({ include: { approaches: true, aircraft: { select: { registration: true, simulator: true } } }, take: TAKE_LEG, orderBy: { startTime_utc: 'asc' } });
+        else legs = await prisma.leg.findMany({ include: { approaches: true, aircraft: { select: { registration: true, simulator: true } } }, take: TAKE_LEG, cursor: { id: lastLegId }, orderBy: { startTime_utc: 'asc' } });
 
         // If there are no types, we are done
         if (legs.length === 0) break;
