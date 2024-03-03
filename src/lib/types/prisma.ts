@@ -81,6 +81,32 @@ export namespace DB {
     }
   }
 
+  export type CategoryAndClass = { category: string, class: string };
+  /**
+   * Convert CategoryClass to Category and Class Export
+   * @param catClass CategoryClass
+   * @returns Category and Class
+   */
+  export const categoryClassToExport = (catClass: CategoryClass): CategoryAndClass | null => {
+    switch (catClass) {
+      case CategoryClass.ASEL: return { category: 'airplane', class: 'airplane_single_engine_land'};
+      case CategoryClass.AMEL: return { category: 'airplane', class: 'airplane_multi_engine_land'};
+      case CategoryClass.ASES: return { category: 'airplane', class: 'airplane_single_engine_sea'};
+      case CategoryClass.AMES: return { category: 'airplane', class: 'airplane_multi_engine_land'};
+      case CategoryClass.RH: return { category: 'rotorcraft', class: 'rotorcraft_helicopter'};
+      case CategoryClass.RG: return { category: 'rotorcraft', class: 'rotorcraft_gyroplane'};
+      case CategoryClass.GL: return { category: 'glider', class: 'glider' };
+      case CategoryClass.LA: return { category: 'lta', class: 'lta_airship'};
+      case CategoryClass.LB: return { category: 'lta', class: 'lta_balloon'};
+      case CategoryClass.PLIFT: return { category: 'powered_lift', class: 'powered_lift' };
+      case CategoryClass.PL: return { category: 'powered_parachute', class: 'powered_parachute_land' };
+      case CategoryClass.PS: return { category: 'powered_parachute', class: 'powered_parachute_sea' };
+      case CategoryClass.WL: return { category: 'weight_shift_control', class: 'weight_shift_control_land' };
+      case CategoryClass.WS: return { category: 'weight_shift_control', class: 'weight_shift_control_sea' };
+      default: return null;
+    }
+  }
+
   // ----------------------------------------------------------------------------------------------
   // Gear Type
 
@@ -114,6 +140,27 @@ export namespace DB {
       default: return 'Unknown';
     }
   }
+
+  /**
+ * Convert GearType to export format
+ * @param catClass GearType
+ * @returns the string
+ */
+  export const gearTypeToExport = (gearType: GearType) => {
+    switch (gearType) {
+      case GearType.AM: return 'amphibian';
+      case GearType.FC: return 'fixed_tailwheel';
+      case GearType.FT: return 'fixed_tricycle';
+      case GearType.FL: return 'gloats';
+      case GearType.RC: return 'retractable_tailwheel';
+      case GearType.RT: return 'retractable_tricycle';
+      case GearType.SK: return 'skids';
+      case GearType.SI: return 'skis';
+      default: return null;
+    }
+  }
+
+
 
   // ----------------------------------------------------------------------------------------------
   // Engine Type

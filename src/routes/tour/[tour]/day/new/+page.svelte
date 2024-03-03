@@ -88,7 +88,7 @@
     }}>
 
       <div class="p-3">
-        <a href="/tour">NOTE: Assigning to current tour that started {getInlineDateUTC(data.currentTour.startTime_utc)}</a>
+        <a href="/tour/{data.currentTour.id}">NOTE: Assigning to current tour that started {getInlineDateUTC(data.currentTour.startTime_utc)}</a>
       </div>
 
       <Section title="Start" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
