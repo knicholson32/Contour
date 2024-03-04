@@ -10,7 +10,7 @@
 	export let form: import('./$types').ActionData;
   import { v4 as uuidv4 } from 'uuid';
     import { browser } from '$app/environment';
-    import { getInlineDateUTC } from '$lib/helpers';
+    import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
 
   let submitting = false;
 
@@ -92,8 +92,8 @@
       </div>
 
       <Section title="Start" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
-        <Entry.AirportPicker required={true} title="Airport" name="start-airport" airports={data.airports} bind:tz={startAirportTZ} defaultValue={null} />
-        <Entry.TimePicker required={true} title="Time" name="start-time" dateOnly={false} tz="UTC" bind:autoTZ={startAirportTZ} defaultValue={null} />
+        <Entry.AirportPicker required={true} title="Airport" name="start-airport" airports={data.airports} bind:tz={startAirportTZ} defaultValue={data.lastDay?.endAirportId ?? data.currentTour.startAirportId} />
+        <Entry.TimePicker required={true} title="Time" name="start-time" dateOnly={false} tz="UTC" bind:autoTZ={startAirportTZ} defaultValue={data.lastDay === null ? dateToDateStringForm(data.currentTour.startTime_utc, false, 'UTC') : null} />
       </Section>
 
       <Section title="End" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>

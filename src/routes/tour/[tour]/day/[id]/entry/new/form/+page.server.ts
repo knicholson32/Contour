@@ -33,7 +33,7 @@ export const load = async ({ params, fetch }) => {
   if (isNaN(parseInt(params.id))) throw redirect(301, '/tour/' + params.tour + '/day');
   const currentDay = await prisma.dutyDay.findUnique({
     where: { id: parseInt(params.id) },
-    include: { legs: true },
+    include: { legs: { orderBy: { startTime_utc: 'asc' } } },
   });
   if (currentDay === null) throw redirect(301, '/tour/' + params.tour + '/day');
 

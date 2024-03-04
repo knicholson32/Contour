@@ -23,10 +23,13 @@ export const load = async ({ fetch, params, parent }) => {
   const tourSettings = await settings.getSet('tour');
   const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
 
+  const lastDay = await prisma.dutyDay.findFirst({ where: { tourId: tour.id }, orderBy: { endTime_utc: 'desc' } });
+
   return {
     params,
     entrySettings,
     currentTour: tour,
+    lastDay,
     tourSettings,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
   }

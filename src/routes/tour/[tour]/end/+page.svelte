@@ -109,8 +109,8 @@
       </Section>
 
       <Section title="Tour End">
-        <Entry.AirportPicker required={true} title="End Airport" name="end-airport" airports={data.airports} bind:tz={endAirportTZ} defaultValue={null} />
-        <Entry.TimePicker required={true} title="End Time" name="end-time" dateOnly={false} tz="UTC" bind:autoTZ={endAirportTZ} defaultValue={null} />
+        <Entry.AirportPicker required={true} title="End Airport" name="end-airport" airports={data.airports} bind:tz={endAirportTZ} defaultValue={data.lastDay?.endAirportId ?? (data.currentTour?.startAirportId ?? data.tourSettings['tour.defaultStartApt'] ?? null)} />
+        <Entry.TimePicker required={true} title="End Time" name="end-time" dateOnly={false} tz="UTC" bind:autoTZ={endAirportTZ} defaultValue={data.lastDay === null ? null : dateToDateStringForm(data.lastDay.endTime_utc, false, 'UTC')} />
       </Section>
 
       <Section title="Details">
