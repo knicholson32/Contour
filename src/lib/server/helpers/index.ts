@@ -273,6 +273,35 @@ export const uploadImage = async (image: string | File, maxMB = 10): Promise<Upl
 }
 
 /**
+ * Filter outliers from an array of numbers
+ * @see https://gist.github.com/rmeissn/f5b42fb3e1386a46f60304a57b6d215a
+ * @param someArray the array to filter
+ * @returns the filtered number array
+ */
+export const filterOutliers = (someArray: number[]): number[] => {
+
+	if (someArray.length < 4) return someArray;
+
+	let values, q1, q3, iqr, maxValue: number, minValue: number;
+
+	values = someArray.slice().sort((a, b) => a - b); //copy array fast and sort
+
+	if ((values.length / 4) % 1 === 0) { //find quartiles
+		q1 = 1 / 2 * (values[(values.length / 4)] + values[(values.length / 4) + 1]);
+		q3 = 1 / 2 * (values[(values.length * (3 / 4))] + values[(values.length * (3 / 4)) + 1]);
+	} else {
+		q1 = values[Math.floor(values.length / 4 + 1)];
+		q3 = values[Math.ceil(values.length * (3 / 4) + 1)];
+	}
+
+	iqr = q3 - q1;
+	maxValue = q3 + iqr * 1.5;
+	minValue = q1 - iqr * 1.5;
+
+	return values.filter((x) => (x >= minValue) && (x <= maxValue));
+}
+
+/**
  * Clear hanging images from the DB (IE. Images with no aircraft, type or log entry)
  */
 export const clearHangingImages = async (): Promise<boolean> => {

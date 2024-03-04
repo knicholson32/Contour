@@ -5,9 +5,9 @@ import { API } from '$lib/types';
 import { timeStrAndTimeZoneToUTC } from '$lib/helpers';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
-import { generateAirportList } from '$lib/server/helpers';
+import { filterOutliers, generateAirportList, getDistanceFromLatLonInKm } from '$lib/server/helpers';
 
-const MAX_MB = 10;
+const AVG_FILTER_NUM = 2;
 
 export const load = async ({ fetch, params, parent }) => {
 
@@ -93,6 +93,57 @@ export const load = async ({ fetch, params, parent }) => {
   console.log(airportsInOrder);
   console.log(await generateAirportList(...airportsInOrder));
 
+  const duty = (currentDay.endTime_utc - currentDay.startTime_utc) / 60 / 60;
+  let flight = 0;
+  let distance = 0;
+  let apts: string[] = [];
+  let operations = 0;
+  let speed = 0;
+  let numPositions = 0;
+
+  let speeds: number[] = [];
+
+
+  for (const leg of currentDay.legs) {
+    flight += leg.totalTime;
+    if (!apts.includes(leg.originAirportId)) apts.push(leg.originAirportId);
+    if (!apts.includes(leg.destinationAirportId)) apts.push(leg.destinationAirportId);
+    if (leg.diversionAirportId !== null && !apts.includes(leg.diversionAirportId)) apts.push(leg.diversionAirportId);
+    operations += 2;
+    if (leg.positions.length > 1) {
+      let lastPos = leg.positions[0];
+      numPositions += leg.positions.length;
+      speed = speed + lastPos.groundspeed;
+      speeds.push(lastPos.groundspeed);
+      for (let i = 1; i < leg.positions.length; i++) {
+        const pos = leg.positions[i];
+        distance = distance + getDistanceFromLatLonInKm(lastPos.latitude, lastPos.longitude, pos.latitude, pos.longitude);
+        speed = speed + pos.groundspeed;
+        speeds.push(pos.groundspeed);
+        lastPos = pos;
+      }
+    }
+  }
+
+  speeds = filterOutliers(speeds);
+  speeds.sort((a, b) => b - a);
+
+  console.log(speeds);
+
+  let fastestSpeed = 0;
+  if (speeds.length > 0) {
+    let filteredCount = 0;
+    for (let i = 0; i < AVG_FILTER_NUM && i < speeds.length; i++) {
+      filteredCount++;
+      fastestSpeed = fastestSpeed + speeds[i];
+    }
+    fastestSpeed = fastestSpeed / filteredCount;
+  }
+
+
+  distance = distance * 0.54;
+  if (numPositions > 0) speed = speed / numPositions;
+
   return {
     params,
     entrySettings,
@@ -100,6 +151,15 @@ export const load = async ({ fetch, params, parent }) => {
     currentTour,
     airportList: await generateAirportList(...airportsInOrder),
     legDeadheadCombo,
+    stats: {
+      flight,
+      duty,
+      distance,
+      airports: apts.length,
+      speed,
+      fastestSpeed,
+      operations
+    },
     days,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
   }

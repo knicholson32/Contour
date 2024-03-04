@@ -2,6 +2,7 @@
   import { enhance } from '$app/forms';
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
+  import * as Card from "$lib/components/ui/card";
   import { Timeline } from '$lib/components/timeline';
   import Image from '$lib/components/Image.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte'
@@ -17,6 +18,7 @@
   import * as Entry from '$lib/components/entry';
   import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
   import { onMount } from 'svelte';
+    import { Timer, TowerControl } from 'lucide-svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -101,6 +103,53 @@
       <Map.Day bind:this={map} class="" legs={data.currentDay.legs} airports={data.airportList} deadheads={data.currentDay.deadheads} />
       <Timeline class="" data={data.legDeadheadCombo} day={data.currentDay} />
     {/key}
+
+    <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 p-4">
+      <Card.Root>
+        <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card.Title class="text-sm font-medium">Flight Time</Card.Title>
+          <Timer class="h-4 w-4 text-muted-foreground" />
+        </Card.Header>
+        <Card.Content>
+          <div class="text-2xl font-bold">{data.stats.flight.toFixed(1)} hr</div>
+          <p class="text-xs text-muted-foreground">{data.stats.distance.toFixed(0)} nmi traveled</p>
+        </Card.Content>
+      </Card.Root>
+      <Card.Root>
+        <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card.Title class="text-sm font-medium">Duty Time</Card.Title>
+          <Timer class="h-4 w-4 text-muted-foreground" />
+        </Card.Header>
+        <Card.Content>
+          <div class="text-2xl font-bold">{data.stats.duty.toFixed(1)} hr</div>
+          {#if data.stats.duty === 0}
+            <p class="text-xs text-muted-foreground">Unknown duty ratio</p>
+          {:else}
+            <p class="text-xs text-muted-foreground">Ratio of {(data.stats.flight / data.stats.duty * 100).toFixed(0)}%</p>
+          {/if}
+        </Card.Content>
+      </Card.Root>
+      <Card.Root>
+        <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card.Title class="text-sm font-medium">Unique Airports</Card.Title>
+          <TowerControl class="h-4 w-4 text-muted-foreground" />
+        </Card.Header>
+        <Card.Content>
+          <div class="text-2xl font-bold">{data.stats.airports}</div>
+          <p class="text-xs text-muted-foreground">{data.stats.operations} operations</p>
+        </Card.Content>
+      </Card.Root>
+      <Card.Root>
+        <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card.Title class="text-sm font-medium">Average Speed</Card.Title>
+          <TowerControl class="h-4 w-4 text-muted-foreground" />
+        </Card.Header>
+        <Card.Content>
+          <div class="text-2xl font-bold">{data.stats.speed.toFixed(0)} kts</div>
+          <p class="text-xs text-muted-foreground">Fastest was {data.stats.fastestSpeed.toFixed(0)} kts</p>
+        </Card.Content>
+      </Card.Root>
+    </div>
 
     <!-- <div class="sticky top-0 bg-red-500">
       <div class="p-3">
