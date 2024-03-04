@@ -4,21 +4,18 @@
   import Submit from '$lib/components/buttons/Submit.svelte';
   import * as Card from "$lib/components/ui/card";
   import { Timeline } from '$lib/components/timeline';
-  import Image from '$lib/components/Image.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte'
   import { v4 as uuidv4 } from 'uuid';
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
   import { afterNavigate, goto} from '$app/navigation';
   import * as Map from '$lib/components/map';
-  import Badge from '$lib/components/decorations/Badge.svelte';
   import * as MenuForm from '$lib/components/menuForm';
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
   import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
-  import { onMount } from 'svelte';
-    import { Timer, TowerControl } from 'lucide-svelte';
+  import { Timer, TowerControl } from 'lucide-svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -146,7 +143,7 @@
         </Card.Header>
         <Card.Content>
           <div class="text-2xl font-bold">{data.stats.speed.toFixed(0)} kts</div>
-          <p class="text-xs text-muted-foreground">Fastest was {data.stats.fastestSpeed.toFixed(0)} kts</p>
+          <p class="text-xs text-muted-foreground">Max {data.stats.fastestSpeed.toFixed(0)} kts</p>
         </Card.Content>
       </Card.Root>
     </div>

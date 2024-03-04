@@ -126,4 +126,4 @@
 <style>
   
 </style>
-<div bind:this={element} style="height:400px; width:100%;" {...$$restProps} />
+<div bind:this={element} style="height:400px; width:100%; position:relative;" {...$$restProps} />

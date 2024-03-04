@@ -9,6 +9,7 @@
   export let positions: Types.Position[];
   export let fixes: Types.Fix[];
   export let airports: Types.Airport[];
+  export let target: [number, number] | null = null;
 
   let element: HTMLDivElement;
 
@@ -22,6 +23,9 @@
   let fixLayer: L.Polyline<any, any> | null = null;
   let posLayer: L.Polyline<any, any> | null = null;
   let markerLayer: L.LayerGroup<any> | null = null;
+  let targetLayer: L.LayerGroup<any> | null = null;
+
+  let targetMarker: L.Marker | null = null;
 
   let mounted = false;
 
@@ -39,6 +43,18 @@
     return L.marker([airport.latitude, airport.longitude], { icon });
   }
 
+  $: updateTargetMarker(target);
+
+  const updateTargetMarker = (t: [number, number] | null) => {
+    if (!mounted || targetMarker === null) return;
+    if (t === null) {
+      targetMarker.setOpacity(0);
+    } else {
+      targetMarker.setLatLng(t);
+      targetMarker.setOpacity(1);
+    }
+  }
+
 
   const updateMapContents = (positions: Types.Position[], fixes: Types.Fix[]) => {
     if (!mounted) return;
@@ -46,6 +62,7 @@
     if (fixLayer !== null) map.removeLayer(fixLayer);
     if (posLayer !== null) map.removeLayer(posLayer);
     if (markerLayer !== null) map.removeLayer(markerLayer);
+    if (targetLayer !== null) map.removeLayer(targetLayer);
 
     pos = [];
     fix = [];
@@ -66,6 +83,14 @@
 			markerLayer.addLayer(markerIcon(airports[i], i));
  		}
   	markerLayer.addTo(map);
+
+    targetLayer = L.layerGroup();
+    const defPos = target ?? [0, 0];
+    targetMarker = L.marker(defPos, { icon: L.divIcon({ html: '<div class="w-2 h-2 rounded-full bg-slate-500 dark:bg-zinc-200 absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"></div>', className: 'relative' })});
+    if (defPos[0] === 0 && defPos[1] === 0) targetMarker.setOpacity(0);
+    
+    targetLayer.addLayer(targetMarker);
+    targetLayer.addTo(map);
 
     map.fitBounds(posLayer.getBounds(), { animate: false }).zoomOut(1, { animate: false });
   }
@@ -112,4 +137,4 @@
   }
 </style>
 
-<div bind:this={element} style="height:400px;width:100%" {...$$restProps} />
+<div bind:this={element} style="height:400px;width:100%;position:relative;" {...$$restProps} />

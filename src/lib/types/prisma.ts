@@ -18,6 +18,20 @@ export namespace DB {
   }
   export const altitudeChangeObj = Object.values(AltitudeChange);
 
+  /**
+   * Convert AltitudeChange to string
+   * @param altChange AltitudeChange
+   * @returns the string
+   */
+  export const altitudeChangeToString = (altChange: AltitudeChange) => {
+    switch (altChange) {
+      case AltitudeChange.CLIMBING: return 'Climbing';
+      case AltitudeChange.DESCENDING: return 'Descending';
+      case AltitudeChange.LEVEL: return 'Level';
+      default: return 'Unknown';
+    }
+  }
+
   // ----------------------------------------------------------------------------------------------
   // Update Type
 

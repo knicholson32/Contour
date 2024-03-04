@@ -9,7 +9,7 @@
   import { pad, weekDaysShort } from '$lib/helpers';
 	import { DateRangePicker } from "$lib/components/ui/date-range-picker";
   import { v4 as uuidv4 } from 'uuid';
-  import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea } from "@unovis/svelte";
+  import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import { CalendarDate } from "@internationalized/date";
   import { page } from "$app/stores";
@@ -198,6 +198,11 @@
   const dualTemplate = (d: DayStat) => (d.flight ?? 0).toFixed(1) + ' hr Flight<br/>' + ((d.duty ?? 0) / 60 / 60).toFixed(1) + ' hr Duty<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
   const yDuty = (d: DayStat) => (d.duty ?? 0) / 60 / 60;
   const dutyTemplate = (d: DayStat) =>  ((d.duty ?? 0) / 60 / 60).toFixed(1) + ' hr<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
+
+  const crosshairColor = (d: DayStat, i: number) => [color()(),color({ secondary: true })()][i]
+
+  let tooltipContainer: HTMLElement | undefined = undefined;
+  if (browser) tooltipContainer = document.body;
 
 
   // const events = {
@@ -410,11 +415,15 @@
               <Card.Content class="p-4 pt-0">
                 <VisXYContainer data={data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}} yDomainMinConstraint={[0,0]}>
                   <VisAxis gridLine={false} type="x" minMaxTicksOnly={true} {tickFormat} />
-                  <VisCrosshair template={dualTemplate}/>
-                  <VisTooltip verticalPlacement={'top'}/>
+                  <VisCrosshair template={dualTemplate} color={crosshairColor}/>
+                  <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer} />
                   <VisArea curveType="linear" {x} y={yTourAreaFlight} color={color({ opacity: '0.2'})} excludeFromDomainCalculation={true} />
                   <VisLine {x} y={yFlight} color={color({secondary: false})} />
                   <VisLine {x} y={yDuty} color={color({ secondary: true })} />
+                  <VisBulletLegend items={[
+                    { name: 'Flight', color: color()() },
+                    { name: 'Duty', color: color({ secondary: true })() },
+                  ]} />
                   <!-- <VisScatter {x} y={yFlight} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
                 </VisXYContainer>
               </Card.Content>
@@ -514,12 +523,16 @@
               <Card.Content class="p-4 pt-0">
                 <VisXYContainer data={data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
                   <VisAxis gridLine={false} type="x" minMaxTicksOnly={true} {tickFormat} />
-                  <VisCrosshair template={dualTemplate}/>
-                  <VisTooltip verticalPlacement={'top'}/>
+                  <VisCrosshair template={dualTemplate} color={crosshairColor}/>
+                  <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer}/>
                   <VisLine {x} y={yFlight} color={color({secondary: false})} />
                   <VisLine {x} y={yDuty} color={color({ secondary: true })} />
                   <!-- <VisArea curveType="linear" {x} y={yTourAreaFlight} color={color('0.2')} excludeFromDomainCalculation={true} /> -->
                   <!-- <VisScatter {x} y={yFlight} {events} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
+                  <VisBulletLegend items={[
+                    { name: 'Flight', color: color()() },
+                    { name: 'Duty', color: color({ secondary: true })() },
+                  ]} />
                 </VisXYContainer>
               </Card.Content>
             </Card.Root>

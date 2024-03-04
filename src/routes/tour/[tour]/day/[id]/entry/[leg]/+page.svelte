@@ -6,15 +6,21 @@
   import * as Map from '$lib/components/map';
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
+  import * as Card from "$lib/components/ui/card";
   import { afterNavigate, goto} from '$app/navigation';
   import type * as Types from '@prisma/client';
+  import { DB } from '$lib/types';
   import * as MenuForm from '$lib/components/menuForm';
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
-  import { timeStrAndTimeZoneToUTC } from '$lib/helpers';
+  import { pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
+  import { Gauge, Link, Route, Table2, Timer } from 'lucide-svelte';
+  import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
+	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
+  import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -99,6 +105,7 @@
   let mapKey = uuidv4();
   const resetMap = () => {
     mapKey = uuidv4();
+    latLong = null;
   }
 
   $: {
@@ -115,9 +122,36 @@
 
   const ref = $page.url.searchParams.get('ref');
 
+  const tickFormat = (timestamp: number) => {
+    const date = new Date(timestamp * 1000);
+    return pad(date.getUTCHours(), 2) + ':' + pad(date.getUTCMinutes(), 2);
+  }
+
+  const x = (d: Types.Position) => d.timestamp;
+  const yAltitude = (d: Types.Position) => d.altitude * 100;
+  const ySpeed = (d: Types.Position) => d.groundspeed * data.speedScaler;
+  const crosshairColor = (d: Types.Position, i: number) => [color()(),color({ secondary: true })()][i]
+
+  let tooltip: HTMLElement;
+  let position: Types.Position;
+  let latLong: [number, number] | null = null;
+  const template = (d: Types.Position) => {
+    position = d;
+    latLong = [d.latitude, d.longitude];
+    return tooltip;
+  }
+
+  let tooltipContainer: HTMLElement | undefined = undefined;
+  if (browser) tooltipContainer = document.body;
+
 </script>
 
+<div class="hidden">
+  <Tooltip bind:el={tooltip} bind:position />
+</div>
+
 <TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" onMenuBack={onMenuBack} afterDrag={resetMap}>
+
 
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
@@ -155,7 +189,6 @@
         {/if}
       {/each}
     </Section>
-    <!-- <Section title="End @ {data.day.endAirportId}"/> -->
   </nav>
   
   <!-- Form Side -->
@@ -165,8 +198,95 @@
     {:else}
 
       {#key mapKey}
-        <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} />
+        <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong} />
       {/key}
+
+      <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
+        <Card.Root class="col-span-1 xs:col-span-2 xl:col-span-4">
+          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card.Title class="text-sm font-semibold">Speed and Altitude</Card.Title>
+            <Table2 class="h-4 w-4 text-muted-foreground" />
+          </Card.Header>
+          <Card.Content class="p-4 pt-0">
+            <div on:mouseleave={() => latLong=[0, 0]} role="presentation">
+              <VisXYContainer data={data.leg.positions} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
+                <VisAxis gridLine={false} type="x" tickValues={data.tickValues} minMaxTicksOnly={false} {tickFormat} />
+                <VisCrosshair {template} color={crosshairColor} />
+                <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer} /> 
+                <VisLine {x} y={yAltitude} color={color({secondary: false})} />
+                <VisLine {x} y={ySpeed} color={color({secondary: true})} />
+                <VisBulletLegend items={[
+                  { name: 'Altitude', color: color()() },
+                  { name: 'Speed', color: color({ secondary: true })() },
+                ]} />
+              </VisXYContainer>
+            </div>
+          </Card.Content>
+        </Card.Root>
+
+        <Card.Root>
+          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card.Title class="text-sm font-medium">FlightAware</Card.Title>
+            <Link class="h-4 w-4 text-muted-foreground" />
+          </Card.Header>
+          <Card.Content>
+            {#if data.leg.flightAwareData !== null}
+              <a href={data.leg.flightAwareData.sourceLink} target="_blank">
+                {#if data.leg.flightAwareData.operator === null}
+                  <div class="text-2xl font-bold">{data.leg.flightAwareData.registration}</div>
+                  <p class="text-xs text-muted-foreground">International</p>
+                {:else}
+                  <div class="text-2xl font-bold">{data.leg.flightAwareData.operator}{data.leg.flightAwareData.flightNumber}</div>
+                  <p class="text-xs text-muted-foreground">{data.leg.flightAwareData.registration}</p>
+                {/if}
+              </a>
+            {:else}
+              <div class="text-2xl font-bold">No Source</div>
+              <p class="text-xs text-muted-foreground">This leg does not have FlightAware data</p>
+            {/if}
+          </Card.Content>
+        </Card.Root>
+
+        <Card.Root>
+          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card.Title class="text-sm font-medium">Flight Time</Card.Title>
+            <Timer class="h-4 w-4 text-muted-foreground" />
+          </Card.Header>
+          <Card.Content>
+            {#if data.stats.time === null}
+              <div class="text-2xl font-bold">Unknown</div>
+            {:else}
+              <div class="text-2xl font-bold">{data.stats.time.toFixed(1)} hr</div>
+              {#if totalTime !== null && !isNaN(parseFloat(totalTime))}
+                <p class="text-xs text-muted-foreground">= Total {Math.sign(parseFloat(totalTime) - data.stats.time) === 1 ? '-' : '+'} {Math.abs(parseFloat(totalTime) - data.stats.time).toFixed(1)} hr</p>
+              {/if}
+            {/if}
+          </Card.Content>
+        </Card.Root>
+
+        <Card.Root>
+          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card.Title class="text-sm font-medium">Avg. Speed</Card.Title>
+            <Gauge class="h-4 w-4 text-muted-foreground" />
+          </Card.Header>
+          <Card.Content>
+            <div class="text-2xl font-bold">{data.stats.avgSpeed.toFixed(0)} kts</div>
+            <p class="text-xs text-muted-foreground">Max {data.stats.maxSpeed.toFixed(0)} kts</p>
+          </Card.Content>
+        </Card.Root>
+
+        <Card.Root>
+          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card.Title class="text-sm font-medium">Distance</Card.Title>
+            <Route class="h-4 w-4 text-muted-foreground" />
+          </Card.Header>
+          <Card.Content>
+            <div class="text-2xl font-bold">{data.stats.distance.toFixed(0)} nmi</div>
+            <p class="text-xs text-muted-foreground">{(data.stats.distance * 1.15).toFixed(0)} mi</p>
+          </Card.Content>
+        </Card.Root>
+
+      </div>
 
       <form action="?/update" method="post" enctype="multipart/form-data" use:enhance={() => {
         submitting = true;
@@ -181,10 +301,6 @@
           }, 1);
         };
       }}>
-
-      <div class="p-3 text-gray-400">
-        <a href={data.leg.flightAwareData?.sourceLink} target="_blank">FlightAware Source</a>
-      </div>
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.leg.ident} />

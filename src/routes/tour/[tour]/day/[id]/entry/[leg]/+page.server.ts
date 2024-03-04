@@ -10,12 +10,12 @@ import * as i from '$lib';
 import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
-import { generateAirportList } from '$lib/server/helpers';
+import { filterOutliers, generateAirportList, getDistanceFromLatLonInKm } from '$lib/server/helpers';
 import type * as Types from '@prisma/client';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
-const MAX_MB = 10;
+const AVG_FILTER_NUM = 2;
 
 export const load = async ({ fetch, params }) => {
 
@@ -76,7 +76,65 @@ export const load = async ({ fetch, params }) => {
     if (a.startTime_utc === null || b.startTime_utc === null) return 0;
     return a.startTime_utc - b.startTime_utc
   });
-  
+
+  let tickValues: number[] = [];
+  if (leg !== null && leg.positions.length > 0) {
+    const first = leg.positions[0].timestamp;
+    const last = leg.positions[leg.positions.length - 1].timestamp;
+    for (let i = 0; i < 5; i++) tickValues.push(first + (last - first) * (i / 5));
+    tickValues.push(last);
+  }
+
+  let speedScaler = 1;
+  let maxSpeed = 0;
+  let maxAlt = 0;
+
+  if (leg !== null) {
+    for (const p of leg.positions) {
+      if (p.altitude * 100 > maxAlt) maxAlt = p.altitude * 100;
+      if (p.groundspeed > maxSpeed) maxSpeed = p.groundspeed;
+    }
+    speedScaler = maxAlt / maxSpeed * 1;
+  }
+
+
+  let flight = 0;
+  let distance = 0;
+  let speed = 0;
+  let numPositions = 0;
+
+  let speeds: number[] = [];
+
+  flight += leg?.totalTime ?? 0;
+  if (leg !== null && leg.positions.length > 1) {
+    let lastPos = leg.positions[0];
+    numPositions += leg.positions.length;
+    speed = speed + lastPos.groundspeed;
+    speeds.push(lastPos.groundspeed);
+    for (let i = 1; i < leg.positions.length; i++) {
+      const pos = leg.positions[i];
+      distance = distance + getDistanceFromLatLonInKm(lastPos.latitude, lastPos.longitude, pos.latitude, pos.longitude);
+      speed = speed + pos.groundspeed;
+      speeds.push(pos.groundspeed);
+      lastPos = pos;
+    }
+  }
+
+  speeds = filterOutliers(speeds);
+  speeds.sort((a, b) => b - a);
+
+  let fastestSpeed = 0;
+  if (speeds.length > 0) {
+    let filteredCount = 0;
+    for (let i = 0; i < AVG_FILTER_NUM && i < speeds.length; i++) {
+      filteredCount++;
+      fastestSpeed = fastestSpeed + speeds[i];
+    }
+    fastestSpeed = fastestSpeed / filteredCount;
+  }
+
+  distance = distance * 0.54;
+  if (numPositions > 0) speed = speed / numPositions;
 
   return {
     params,
@@ -87,6 +145,14 @@ export const load = async ({ fetch, params }) => {
     // positions: await prisma.position.findMany({ where: { legId: params.leg } }),
     // fixes: await prisma.fix.findMany({ where: { legId: params.leg } }),
     legDeadheadCombo,
+    stats: {
+      time: leg === null || leg.endTime_utc === null || leg.startTime_utc === null ? null : (leg.endTime_utc - leg.startTime_utc) / 60 / 60,
+      avgSpeed: speed,
+      maxSpeed: fastestSpeed,
+      distance
+    },
+    tickValues,
+    speedScaler,
     startTime: dateToDateStringForm(leg?.startTime_utc ?? 0, false, 'UTC'),
     startTimezone: originAirport === null || leg === null ? null : getTimezoneObjectFromTimezone(originAirport.timezone),
     endTime: dateToDateStringForm(leg?.endTime_utc ?? 0, false, 'UTC'),

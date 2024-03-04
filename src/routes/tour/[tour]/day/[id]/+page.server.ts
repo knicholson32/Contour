@@ -128,8 +128,6 @@ export const load = async ({ fetch, params, parent }) => {
   speeds = filterOutliers(speeds);
   speeds.sort((a, b) => b - a);
 
-  console.log(speeds);
-
   let fastestSpeed = 0;
   if (speeds.length > 0) {
     let filteredCount = 0;

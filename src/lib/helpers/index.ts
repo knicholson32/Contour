@@ -118,6 +118,16 @@ export const dateToDateStringForm = (unixTime: number, dateOnly: boolean, timezo
 }
 
 /**
+ * Convert a date object into a date and time string in UTC: 03/12/24 17:22Z
+ * @param now the date object
+ * @returns the date string
+ */
+export const dateToTimeStringForm = (unixTime: number) => {
+	const now = new Date(unixTime * 1000);
+	return `${pad(now.getUTCMonth() + 1, 2)}/${pad(now.getUTCDate(), 2)}/${now.getUTCFullYear()} ${pad(now.getUTCHours(), 2)}:${pad(now.getUTCMinutes(), 2)}Z`;
+}
+
+/**
  * Validate a URL
  * @see https://www.makeuseof.com/regular-expressions-validate-url/
  * @param url the URL to validate
