@@ -51,7 +51,7 @@
 
   afterNavigate(() => {
     setTimeout(resetMap, 1);
-  })
+  });
 
 
 
@@ -128,7 +128,7 @@
     {#if data.tourMap !== null}
       <Section title="Tour Map">
         {#key mapKey}
-          <Map.Bulk class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" pos={data.tourMap.positions} airports={data.tourMap.airports} />
+          <Map.Bulk class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" legIDs={data.tourMap.ids} pos={data.tourMap.positions} airports={data.tourMap.airports} />
         {/key}
       </Section>
     {/if}
@@ -166,10 +166,10 @@
 
       <Section title="Details">
         <Entry.Select required={true} title="Company" options={['NetJets']} placeholder="Unset" name="company" defaultValue={'NetJets'} />
-        <Entry.Switch required={true} title="Line Check" name="line-check" defaultValue={false} />
+        <Entry.Switch required={true} title="Line Check" name="line-check" defaultValue={data.currentTour?.lineCheck ?? false} />
       </Section>
       <Section title="Notes">
-        <Entry.TextField name="notes" placeholder="Enter Notes" defaultValue={null} />
+        <Entry.TextField name="notes" placeholder="Enter Notes" defaultValue={data.currentTour?.notes ?? null} />
       </Section>
 
       <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">

@@ -40,12 +40,12 @@ export const load = async ({ fetch, params, parent }) => {
 
   type T = [number, number][][];
   type A = Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true } }>[];
-  let tourMap: { positions: T, airports: A } | null = null;
+  let tourMap: { positions: T, ids: string[], airports: A } | null = null;
 
   if (tour !== null) {
     const tourExtended = await prisma.tour.findUnique({ where: { id: parseInt(params.tour)}, include: { days: { include: { legs: { include: { originAirport: true, destinationAirport: true, diversionAirport: true, positions: { select: { latitude: true, longitude: true }}}}}}}});
     if (tourExtended !== null) {
-      tourMap = { positions: [], airports: []}
+      tourMap = { positions: [], ids: [], airports: []}
       for (const d of tourExtended.days) {
         for (const l of d.legs) {
           tourMap.airports.push(l.originAirport);
@@ -55,6 +55,7 @@ export const load = async ({ fetch, params, parent }) => {
           const posGroup: [number, number][] = [];
           for (const p of l.positions) posGroup.push([p.latitude, p.longitude]);
           tourMap.positions.push(posGroup);
+          tourMap.ids.push(l.id);
         }
       }
     }

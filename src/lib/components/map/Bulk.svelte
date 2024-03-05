@@ -6,6 +6,7 @@
   import type * as Types from '@prisma/client';
   import { browser } from '$app/environment';
   import './helpers/leaflet.css';
+    import { goto } from '$app/navigation';
 
   type T = [number, number][];
   type A = Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>;
@@ -14,8 +15,6 @@
   export let pos: T[];
   export let legIDs: string[];
   export let airports: A[];
-
-  export let click: (idx: number) => void = (idx: number) => { }
 
   let element: HTMLDivElement;
 
@@ -64,7 +63,7 @@
       }
       const pl = L.polyline(pos, { color: '#E4E', opacity: 1 });
       const i = index;
-      pl.on('click', () => click(i));
+      pl.on('click', () => goto('/leg/' + legIDs[i]));
       posLayer.addLayer(pl);
       index++;
     }
