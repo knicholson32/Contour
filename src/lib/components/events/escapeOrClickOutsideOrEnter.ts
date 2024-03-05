@@ -18,13 +18,14 @@ export default function escapeOrClickOutsideOrEnter(
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			on_escape();
-		} else if (event.key === 'Tab') {
-			event.preventDefault();
-			on_clickOutside();
 		} else if (event.key === 'Enter') {
 			event.preventDefault();
 			on_enter();
 		}
+		// else if (event.key === 'Tab') {
+		// 	event.preventDefault();
+		// 	on_clickOutside();
+		// }
 	}
 
 	function handleClick(event: MouseEvent) {

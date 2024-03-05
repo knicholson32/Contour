@@ -14,10 +14,11 @@ export default function escapeOrClickOutside(
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			on_bind();
-		} else if (event.key === 'Tab') {
-			event.preventDefault();
-			on_bind();
 		}
+		// else if (event.key === 'Tab') {
+		// 	event.preventDefault();
+		// 	on_bind();
+		// }
 	}
 
 	function handleClick(event: MouseEvent) {
