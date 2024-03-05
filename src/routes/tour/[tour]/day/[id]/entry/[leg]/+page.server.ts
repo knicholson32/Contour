@@ -154,7 +154,7 @@ export const load = async ({ fetch, params }) => {
     // fixes: await prisma.fix.findMany({ where: { legId: params.leg } }),
     legDeadheadCombo,
     stats: {
-      time: leg === null || leg.endTime_utc === null || leg.startTime_utc === null ? null : (leg.endTime_utc - leg.startTime_utc) / 60 / 60,
+      time: leg === null || leg.positions.length === 0 ? null : (leg.positions[leg.positions.length - 1].timestamp - leg.positions[0].timestamp) / 60 / 60,
       avgSpeed: speed,
       maxSpeed: fastestSpeed,
       distance
