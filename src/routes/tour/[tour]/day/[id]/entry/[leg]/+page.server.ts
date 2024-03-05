@@ -3,6 +3,7 @@ import * as settings from '$lib/server/settings';
 import prisma from '$lib/server/prisma';
 import { API, ImageUploadState } from '$lib/types';
 import { dateToDateStringForm, delay, getTimezoneObjectFromTimezone, timeStrAndTimeZoneToUTC } from '$lib/helpers/index.js';
+import { DB } from '$lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import * as helpers from '$lib/helpers';
 import * as i from '$lib';
@@ -108,11 +109,18 @@ export const load = async ({ fetch, params }) => {
   flight += leg?.totalTime ?? 0;
   if (leg !== null && leg.positions.length > 1) {
     let lastPos = leg.positions[0];
+    let lastValidPos = lastPos;
     numPositions += leg.positions.length;
     speed = speed + lastPos.groundspeed;
     speeds.push(lastPos.groundspeed);
     for (let i = 1; i < leg.positions.length; i++) {
       const pos = leg.positions[i];
+      if (pos.updateType !== null && (pos.updateType as DB.UpdateType) !== DB.UpdateType.PROJECTED) {
+        lastValidPos = pos;
+      } else {
+        pos.groundspeed = lastValidPos.groundspeed;
+        pos.altitude = lastValidPos.altitude;
+      }
       distance = distance + getDistanceFromLatLonInKm(lastPos.latitude, lastPos.longitude, pos.latitude, pos.longitude);
       speed = speed + pos.groundspeed;
       speeds.push(pos.groundspeed);

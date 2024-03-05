@@ -151,13 +151,15 @@ export const load = async ({ url }) => {
   let restIndex = 0;
   let shortestRest = -1;
 
+
   for (const day of days) {
     const dayDuration = day.endTime_utc - day.startTime_utc;
     dutyDayDuration += dayDuration;
     if (dayDuration > longestDayDuration) longestDayDuration = dayDuration;
 
     // Calculate rest
-    if (lastDayEndUTC !== -1 && day.startTime_utc - lastDayEndUTC <= 86400) {
+    console.log(day.startTime_utc, lastDayEndUTC);
+    if (lastDayEndUTC !== -1 && day.startTime_utc - lastDayEndUTC <= 86400 * 1.5) {
       const rest = day.startTime_utc - lastDayEndUTC;
       if (shortestRest === -1 || rest < shortestRest) shortestRest = rest;
       avgRest += rest;
@@ -182,6 +184,7 @@ export const load = async ({ url }) => {
   }
 
   if (restIndex > 0) avgRest = avgRest / restIndex;
+  console.log('sr', shortestRest);
   if (shortestRest <= 0) shortestRest = NaN;
 
   miles = miles * 0.54;

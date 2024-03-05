@@ -128,8 +128,14 @@
   }
 
   const x = (d: Types.Position) => d.timestamp;
-  const yAltitude = (d: Types.Position) => d.altitude * 100;
-  const ySpeed = (d: Types.Position) => d.groundspeed * data.speedScaler;
+  const yAltitude = (d: Types.Position) => {
+    if (d.updateType === DB.UpdateType.PROJECTED) return undefined;
+    return d.altitude * 100;
+  }
+  const ySpeed = (d: Types.Position) => {
+    if (d.updateType === DB.UpdateType.PROJECTED) return undefined;
+    return d.groundspeed * data.speedScaler;
+  }
   const crosshairColor = (d: Types.Position, i: number) => [color()(),color({ secondary: true })()][i]
 
   let tooltip: HTMLElement;

@@ -2,6 +2,7 @@
   import { Clock3, Gauge, Locate, Rabbit, Radio } from "lucide-svelte";
   import type * as Types from '@prisma/client';
   import { dateToTimeStringForm } from "$lib/helpers";
+  import { DB } from '$lib/types';
 
   export let position: Types.Position | null = null;
   export let el: HTMLElement;
@@ -13,7 +14,11 @@
     <div class="flex items-center w-full">
       <Gauge class="mr-2 h-5 w-5 opacity-70" />{" "}
       <div class="text-sm whitespace-nowrap flex w-full items-center">
-        {(position.altitude * 100).toLocaleString()} ft
+        {#if position.updateType === DB.UpdateType.PROJECTED}
+          Unknown
+        {:else}
+          {(position.altitude * 100).toLocaleString()} ft
+        {/if}
         <div class="flex-grow"></div>
         <span class="uppercase text-xs opacity-70 ml-2">{position.altitudeChange}</span>
       </div>
@@ -21,9 +26,13 @@
     <div class="flex items-center py-2 border-b w-full">
       <Rabbit class="mr-2 h-5 w-5 opacity-70" />{" "}
       <div class="text-sm whitespace-nowrap flex w-full items-center">
-        {position.groundspeed.toFixed(0)} kts
-        <div class="flex-grow"></div>
-        <span class="uppercase text-xs opacity-70 ml-2">{(position.groundspeed * 1.15).toFixed(0)} mph</span>
+        {#if position.updateType === DB.UpdateType.PROJECTED}
+          Unknown
+        {:else}
+          {position.groundspeed.toFixed(0)} kts
+          <div class="flex-grow"></div>
+          <span class="uppercase text-xs opacity-70 ml-2">{(position.groundspeed * 1.15).toFixed(0)} mph</span>
+        {/if}
       </div>
     </div>
 
