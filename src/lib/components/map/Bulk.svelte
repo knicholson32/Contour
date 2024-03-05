@@ -12,7 +12,10 @@
   // type D = Types.Prisma.DeadheadGetPayload<{ include: { originAirport: true, destinationAirport: true} }>;
 
   export let pos: T[];
+  export let legIDs: string[];
   export let airports: A[];
+
+  export let click: (idx: number) => void = (idx: number) => { }
 
   let element: HTMLDivElement;
 
@@ -52,14 +55,18 @@
     
     let bound: L.LatLngExpression[] = [];
     posLayer = L.layerGroup();
-    console.log(pos);
+    let index = 0;
     for (const pGroup of pos) {
       const pos: L.LatLngExpression[] = [];;
       for (const p of pGroup) {
         pos.push([ p[0], p[1] ]);
         bound.push([ p[0], p[1] ]);
       }
-      posLayer.addLayer(L.polyline(pos, { color: '#E4E', opacity: 1 }));
+      const pl = L.polyline(pos, { color: '#E4E', opacity: 1 });
+      const i = index;
+      pl.on('click', () => click(i));
+      posLayer.addLayer(pl);
+      index++;
     }
     posLayer.addTo(map);
 

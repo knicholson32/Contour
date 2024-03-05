@@ -90,6 +90,7 @@ export const load = async ({ url }) => {
   }, orderBy: { startTime_utc: 'asc' }, include: { legs: { include: { aircraft: true, positions: true, originAirport: true, destinationAirport: true, diversionAirport: true, _count: { select: { approaches: true } } } }, deadheads: true } });
 
   const posGroups: [number, number][][] = [];
+  const posGroupsIDs: string[] = [];
   const airports: Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>[] = [];
   let operations = 0;
 
@@ -113,6 +114,7 @@ export const load = async ({ url }) => {
       const posGroup: [number, number][] = [];
       for (const p of leg.positions) posGroup.push([p.latitude, p.longitude]);
       posGroups.push(posGroup);
+      posGroupsIDs.push(leg.id);
 
       operations += 2;
 
@@ -333,6 +335,7 @@ export const load = async ({ url }) => {
       shortest: shortestRest,
     },
     positions: posGroups,
+    legIDs: posGroupsIDs,
     airports,
     operations,
     mostCommonAC: {

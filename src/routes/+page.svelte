@@ -201,6 +201,8 @@
 
   const crosshairColor = (d: DayStat, i: number) => [color()(),color({ secondary: true })()][i]
 
+  const legClick = (idx: number) => goto('/leg/' + data.legIDs[idx]);
+
   let tooltipContainer: HTMLElement | undefined = undefined;
   if (browser) tooltipContainer = document.body;
 
@@ -460,7 +462,7 @@
             <Card.Root class="col-span-5 xl:col-span-4">
               <Card.Content class="p-0 relative">
                 {#key mapKey}
-                  <Map.Bulk bind:this={map} class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" pos={data.positions} airports={data.airports} />
+                  <Map.Bulk bind:this={map} click={legClick} class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" pos={data.positions} legIDs={data.legIDs} airports={data.airports} />
                 {/key}
               </Card.Content>
             </Card.Root>
