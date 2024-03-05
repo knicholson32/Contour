@@ -129,11 +129,11 @@
 
   const x = (d: Types.Position) => d.timestamp;
   const yAltitude = (d: Types.Position) => {
-    if (d.updateType === DB.UpdateType.PROJECTED) return undefined;
+    if (d.updateType === DB.UpdateType.PROJECTED || d.groundspeed === 0) return undefined;
     return d.altitude * 100;
   }
   const ySpeed = (d: Types.Position) => {
-    if (d.updateType === DB.UpdateType.PROJECTED) return undefined;
+    if (d.updateType === DB.UpdateType.PROJECTED || d.groundspeed === 0) return undefined;
     return d.groundspeed * data.speedScaler;
   }
   const crosshairColor = (d: Types.Position, i: number) => [color()(),color({ secondary: true })()][i]

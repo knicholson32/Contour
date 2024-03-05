@@ -14,7 +14,7 @@
     <div class="flex items-center w-full">
       <Gauge class="mr-2 h-5 w-5 opacity-70" />{" "}
       <div class="text-sm whitespace-nowrap flex w-full items-center">
-        {#if position.updateType === DB.UpdateType.PROJECTED}
+        {#if position.updateType === DB.UpdateType.PROJECTED || position.groundspeed === 0}
           Unknown
         {:else}
           {(position.altitude * 100).toLocaleString()} ft
@@ -26,7 +26,7 @@
     <div class="flex items-center py-2 border-b w-full">
       <Rabbit class="mr-2 h-5 w-5 opacity-70" />{" "}
       <div class="text-sm whitespace-nowrap flex w-full items-center">
-        {#if position.updateType === DB.UpdateType.PROJECTED}
+        {#if position.updateType === DB.UpdateType.PROJECTED || position.groundspeed === 0}
           Unknown
         {:else}
           {position.groundspeed.toFixed(0)} kts
