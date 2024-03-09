@@ -6,11 +6,12 @@ import { API } from '$lib/types';
 import { timeStrAndTimeZoneToUTC } from '$lib/helpers';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
-import { generateAirportList } from '$lib/server/helpers';
+import { filterOutliers, generateAirportList, getDistanceFromLatLonInKm } from '$lib/server/helpers';
 import type { Prisma } from '@prisma/client';
 import type * as Types from '@prisma/client';
 
 const MAX_MB = 10;
+const AVG_FILTER_NUM = 2;
 
 export const load = async ({ fetch, params, parent }) => {
 
@@ -42,22 +43,123 @@ export const load = async ({ fetch, params, parent }) => {
   type A = Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true } }>[];
   let tourMap: { positions: T, ids: string[], airports: A } | null = null;
 
+  let stats: {
+    flight: number,
+    duty: number,
+    distance: number,
+    airports: number,
+    speed: number,
+    fastestSpeed: number,
+    operations: number
+  } | null = null;
+
   if (tour !== null) {
-    const tourExtended = await prisma.tour.findUnique({ where: { id: parseInt(params.tour)}, include: { days: { include: { legs: { include: { originAirport: true, destinationAirport: true, diversionAirport: true, positions: { select: { latitude: true, longitude: true }}}}}}}});
+    const tourExtended = await prisma.tour.findUnique({ 
+      where: { 
+        id: parseInt(params.tour)
+      }, 
+      include: { 
+        days: { 
+          include: { 
+            legs: { 
+              include: { 
+                originAirport: true, 
+                destinationAirport: true, 
+                diversionAirport: true, 
+                positions: { 
+                  select: { 
+                    latitude: true, 
+                    longitude: true,
+                    groundspeed: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
     if (tourExtended !== null) {
+
       tourMap = { positions: [], ids: [], airports: []}
+
+      stats = {
+        flight: 0,        // Done
+        duty: 0,          // Done
+        distance: 0,      // Done
+        airports: 0,      // Done
+        speed: 0,         // Done
+        fastestSpeed: 0,  // Done
+        operations: 0     // Done
+      }
+
+      let apts: string[] = [];
+      let speeds: number[] = [];
+      let numPositions = 0;
+
+
       for (const d of tourExtended.days) {
+
+        stats.duty += (d.endTime_utc - d.startTime_utc) / 60 / 60;
+
         for (const l of d.legs) {
+          stats.flight += l.totalTime;
+          stats.operations += 2;
+          if (!apts.includes(l.originAirportId)) apts.push(l.originAirportId);
+          if (!apts.includes(l.destinationAirportId)) apts.push(l.destinationAirportId);
+          if (l.diversionAirportId !== null && !apts.includes(l.diversionAirportId)) apts.push(l.diversionAirportId);
+
           tourMap.airports.push(l.originAirport);
           if (l.diversionAirport !== null) tourMap.airports.push(l.diversionAirport);
           else tourMap.airports.push(l.destinationAirport);
           
           const posGroup: [number, number][] = [];
-          for (const p of l.positions) posGroup.push([p.latitude, p.longitude]);
+
+          
+
+          // for (const p of l.positions) {
+          //   posGroup.push([p.latitude, p.longitude]);
+          // }
+
+          if (l.positions.length > 1) {
+            let lastPos = l.positions[0];
+            numPositions += l.positions.length;
+            stats.speed += lastPos.groundspeed;
+            speeds.push(lastPos.groundspeed);
+            posGroup.push([lastPos.latitude, lastPos.longitude]);
+            for (let i = 1; i < l.positions.length; i++) {
+              const pos = l.positions[i];
+              posGroup.push([pos.latitude, pos.longitude]);
+              stats.distance += getDistanceFromLatLonInKm(lastPos.latitude, lastPos.longitude, pos.latitude, pos.longitude);
+              stats.speed += pos.groundspeed;
+              speeds.push(pos.groundspeed);
+              lastPos = pos;
+            }
+          }
+
           tourMap.positions.push(posGroup);
           tourMap.ids.push(l.id);
         }
       }
+
+      speeds = filterOutliers(speeds);
+      speeds.sort((a, b) => b - a);
+
+      if (speeds.length > 0) {
+        let filteredCount = 0;
+        for (let i = 0; i < AVG_FILTER_NUM && i < speeds.length; i++) {
+          filteredCount++;
+          stats.fastestSpeed += speeds[i];
+        }
+        stats.fastestSpeed = stats.fastestSpeed / filteredCount;
+      }
+
+      stats.distance *= 0.54;
+      if (numPositions > 0) stats.speed = stats.speed / numPositions;
+
+      stats.airports = apts.length;
+
     }
   }
 
@@ -66,6 +168,7 @@ export const load = async ({ fetch, params, parent }) => {
     entrySettings,
     currentTour: tour,
     tourMap,
+    stats,
     tourSettings,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[],
     tours: tours
