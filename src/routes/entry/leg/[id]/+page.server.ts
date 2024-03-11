@@ -34,7 +34,7 @@ export const load = async ({ fetch, params, url }) => {
   });
 
   const resolve = url.searchParams.get('resolve');
-  if (leg !== null && resolve !== null) throw redirect(302, `/entry/leg/${params.id}?active=menu${leg.dayId === null ? '' : '&day=' + leg.dayId}${leg.day?.tourId === undefined ? '' : '&tour=' + leg.day.tourId}`);
+  if (leg !== null && resolve !== null) throw redirect(302, `/entry/leg/${params.id}?active=form${leg.dayId === null ? '' : '&day=' + leg.dayId}${leg.day?.tourId === undefined ? '' : '&tour=' + leg.day.tourId}`);
 
   if (leg === null && params.id !== 'new') throw redirect(302, `/entry/leg?${url.searchParams.toString()}`);
 
