@@ -1,6 +1,6 @@
 <script lang="ts">
   import { browser } from "$app/environment";
-  import { goto } from "$app/navigation";
+  import { afterNavigate, goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { backArrow, backButtonClicked, backText as _backText } from "$lib/stores";
   import { onMount } from "svelte";
@@ -19,9 +19,32 @@
    */
   let activeOnSingleCol: 'menu' | 'form' = $page.url.searchParams.get('active') as 'menu' | 'form';
   if (activeOnSingleCol !== 'menu' && activeOnSingleCol !== 'form') activeOnSingleCol = 'menu';
-  export let urlActiveParam = 'active=' + (activeOnSingleCol === 'form' ? 'menu' : 'form');
+  // export let urlActiveParam = 'active=' + (activeOnSingleCol === 'form' ? 'menu' : 'form');
+  
+
+  let _altURLParamsObj: URLSearchParams = new URLSearchParams($page.url.search);
+  _altURLParamsObj.set('active', (activeOnSingleCol === 'form' ? 'menu' : 'form'));
+
+  export let urlActiveParam: string = _altURLParamsObj.toString();
+  export let urlFormParam: string = _altURLParamsObj.toString();
+
+
+  export const alterParamsWithMenuSwap = (mods: { [key: string]: string }) => {
+    const params = new URLSearchParams($page.url.search);
+    params.set('active', (activeOnSingleCol === 'form' ? 'menu' : 'form'));
+    for (const key of Object.keys(mods)) params.set(key, mods[key]);
+    return params;
+  }
 
   export let isMobileSize = true;
+
+  const updateURLParams = () => {
+    _altURLParamsObj = new URLSearchParams($page.url.search);
+    _altURLParamsObj.set('active', 'form');
+    urlFormParam = _altURLParamsObj.toString();
+    _altURLParamsObj.set('active', (activeOnSingleCol === 'form' ? 'menu' : 'form'));
+    urlActiveParam = _altURLParamsObj.toString();
+  }
 
   $: {
     $page.url.pathname;
@@ -29,9 +52,17 @@
     let active = $page.url.searchParams.get('active');
     if (active === null) active = (new URLSearchParams($page.url.search)).get('active');
     if (active === 'menu' || active === 'form') activeOnSingleCol = active;
-    urlActiveParam = 'active=' + (activeOnSingleCol === 'form' ? 'menu' : 'form');
+    // urlActiveParam = 'active=' + (activeOnSingleCol === 'form' ? 'menu' : 'form');
+
+    updateURLParams();
+
+    // tmpURL.searchParams.set('active', (activeOnSingleCol !== 'form' ? 'menu' : 'form'));
     // console.log($page.url.pathname, $page.url.search, active, activeOnSingleCol);
   }
+
+  afterNavigate(() => {
+    updateURLParams();
+  });
 
   let innerWidth: number;
 

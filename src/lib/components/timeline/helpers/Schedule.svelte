@@ -21,9 +21,14 @@
 
     const totalTime = ((entry.endTime_utc??0) - (entry.startTime_utc??0)) / 60 / 60;
 
+    const u = new URLSearchParams($page.url.search);
+    if (entry.dayId !== null) u.set('day', entry.dayId.toFixed(0));
+    u.set('active', 'form');
+    const legLink = `/entry/leg/${entry.id}?${u.toString()}`;
+
 </script>
 
-<a href="{entry.id !== null && entry.dayId !== null && entry.type === 'leg' ? `/tour/${$page.params.tour}/day/${entry.dayId}/entry/${entry.id}?active=form` : '#'}" class="group hover:opacity-80 select-none {helpers.getText(i, entry.type)} flex flex-col gap-0.5 items-center justify-center min-w-[4.75rem] lg:min-w-[6.5rem]" style="width: {helpers.convertUTCToWidth(i, entry.startTime_utc, entry.endTime_utc, dayStartTime, dayEndTime)}%; margin-top: {i * spacing}rem">
+<a href="{entry.id !== null && entry.dayId !== null && entry.type === 'leg' ? legLink : '#'}" class="group hover:opacity-80 select-none {helpers.getText(i, entry.type)} flex flex-col gap-0.5 items-center justify-center min-w-[4.75rem] lg:min-w-[6.5rem]" style="width: {helpers.convertUTCToWidth(i, entry.startTime_utc, entry.endTime_utc, dayStartTime, dayEndTime)}%; margin-top: {i * spacing}rem">
   <div class="w-full text-xxs leading-3 inline-flex px-2">
     {#if totalTime >= 0}
       <span class="text-gray-500">{getHoursMinutesUTC(new Date((entry.startTime_utc??0) * 1000), false)}</span>

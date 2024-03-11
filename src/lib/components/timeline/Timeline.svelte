@@ -7,18 +7,8 @@
 
   export let data: ((Types.Deadhead | Types.Leg) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[];
   export let day: Types.DutyDay;
-  // let intervals = 10
-
-  // let dateObjects: Date[] = [];
-
-  // let interval = (day.endTime_utc * 1000 - day.startTime_utc * 1000) / 7;
-
-  // for (let i = 0 + 1; i < 5 + 1; i++) {
-  //   dateObjects.push(new Date(day.startTime_utc * 1000 + i * interval));
-  // }
 
   let dutyDayLength = ((day.endTime_utc - day.startTime_utc) / 60 / 60).toFixed(1);
-
 
   const dataFormatted: {
     entity: (typeof data[0] | {
@@ -35,7 +25,6 @@
     if (d.endTime_utc === null || d.startTime_utc === null) continue;
     dataCleaned.push(d);
   }
-
 
   if (dataCleaned.length > 0) {
     let lastEntry = dataCleaned[0];
@@ -82,9 +71,6 @@
       });
     }
   }
-
-  console.log(dataFormatted);
-
 
   const spacing = 1.25;
 

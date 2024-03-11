@@ -63,7 +63,7 @@
       }
       const pl = L.polyline(pos, { color: '#E4E', opacity: 1 });
       const i = index;
-      pl.on('click', () => goto('/leg/' + legIDs[i]));
+      pl.on('click', () => goto(`/entry/leg/${legIDs[i]}?resolve=true`));
       posLayer.addLayer(pl);
       index++;
     }

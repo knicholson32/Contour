@@ -17,7 +17,8 @@
 
 {#if theme === 'default'}
   {#if type === 'left'}
-    <a href={href} class="hidden md:flex border-b select-none h-11 relative flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-black dark:betterhover:hover:text-white">
+    <!-- hidden md:flex  -->
+    <a href={href} class="flex border-b select-none h-11 relative flex-row justify-left items-center gap-2 pl-2 pr-6 py-2 betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-black dark:betterhover:hover:text-white">
       <div class="h-7 w-12 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
           {@html icons.chevronLeft}
