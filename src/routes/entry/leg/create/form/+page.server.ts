@@ -24,14 +24,26 @@ export const load = async ({ params, fetch, url }) => {
   const entrySettings = await settings.getSet('entry');
   const aeroAPIKey = await settings.get('general.aeroAPI');
 
+  const selection = url.searchParams.get('selection') === null ? null : url.searchParams.get('selection');
 
-  if (entrySettings['entry.day.entry.fa_id'] === '' || entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED) throw redirect(301, '../link' + url.search);
+  if (selection !== null && (entrySettings['entry.day.entry.fa_id'] === '' || entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED)) throw redirect(301, '../link' + url.search);
   if (aeroAPIKey === '') throw redirect(301, '/settings');
-  
-  let entry = await options.getFlightOptionFaFlightID(entrySettings['entry.day.entry.fa_id']);
 
   const airportsRaw = await ((await fetch('/api/airports')).json()) as API.Airports;
   const airports = (airportsRaw.ok === true) ? airportsRaw.airports : [] as API.Types.Airport[]
+
+  const aircraft = await prisma.aircraft.findMany({ select: { registration: true, id: true, type: { select: { typeCode: true, make: true, model: true } } }, orderBy: { registration: 'asc' } });
+  
+  if (selection === null) {
+    return {
+      airports,
+      aircraft
+    };
+  }
+
+
+  let entry = await options.getFlightOptionFaFlightID(entrySettings['entry.day.entry.fa_id']);
+
 
   if (entry === undefined) {
     console.log(`Could not verify - FA Flight ID ${entrySettings['entry.day.entry.fa_id']} did not load a value from the DB.`);
@@ -40,7 +52,6 @@ export const load = async ({ params, fetch, url }) => {
     throw redirect(301, '../link' + url.search);
   }
 
-  const aircraft = await prisma.aircraft.findMany({ select: { registration: true, id: true, type: { select: { typeCode: true, make: true, model: true } } }, orderBy: { registration: 'asc' } });
 
   if (entry.registration !== null) {
     let unknownAircraft = true;
@@ -51,7 +62,6 @@ export const load = async ({ params, fetch, url }) => {
       }
     }
 
-    // TODO: This redirect will not work correctly because it will lose the tour and day IDs in the search params
     if (unknownAircraft) {
       const u = new URLSearchParams();
       u.set('reg', entry.registration);
@@ -121,16 +131,17 @@ export const load = async ({ params, fetch, url }) => {
 
 
   const u = new URLSearchParams(url.search);
-  const selection = u.get('selection');
-  if (selection !== null) u.delete('selection');
+  u.delete('selection');
   u.set('active', 'menu');
   const changeSourceURL = `/entry/leg/create/fa${selection === null ? '' : '/' + selection}?${u.toString()}`;
+  const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
 
   return {
     entry,
     params,
     entrySettings,
     changeSourceURL,
+    dayId,
     // totalTime,
     runwayOperations,
     xc: entry.diversionAirportId === null ? (entry.originAirportId === entry.destinationAirportId ? false : true) : (entry.originAirportId === entry.diversionAirportId ? false : true),
@@ -153,9 +164,10 @@ export const actions = {
     const fa = await settings.get('entry.day.entry.fa_id');
 
     const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
+    const selection = url.searchParams.get('selection') === null ? null : url.searchParams.get('selection');
 
     let entry = await options.getFlightOptionFaFlightID(fa);
-    if (entry === undefined) return API.Form.formFailure('?/default', '*', 'No FA Entry');
+    if (entry === undefined && selection !== null) return API.Form.formFailure('?/default', '*', 'No FA Entry');
 
     if (await prisma.flightAwareData.findUnique({ where: { faFlightId: fa } }) !== null) return API.Form.formFailure('?/default', '*', 'Entry with FA already exists');
 
@@ -231,25 +243,38 @@ export const actions = {
     // Out / In Times
     // -----------------------------------------------------------------------------------------------------------------
 
+    const useBlock = data.get('use-block') === 'true';
     const startTime = data.get('out-date') as null | string;
     const startTimeTZ = data.get('out-tz') as null | string;
     const endTime = data.get('in-date') as null | string;
     const endTimeTZ = data.get('in-tz') as null | string;
+    const date = data.get('date') as null | string;
 
-    if (startTime === null || startTime === '') return API.Form.formFailure('?/default', 'out', 'Required field');
-    if (startTimeTZ === null || startTimeTZ === '') return API.Form.formFailure('?/default', 'out', 'Required field');
-    if (endTime === null || endTime === '') return API.Form.formFailure('?/default', 'in', 'Required field');
-    if (endTimeTZ === null || endTimeTZ === '') return API.Form.formFailure('?/default', 'in', 'Required field');
+    // Initialize time variables that we may modify later
+    let startUTCValue = Math.floor(new Date().getTime() / 1000);
+    let endUTCValue = startUTCValue;
+    let relativeOrder = 0;
 
+    if (useBlock) {
+      if (startTime === null || startTime === '') return API.Form.formFailure('?/default', 'out', 'Required field');
+      if (startTimeTZ === null || startTimeTZ === '') return API.Form.formFailure('?/default', 'out', 'Required field');
+      if (endTime === null || endTime === '') return API.Form.formFailure('?/default', 'in', 'Required field');
+      if (endTimeTZ === null || endTimeTZ === '') return API.Form.formFailure('?/default', 'in', 'Required field');
+      if (date === null && dayId === null) return API.Form.formFailure('?/default', 'date', 'Required field');
 
-    const startUTC = helpers.timeStrAndTimeZoneToUTC(startTime, startTimeTZ);
-    if (startUTC === null) return API.Form.formFailure('?/default', 'out', 'Unknown Timezone');
+      const startUTC = helpers.timeStrAndTimeZoneToUTC(startTime, startTimeTZ);
+      if (startUTC === null) return API.Form.formFailure('?/default', 'out', 'Unknown Timezone');
 
-    const endUTC = helpers.timeStrAndTimeZoneToUTC(endTime, endTimeTZ);
-    if (endUTC === null) return API.Form.formFailure('?/default', 'in', 'Unknown Timezone');
+      const endUTC = helpers.timeStrAndTimeZoneToUTC(endTime, endTimeTZ);
+      if (endUTC === null) return API.Form.formFailure('?/default', 'in', 'Unknown Timezone');
 
-    if (startUTC.value > endUTC.value) return API.Form.formFailure('?/default', 'out', 'In is after Out');
-    if (endUTC.value - startUTC.value > 86400) return API.Form.formFailure('?/default', 'out', 'Flight time is longer than 24 hours');
+      if (startUTC.value > endUTC.value) return API.Form.formFailure('?/default', 'out', 'In is after Out');
+      if (endUTC.value - startUTC.value > 86400) return API.Form.formFailure('?/default', 'out', 'Flight time is longer than 24 hours');
+
+      startUTCValue = startUTC.value;
+      endUTCValue = endUTC.value;
+    }
+    
 
     // -----------------------------------------------------------------------------------------------------------------
     // Aircraft
@@ -300,6 +325,13 @@ export const actions = {
     if (dualReceivedTime === null || dualReceivedTime === '' || isNaN(parseFloat(dualReceivedTime))) dualReceivedTime = null;
     if (simTime === null || simTime === '' || isNaN(parseFloat(simTime))) simTime = null;
 
+    // If we have provided a date, the user wants to use that instead of the flight aware info.
+    if (date !== null) {
+      startUTCValue = Math.floor(new Date(date).getTime() / 1000);
+      endUTCValue = startUTCValue + (parseFloat(totalTime) * 60 * 60);
+      relativeOrder = await prisma.leg.count({ where: { startTime_utc: startUTCValue } });
+    }
+
     // -----------------------------------------------------------------------------------------------------------------
     // Takeoffs & Landings and other Integers
     // -----------------------------------------------------------------------------------------------------------------
@@ -346,8 +378,9 @@ export const actions = {
 
         aircraftId: aircraftId,
 
-        startTime_utc: startUTC.value,
-        endTime_utc: endUTC.value,
+        startTime_utc: startUTCValue,
+        endTime_utc: endUTCValue,
+        relativeOrder: relativeOrder,
 
         totalTime: totalTime === null ? undefined : parseFloat(totalTime),
         pic: picTime === null ? undefined : parseFloat(picTime),
@@ -379,63 +412,71 @@ export const actions = {
       // If we make it here, it is time to commit the FlightAware data
 
       try {
-        const flightAwareData = await prisma.flightAwareData.create({ data: {
-          faFlightId: entry.faFlightId,
+        let faFlightId: string | null = null;
+        if (entry !== undefined) {
+          const flightAwareData = await prisma.flightAwareData.create({ data: {
+            faFlightId: entry.faFlightId,
 
-          operator: entry.operator,
-          flightNumber: entry.flightNumber,
-          registration: entry.registration,
-          inboundFaFlightId: entry.inboundFaFlightId,
+            operator: entry.operator,
+            flightNumber: entry.flightNumber,
+            registration: entry.registration,
+            inboundFaFlightId: entry.inboundFaFlightId,
 
-          sourceLink: await settings.get('entry.day.entry.fa_link'),
+            sourceLink: await settings.get('entry.day.entry.fa_link'),
 
-          blocked: entry.blocked,
-          diverted: entry.diverted,
-          cancelled: entry.cancelled,
-          positionOnly: entry.positionOnly,
+            blocked: entry.blocked,
+            diverted: entry.diverted,
+            cancelled: entry.cancelled,
+            positionOnly: entry.positionOnly,
 
-          departureDelay: entry.departureDelay,
-          arrivalDelay: entry.arrivalDelay,
-          filedEte: entry.filedEte,
-          progressPercent: entry.progressPercent,
-          status: entry.status,
-          aircraftType: entry.aircraftType,
-          routeDistance: entry.routeDistance,
-          filedAirspeed: entry.filedAirspeed,
-          filedAltitude: entry.filedAltitude,
-          filedRoute: entry.filedRoute,
-          seatsCabinBusiness: entry.seatsCabinBusiness,
-          seatsCabinCoach: entry.seatsCabinCoach,
-          seatsCabinFirst: entry.seatsCabinFirst,
-          gateOrigin: entry.gateOrigin,
-          gateDestination: entry.gateDestination,
-          terminalOrigin: entry.terminalOrigin,
-          terminalDestination: entry.terminalDestination,
-          type: entry.type,
+            departureDelay: entry.departureDelay,
+            arrivalDelay: entry.arrivalDelay,
+            filedEte: entry.filedEte,
+            progressPercent: entry.progressPercent,
+            status: entry.status,
+            aircraftType: entry.aircraftType,
+            routeDistance: entry.routeDistance,
+            filedAirspeed: entry.filedAirspeed,
+            filedAltitude: entry.filedAltitude,
+            filedRoute: entry.filedRoute,
+            seatsCabinBusiness: entry.seatsCabinBusiness,
+            seatsCabinCoach: entry.seatsCabinCoach,
+            seatsCabinFirst: entry.seatsCabinFirst,
+            gateOrigin: entry.gateOrigin,
+            gateDestination: entry.gateDestination,
+            terminalOrigin: entry.terminalOrigin,
+            terminalDestination: entry.terminalDestination,
+            type: entry.type,
 
-          scheduledOut: entry.scheduledOut,
-          scheduledOff: entry.scheduledOff,
-          actualOut: entry.actualOut,
-          actualOff: entry.actualOff,
-          scheduledIn: entry.scheduledIn,
-          scheduledOn: entry.scheduledOn,
-          actualIn: entry.actualIn,
-          actualOn: entry.actualOn,
+            scheduledOut: entry.scheduledOut,
+            scheduledOff: entry.scheduledOff,
+            actualOut: entry.actualOut,
+            actualOff: entry.actualOff,
+            scheduledIn: entry.scheduledIn,
+            scheduledOn: entry.scheduledOn,
+            actualIn: entry.actualIn,
+            actualOn: entry.actualOn,
 
-          legId: id
-        }});
+            legId: id
+          }});
+          faFlightId = flightAwareData.faFlightId;
+        }
 
         // If we make it here, it is time to store positions
 
         try {
-          const track = await aero.getFlightTrack(flightAwareData.faFlightId, aeroAPIKey);
-          await Positions.storePositions(track.positions, leg.id);
+          if (faFlightId !== null) {
+            const track = await aero.getFlightTrack(faFlightId, aeroAPIKey);
+            await Positions.storePositions(track.positions, leg.id);
+          }
 
           // If we made it here, it is time to store the route
 
           try {
-            const route = await aero.getFlightRoute(flightAwareData.faFlightId, aeroAPIKey);
-            await Fixes.storeFixes(route.fixes, leg.id);
+            if (faFlightId !== null) {
+              const route = await aero.getFlightRoute(faFlightId, aeroAPIKey);
+              await Fixes.storeFixes(route.fixes, leg.id);
+            }
           } catch (e) {
             console.log(e);
             // It is OK if we can't store the route?
@@ -476,7 +517,7 @@ export const actions = {
               await prisma.approach.deleteMany({ where: { legId: leg.id }});
               await Positions.deletePositions(leg.id);
               await Fixes.deleteFixes(leg.id);
-              await prisma.flightAwareData.delete({ where: { faFlightId: flightAwareData.faFlightId } });
+              if (faFlightId !== null) await prisma.flightAwareData.delete({ where: { faFlightId: faFlightId } });
               await prisma.leg.delete({ where: { id: leg.id } });
               return API.Form.formFailure('?/default', '*', 'Could not create deadheads');
             }
@@ -484,13 +525,15 @@ export const actions = {
             console.log(e);
             await Positions.deletePositions(leg.id);
             await Fixes.deleteFixes(leg.id);
-            await prisma.flightAwareData.delete({ where: { faFlightId: flightAwareData.faFlightId } });
+            if (faFlightId !== null) await prisma.flightAwareData.delete({ where: { faFlightId: faFlightId } });
             await prisma.leg.delete({ where: { id: leg.id } });
             return API.Form.formFailure('?/default', '*', 'Could not create approaches');
           }
         } catch (e) {
           console.log(e);
-          await prisma.flightAwareData.delete({ where: { faFlightId: flightAwareData.faFlightId } });
+          if (faFlightId !== null) {
+            await prisma.flightAwareData.delete({ where: { faFlightId: faFlightId } });
+          }
           await prisma.leg.delete({ where: { id: leg.id } });
           return API.Form.formFailure('?/default', '*', 'Could not store positions');
         }
@@ -510,6 +553,7 @@ export const actions = {
     const u = new URLSearchParams(url.search);
     u.delete('selection');
     u.delete('flight-id');
+    u.delete('date');
     throw redirect(301, `/entry/leg/${id}?${u.toString()}`);
   }
 };

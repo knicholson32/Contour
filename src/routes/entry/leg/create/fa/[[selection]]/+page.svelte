@@ -5,7 +5,7 @@
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
   import { enhance } from '$app/forms';
-  import { deleteQueries, getAirportFromICAO, getHoursMinutesUTC, getInlineDateUTC, getInlineDateUTCFA, getWeekdayUTC, setActive } from '$lib/helpers';
+  import { dateToDateStringForm, deleteQueries, getAirportFromICAO, getHoursMinutesUTC, getInlineDateUTC, getInlineDateUTCFA, getWeekdayUTC, setActive } from '$lib/helpers';
   import Warning from '$lib/components/Warning.svelte';
   import * as Map from '$lib/components/map';
   import { v4 as uuidv4 } from 'uuid';
@@ -98,8 +98,12 @@
   <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
 
     <form method="get">
-      <input type="hidden" name="tour" value={data.currentTour.id}>
-      <input type="hidden" name="day" value={data.currentDay.id}>
+      {#if data.currentTour !== null}
+        <input type="hidden" name="tour" value={data.currentTour.id}>
+      {/if}
+      {#if data.currentDay !== null}
+        <input type="hidden" name="day" value={data.currentDay.id}>
+      {/if}
       <Section title="Flight Aware Options" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Switch title="Poll FlightAware" name="no-cache" bind:value={noCache} defaultValue={false} />
         
@@ -116,6 +120,9 @@
             </div>
           </div>
         </Frame>
+        {#if data.currentDay === null}
+          <Entry.TimePicker name="date" title="Approx. Flight Date" defaultValue={dateToDateStringForm(new Date().getTime() / 1000, true, 'utc')} dateOnly={true}/>
+        {/if}
         <Entry.Submit bind:title={searchTitle}/>
       </Section>
 

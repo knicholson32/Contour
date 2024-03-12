@@ -45,12 +45,34 @@ export const load = async ({ fetch, params, url }) => {
     if (currentDay === null) throw redirect(302, '/entry/leg' + url.search);
   }
 
-  let legs: Prisma.LegGetPayload<{ select: { id: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, aircraftId: true }, orderBy: { startTime_utc: 'asc' } }>[] | null = null;
+  type Entry = Prisma.LegGetPayload<{ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } } }>;
+  let _legs: Entry[] | null = null;
+  let legs: { year: number, entries: Entry[]}[] = [];
 
   if (dayId === null) {
-    legs = await prisma.leg.findMany({ select: { id: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, aircraftId: true }, orderBy: { startTime_utc: 'asc' } });
+    _legs = await prisma.leg.findMany({ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
   } else {
-    legs = await prisma.leg.findMany({ where: { dayId: dayId }, select: { id: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, aircraftId: true }, orderBy: { startTime_utc: 'asc' } });
+    _legs = await prisma.leg.findMany({ where: { dayId: dayId }, select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
+  }
+
+  if (_legs !== null && _legs.length > 0 && _legs[0].startTime_utc !== null) {
+    let currentYear = new Date(_legs[0].startTime_utc * 1000).getFullYear();
+    let entries: Entry[] = [];
+    for (const leg of _legs) {
+      if (leg.startTime_utc !== null) {
+        const year = new Date(leg.startTime_utc * 1000).getFullYear();
+        if (year !== currentYear) {
+          legs.push({ year: currentYear, entries });
+          entries = [];
+          currentYear = year;
+        }
+      }
+      // Add this leg to the current year group
+      entries.push(leg);
+    }
+    // Add the last year to the group list
+    legs.push({ year: currentYear, entries });
+    entries = [];
   }
 
 
@@ -80,22 +102,45 @@ export const load = async ({ fetch, params, url }) => {
   const aircraft = await prisma.aircraft.findMany({ select: { registration: true, id: true, type: { select: { typeCode: true, make: true, model: true } } }, orderBy: { registration: 'asc' } });
 
 
-  let legDeadheadCombo: ((Prisma.DeadheadGetPayload<{}> | Prisma.LegGetPayload<{ select: { id: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, aircraftId: true } }>) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[] | null = null;
+  interface Combo {
+    type: string
+    startTime_utc: number
+    id: string
+  }
+
+  interface Deadhead extends Combo {
+    type: 'deadhead',
+    entry: Prisma.DeadheadGetPayload<{}>
+  }
+
+  interface Leg extends Combo {
+    type: 'leg',
+    entry: Entry
+  }
+
+  type LegOrDeadhead = Leg | Deadhead;
+
+  let legDeadheadCombo: LegOrDeadhead[] | null = null;
 
   if (dayId !== null) {
     const day = await prisma.dutyDay.findUnique({
       where: { id: dayId },
       include: {
-        legs: { select: { id: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, aircraftId: true }, orderBy: { startTime_utc: 'asc' } },
+        legs: { select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } }, orderBy: { startTime_utc: 'asc' } },
         deadheads: { orderBy: { startTime_utc: 'asc' } }
       },
     });
 
     if (day !== null) {
-
       legDeadheadCombo = [];
-      for (const leg of day.legs) legDeadheadCombo.push({ ...leg, type: 'leg' });
-      for (const dead of day.deadheads) legDeadheadCombo.push({ ...dead, type: 'deadhead', diversionAirportId: null });
+      for (const leg of day.legs) {
+        const entry: Leg = { type: 'leg', entry: leg, startTime_utc: leg.startTime_utc ?? 0, id: leg.id }
+        legDeadheadCombo.push(entry);
+      }
+      for (const dead of day.deadheads) {
+        const entry: Deadhead = { type: 'deadhead', entry: dead, startTime_utc: dead.startTime_utc ?? 0, id: dead.id }
+        legDeadheadCombo.push(entry);
+      }
       legDeadheadCombo.sort((a, b) => {
         if (a.startTime_utc === null || b.startTime_utc === null) return 0;
         return a.startTime_utc - b.startTime_utc
@@ -204,6 +249,9 @@ export const actions = {
 
     const id = params.id;
 
+    const currentLeg = await prisma.leg.findUnique({ where: { id }});
+    if (currentLeg === null) return API.Form.formFailure('?/default', '*', 'Leg does not exist');
+
     const data = await request.formData();
     for (const key of data.keys()) {
       console.log(key, data.getAll(key));
@@ -274,25 +322,37 @@ export const actions = {
     // Out / In Times
     // -----------------------------------------------------------------------------------------------------------------
 
+    const useBlock = data.get('use-block') === 'true';
     const startTime = data.get('out-date') as null | string;
     const startTimeTZ = data.get('out-tz') as null | string;
     const endTime = data.get('in-date') as null | string;
     const endTimeTZ = data.get('in-tz') as null | string;
+    const date = data.get('date') as null | string;
 
-    if (startTime === null || startTime === '') return API.Form.formFailure('?/default', 'out', 'Required field');
-    if (startTimeTZ === null || startTimeTZ === '') return API.Form.formFailure('?/default', 'out', 'Required field');
-    if (endTime === null || endTime === '') return API.Form.formFailure('?/default', 'in', 'Required field');
-    if (endTimeTZ === null || endTimeTZ === '') return API.Form.formFailure('?/default', 'in', 'Required field');
+    // Initialize time variables that we may modify later
+    let startUTCValue = Math.floor(new Date().getTime() / 1000);
+    let endUTCValue = startUTCValue;
+    let relativeOrder = 0;
 
 
-    const startUTC = helpers.timeStrAndTimeZoneToUTC(startTime, startTimeTZ);
-    if (startUTC === null) return API.Form.formFailure('?/default', 'out', 'Unknown Timezone');
+    if (useBlock || currentLeg.dayId !== null) {
+      if (startTime === null || startTime === '') return API.Form.formFailure('?/default', 'out', 'Required field');
+      if (startTimeTZ === null || startTimeTZ === '') return API.Form.formFailure('?/default', 'out', 'Required field');
+      if (endTime === null || endTime === '') return API.Form.formFailure('?/default', 'in', 'Required field');
+      if (endTimeTZ === null || endTimeTZ === '') return API.Form.formFailure('?/default', 'in', 'Required field');
 
-    const endUTC = helpers.timeStrAndTimeZoneToUTC(endTime, endTimeTZ);
-    if (endUTC === null) return API.Form.formFailure('?/default', 'in', 'Unknown Timezone');
+      const startUTC = helpers.timeStrAndTimeZoneToUTC(startTime, startTimeTZ);
+      if (startUTC === null) return API.Form.formFailure('?/default', 'out', 'Unknown Timezone');
 
-    if (startUTC.value > endUTC.value) return API.Form.formFailure('?/default', 'out', 'Out is after In');
-    if (endUTC.value - startUTC.value > 86400) return API.Form.formFailure('?/default', 'out', 'Flight time is longer than 24 hours');
+      const endUTC = helpers.timeStrAndTimeZoneToUTC(endTime, endTimeTZ);
+      if (endUTC === null) return API.Form.formFailure('?/default', 'in', 'Unknown Timezone');
+
+      if (startUTC.value > endUTC.value) return API.Form.formFailure('?/default', 'out', 'Out is after In');
+      if (endUTC.value - startUTC.value > 86400) return API.Form.formFailure('?/default', 'out', 'Flight time is longer than 24 hours');
+
+      startUTCValue = startUTC.value;
+      endUTCValue = endUTC.value;
+    }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Aircraft
@@ -343,6 +403,14 @@ export const actions = {
     if (dualReceivedTime === null || dualReceivedTime === '' || isNaN(parseFloat(dualReceivedTime))) dualReceivedTime = null;
     if (simTime === null || simTime === '' || isNaN(parseFloat(simTime))) simTime = null;
 
+    // If we have provided a date, the user wants to use that instead of the flight aware info.
+    if (date !== null && !useBlock) {
+      startUTCValue = Math.floor(new Date(date).getTime() / 1000);
+      endUTCValue = startUTCValue + (parseFloat(totalTime) * 60 * 60);
+      // TODO: Probably we should then go through all the other legs that share this date and resolve any order gaps
+      relativeOrder = await prisma.leg.count({ where: { startTime_utc: startUTCValue } });
+    }
+
     // -----------------------------------------------------------------------------------------------------------------
     // Takeoffs & Landings and other Integers
     // -----------------------------------------------------------------------------------------------------------------
@@ -386,8 +454,9 @@ export const actions = {
 
         aircraftId: aircraftId,
 
-        startTime_utc: startUTC.value,
-        endTime_utc: endUTC.value,
+        startTime_utc: startUTCValue,
+        endTime_utc: endUTCValue,
+        relativeOrder: relativeOrder,
 
         totalTime: totalTime === null ? undefined : parseFloat(totalTime),
         pic: picTime === null ? undefined : parseFloat(picTime),
@@ -416,7 +485,8 @@ export const actions = {
         notes: notes === null ? undefined : notes
       }});
 
-      await generateDeadheads(parseInt(params.id));
+
+      if (leg.dayId !== null) await generateDeadheads(leg.dayId);
 
       // ---------------------------------------------------------------------------------------------------------------
       // Approaches
@@ -461,21 +531,12 @@ export const actions = {
     let dayId = data.get('day') as null | string;
     try {
       await prisma.approach.deleteMany({ where: { legId: id } });
-      await prisma.leg.delete({ where: { id } });
+      const leg = await prisma.leg.delete({ where: { id } });
+      if (leg.dayId !== null) await generateDeadheads(leg.dayId);
     } catch (e) {
       console.log(e);
       return API.Form.formFailure('?/delete', '*', 'Could not delete');
     }
-
-    if (dayId !== null && !isNaN(parseInt(dayId))) await generateDeadheads(parseInt(dayId));
-
-    // const c = await prisma.leg.count({ where: { dayId: parseInt(params.id)}});
-
-    // if (c > 0) {
-    //   throw redirect(301, '/entry/day' + url.search);
-    // } else {
-    //   throw redirect(301, '/tour/' + params.tour + '/day/' + params.id);
-    // }
 
     const u = new URLSearchParams(url.search);
     u.delete('/delete');

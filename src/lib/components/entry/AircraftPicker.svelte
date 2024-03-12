@@ -72,7 +72,11 @@
     // TODO: Defer this question to when the browser exists
     if (confirm('This aircraft does not exist. Do you want to create it?')) {
       // Save it!
-      goto('/aircraft/entry/new?reg=' + value + '&ref=' + $page.url.pathname + '&active=form');
+      const u = new URLSearchParams();
+      u.set('reg', value);
+      u.set('ref', `${$page.url.pathname}?${$page.url.searchParams.toString()}`);
+      u.set('active', 'form');
+      goto(`/aircraft/entry/new?${u.toString()}`);
     }
 
   };

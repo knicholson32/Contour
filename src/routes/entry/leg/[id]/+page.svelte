@@ -12,15 +12,17 @@
   import { DB } from '$lib/types';
   import * as MenuForm from '$lib/components/menuForm';
   import Tag from '$lib/components/decorations/Tag.svelte';
+  import * as Popover from "$lib/components/ui/popover";
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
-  import { pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
+  import { dateToDateStringForm, dateToDateStringFormSimple, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
-  import { Gauge, Link, Plus, Route, RouteOff, Table2, Timer } from 'lucide-svelte';
+  import { CalendarDays, ChevronRight, Dot, Gauge, Link, Plus, Route, RouteOff, Table2, Timer } from 'lucide-svelte';
   import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
+    import Calendar from '$lib/components/ui/calendar/calendar.svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -80,7 +82,7 @@
           if (v !== null) {
             try {
               const app = JSON.parse(v) as Types.Approach;
-              approaches.push({ id: app.id, modified: app, approach: null });
+              if (app.id !== undefined) approaches.push({ id: app.id, modified: app, approach: null });
             } catch (e) {}
           }
         }
@@ -118,7 +120,10 @@
 
   
   afterNavigate(() => {
-    setTimeout(resetMap, 1);
+    resetApproaches();
+    setTimeout(() => {
+      resetMap()
+    }, 1);
   });
 
   const ref = $page.url.searchParams.get('ref');
@@ -151,6 +156,9 @@
   let tooltipContainer: HTMLElement | undefined = undefined;
   if (browser) tooltipContainer = document.body;
 
+  let legsPopoverOpen = false;
+  let useBlock: boolean;
+
 </script>
 
 <div class="hidden">
@@ -165,39 +173,72 @@
     {#if data.currentDay !== null}
       <MenuForm.Title title="Duty Day Legs" />
       <MenuForm.Link href={`/entry/day/${data.currentDay.id}?${urlFormParam}`} type="left" text="Back to Day" />
-      <MenuForm.Link href={`/entry/leg/create?${urlFormParam}`} icon={icons.plus} text="Create a new leg" type="right"/>
+      <MenuForm.Link href={`/entry/leg/create/fa?${urlFormParam}`} icon={icons.plus} text="Create a new leg" type="right"/>
     {:else}
       <MenuForm.Title title="Legs" />
+      <Popover.Root bind:open={legsPopoverOpen}>
+        <Popover.Trigger class="w-full">
+          <MenuForm.Link href="#" icon={icons.plus} text="Create a new leg" type="right"/>
+        </Popover.Trigger>
+        <Popover.Content side={isMobileSize ? undefined : 'right'} class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-none w-auto">
+          <!-- Active: "bg-gray-100", Not Active: "" -->
+          <a href="/entry/leg/create/fa" on:click={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From FlightAware</a>
+          <a href="/entry/leg/create/form" on:click={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From Scratch</a>
+        </Popover.Content>
+      </Popover.Root>
     {/if}
     <MenuForm.SearchBar />
     <!-- Existing Legs -->
-    <Section title="Legs">
-      {#if data.legDeadheadCombo === null}
-        {#each data.legs as leg,i (leg.id)}
-          <a data-sveltekit-preload-data="tap" href="/entry/leg/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
-            <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
-              <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-                <span class="font-mono">{i+1}: {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId} </span>
-                {#if $unsavedUIDs.includes(leg.id)}
-                  <Tag>UNSAVED</Tag>
-                {/if}
+    {#if data.legDeadheadCombo === null}
+      {#each data.legs as group,i (group.year)}
+        <Section title="{group.year.toFixed(0)}" collapsable={true}>
+          {#each group.entries as leg, i (leg.id)}
+            <a data-sveltekit-preload-data="tap" href="/entry/leg/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
+              <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 pl-2 flex-initial">
+                <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
+                  <span class="font-mono">
+                    {#if leg.dayId !== null}
+                      <span class="absolute -left-1 top-0 bottom-0 flex items-center"><Dot/></span>
+                    {/if}
+                    <span class="text-xxs text-sky-600 font-thin">
+                      {#if leg.startTime_utc === null}
+                        Unknown
+                      {:else}
+                        {dateToDateStringFormSimple(leg.startTime_utc)}
+                      {/if}
+                    </span>
+                    {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId}
+                    <span class="text-xxs text-sky-600 font-thin ml-1">{leg.aircraft.registration}</span>
+                    <span class="text-xxs text-sky-600 font-thin ml-1 lowercase">{leg.totalTime.toFixed(1)}hr</span>
+                  </span>
+                  {#if $unsavedUIDs.includes(leg.id)}
+                    <Tag>UNSAVED</Tag>
+                  {/if}
+                </div>
               </div>
-            </div>
-            <div class="absolute right-1">
-              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
-                {@html icons.chevronRight}
-              </svg>
-            </div>
-          </a>
-        {/each}
-      {:else}
-        {#each data.legDeadheadCombo as leg,i (leg.id)}
-          {#if leg.type === 'leg'}
-            <a href="/entry/leg/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
+              <div class="absolute right-1">
+                <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+                  {@html icons.chevronRight}
+                </svg>
+              </div>
+            </a>
+          {/each}
+        </Section>
+      {/each}
+    {:else}
+      <Section title="Legs">
+        {#each data.legDeadheadCombo as entry, i (entry.id)}
+          {#if entry.type === 'leg'}
+            <a href="/entry/leg/{entry.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {entry.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
               <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
                 <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-                  <span class="font-mono">{i+1}: {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId} </span>
-                  {#if $unsavedUIDs.includes(leg.id)}
+                  <span class="font-mono">
+                    <span class="text-xxs text-sky-600 font-thin">{i+1}</span>
+                    {entry.entry.originAirportId} → {entry.entry.diversionAirportId === null ? entry.entry.destinationAirportId : entry.entry.diversionAirportId}
+                    <span class="text-xxs text-sky-600 font-thin ml-1">{entry.entry.aircraft.registration}</span>
+                    <span class="text-xxs text-sky-600 font-thin ml-1 lowercase">{entry.entry.totalTime.toFixed(1)}hr</span>
+                  </span>
+                  {#if $unsavedUIDs.includes(entry.id)}
                     <Tag>UNSAVED</Tag>
                   {/if}
                 </div>
@@ -212,14 +253,14 @@
             <div class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 bg-gray-50 dark:bg-zinc-950/50">
               <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
                 <div class="uppercase font-bold font-mono text-xs overflow-hidden whitespace-nowrap text-ellipsis text-gray-400 dark:text-zinc-700">
-                  {i+1}: {leg.originAirportId} → {leg.destinationAirportId} (Deadhead)
+                  <span class="text-xxs font-thin">{i+1}</span> {entry.entry.originAirportId} → {entry.entry.destinationAirportId} (Deadhead)
                 </div>
               </div>
             </div>
           {/if}
         {/each}
-      {/if}
-    </Section>
+      </Section>
+    {/if}
   </nav>
   
   <!-- Form Side -->
@@ -236,7 +277,7 @@
           {/if}
           {#if data.currentDay !== null}
             <div class="mt-6">
-              <a href="/entry/leg/create?{urlFormParam}" class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
+              <a href="/entry/leg/create/fa?{urlFormParam}" class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
                 <Plus class="-ml-0.5 mr-1.5 h-5 w-5" />
                 Create A New Leg
               </a>
@@ -250,92 +291,103 @@
         <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong} />
       {/key}
 
-      <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
-        <Card.Root class="col-span-1 xs:col-span-2 xl:col-span-4">
-          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <Card.Title class="text-sm font-semibold">Speed and Altitude</Card.Title>
-            <Table2 class="h-4 w-4 text-muted-foreground" />
-          </Card.Header>
-          <Card.Content class="p-4 pt-0">
-            <div on:mouseleave={() => latLong=[0, 0]} role="presentation">
-              <VisXYContainer data={data.leg.positions} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
-                <VisAxis gridLine={false} type="x" tickValues={data.tickValues} minMaxTicksOnly={false} {tickFormat} />
-                <VisCrosshair {template} color={crosshairColor} />
-                <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer} /> 
-                <VisLine {x} y={yAltitude} color={color({secondary: false})} />
-                <VisLine {x} y={ySpeed} color={color({secondary: true})} />
-                <VisBulletLegend items={[
-                  { name: 'Altitude', color: color()() },
-                  { name: 'Speed', color: color({ secondary: true })() },
-                ]} />
-              </VisXYContainer>
-            </div>
-          </Card.Content>
-        </Card.Root>
+      {#if data.leg.flightAwareData !== null}
+        <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
+          <Card.Root class="col-span-1 xs:col-span-2 xl:col-span-4">
+            <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Card.Title class="text-sm font-semibold">Speed and Altitude</Card.Title>
+              <Table2 class="h-4 w-4 text-muted-foreground" />
+            </Card.Header>
+            <Card.Content class="p-4 pt-0">
+              <div on:mouseleave={() => latLong=[0, 0]} role="presentation">
+                <VisXYContainer data={data.leg.positions} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
+                  <VisAxis gridLine={false} type="x" tickValues={data.tickValues} minMaxTicksOnly={false} {tickFormat} />
+                  <VisCrosshair {template} color={crosshairColor} />
+                  <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer} /> 
+                  <VisLine {x} y={yAltitude} color={color({secondary: false})} />
+                  <VisLine {x} y={ySpeed} color={color({secondary: true})} />
+                  <VisBulletLegend items={[
+                    { name: 'Altitude', color: color()() },
+                    { name: 'Speed', color: color({ secondary: true })() },
+                  ]} />
+                </VisXYContainer>
+              </div>
+            </Card.Content>
+          </Card.Root>
 
-        <Card.Root>
-          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <Card.Title class="text-sm font-medium">FlightAware</Card.Title>
-            <Link class="h-4 w-4 text-muted-foreground" />
-          </Card.Header>
-          <Card.Content>
-            {#if data.leg.flightAwareData !== null}
-              <a href={data.leg.flightAwareData.sourceLink} target="_blank">
-                {#if data.leg.flightAwareData.operator === null}
-                  <div class="text-2xl font-bold">{data.leg.flightAwareData.registration}</div>
-                  <p class="text-xs text-muted-foreground">International</p>
-                {:else}
-                  <div class="text-2xl font-bold">{data.leg.flightAwareData.operator}{data.leg.flightAwareData.flightNumber}</div>
-                  <p class="text-xs text-muted-foreground">{data.leg.flightAwareData.registration}</p>
-                {/if}
-              </a>
-            {:else}
-              <div class="text-2xl font-bold">No Source</div>
-              <p class="text-xs text-muted-foreground">This leg does not have FlightAware data</p>
-            {/if}
-          </Card.Content>
-        </Card.Root>
-
-        <Card.Root>
-          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <Card.Title class="text-sm font-medium">Flight Time</Card.Title>
-            <Timer class="h-4 w-4 text-muted-foreground" />
-          </Card.Header>
-          <Card.Content>
-            {#if data.stats.time === null}
-              <div class="text-2xl font-bold">Unknown</div>
-            {:else}
-              <div class="text-2xl font-bold">{data.stats.time.toFixed(1)} hr</div>
-              {#if totalTime !== null && !isNaN(parseFloat(totalTime))}
-                <p class="text-xs text-muted-foreground">= Total {Math.sign(parseFloat(totalTime) - data.stats.time) === 1 ? '-' : '+'} {Math.abs(parseFloat(totalTime) - data.stats.time).toFixed(1)} hr</p>
+          <Card.Root>
+            <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Card.Title class="text-sm font-medium">FlightAware</Card.Title>
+              <Link class="h-4 w-4 text-muted-foreground" />
+            </Card.Header>
+            <Card.Content>
+              {#if data.leg.flightAwareData !== null}
+                <a href={data.leg.flightAwareData.sourceLink} target="_blank">
+                  {#if data.leg.flightAwareData.operator === null}
+                    <div class="text-2xl font-bold">{data.leg.flightAwareData.registration}</div>
+                    <p class="text-xs text-muted-foreground">International</p>
+                  {:else}
+                    <div class="text-2xl font-bold">{data.leg.flightAwareData.operator}{data.leg.flightAwareData.flightNumber}</div>
+                    <p class="text-xs text-muted-foreground">{data.leg.flightAwareData.registration}</p>
+                  {/if}
+                </a>
+              {:else}
+                <div class="text-2xl font-bold">No Source</div>
+                <p class="text-xs text-muted-foreground">This leg does not have FlightAware data</p>
               {/if}
-            {/if}
-          </Card.Content>
-        </Card.Root>
+            </Card.Content>
+          </Card.Root>
 
-        <Card.Root>
-          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <Card.Title class="text-sm font-medium">Avg. Speed</Card.Title>
-            <Gauge class="h-4 w-4 text-muted-foreground" />
-          </Card.Header>
-          <Card.Content>
-            <div class="text-2xl font-bold">{data.stats.avgSpeed.toFixed(0)} kts</div>
-            <p class="text-xs text-muted-foreground">Max {data.stats.maxSpeed.toFixed(0)} kts</p>
-          </Card.Content>
-        </Card.Root>
+          <Card.Root>
+            <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Card.Title class="text-sm font-medium">Flight Time</Card.Title>
+              <Timer class="h-4 w-4 text-muted-foreground" />
+            </Card.Header>
+            <Card.Content>
+              {#if data.stats.time === null}
+                <div class="text-2xl font-bold">Unknown</div>
+              {:else}
+                <div class="text-2xl font-bold">{data.stats.time.toFixed(1)} hr</div>
+                {#if totalTime !== null && !isNaN(parseFloat(totalTime))}
+                  <p class="text-xs text-muted-foreground">= Total {Math.sign(parseFloat(totalTime) - data.stats.time) === 1 ? '-' : '+'} {Math.abs(parseFloat(totalTime) - data.stats.time).toFixed(1)} hr</p>
+                {/if}
+              {/if}
+            </Card.Content>
+          </Card.Root>
 
-        <Card.Root>
-          <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <Card.Title class="text-sm font-medium">Distance</Card.Title>
-            <Route class="h-4 w-4 text-muted-foreground" />
-          </Card.Header>
-          <Card.Content>
-            <div class="text-2xl font-bold">{data.stats.distance.toFixed(0)} nmi</div>
-            <p class="text-xs text-muted-foreground">{(data.stats.distance * 1.15).toFixed(0)} mi</p>
-          </Card.Content>
-        </Card.Root>
+          <Card.Root>
+            <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Card.Title class="text-sm font-medium">Avg. Speed</Card.Title>
+              <Gauge class="h-4 w-4 text-muted-foreground" />
+            </Card.Header>
+            <Card.Content>
+              <div class="text-2xl font-bold">{data.stats.avgSpeed.toFixed(0)} kts</div>
+              <p class="text-xs text-muted-foreground">Max {data.stats.maxSpeed.toFixed(0)} kts</p>
+            </Card.Content>
+          </Card.Root>
 
-      </div>
+          <Card.Root>
+            <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Card.Title class="text-sm font-medium">Distance</Card.Title>
+              <Route class="h-4 w-4 text-muted-foreground" />
+            </Card.Header>
+            <Card.Content>
+              <div class="text-2xl font-bold">{data.stats.distance.toFixed(0)} nmi</div>
+              <p class="text-xs text-muted-foreground">{(data.stats.distance * 1.15).toFixed(0)} mi</p>
+            </Card.Content>
+          </Card.Root>
+          {#if data.leg.day !== null}
+            <a href="/entry/day/{data.leg.day.id}?tour={data.leg.day.tourId}&active=form" class="col-span-1 xs:col-span-2 xl:col-span-4 flex flex-row gap-3 items-center group cursor-pointer">
+              <div class="bg-sky-500 p-1.5 rounded-full">
+                <CalendarDays class="w-4 h-4"/>
+              </div>
+              <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-sky-500">Go To Duty Day</div>
+              <div class="flex-grow"></div>
+              <ChevronRight class="w-5 h-5" />
+            </a>
+          {/if}
+        </div>
+      {/if}
 
       <form action="?/update" method="post" enctype="multipart/form-data" use:enhance={() => {
         submitting = true;
@@ -354,6 +406,9 @@
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.leg.ident} />
         <Entry.AircraftPicker required={true} title="Aircraft" name="aircraft" aircraft={data.aircraft} defaultValue={data.leg.aircraft.registration} />
+        {#if data.leg.dayId === null && data.leg.startTime_utc !== null}
+          <Entry.TimePicker name="date" title="Date" defaultValue={dateToDateStringForm(data.leg.startTime_utc, true, 'utc')} dateOnly={true}/>
+        {/if}
         <Entry.AirportPicker required={true} airports={data.airports} bind:tz={startAirportTZ} title="From" name="from" defaultValue={data.leg.originAirportId} />
         <Entry.AirportPicker required={true} airports={data.airports} bind:tz={endAirportTZ} title="To" name="to" bind:value={endApt} defaultValue={data.leg.destinationAirportId} />
         <Entry.AirportPicker required={false} airports={data.airports} bind:tz={divertAirportTZ} title="Divert" name="divert" bind:value={divertApt} defaultValue={data.leg.diversionAirportId} />
@@ -362,9 +417,14 @@
       </Section>
 
       <Section title="Block Times">
-        <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTime} />
-        <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZBind} defaultValue={data.endTime} />
-        <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
+        {#if data.leg.dayId === null}
+          <Entry.Switch title="Use Block Times" name="use-block" noLocalStorage={true} bind:value={useBlock} defaultValue={false} />
+        {/if}
+        {#if useBlock || data.leg.dayId !== null}
+          <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTime} />
+          <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZBind} defaultValue={data.endTime} />
+          <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
+          {/if}
       </Section>
 
       <Section title="Times">

@@ -79,9 +79,7 @@
     posLayer.addTo(map);
 
     markerLayer = L.layerGroup();
- 		for(let i = 0; i < airports.length; i++) {
-			markerLayer.addLayer(markerIcon(airports[i], i));
- 		}
+ 		for(let i = 0; i < airports.length; i++) markerLayer.addLayer(markerIcon(airports[i], i));
   	markerLayer.addTo(map);
 
     targetLayer = L.layerGroup();
@@ -92,7 +90,22 @@
     targetLayer.addLayer(targetMarker);
     targetLayer.addTo(map);
 
-    map.fitBounds(posLayer.getBounds(), { animate: false }).zoomOut(1, { animate: false });
+    try {
+      map.fitBounds(posLayer.getBounds(), { animate: false }).zoomOut(1, { animate: false });
+    } catch (e) {
+      // if (bound.length > 0) map.fitBounds(L.polyline(bound).getBounds(), { animate: false }).zoomOut(1, { animate: false });
+      let smallestLat = airports[0].latitude;
+      let largestLat = airports[0].latitude;
+      let smallestLon = airports[0].longitude;
+      let largestLon = airports[0].longitude;
+      for (const a of airports) {
+        if (a.latitude < smallestLat) smallestLat = a.latitude;
+        if (a.latitude > largestLat) largestLat = a.latitude;
+        if (a.longitude < smallestLon) smallestLon = a.longitude;
+        if (a.longitude > largestLon) largestLon = a.longitude;
+      }
+      map.fitBounds([[smallestLat, smallestLon], [largestLat, largestLon]], {animate: false });
+    }
   }
 
   $: updateMapContents(positions, fixes);

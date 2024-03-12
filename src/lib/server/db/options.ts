@@ -16,7 +16,7 @@ const EIGHT_HOURS = 8 * 60 * 60;
 /**
  * Create a cache-format flight from an AeroAPI flight
  */
-export const aeroFlightToOption = (tourID: number, flight: aero.schema.Flight): Types.Option => {
+export const aeroFlightToOption = (tourID: number | null, flight: aero.schema.Flight): Types.Option => {
     // Calculate times
     const scheduled_out = Math.round(Date.parse(flight.scheduled_out??'NaN') / 1000);
     const estimated_out = Math.round(Date.parse(flight.estimated_out??'NaN') / 1000);
@@ -165,7 +165,7 @@ export const cacheMany = async (flights: Types.Option[]): Promise<void> => {
  * Clear the options list that has to do with a specific tour
  * @param tourID the tour to clear based
  */
-export const clear = async (tourID?: number): Promise<void> => {
+export const clear = async (tourID?: number | null): Promise<void> => {
     if (tourID === undefined) {
         try {
             console.log('Clearing all flight cache');
@@ -193,7 +193,7 @@ export const clear = async (tourID?: number): Promise<void> => {
  * Count the number of cached flights associated with a tour
  * @param tourID 
  */
-export const count = async (tourID: number): Promise<number> => {
+export const count = async (tourID: number | null): Promise<number> => {
     try {
         const val = await prisma.option.count({
             where: {
@@ -228,7 +228,7 @@ const _minimalsTypeSynthesis = async () => await prisma.option.findUnique({ wher
  * @returns an array of cached flights
  */
 export type Minimals = NonNullable<Types.Prisma.PromiseReturnType<typeof _minimalsTypeSynthesis>>;
-export const getMinimals = async (tourID: number): Promise<Minimals[]> => {
+export const getMinimals = async (tourID: number | null): Promise<Minimals[]> => {
     return await prisma.option.findMany({
         where: {
             tourId: tourID
@@ -278,7 +278,7 @@ export const getFlightOptionFaFlightID = async (fa_flight_id?: string): Promise<
  * @param flightIDs a list of the unique flightIDs to cache. The larger this list is the more efficient the API usage
  * @param clearCache whether or not to erase the associated cache and redo it. False by default.
  */
-export const getOptionsAndCache = async (aeroAPIKey: string, tour: number, flightIDs: string[], options?: { clearCache?: boolean, forceExpansiveSearch?: boolean, startTime?: number, endTime?: number }): Promise<void> => {
+export const getOptionsAndCache = async (aeroAPIKey: string, tour: number | null, flightIDs: string[], options?: { clearCache?: boolean, forceExpansiveSearch?: boolean, startTime?: number, endTime?: number }): Promise<void> => {
 
     if (options === undefined) options = {};
     if (options.clearCache === undefined) options.clearCache = false;

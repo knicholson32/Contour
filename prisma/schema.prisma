@@ -131,8 +131,8 @@ model DutyDay {
 model Option {
   id String @id @default(uuid())
 
-  tourId Int
-  tour   Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  tourId Int?
+  tour   Tour? @relation(fields: [tourId], references: [id], onDelete: Cascade)
 
   inaccurateTiming  Boolean
   ident             String // @db.VarChar(16)
@@ -256,6 +256,8 @@ model Leg {
 
   startTime_utc Int?
   endTime_utc   Int?
+
+  relativeOrder Int @default(0)
 
   totalTime Float @default(0)
   pic       Float @default(0)

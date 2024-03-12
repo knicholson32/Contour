@@ -128,6 +128,16 @@ export const dateToTimeStringForm = (unixTime: number) => {
 }
 
 /**
+ * Convert a date object into a date and time string in local timezone: 03/12
+ * @param now the date object
+ * @returns the date string
+ */
+export const dateToDateStringFormSimple = (unixTime: number) => {
+	const now = new Date(unixTime * 1000);
+	return `${pad(now.getUTCMonth() + 1, 2)}/${pad(now.getUTCDate(), 2)}`;
+}
+
+/**
  * Validate a URL
  * @see https://www.makeuseof.com/regular-expressions-validate-url/
  * @param url the URL to validate

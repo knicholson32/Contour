@@ -38,8 +38,7 @@ export const load = async ({ params, fetch, url }) => {
 
   // TODO: This needs to be updated to support adding legs without a tour or day
   // Redirect if there is no tour or day, as we need the tour number and day number to create flight options
-  console.log('abc', dayId, currentTour, currentDay);
-  if (currentTour === null || currentDay === null) throw redirect(301, '/entry/leg' + url.search);
+  // if (currentTour === null || currentDay === null) throw redirect(301, '/entry/leg' + url.search);
 
   const flightIDRaw = url.searchParams.get('flight-id');
   const flightIDs = flightIDRaw === null ? [] : flightIDRaw.split(',').map((v) => {
@@ -59,9 +58,21 @@ export const load = async ({ params, fetch, url }) => {
   if (noCache && flightIDs.length !== 0){
     try {
       if (expansive) {
-        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, flightIDs, { forceExpansiveSearch: true });
+        await options.getOptionsAndCache(aeroAPIKey, currentTour?.id ?? null, flightIDs, { forceExpansiveSearch: true });
       } else {
-        await options.getOptionsAndCache(aeroAPIKey, currentTour.id, flightIDs, { startTime: currentDay.startTime_utc, endTime: currentDay.endTime_utc });
+        // Check if we have a day to base the search on
+        if (currentDay === null) {
+          // We do not. Rely on the date selected during the search
+          const date = url.searchParams.get('date');
+          console.log('date!', date);
+          if (date !== null) {
+            const d = Math.floor((new Date(date)).getTime() / 1000);
+            await options.getOptionsAndCache(aeroAPIKey, currentTour?.id ?? null, flightIDs, { startTime: d, endTime: d + TWENTY_FOUR_HOURS });
+          }
+        } else {
+          // We do. Use that day to narrow the search window
+          await options.getOptionsAndCache(aeroAPIKey, currentTour?.id ?? null, flightIDs, { startTime: currentDay.startTime_utc, endTime: currentDay.endTime_utc });
+        }
       }
     } catch (e) {
       console.log('ERROR', e);
@@ -242,6 +253,7 @@ export const actions = {
 
     const u = new URLSearchParams(url.search);
     u.set('selection', params.selection);
+    u.set('clearChanges', 'true');
     throw redirect(301, '/entry/leg/create/form?' + u.toString());
 
   }

@@ -6,7 +6,9 @@
   import { fade, scale, slide } from "svelte/transition";
   import { backArrow, backButtonClicked, backText, unsaved } from "$lib/stores";
   import { icons } from "$lib/components";
+  import * as Popover from "$lib/components/ui/popover";
   import { ModeWatcher } from "mode-watcher";
+  import { Briefcase, ChevronRight, Link, Plane, Send, Tag } from "lucide-svelte";
 
   export let data: import('./$types').PageData;
 
@@ -14,14 +16,34 @@
 	// Navigation Menus
 	// -----------------------------------------------------------------------------------------------
 
+  type Submenu = {
+    title: string,
+    href: string, 
+    icon: string,
+    description: string,
+  };
+
+  type Menu = {
+    title: string,
+    href: string,
+    submenu?: Submenu[],
+    popover: false
+  }[];
+
   // Menu contents
-  const menu = [
-    { title: 'Dashboard', href: '/' },
-    { title: 'Entry', href: `/entry` },
-    { title: 'Aircraft', href: '/aircraft' },
-    { title: 'Logbook', href: '/log' },
-    { title: 'Airports', href: '/airports' },
+  const menu: Menu = [
+    { title: 'Dashboard', popover: false,  href: '/' },
+    { title: 'Entry', popover: false, href: `/entry`, submenu: [ { title: 'Tours', href: '/entry/tour', icon: 'briefcase', description: 'Enter flights that are associated with a work tour or duty day.'}, { title: 'Legs', href: '/entry/leg', icon: 'send', description: 'Enter generic flights that are not associated with a tour.'}] },
+    { title: 'Aircraft', popover: false, href: '/aircraft', submenu: [ { title: 'Aircraft', href: '/aircraft/entry', icon: 'plane', description: 'Document specific aircraft flown in flight legs.'}, { title: 'Types', href: '/aircraft/type', icon: 'tag', description: 'Create and manage common aircraft types.'}] },
+    { title: 'Logbook', popover: false, href: '/log' },
+    { title: 'Airports', popover: false, href: '/airports' },
   ];
+
+  // const p: typeof Popover.Root;
+
+  // const attachPopoverRoot = (element: typeof Popover.Root) => {
+
+  // }
 
   // Mobile menu controls
   let mobileNavMenuVisible = false;
@@ -45,6 +67,7 @@
 	let profileMenuVisible = false;
 	const toggleAccountDropdown = () => profileMenuVisible = !profileMenuVisible;
 	const closeAccountDropdown = () => profileMenuVisible = false;
+
 
 </script>
 
@@ -106,18 +129,54 @@
         {/if}
         <div class="hidden sm:-my-px sm:flex sm:space-x-8">
           <!-- Desktop Menu -->
-          {#each menu as m}
-            <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-            {#if ($page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && $page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
-              <a href="{m.href}" class="border-sky-500 relative z-40 text-gray-900 dark:text-white inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">{m.title}</a>  
+          {#each menu as m, i}
+            {#if m.submenu !== undefined}
+              <Popover.Root bind:open={m.popover} >
+                  {#if ($page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && $page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
+                    <Popover.Trigger class="border-sky-500 relative z-40 text-gray-900 dark:text-white inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</Popover.Trigger>
+                  {:else}
+                    <Popover.Trigger class="border-transparent relative z-40 text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</Popover.Trigger>
+                  {/if}
+                  <Popover.Content class="grid grid-cols-1 gap-x-4 gap-y-1 p-0 w-auto text-sm rounded-lg dark:bg-zinc-800 dark:border dark:border-zinc-900">
+                    {#each m.submenu as item}
+                      <div class="group relative flex gap-x-6 first:rounded-b-none rounded-lg last:rounded-t-none p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 dark:bg-zinc-800">
+                        <div class="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white dark:bg-zinc-900 dark:group-hover:bg-zinc-950">
+                          {#if item.icon === 'briefcase'}
+                            <Briefcase class="h-6 w-6 text-gray-600 group-hover:text-sky-600 dark:text-gray-400" />
+                          {:else if item.icon === 'send'}
+                            <Send class="h-6 w-6 text-gray-600 group-hover:text-sky-600 dark:text-gray-400" />
+                          {:else if item.icon === 'plane'}
+                            <Plane class="h-6 w-6 text-gray-600 group-hover:text-sky-600 dark:text-gray-400" />
+                          {:else if item.icon === 'tag'}
+                            <Tag class="h-6 w-6 text-gray-600 group-hover:text-sky-600 dark:text-gray-400" />
+                          {:else}
+                            <Link class="h-6 w-6 text-gray-600 group-hover:text-sky-600 dark:text-gray-400" />
+                          {/if}
+                        </div>
+                        <div class="mt-1">
+                          <a href="{item.href}" on:click={() => m.popover = false} class="font-semibold text-gray-900 dark:text-gray-100">
+                            {item.title}
+                            <span class="absolute inset-0"></span>
+                          </a>
+                          <p class="mt-0 text-gray-600 dark:text-gray-400 pr-2">{item.description}</p>
+                        </div>
+                      </div>
+                    {/each}
+                  </Popover.Content>
+                </Popover.Root>
             {:else}
-              <a href="{m.href}" class="border-transparent relative z-40 text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</a>  
+              <!-- Current: "border-sky-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
+              {#if ($page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && $page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
+                <a href="{m.href}" class="border-sky-500 relative z-40 text-gray-900 dark:text-white inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">{m.title}</a>  
+              {:else}
+                <a href="{m.href}" class="border-transparent relative z-40 text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</a>  
+              {/if}
             {/if}
           {/each}
         </div>
       </div>
       <div class="hidden sm:ml-6 sm:flex sm:items-center">
-        <!-- <button type="button" class="relative rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+        <!-- <button type="button" class="relative rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
           <span class="absolute -inset-1.5"></span>
           <span class="sr-only">View notifications</span>
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -128,7 +187,7 @@
         <!-- Profile dropdown -->
         <div bind:this={profileBar} use:EscapeOrClickOutside={{ callback: closeAccountDropdown, except: profileBar }} class="relative ml-3">
           <div>
-            <button type="button" on:click={toggleAccountDropdown} class="touch-manipulation relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+            <button type="button" on:click={toggleAccountDropdown} class="touch-manipulation relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
               <span class="absolute -inset-1.5"></span>
               <span class="sr-only">Open user menu</span>
               <img class="h-8 w-8 rounded-full" src="https://www.gravatar.com/avatar/{data.generalSettings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
@@ -165,7 +224,7 @@
       </div>
       <div class="-mr-2 flex items-center sm:hidden">
         <!-- Mobile menu button -->
-        <button type="button" on:click={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md  p-2 text-gray-400 dark:text-gray-200 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-500 dark:betterhover:hover:text-white {mobileNavMenuVisible ? 'bg-gray-100 dark:bg-zinc-800' : 'bg-white dark:bg-zinc-900'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
+        <button type="button" on:click={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md  p-2 text-gray-400 dark:text-gray-200 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-500 dark:betterhover:hover:text-white {mobileNavMenuVisible ? 'bg-gray-100 dark:bg-zinc-800' : 'bg-white dark:bg-zinc-900'} focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
           <span class="absolute -inset-0.5"></span>
           <span class="sr-only">Open main menu</span>
           <!-- Menu open: "hidden", Menu closed: "block" -->
@@ -189,11 +248,19 @@
       <div class="space-y-1 pb-3 pt-2">
         <!-- Mobile Menu -->
         {#each menu as m}
-          <!-- Current: "border-indigo-500 bg-indigo-50 text-indigo-700", Default: "border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800" -->
-          {#if ($page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && $page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
-            <a href="{m.href}" on:click={closeMobileMenu} class="border-sky-500 bg-sky-50/50 dark:bg-slate-800/25 text-sky-500 block border-l-4 py-2 pl-3 pr-4 text-base font-medium" aria-current="page">{m.title}</a>  
-          {:else}
-            <a href="{m.href}" on:click={closeMobileMenu} class="border-transparent text-gray-600 dark:text-gray-400 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">{m.title}</a>  
+          <!-- Current: "border-sky-500 bg-sky-50 text-sky-700", Default: "border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800" -->
+            {#if ($page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && $page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
+              <a href="{m.href}" on:click={closeMobileMenu} class="border-sky-500 bg-sky-50/50 dark:bg-slate-800/25 text-sky-500 block border-l-4 py-2 pl-3 pr-4 text-base font-medium" aria-current="page">{m.title}</a>  
+            {:else}
+              <a href="{m.href}" on:click={closeMobileMenu} class="border-transparent text-gray-600 dark:text-gray-400 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">{m.title}</a>  
+            {/if}
+          {#if m.submenu !== undefined}
+            {#each m.submenu as item}
+              <a href="{item.href}" on:click={closeMobileMenu} class="flex gap-3 items-center py-2 pl-3 pr-4 text-base font-medium" aria-current="page">
+                <ChevronRight class="w-5 h-5"/>
+                <span>{item.title}</span>
+              </a>  
+            {/each}
           {/if}
         {/each}
       </div>
@@ -206,7 +273,7 @@
             <div class="text-base font-medium text-gray-800 dark:text-gray-200">{data.generalSettings["general.name"]}</div>
             <div class="text-sm font-medium text-gray-500">{data.generalSettings["general.email"]}</div>
           </div>
-          <!-- <button type="button" class="relative ml-auto flex-shrink-0 rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          <!-- <button type="button" class="relative ml-auto flex-shrink-0 rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
             <span class="absolute -inset-1.5"></span>
             <span class="sr-only">View notifications</span>
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -217,7 +284,7 @@
         <div class="mt-3 space-y-1">
           {#each profileMenu as m}
             {#if $page.url.pathname.startsWith(m.href)}
-              <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium border-indigo-500 bg-indigo-50 dark:bg-slate-800/25 text-sky-700 dark:text-sky-400">{m.title}</a>
+              <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium border-sky-500 bg-sky-50 dark:bg-slate-800/25 text-sky-700 dark:text-sky-400">{m.title}</a>
             {:else}
               <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200">{m.title}</a>
             {/if}
