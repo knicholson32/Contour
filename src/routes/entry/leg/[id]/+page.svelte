@@ -22,7 +22,6 @@
   import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
-    import Calendar from '$lib/components/ui/calendar/calendar.svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -404,7 +403,7 @@
       }}>
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
-        <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.leg.ident} />
+        <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.leg.ident} placeholder={data.leg.aircraft.registration} />
         <Entry.AircraftPicker required={true} title="Aircraft" name="aircraft" aircraft={data.aircraft} defaultValue={data.leg.aircraft.registration} />
         {#if data.leg.dayId === null && data.leg.startTime_utc !== null}
           <Entry.TimePicker name="date" title="Date" defaultValue={dateToDateStringForm(data.leg.startTime_utc, true, 'utc')} dateOnly={true}/>
@@ -412,7 +411,7 @@
         <Entry.AirportPicker required={true} airports={data.airports} bind:tz={startAirportTZ} title="From" name="from" defaultValue={data.leg.originAirportId} />
         <Entry.AirportPicker required={true} airports={data.airports} bind:tz={endAirportTZ} title="To" name="to" bind:value={endApt} defaultValue={data.leg.destinationAirportId} />
         <Entry.AirportPicker required={false} airports={data.airports} bind:tz={divertAirportTZ} title="Divert" name="divert" bind:value={divertApt} defaultValue={data.leg.diversionAirportId} />
-        <Entry.Input title="Route" name="route" disabled={true} uppercase={true} defaultValue={data.leg.flightAwareData?.filedRoute ?? ''} />
+        <Entry.Input title="Route" name="route" disabled={true} uppercase={true} defaultValue={data.leg.route ?? data.leg.flightAwareData?.filedRoute ?? null} />
         <Entry.Ticker title="Passengers" name="pax" defaultValue={data.leg.passengers} />
       </Section>
 

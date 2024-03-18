@@ -15,26 +15,6 @@
  
   $: perPage = isDesktop ? data.select : data.select;
   $: siblingCount = isDesktop ? 1 : 0;
-  
-  const totals = {
-    total: 0,
-    SEL: 0,
-    MEL: 0,
-    actInst: 0,
-    simInst: 0,
-    night: 0
-  }
-
-  for (const leg of data.legs) {
-    totals.total += leg.totalTime;
-
-    if (leg.aircraft.type.catClass === 'ASEL' || leg.aircraft.type.catClass === 'ASES') totals.SEL += leg.totalTime
-    else if (leg.aircraft.type.catClass === 'AMEL' || leg.aircraft.type.catClass === 'AMES') totals.MEL += leg.totalTime
-
-    totals.simInst += leg.simulatedInstrument;
-    totals.actInst += leg.actualInstrument;
-    totals.night += leg.night;
-  }
 
   let page = data.page;
 
@@ -100,7 +80,7 @@
           {:else}
             <Table.Cell class="font-medium text-xs xs:text-sm">{timeConverter(leg.startTime_utc, { dateOnly: true, shortYear: true })}</Table.Cell>
           {/if}
-          <Table.Cell class="hidden xs:table-cell">{leg.aircraft.type.typeCode}</Table.Cell>
+          <Table.Cell class="hidden xs:table-cell whitespace-nowrap">{leg.aircraft.type.typeCode}</Table.Cell>
           <Table.Cell>{leg.aircraft.registration}</Table.Cell>
           <Table.Cell class="text-center">{leg.originAirportId}</Table.Cell>
           {#if leg.diversionAirportId === null}
@@ -115,7 +95,7 @@
               {leg.dayLandings + leg.nightLandings}
             {/if}
           </Table.Cell>
-          <Table.Cell class="text-left hidden xs:table-cell">{leg.notes}</Table.Cell>
+          <Table.Cell class="text-left hidden xs:table-cell whitespace-nowrap">{leg.notes}</Table.Cell>
         </Table.Row>
       {/each}
       <!-- {#each {length: data.PER_PAGE - data.legs.length} as _, i (i)}
@@ -143,8 +123,8 @@
         <Table.Head></Table.Head>
         <Table.Head></Table.Head>
         <Table.Head class="hidden xs:table-cell"></Table.Head>
-        <Table.Head class="text-center">{totals.total.toFixed(1)}</Table.Head>
-        <Table.Head class="text-center hidden xs:table-cell">{totals.night.toFixed(1)}</Table.Head>
+        <Table.Head class="text-center">{data.totals.total.toFixed(1)}</Table.Head>
+        <Table.Head class="text-center hidden xs:table-cell">{data.totals.night.toFixed(1)}</Table.Head>
         <Table.Head class="hidden xs:table-cell"></Table.Head>
         <Table.Head class="hidden xs:table-cell"></Table.Head>
       </Table.Row>

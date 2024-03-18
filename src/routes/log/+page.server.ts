@@ -28,11 +28,22 @@ export const load = async ({ fetch, params, parent, url }) => {
     skip: page * select
   });
 
+  const totals = {
+    total: 0,
+    night: 0
+  }
+
+  for (const leg of await prisma.leg.findMany({ select: { totalTime: true, night: true }, orderBy: { startTime_utc: 'asc' }, take: page * select + select })) {
+    totals.total += leg.totalTime;
+    totals.night += leg.night;
+  }
+
   return {
     params,
     count,
     legs,
     select,
+    totals,
     page
   }
 }

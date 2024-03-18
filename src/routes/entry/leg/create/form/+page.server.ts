@@ -243,7 +243,7 @@ export const actions = {
     // Out / In Times
     // -----------------------------------------------------------------------------------------------------------------
 
-    const useBlock = data.get('use-block') === 'true';
+    const useBlock = data.get('use-block') !== 'false';
     const startTime = data.get('out-date') as null | string;
     const startTimeTZ = data.get('out-tz') as null | string;
     const endTime = data.get('in-date') as null | string;
@@ -375,6 +375,8 @@ export const actions = {
         originAirportId: startAirport,
         destinationAirportId: endAirport,
         diversionAirportId: divertAirport,
+
+        route: (entry !== undefined && entry.filedRoute !== null) ? entry.filedRoute : undefined,
 
         aircraftId: aircraftId,
 

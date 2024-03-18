@@ -243,15 +243,17 @@ model Leg {
   fixes      Fix[]
   approaches Approach[]
 
+  route String?
+
   flightAwareData FlightAwareData?
 
   ident String? // @db.VarChar(16)
 
-  originAirportId      String // @db.VarChar(5)
-  destinationAirportId String // @db.VarChar(5)
+  originAirportId      String? // @db.VarChar(5)
+  destinationAirportId String? // @db.VarChar(5)
   diversionAirportId   String? // @db.VarChar(5)
-  originAirport        Airport  @relation("originAirport", fields: [originAirportId], references: [id], onDelete: Restrict)
-  destinationAirport   Airport  @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
+  originAirport        Airport?  @relation("originAirport", fields: [originAirportId], references: [id], onDelete: Restrict)
+  destinationAirport   Airport?  @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
   diversionAirport     Airport? @relation("diversionAirport", fields: [diversionAirportId], references: [id], onDelete: Restrict)
 
   startTime_utc Int?
