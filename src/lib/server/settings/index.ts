@@ -13,6 +13,7 @@ export const TypeNames = {
 	'entry.flight_id.last': '',
 	'entry.day.current': -1,
 	'entry.defaultFlightID': 'EJA',
+	'entry.entryMXMode': false,
 	// Tour ----------------------------------
 	'tour.defaultStartApt': 'KPDK',
 	// System --------------------------------
@@ -40,6 +41,7 @@ export type ObjectType<T extends TypeName> =
 	T extends 'entry.flight_id.last' ? string :		// String
 	T extends 'entry.defaultFlightID' ? string : 	// String
 	T extends 'entry.defaultStartApt' ? string : 	// String
+	T extends 'entry.entryMXMode' ? boolean : // Boolean
 	T extends 'system.debug' ? number : 					// Integer
 	T extends 'data.approaches.lastSync' ? number :	// Integer
 	T extends 'data.approaches.source' ? string :	// String
@@ -79,8 +81,8 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 		// It does. Fetch, cast and return.
 		switch (setting) {
 			// Boolean Conversion ------------------------------------------------------------------------
-			// case '':
-			// 	return (settingVal.value === 'true' ? true : false) as ObjectType<T>;
+			case 'entry.entryMXMode':
+				return (settingVal.value === 'true' ? true : false) as ObjectType<T>;
 
 			// Integer Conversion ------------------------------------------------------------------------
 			case 'entry.tour.current':

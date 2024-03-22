@@ -21,6 +21,7 @@ export const load = async ({ fetch, params, url }) => {
 
   const entrySettings = await settings.getSet('entry');
 
+
   const leg = await prisma.leg.findUnique({
     where: { id: params.id },
     include: {
@@ -242,6 +243,23 @@ export const load = async ({ fetch, params, url }) => {
 }
 
 export const actions = {
+  deleteFA: async ({ request, url, params }) => {
+    const id = params.id;
+
+    const currentLeg = await prisma.leg.findUnique({ where: { id } });
+    if (currentLeg === null) return API.Form.formFailure('?/default', '*', 'Leg does not exist');
+
+    try {
+      await prisma.flightAwareData.delete({ where: { legId: currentLeg.id } });
+    } catch(e) {}
+    try {
+      await prisma.position.deleteMany({ where: { legId: currentLeg.id } });
+    } catch(e) { }
+    try {
+      await prisma.fix.deleteMany({ where: { legId: currentLeg.id } });
+    } catch (e) { }
+
+  },
   update: async ({ request, url, params }) => {
 
     const aeroAPIKey = await settings.get('general.aeroAPI');
@@ -330,9 +348,9 @@ export const actions = {
     const date = data.get('date') as null | string;
 
     // Initialize time variables that we may modify later
-    let startUTCValue = Math.floor(new Date().getTime() / 1000);
-    let endUTCValue = startUTCValue;
-    let relativeOrder = 0;
+    let startUTCValue = currentLeg.startTime_utc;
+    let endUTCValue = currentLeg.endTime_utc;
+    let relativeOrder = currentLeg.relativeOrder;
 
 
     if (useBlock || currentLeg.dayId !== null) {
@@ -362,18 +380,18 @@ export const actions = {
     let ident = data.get('ident') as null | string;
 
     if (aircraft === null || aircraft === '') return API.Form.formFailure('?/default', 'aircraft', 'Required field');
-    if (ident === null || ident === '') return API.Form.formFailure('?/default', 'ident', 'Required field');
-    ident = ident.trim().toUpperCase();
-
+    
     let aircraftId: string = '';
 
     try {
-      const ac = await prisma.aircraft.findUnique({ where: { registration: aircraft as string }, select: { id: true } });
+      const ac = await prisma.aircraft.findUnique({ where: { registration: aircraft as string }, select: { id: true, registration: true } });
       if (ac === null) return API.Form.formFailure('?/default', 'aircraft', 'Aircraft does not exist.');
       aircraftId = ac.id;
+
     } catch (e) {
       return API.Form.formFailure('?/default', 'aircraft', 'Invalid data');
     }
+
 
     // -----------------------------------------------------------------------------------------------------------------
     // Times
@@ -404,7 +422,7 @@ export const actions = {
     if (simTime === null || simTime === '' || isNaN(parseFloat(simTime))) simTime = null;
 
     // If we have provided a date, the user wants to use that instead of the flight aware info.
-    if (date !== null && !useBlock) {
+    if (date !== null && !useBlock && !currentLeg.forceUseBlock) {
       startUTCValue = Math.floor(new Date(date).getTime() / 1000);
       endUTCValue = startUTCValue + (parseFloat(totalTime) * 60 * 60);
       // TODO: Probably we should then go through all the other legs that share this date and resolve any order gaps

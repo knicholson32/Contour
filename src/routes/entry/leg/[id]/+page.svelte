@@ -18,7 +18,7 @@
   import { dateToDateStringForm, dateToDateStringFormSimple, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
-  import { CalendarDays, ChevronRight, Dot, Gauge, Link, Plus, Route, RouteOff, Table2, Timer } from 'lucide-svelte';
+  import { AlertCircle, CalendarDays, ChevronRight, Dot, Gauge, Link, Menu, Plus, Route, RouteOff, Table2, Timer } from 'lucide-svelte';
   import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
@@ -158,6 +158,12 @@
   let legsPopoverOpen = false;
   let useBlock: boolean;
 
+  let submitFADelete: HTMLButtonElement;
+  const faDelete = async () => {
+    const result = await confirm('Are you sure? This CANNOT be undone.');
+    if (result) submitFADelete.click();
+  }
+
 </script>
 
 <div class="hidden">
@@ -291,7 +297,7 @@
       {/key}
 
       {#if data.leg.flightAwareData !== null}
-        <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4 p-4">
+        <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4 p-4 relative">
           <Card.Root class="col-span-1 xs:col-span-2 xl:col-span-4">
             <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
               <Card.Title class="text-sm font-semibold">Speed and Altitude</Card.Title>
@@ -388,6 +394,26 @@
         </div>
       {/if}
 
+      {#if data.entrySettings['entry.entryMXMode'] === true}
+
+        <Section title="Leg Maintenance" collapsable={false} messageRight={true} error={form !== null && form.ok === false && form.action === '?/mx' && form.name === '*' ? form.message : null}>
+          <form action="?/deleteFA" method="post" enctype="multipart/form-data" class="p-4 flex flex-row gap-3 items-center">
+            <button bind:this={submitFADelete} type="submit" class="hidden"/>
+            <button on:click={faDelete} type="button" class="flex flex-row gap-3 items-center group">
+              <div class="p-0 rounded-full text-red-500">
+                <AlertCircle class="w-7 h-7"/>
+              </div>
+              <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-red-500">Erase FlightAware Data</div>
+            </button>
+            <div class="flex-grow"></div>
+          </form>
+          <a slot="message" href="/settings/data" class="flex flex-row gap-3 items-center group">
+            <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-sky-500">Modify Settings</div>
+            <ChevronRight class="w-5 h-5" />
+          </a>
+        </Section>
+      {/if}
+
       <form action="?/update" method="post" enctype="multipart/form-data" use:enhance={() => {
         submitting = true;
         return async ({ update }) => {
@@ -416,10 +442,10 @@
       </Section>
 
       <Section title="Block Times">
-        {#if data.leg.dayId === null}
+        {#if data.leg.dayId === null && data.leg.forceUseBlock === false}
           <Entry.Switch title="Use Block Times" name="use-block" noLocalStorage={true} bind:value={useBlock} defaultValue={false} />
         {/if}
-        {#if useBlock || data.leg.dayId !== null}
+        {#if useBlock || data.leg.dayId !== null || data.leg.forceUseBlock === true}
           <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTime} />
           <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZBind} defaultValue={data.endTime} />
           <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />

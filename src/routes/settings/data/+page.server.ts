@@ -13,7 +13,7 @@ export const load = async ({ params }) => {
 	if (indexRaw.status !== 200) console.log('ERROR: Unable to fetch aeronav data: Status', indexRaw.status, indexRaw.statusText);
 	const index = await indexRaw.text()
 
-	const settingValues = await settings.getMany('data.approaches.lastSync', 'data.approaches.source');
+	const settingValues = await settings.getMany('data.approaches.lastSync', 'data.approaches.source', 'entry.entryMXMode');
 
 	const regex = /\/CIFP_[0-9]+.zip/gm;
 
@@ -64,6 +64,13 @@ export const load = async ({ params }) => {
 };
 
 export const actions = {
+	updateOptions: async ({ request }) => {
+		const data = await request.formData();
+
+		const entryMXMode = (data.get('entry.entryMXMode') ?? undefined) as undefined | string;
+		if (entryMXMode !== undefined) await settings.set('entry.entryMXMode', entryMXMode === 'true');
+
+	},
 	updateApproaches: async ({ request }) => {
 		const data = await request.formData();
 

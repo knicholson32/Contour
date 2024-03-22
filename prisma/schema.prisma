@@ -244,6 +244,7 @@ model Leg {
   approaches Approach[]
 
   route String?
+  forceUseBlock Boolean @default(false)
 
   flightAwareData FlightAwareData?
 

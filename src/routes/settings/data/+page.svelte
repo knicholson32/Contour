@@ -12,12 +12,15 @@
 	// Approach
 	let approachUpdate: () => {};
 	let approachUnsavedChanges = false;
+
+	let optionUpdate: () => {};
+	let optionsUnsavedChanges = false;
 	// let timezone = data.settingValues['general.timezone'];
 	let source: string = 'unset';
 
 	// Utilities
 	beforeNavigate(({ cancel }) => {
-		if (approachUnsavedChanges) {
+		if (approachUnsavedChanges || optionsUnsavedChanges) {
 			if (!confirm('Are you sure you want to leave this page? You have unsaved changes that will be lost.')) {
 				cancel();
 			}
@@ -34,6 +37,14 @@
 </script>
 
 <!-- Debug -->
+<Settings.List class="" {form} action="?/updateOptions" bind:unsavedChanges={optionsUnsavedChanges} bind:update={optionUpdate} >
+	<span slot="title">Data Entry</span>
+	<span slot="description">Alter how data is entered into Contour.</span>
+
+	<Settings.Switch name="entry.entryMXMode" {form} bind:value={data.settingValues['entry.entryMXMode']} title="Enable data entry maintenance mode" update={optionUpdate} hoverTitle={'Whether or not to allow FlightAware data to be deleted from leg and other maintenance features.'} />
+</Settings.List>
+
+
 <Settings.List class="" {form} action="?/updateApproaches" bind:unsavedChanges={approachUnsavedChanges} bind:update={approachUpdate} >
 	<span slot="title">Approach Database</span>
 	<span slot="description">Update the Approach Database source.</span>

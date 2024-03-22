@@ -6,6 +6,7 @@
   export let visible: boolean = true;
   export let warning: boolean = false;
   export let collapsable = false;
+  export let messageRight = false;
 
   let click = () => {
     visible = !visible;
@@ -47,6 +48,9 @@
     </span>
     {#if error !== null}
       <span class="flex-grow text-red-500 ml-2">{error}</span>
+    {/if}
+    {#if messageRight}
+      <span class="flex-grow"></span>
     {/if}
     <slot name="message"/>
   </div>
