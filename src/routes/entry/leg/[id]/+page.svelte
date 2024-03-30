@@ -212,7 +212,11 @@
                         {dateToDateStringFormSimple(leg.startTime_utc)}
                       {/if}
                     </span>
-                    {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId}
+                    {#if leg.originAirportId === null && leg.destinationAirportId === null}
+                      <span class="opacity-45">????</span> → <span class="opacity-45">????</span>
+                    {:else}
+                      {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId}
+                    {/if}
                     <span class="text-xxs text-sky-600 font-thin ml-1">{leg.aircraft.registration}</span>
                     <span class="text-xxs text-sky-600 font-thin ml-1 lowercase">{leg.totalTime.toFixed(1)}hr</span>
                   </span>
@@ -469,7 +473,7 @@
 
       <Section title="Instrument">
         <Entry.FlightTime title="Actual Instrument" name="actual-instrument-time" bind:autoFill={totalTime} defaultValue={data.leg.actualInstrument} />
-        <Entry.FlightTime title="simulated Instrument" name="simulated-instrument-time" bind:autoFill={totalTime} defaultValue={data.leg.simulatedInstrument} />
+        <Entry.FlightTime title="Simulated Instrument" name="simulated-instrument-time" bind:autoFill={totalTime} defaultValue={data.leg.simulatedInstrument} />
         <Entry.Ticker title="Holds" name="holds" defaultValue={data.leg.holds} />
         {#key data.params.id}
           {#each approaches as approach (approach.id)}
