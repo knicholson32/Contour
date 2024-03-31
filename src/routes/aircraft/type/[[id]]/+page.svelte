@@ -13,6 +13,8 @@
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
+    import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
+    import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
 
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
@@ -51,9 +53,9 @@
       <MenuForm.SearchBar />
       <!-- Existing Aircraft -->
       {#each data.orderGroups as group (group.make)}
-        <Section title={group.make}>
+        <MenuSection title={group.make}>
           {#each group.types as type (type.id)}
-            <a href="/aircraft/type/{type.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {type.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
+            <MenuElement href="/aircraft/type/{type.id}?{urlActiveParam}" selected={type.id === data.params.id && !isMobileSize} includePadding={false}>
               {#if type.imageId !== null}
                 <div class="h-12 w-12 my-2 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
                   <Image id={type.imageId} size={48} class="aspect-1 object-cover w-full h-full" alt="Icon for the {type.make} {type.model}"/>
@@ -79,9 +81,9 @@
                   {@html icons.chevronRight}
                 </svg>
               </div>
-            </a>
+            </MenuElement>
           {/each}
-        </Section>  
+        </MenuSection>  
       {/each}
     {/if}
   </nav>

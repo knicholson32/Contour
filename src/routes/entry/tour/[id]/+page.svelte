@@ -15,9 +15,11 @@
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
-  import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
+  import { dateToDateStringForm, dateToDateStringFormMonthDayYear, getInlineDateUTC } from '$lib/helpers';
   import * as Map from '$lib/components/map';
   import { Timer, TowerControl } from 'lucide-svelte';
+    import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
+    import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -69,22 +71,33 @@
     <MenuForm.Link href={'/entry/tour/new?' + urlActiveParam} selected={$page.url.pathname.endsWith('new') && !isMobileSize} icon={icons.plus} text="Start a new tour" type="right"/>
     <MenuForm.SearchBar />
     <!-- Existing Tours -->
-    <Section title="Tours">
+    <MenuSection title="Tours">
       {#each data.tours as tour (tour.id)}
-        <a href="/entry/tour/{tour.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {tour.id === parseInt(data.params.id) && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
-          <div class="flex flex-row gap-2 items-center justify-center overflow-hidden py-2 flex-initial">
-            <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
-              <Badge class="h-full">{tour._count.days}</Badge>
-            </div>
-            <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-              {#if tour.endTime_utc === null}
-                {getInlineDateUTC(tour.startTime_utc)} - PRESENT
-              {:else}
-                {getInlineDateUTC(tour.startTime_utc)} - {getInlineDateUTC(tour.endTime_utc)} 
-              {/if}
-              {#if $unsavedUIDs.includes('tour-' + tour.id)}
-                <Tag>UNSAVED</Tag>
-              {/if}
+        <MenuElement href="/entry/tour/{tour.id}?{urlActiveParam}" selected={tour.id === parseInt(data.params.id) && !isMobileSize}>
+          <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
+            <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+              <span class="text-sky-600 w-20">{dateToDateStringFormMonthDayYear(tour.startTime_utc)}</span>
+              <span class="mx-2 text-xxs">→</span>
+              <span class="ml-1 text-sky-600 w-20">
+                {#if tour.endTime_utc === null}
+                  In Progress
+                {:else}
+                  {dateToDateStringFormMonthDayYear(tour.endTime_utc ?? 0)}
+                {/if}
+              </span>
+              <span class="flex-grow ml-1">
+                {#if $unsavedUIDs.includes('tour-' + tour.id)}
+                  <Tag>UNSAVED</Tag>
+                {/if}
+              </span>
+              <span class="mx-2 text-xxs">
+                {tour._count.days + ' '}
+                {#if tour._count.days === 1}
+                  Day
+                {:else}
+                  Days
+                {/if}
+              </span>
             </div>
           </div>
           <div class="absolute right-1">
@@ -92,9 +105,9 @@
               {@html icons.chevronRight}
             </svg>
           </div>
-        </a>
+        </MenuElement>
       {/each}
-    </Section>
+    </MenuSection>
   </nav>
   
   <!-- Form Side -->

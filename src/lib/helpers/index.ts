@@ -6,6 +6,7 @@ import { getTimeZones, type TimeZone } from '@vvo/tzdb';
 import type API from '$lib/types/api';
 
 const timeZonesWithUtc = getTimeZones({ includeUtc: true });
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
  * Get an airport from the ICAO identifier
@@ -61,7 +62,6 @@ export const getInlineDateUTC = (unix: number) => {
  */
 export const getInlineDateUTCFA = (unix: number) => {
 	const now = new Date(unix * 1000);
-	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	return `${pad(now.getUTCDate(), 2)}-${months[now.getUTCMonth()]}-${now.getUTCFullYear()}`;
 }
 
@@ -135,6 +135,43 @@ export const dateToTimeStringForm = (unixTime: number) => {
 export const dateToDateStringFormSimple = (unixTime: number) => {
 	const now = new Date(unixTime * 1000);
 	return `${pad(now.getUTCMonth() + 1, 2)}/${pad(now.getUTCDate(), 2)}`;
+}
+
+/**
+ * Get the ordinal for a number (up to 31)
+ * @see https://stackoverflow.com/questions/15397372/javascript-new-date-ordinal-st-nd-rd-th
+ * @param d the number
+ * @returns the ordinal
+ */
+export const nth = (d: number) => {
+	if (d > 3 && d < 21) return 'th';
+	switch (d % 10) {
+		case 1: return "st";
+		case 2: return "nd";
+		case 3: return "rd";
+		default: return "th";
+	}
+};
+
+/**
+ * Convert a date object into a date and time string in local timezone: March 12, 2024
+ * @param now the date object
+ * @returns the date string
+ */
+export const dateToDateStringFormMonthDayYear = (unixTime: number) => {
+	const now = new Date(unixTime * 1000);
+	const day = now.getUTCDate();
+	return `${months[now.getUTCMonth()]} ${day}, ${now.getUTCFullYear()}`;
+}
+
+/**
+ * Convert a date object into a date and time string in local timezone: 19:19Z
+ * @param now the date object
+ * @returns the date string
+ */
+export const dateToTimeStringZulu = (unixTime: number) => {
+	const now = new Date(unixTime * 1000);
+	return `${pad(now.getUTCHours(), 2)}:${pad(now.getUTCMinutes(), 2)}Z`;
 }
 
 /**
@@ -516,7 +553,6 @@ export const pad = (num: number, size: number) => {
  */
 export const timeConverter = (UNIX_timestamp: number, options?: { dateOnly?: boolean, shortYear?: boolean}) => {
 	const a = new Date(UNIX_timestamp * 1000);
-	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	const year = (options !== undefined && options.dateOnly === true) ? a.getFullYear().toFixed(0).substring(2) : a.getFullYear();
 	if (options !== undefined && options.dateOnly === true) {
 		return `${pad(a.getMonth() + 1, 2)}/${pad(a.getDate(), 2)}/${year}`;

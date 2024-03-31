@@ -10,7 +10,7 @@
 
 </script>
 
-<div class="flex flex-1 items-center justify-center bg-gray-100 dark:bg-zinc-900 sticky top-0">
+<div class="flex flex-1 items-center justify-center bg-gray-100 dark:bg-zinc-900 sticky top-0 -z-10">
   <div class="w-full max-w-lg lg:max-w-xs">
     <label for="search" class="sr-only">Search</label>
     <div class="relative z-50">

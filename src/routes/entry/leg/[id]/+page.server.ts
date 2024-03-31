@@ -17,6 +17,8 @@ import type * as Types from '@prisma/client';
 
 const AVG_FILTER_NUM = 2;
 
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
 export const load = async ({ fetch, params, url }) => {
 
   const entrySettings = await settings.getSet('entry');
@@ -50,14 +52,14 @@ export const load = async ({ fetch, params, url }) => {
     if (currentDay === null) throw redirect(302, '/entry/leg' + url.search);
   }
 
-  type Entry = Prisma.LegGetPayload<{ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } } }>;
+  type Entry = Prisma.LegGetPayload<{ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true, type: { select: { typeCode: true }} } } } }>;
   let _legs: Entry[] | null = null;
-  let legs: { year: string, entries: Entry[], visible: boolean }[] = [];
+  let legs: { text: string, entries: Entry[], visible: boolean }[] = [];
 
   if (dayId === null) {
-    _legs = await prisma.leg.findMany({ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
+    _legs = await prisma.leg.findMany({ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true, type: { select: { typeCode: true }} } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
   } else {
-    _legs = await prisma.leg.findMany({ where: { dayId: dayId }, select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
+    _legs = await prisma.leg.findMany({ where: { dayId: dayId }, select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true, type: { select: { typeCode: true }} } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
   }
 
   // See if there are any legs that don't have a date assigned. We will put these in their own group
@@ -66,33 +68,37 @@ export const load = async ({ fetch, params, url }) => {
     // Add each leg to the unassigned date group
     for (const leg of _legs) if (leg.startTime_utc === null) entries.push(leg);
     // Submit the group
-    legs.push({ year: 'No Date', entries, visible: true});
+    legs.push({ text: 'No Date', entries, visible: true});
     // Remove each of the legs added here from the primary leg list
-    _legs = _legs.filter((leg) => entries.findIndex((entry) => entry.id === leg.id) === -1);
+    // _legs = _legs.filter((leg) => entries.findIndex((entry) => entry.id === leg.id) === -1);
   }
   
 
   if (_legs !== null && _legs.length > 0 && _legs[0].startTime_utc !== null) {
-    let currentYear = new Date(_legs[0].startTime_utc * 1000).getFullYear();
+    const d = new Date(_legs[0].startTime_utc * 1000);
+    let currentMonth = d.getMonth();
+    let currentYear = d.getFullYear();
     let entries: Entry[] = [];
     for (const leg of _legs) {
-      if (leg.startTime_utc !== null) {
-        const year = new Date(leg.startTime_utc * 1000).getFullYear();
-        if (year !== currentYear) {
-          let v = false;
-          if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
-          legs.push({ year: currentYear.toFixed(0), entries, visible: v });
-          entries = [];
-          currentYear = year;
-        }
+      if (leg.startTime_utc === null) continue;
+      const d = new Date(leg.startTime_utc * 1000);
+      const month = d.getMonth();
+      const year = d.getFullYear();
+      if (month !== currentMonth || year !== currentYear) {
+        // let v = false;
+        // if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
+        legs.push({ text: `${months[currentMonth]} ${currentYear}`, entries, visible: true });
+        entries = [];
+        currentMonth = month;
+        currentYear = year;
       }
       // Add this leg to the current year group
       entries.push(leg);
     }
     // Add the last year to the group list
-    let v = false;
-    if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
-    legs.push({ year: currentYear.toFixed(0), entries, visible: v });
+    // let v = false;
+    // if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
+    legs.push({ text: `${months[currentMonth]} ${currentYear}`, entries, visible: true });
     entries = [];
   }
 
@@ -147,7 +153,7 @@ export const load = async ({ fetch, params, url }) => {
     const day = await prisma.dutyDay.findUnique({
       where: { id: dayId },
       include: {
-        legs: { select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } }, orderBy: { startTime_utc: 'asc' } },
+        legs: { select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true, type: { select: { typeCode: true } } } } }, orderBy: { startTime_utc: 'asc' } },
         deadheads: { orderBy: { startTime_utc: 'asc' } }
       },
     });

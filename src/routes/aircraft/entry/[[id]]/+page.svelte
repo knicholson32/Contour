@@ -11,6 +11,7 @@
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
+    import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
 
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
@@ -74,7 +75,7 @@
       {#each data.orderGroups as group (group.typeCode)}
         <Section title={group.typeCode} subtitle={`${group.regs.length} Aircraft`} collapsable={true} >
           {#each group.regs as ac (ac.id)}
-            <a href="/aircraft/entry/{ac.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-1 py-2 {ac.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
+            <MenuElement href="/aircraft/entry/{ac.id}?{urlActiveParam}" selected={ac.id === data.params.id && !isMobileSize}>
               {#if ac.imageId !== null}
                 <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
                   <Badge class="h-full">{ac._count.legs}</Badge>
@@ -103,7 +104,7 @@
               <svg class="h-4 w-4 shrink-0 flex-nowrap" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
                 {@html icons.chevronRight}
               </svg>
-            </a>
+            </MenuElement>
           {/each}
         </Section>  
       {/each}

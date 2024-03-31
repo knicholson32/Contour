@@ -14,9 +14,11 @@
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
-  import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
+  import { dateToDateStringForm, dateToDateStringFormMonthDayYear, getInlineDateUTC } from '$lib/helpers';
   import { CalendarOff, Plus, Timer, TowerControl } from 'lucide-svelte';
     import Warning from '$lib/components/Warning.svelte';
+    import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
+    import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -72,23 +74,22 @@
     {/if}
     <MenuForm.SearchBar />
     <!-- Existing Aircraft -->
-    <Section title="Days">
+    <MenuSection title="Days">
       {#each data.days as day,i (day.id)}
-        <a href="/entry/day/{day.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {day.id === parseInt(data.params.id) && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
-          <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
-            <div class="uppercase font-bold font-mono text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-              {#if data.currentTour !== null}
-                <span class="font-mono text-xxs">Day {data.days.length - i}: </span>{day.startAirportId} → {day.endAirportId} 
-              {:else}
-                {day.startAirportId} → {day.endAirportId} 
-              {/if}
-              <span class="lowercase text-gray-400">
-                on
-                {getInlineDateUTC(day.startTime_utc)}
+        <MenuElement href="/entry/day/{day.id}?{urlActiveParam}" selected={day.id === parseInt(data.params.id) && !isMobileSize}>
+          <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
+            <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+              <span class="font-mono">
+                {day.startAirportId} → {day.endAirportId}
               </span>
-              {#if $unsavedUIDs.includes('day-' + day.id)}
-                <Tag>UNSAVED</Tag>
-              {/if}
+              <span class="flex-grow ml-1">
+                {#if $unsavedUIDs.includes('day-' + day.id)}
+                  <Tag>UNSAVED</Tag>
+                {/if}
+              </span>
+              <span class="text-sky-600">
+                {dateToDateStringFormMonthDayYear(day.startTime_utc)}
+              </span>
             </div>
           </div>
           <div class="absolute right-1">
@@ -96,9 +97,9 @@
               {@html icons.chevronRight}
             </svg>
           </div>
-        </a>
+        </MenuElement>
       {/each}
-    </Section>
+    </MenuSection>
   </nav>
   
   <!-- Form Side -->

@@ -28,6 +28,8 @@
   export let urlActiveParam: string = _altURLParamsObj.toString();
   export let urlFormParam: string = _altURLParamsObj.toString();
 
+  export let scrollToDiv: HTMLDivElement | HTMLAnchorElement | null = null;
+
 
   export const alterParamsWithMenuSwap = (mods: { [key: string]: string }) => {
     const params = new URLSearchParams($page.url.search);
@@ -70,6 +72,33 @@
     scrollFormTop();
   });
 
+  // @see https://stackoverflow.com/a/22480938/5441886
+  const isScrolledIntoView = (el: HTMLElement) => {
+    let rect = el.getBoundingClientRect();
+    let elemTop = rect.top;
+    let elemBottom = rect.bottom;
+
+    // Only completely visible elements return true:
+    let isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
+    // Partially visible elements return true:
+    //isVisible = elemTop < window.innerHeight && elemBottom >= 0;
+    return isVisible;
+  }
+
+  // Scroll to the proper div
+  const scrollTo = (div: HTMLAnchorElement | HTMLDivElement | null) => {
+    if (div === null) return;
+    if (isMobileSize && activeOnSingleCol === 'form') return;
+    if (!isScrolledIntoView(div)) {
+      div.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }
+  $: scrollTo(scrollToDiv);
+
+
   let innerWidth: number;
 
   /**
@@ -80,7 +109,7 @@
   /**
    * Sizes for each column
    */
-  export let minSizes = { menu: 200, form: 475 };
+  export let minSizes = { menu: 250, form: 475 };
   export let defaultRatio = 0.25;
   // TODO: Save this ratio so when the user loads it defaults to that (no layout shifting though)
   // TODO: Instead of using a ratio, use width of the menu, that way the menu initially starts as the same size no matter the window size
@@ -182,7 +211,7 @@
 <!-- Menu -->
 <div bind:this={wrapper} class="h-full w-full flex flex-row relative overflow-hidden" style="--column-width: {ratio * 100}%; --menu-min-width: {minSizes.menu}px;" role="presentation">
   {#if menu === 'safe'}
-    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border mb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-900 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
+    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border mb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
       <slot name="menu"/>
     </div>
     <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
@@ -191,7 +220,7 @@
       </slot>
     </div> -->
   {:else}
-    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-900 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
+    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
       <slot name="menu"/>
     </div>
     <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
@@ -204,8 +233,8 @@
   <!-- Separator -->
   {#if resizable}
     <div class="h-full flex-shrink-0 bg-gray-100 dark:bg-zinc-800 relative select-none w-2 justify-center hidden md:flex">
-      <div on:mousedown={dragStart} on:touchstart={dragStart} class="absolute z-30 w-12 cursor-col-resize bg-transparent top-0 bottom-0 flex justify-center" role="presentation">
-        <div class="h-full w-[1px] bg-white dark:bg-zinc-700"></div>
+      <div on:mousedown={dragStart} on:touchstart={dragStart} class="absolute z-30 w-6 border-l border-white dark:border-zinc-700 bg-transparant cursor-col-resize top-0 bottom-0 left-1 flex justify-center" role="presentation">
+        <!-- <div class="h-full w-[1px] bg-white dark:bg-zinc-700"></div> -->
       </div>
     </div>
   {:else}

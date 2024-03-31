@@ -7,7 +7,7 @@
   import { icons } from '$lib/components';
   import { page } from '$app/stores';
   import * as Card from "$lib/components/ui/card";
-  import { afterNavigate, goto} from '$app/navigation';
+  import { afterNavigate, beforeNavigate, goto} from '$app/navigation';
   import type * as Types from '@prisma/client';
   import { API, DB } from '$lib/types';
   import * as MenuForm from '$lib/components/menuForm';
@@ -15,7 +15,7 @@
   import * as Popover from "$lib/components/ui/popover";
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
-  import { dateToDateStringForm, dateToDateStringFormSimple, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
+  import { dateToDateStringForm, dateToDateStringFormMonthDayYear, dateToDateStringFormSimple, dateToTimeStringZulu, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
   import { AlertCircle, CalendarDays, ChevronRight, Dot, Gauge, Link, Menu, Plus, Route, RouteOff, Table2, Timer } from 'lucide-svelte';
@@ -23,6 +23,8 @@
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
   import { onMount } from 'svelte';
+    import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
+    import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -118,9 +120,21 @@
     resetApproaches();
   }
 
-  
+  let menuElements: { [key: string]: HTMLAnchorElement } = {};
+
+  beforeNavigate(() => {
+    menuElements = {};
+  });
+
+  let scrollToDiv: HTMLAnchorElement | null = null;
+
   afterNavigate(() => {
     resetApproaches();
+    if (data.leg === null) scrollToDiv = null;
+    else {
+      if (data.leg.id in menuElements) scrollToDiv = menuElements[data.leg.id];
+      else scrollToDiv = null;
+    }
     setTimeout(() => {
       resetMap()
     }, 1);
@@ -181,13 +195,14 @@
 
   $: refreshSelectedAC(selectedAircraft);
 
+
 </script>
 
 <div class="hidden">
   <Tooltip bind:el={tooltip} bind:position />
 </div>
 
-<TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:urlFormParam bind:isMobileSize backText="Back" onMenuBack={onMenuBack} afterDrag={resetMap}>
+<TwoColumn menu="scroll" {ref} form="scroll" bind:scrollToDiv bind:urlActiveParam bind:urlFormParam bind:isMobileSize backText="Back" onMenuBack={onMenuBack} afterDrag={resetMap}>
 
 
   <!-- Menu Side -->
@@ -212,34 +227,38 @@
     <MenuForm.SearchBar />
     <!-- Existing Legs -->
     {#if data.legDeadheadCombo === null}
-      {#each data.legs as group,i (group.year)}
-        <Section title="{group.year}" collapsable={true} visible={group.visible}>
+      {#each data.legs as group,i (group.text)}
+        <MenuSection title="{group.text}">
           {#each group.entries as leg, i (leg.id)}
-            <a data-sveltekit-preload-data="tap" href="/entry/leg/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
-              <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 pl-2 flex-initial">
-                <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-                  <span class="font-mono">
-                    {#if leg.dayId !== null}
-                      <span class="absolute -left-1 top-0 bottom-0 flex items-center"><Dot/></span>
-                    {/if}
-                    <span class="text-xxs text-sky-600 font-thin">
-                      {#if leg.startTime_utc === null}
-                        ??/??
-                      {:else}
-                        {dateToDateStringFormSimple(leg.startTime_utc)}
-                      {/if}
-                    </span>
+            <MenuElement bind:element={menuElements[leg.id]} href="/entry/leg/{leg.id}?{urlActiveParam}" selected={leg.id === data.params.id && !isMobileSize}>
+              <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
+                <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+                  <span class="">
                     {#if leg.originAirportId === null && leg.destinationAirportId === null}
-                      <span class="opacity-45">????</span> → <span class="opacity-45">????</span>
+                      No Route
                     {:else}
                       {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId}
                     {/if}
-                    <span class="text-xxs text-sky-600 font-thin ml-1">{leg.aircraft.registration}</span>
-                    <span class="text-xxs text-sky-600 font-thin ml-1 lowercase">{leg.totalTime.toFixed(1)}hr</span>
                   </span>
-                  {#if $unsavedUIDs.includes(leg.id)}
-                    <Tag>UNSAVED</Tag>
-                  {/if}
+                  <span class="flex-grow ml-1">
+                    {#if $unsavedUIDs.includes(leg.id)}
+                      <Tag>UNSAVED</Tag>
+                    {/if}
+                  </span>
+                  <span class="text-sky-600">
+                    {#if leg.startTime_utc === null}
+                      No Date
+                    {:else}
+                      {dateToDateStringFormMonthDayYear(leg.startTime_utc)}
+                    {/if}
+                  </span>
+                </div>
+                <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+                  <span class="font-normal text-gray-400 dark:text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis">
+                    {leg.aircraft.registration} ({leg.aircraft.type.typeCode})
+                  </span>
+                  <span class="flex-grow"></span>
+                  <span class="">{leg.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
                 </div>
               </div>
               <div class="absolute right-1">
@@ -247,16 +266,54 @@
                   {@html icons.chevronRight}
                 </svg>
               </div>
-            </a>
+            </MenuElement>
           {/each}
-        </Section>
+        </MenuSection>
       {/each}
     {:else}
-      <Section title="Legs">
+      <MenuSection title="Legs">
         {#each data.legDeadheadCombo as entry, i (entry.id)}
           {#if entry.type === 'leg'}
-            <a href="/entry/leg/{entry.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {entry.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
-              <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
+            <MenuElement href="/entry/leg/{entry.id}?{urlActiveParam}" selected={entry.id === data.params.id && !isMobileSize}>
+              <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
+                <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+                  <span class="">
+                    {#if entry.entry.originAirportId === null && entry.entry.destinationAirportId === null}
+                      No Route
+                    {:else}
+                      {entry.entry.originAirportId} → {entry.entry.diversionAirportId === null ? entry.entry.destinationAirportId : entry.entry.diversionAirportId}
+                    {/if}
+                  </span>
+                  <span class="flex-grow ml-1">
+                    {#if $unsavedUIDs.includes(entry.entry.id)}
+                      <Tag>UNSAVED</Tag>
+                    {/if}
+                  </span>
+                  <span class="mr-2">
+                    <div class="w-4 h-4 text-xxs flex items-center justify-center font-bold rounded-full bg-sky-600 text-white">{i + 1}</div>
+                  </span>
+                  <span class="text-sky-600">
+                    {#if entry.entry.startTime_utc === null}
+                      No Date
+                    {:else}
+                      {dateToTimeStringZulu(entry.entry.startTime_utc)}
+                    {/if}
+                  </span>
+                </div>
+                <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+                  <span class="font-normal text-gray-400 dark:text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis">
+                    {entry.entry.aircraft.registration} ({entry.entry.aircraft.type.typeCode})
+                  </span>
+                  <span class="flex-grow"></span>
+                  <span class="">{entry.entry.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
+                </div>
+              </div>
+              <div class="absolute right-1">
+                <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+                  {@html icons.chevronRight}
+                </svg>
+              </div>
+              <!-- <div class="flex flex-row gap-1 items-center justify-center overflow-hidden flex-initial">
                 <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
                   <span class="font-mono">
                     <span class="text-xxs text-sky-600 font-thin">{i+1}</span>
@@ -273,8 +330,8 @@
                 <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
                   {@html icons.chevronRight}
                 </svg>
-              </div>
-            </a>
+              </div> -->
+            </MenuElement>
           {:else}
             <div class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 bg-gray-50 dark:bg-zinc-950/50">
               <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
@@ -285,7 +342,7 @@
             </div>
           {/if}
         {/each}
-      </Section>
+      </MenuSection>
     {/if}
   </nav>
   
