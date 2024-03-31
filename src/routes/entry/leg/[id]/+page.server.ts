@@ -67,10 +67,11 @@ export const load = async ({ fetch, params, url }) => {
     for (const leg of _legs) if (leg.startTime_utc === null) entries.push(leg);
     // Submit the group
     legs.push({ year: 'No Date', entries, visible: true});
+    // Remove each of the legs added here from the primary leg list
+    _legs = _legs.filter((leg) => entries.findIndex((entry) => entry.id === leg.id) === -1);
   }
   
 
-  let visible = true;
   if (_legs !== null && _legs.length > 0 && _legs[0].startTime_utc !== null) {
     let currentYear = new Date(_legs[0].startTime_utc * 1000).getFullYear();
     let entries: Entry[] = [];
@@ -78,8 +79,9 @@ export const load = async ({ fetch, params, url }) => {
       if (leg.startTime_utc !== null) {
         const year = new Date(leg.startTime_utc * 1000).getFullYear();
         if (year !== currentYear) {
-          legs.push({ year: currentYear.toFixed(0), entries, visible });
-          visible = false;
+          let v = false;
+          if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
+          legs.push({ year: currentYear.toFixed(0), entries, visible: v });
           entries = [];
           currentYear = year;
         }
@@ -88,8 +90,9 @@ export const load = async ({ fetch, params, url }) => {
       entries.push(leg);
     }
     // Add the last year to the group list
-    legs.push({ year: currentYear.toFixed(0), entries, visible });
-    visible = false;
+    let v = false;
+    if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
+    legs.push({ year: currentYear.toFixed(0), entries, visible: v });
     entries = [];
   }
 
