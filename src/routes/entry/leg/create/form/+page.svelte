@@ -12,8 +12,9 @@
 
   import { dateToDateStringForm, getInlineDateUTC, timeStrAndTimeZoneToUTC, validateURL } from '$lib/helpers';
   import { Title } from '$lib/components/menuForm';
-    import { page } from '$app/stores';
-    import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
+  import type { API } from '$lib/types';
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
@@ -89,7 +90,17 @@
     resetMap();
   }
 
+  let mounted = false;
+
+  const refreshSelectedAC = async (selected: string) => {
+    if (!mounted) return;
+    const res = await (await fetch(`/api/aircraft/reg/${selected}`)).json() as API.Aircraft;
+    console.log(res);
+    if (res.ok == true && res.type === 'aircraft') selectedAircraftAPI = res.aircraft;
+  }
+
   onMount(() => {
+    mounted = true;
     if ($page.url.searchParams.get('clearChanges') !== null) {
       formManager.clearUID(true);
       const u = new URLSearchParams($page.url.search);
@@ -99,7 +110,12 @@
       }, 1);
     }
     setTimeout(resetMap, 1);
+    refreshSelectedAC(ac);
   });
+
+  let selectedAircraftAPI: API.Types.Aircraft | null = null;
+  $: refreshSelectedAC(ac);
+
 
 
 </script>
@@ -151,13 +167,13 @@
       </Section> -->
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
-        <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.entry?.ident ?? ac} />
+        <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.entry?.ident ?? null} />
         <Entry.AircraftPicker required={true} title="Aircraft" name="aircraft" bind:value={ac} aircraft={data.aircraft} defaultValue={data.entry?.registration ?? null} />
         {#if data.dayId === null || data.dayId === undefined}
           <Entry.TimePicker name="date" title="Date" defaultValue={dateToDateStringForm(data.entry?.startTime ?? new Date().getTime() / 1000, true, 'utc')} dateOnly={true}/>
         {/if}
-        <Entry.AirportPicker required={true} airports={data.airports} bind:tz={startAirportTZ} title="From" name="from" defaultValue={data.entry?.originAirportId ?? null} />
-        <Entry.AirportPicker required={true} airports={data.airports}  bind:tz={endAirportTZ} title="To" name="to" bind:value={endApt} defaultValue={data.entry?.destinationAirportId ?? null} />
+        <Entry.AirportPicker required={false} airports={data.airports} bind:tz={startAirportTZ} title="From" name="from" defaultValue={data.entry?.originAirportId ?? null} />
+        <Entry.AirportPicker required={false} airports={data.airports}  bind:tz={endAirportTZ} title="To" name="to" bind:value={endApt} defaultValue={data.entry?.destinationAirportId ?? null} />
         <Entry.AirportPicker required={false} airports={data.airports}  bind:tz={divertAirportTZ} title="Divert" name="divert" bind:value={divertApt} defaultValue={data.entry?.diversionAirportId ?? null} />
         <Entry.Input title="Route" name="route" disabled={true} uppercase={true} defaultValue={data.entry?.filedRoute ?? null} />
         <Entry.Ticker title="Passengers" name="pax" defaultValue={null} />
@@ -175,7 +191,7 @@
       </Section>
 
       <Section title="Times">
-        <Entry.FlightTime required={true} title="Total Time" name="total-time" autoFill={null} bind:value={totalTime} defaultValue={calcTotalTime} />
+        <Entry.FlightTime required={true} title={selectedAircraftAPI === null || selectedAircraftAPI.simulator === false ? 'Total Time' : 'Simulated Flight'} name="total-time" autoFill={null} bind:value={totalTime} defaultValue={calcTotalTime} />
         <Entry.FlightTime title="PIC" name="pic-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="SIC" name="sic-time" bind:autoFill={totalTime} defaultValue={calcTotalTime} />
         <Entry.FlightTime title="Night" name="night-time" bind:autoFill={totalTime} defaultValue={null} />
@@ -200,7 +216,7 @@
         <Entry.Button title="Add Approach" focus={addApproach} />
       </Section>
 
-      <Section title="Training & Other" collapsable={false} visible={true}>
+      <Section title="Training & Other" collapsable={false} visible={false}>
         <Entry.FlightTime title="Solo" name="solo-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Given" name="dual-given-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Received" name="dual-received-time" bind:autoFill={totalTime} defaultValue={null} />

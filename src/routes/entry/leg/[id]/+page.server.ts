@@ -27,7 +27,11 @@ export const load = async ({ fetch, params, url }) => {
     include: {
       flightAwareData: true,
       day: true,
-      aircraft: true,
+      aircraft: {
+        include: {
+          type: true
+        }
+      },
       positions: true,
       fixes: true,
       approaches: true
@@ -48,7 +52,7 @@ export const load = async ({ fetch, params, url }) => {
 
   type Entry = Prisma.LegGetPayload<{ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } } }>;
   let _legs: Entry[] | null = null;
-  let legs: { year: number, entries: Entry[]}[] = [];
+  let legs: { year: string, entries: Entry[], visible: boolean }[] = [];
 
   if (dayId === null) {
     _legs = await prisma.leg.findMany({ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
@@ -56,6 +60,17 @@ export const load = async ({ fetch, params, url }) => {
     _legs = await prisma.leg.findMany({ where: { dayId: dayId }, select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
   }
 
+  // See if there are any legs that don't have a date assigned. We will put these in their own group
+  if (_legs.findIndex((l) => l.startTime_utc === null) !== -1) {
+    let entries: Entry[] = [];
+    // Add each leg to the unassigned date group
+    for (const leg of _legs) if (leg.startTime_utc === null) entries.push(leg);
+    // Submit the group
+    legs.push({ year: 'No Date', entries, visible: true});
+  }
+  
+
+  let visible = true;
   if (_legs !== null && _legs.length > 0 && _legs[0].startTime_utc !== null) {
     let currentYear = new Date(_legs[0].startTime_utc * 1000).getFullYear();
     let entries: Entry[] = [];
@@ -63,7 +78,8 @@ export const load = async ({ fetch, params, url }) => {
       if (leg.startTime_utc !== null) {
         const year = new Date(leg.startTime_utc * 1000).getFullYear();
         if (year !== currentYear) {
-          legs.push({ year: currentYear, entries });
+          legs.push({ year: currentYear.toFixed(0), entries, visible });
+          visible = false;
           entries = [];
           currentYear = year;
         }
@@ -72,7 +88,8 @@ export const load = async ({ fetch, params, url }) => {
       entries.push(leg);
     }
     // Add the last year to the group list
-    legs.push({ year: currentYear, entries });
+    legs.push({ year: currentYear.toFixed(0), entries, visible });
+    visible = false;
     entries = [];
   }
 
@@ -215,12 +232,16 @@ export const load = async ({ fetch, params, url }) => {
   distance = distance * 0.54;
   if (numPositions > 0) speed = speed / numPositions;
 
+  let selectedAircraftAPI: API.Types.Aircraft | null = null;
+  if (leg !== null) selectedAircraftAPI = leg.aircraft;
+
   return {
     params,
     entrySettings,
     leg,
     legs,
     currentDay,
+    selectedAircraftAPI,
     // positions: await prisma.position.findMany({ where: { legId: params.leg } }),
     // fixes: await prisma.fix.findMany({ where: { legId: params.leg } }),
     legDeadheadCombo,
@@ -287,39 +308,48 @@ export const actions = {
     let divertAirport = data.get('divert') as null | string;
     const divertAirportTZ = data.get('divert-tz') as null | string;
 
-    if (startAirport === null || startAirport === '') return API.Form.formFailure('?/default', 'from', 'Required field');
-    if (startAirportTZ === null || startAirportTZ === '') return API.Form.formFailure('?/default', 'from', 'Required field');
-    if (endAirport === null || endAirport === '') return API.Form.formFailure('?/default', 'to', 'Required field');
-    if (endAirportTZ === null || endAirportTZ === '') return API.Form.formFailure('?/default', 'to', 'Required field');
+    const startEmpty = startAirport === null || startAirport === '';
+    const endEmpty = endAirport === null || endAirport === '';
 
-    startAirport = startAirport.trim().toLocaleUpperCase();
-    endAirport = endAirport.trim().toLocaleUpperCase();
+    if ((startEmpty && !endEmpty) || (endEmpty && !startEmpty)) return API.Form.formFailure('?/default', 'from', 'Specify both start and end airport or no airports');
+    // if (startAirportTZ === null || startAirportTZ === '') return API.Form.formFailure('?/default', 'from', 'Required field');
+    // if (endAirportTZ === null || endAirportTZ === '') return API.Form.formFailure('?/default', 'to', 'Required field');
+
+
+    startAirport = startAirport?.trim().toLocaleUpperCase() ?? '';
+    if (startAirport === '') startAirport = null;
+    endAirport = endAirport?.trim().toLocaleUpperCase() ?? '';
+    if (endAirport === '') endAirport = null;
     divertAirport = divertAirport?.trim().toLocaleUpperCase() ?? '';
     if (divertAirport === '') divertAirport = null;
 
 
     // Create airport if it does not exist
-    try {
-      await addIfDoesNotExist(startAirport, aeroAPIKey);
-      const airport = await prisma.airport.findUnique({
-        where: { id: startAirport }
-      });
-      if (airport === null) return API.Form.formFailure('?/default', 'from', 'Unknown airport');
-    } catch (e) {
-      console.log(e);
-      return API.Form.formFailure('?/default', 'from', 'Error verifying airport');
+    if (startAirport !== null) {
+      try {
+        await addIfDoesNotExist(startAirport, aeroAPIKey);
+        const airport = await prisma.airport.findUnique({
+          where: { id: startAirport }
+        });
+        if (airport === null) return API.Form.formFailure('?/default', 'from', 'Unknown airport');
+      } catch (e) {
+        console.log(e);
+        return API.Form.formFailure('?/default', 'from', 'Error verifying airport');
+      }
     }
 
     // Create airport if it does not exist
-    try {
-      await addIfDoesNotExist(endAirport, aeroAPIKey);
-      const airport = await prisma.airport.findUnique({
-        where: { id: endAirport }
-      });
-      if (airport === null) return API.Form.formFailure('?/default', 'to', 'Unknown airport');
-    } catch (e) {
-      console.log(e);
-      return API.Form.formFailure('?/default', 'to', 'Error verifying airport');
+    if (endAirport !== null) {
+      try {
+        await addIfDoesNotExist(endAirport, aeroAPIKey);
+        const airport = await prisma.airport.findUnique({
+          where: { id: endAirport }
+        });
+        if (airport === null) return API.Form.formFailure('?/default', 'to', 'Unknown airport');
+      } catch (e) {
+        console.log(e);
+        return API.Form.formFailure('?/default', 'to', 'Error verifying airport');
+      }
     }
 
     // Create airport if it does not exist
@@ -327,7 +357,7 @@ export const actions = {
       try {
         await addIfDoesNotExist(divertAirport, aeroAPIKey);
         const airport = await prisma.airport.findUnique({
-          where: { id: endAirport }
+          where: { id: divertAirport }
         });
         if (airport === null) return API.Form.formFailure('?/default', 'divert', 'Unknown airport');
       } catch (e) {
@@ -380,6 +410,7 @@ export const actions = {
     let ident = data.get('ident') as null | string;
 
     if (aircraft === null || aircraft === '') return API.Form.formFailure('?/default', 'aircraft', 'Required field');
+    if (ident !== null && ident !== '') ident = ident.trim().toUpperCase();
     
     let aircraftId: string = '';
 

@@ -60,8 +60,14 @@
     // console.log($page.url.pathname, $page.url.search, active, activeOnSingleCol);
   }
 
+  let formDiv: HTMLDivElement;
+  const scrollFormTop = () => {
+    formDiv.scrollTo({ top: 0 });
+  }
+
   afterNavigate(() => {
     updateURLParams();
+    scrollFormTop();
   });
 
   let innerWidth: number;
@@ -208,11 +214,11 @@
 
   <!-- Form -->
   {#if form === 'safe'}
-    <div style="-webkit-transform: translateZ(0);" class="box-border w-full bg-gray-100 dark:bg-zinc-900 mb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
+    <div style="-webkit-transform: translateZ(0);" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-900 mb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
       <slot name="form"/>
     </div>
   {:else}
-    <div style="-webkit-transform: translateZ(0);" class="box-border w-full bg-gray-100 dark:bg-zinc-900 pb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
+    <div style="-webkit-transform: translateZ(0);" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-900 pb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
       <slot name="form"/>
     </div>
   {/if}

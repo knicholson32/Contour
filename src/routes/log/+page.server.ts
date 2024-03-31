@@ -33,8 +33,8 @@ export const load = async ({ fetch, params, parent, url }) => {
     night: 0
   }
 
-  for (const leg of await prisma.leg.findMany({ select: { totalTime: true, night: true }, orderBy: { startTime_utc: 'asc' }, take: page * select + select })) {
-    totals.total += leg.totalTime;
+  for (const leg of await prisma.leg.findMany({ select: { totalTime: true, night: true, aircraft: { select: { simulator: true } } }, orderBy: { startTime_utc: 'asc' }, take: page * select + select })) {
+    if (!leg.aircraft.simulator) totals.total += leg.totalTime;
     totals.night += leg.night;
   }
 

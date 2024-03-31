@@ -9,7 +9,7 @@
   import * as Card from "$lib/components/ui/card";
   import { afterNavigate, goto} from '$app/navigation';
   import type * as Types from '@prisma/client';
-  import { DB } from '$lib/types';
+  import { API, DB } from '$lib/types';
   import * as MenuForm from '$lib/components/menuForm';
   import Tag from '$lib/components/decorations/Tag.svelte';
   import * as Popover from "$lib/components/ui/popover";
@@ -22,6 +22,7 @@
   import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
+  import { onMount } from 'svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -164,6 +165,22 @@
     if (result) submitFADelete.click();
   }
 
+  let selectedAircraft: string;
+  let selectedAircraftAPI: API.Types.Aircraft | null = data.selectedAircraftAPI;
+  let mounted = false;
+  const refreshSelectedAC = async (selected: string) => {
+    if (!mounted) return;
+    const res = await (await fetch(`/api/aircraft/reg/${selected}`)).json() as API.Aircraft;
+    console.log(res);
+    if (res.ok == true && res.type === 'aircraft') selectedAircraftAPI = res.aircraft;
+  }
+  onMount(async () => {
+    mounted = true;
+    await refreshSelectedAC(selectedAircraft);
+  });
+
+  $: refreshSelectedAC(selectedAircraft);
+
 </script>
 
 <div class="hidden">
@@ -196,7 +213,7 @@
     <!-- Existing Legs -->
     {#if data.legDeadheadCombo === null}
       {#each data.legs as group,i (group.year)}
-        <Section title="{group.year.toFixed(0)}" collapsable={true}>
+        <Section title="{group.year}" collapsable={true} visible={group.visible}>
           {#each group.entries as leg, i (leg.id)}
             <a data-sveltekit-preload-data="tap" href="/entry/leg/{leg.id}?{urlActiveParam}" class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 {leg.id === data.params.id && !isMobileSize ? 'bg-gray-200 dark:bg-zinc-700' : 'betterhover:hover:bg-gray-200 dark:betterhover:hover:bg-zinc-600 betterhover:hover:text-black dark:betterhover:hover:text-white'}">
               <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 pl-2 flex-initial">
@@ -207,7 +224,7 @@
                     {/if}
                     <span class="text-xxs text-sky-600 font-thin">
                       {#if leg.startTime_utc === null}
-                        Unknown
+                        ??/??
                       {:else}
                         {dateToDateStringFormSimple(leg.startTime_utc)}
                       {/if}
@@ -296,9 +313,11 @@
       </div>
     {:else}
 
-      {#key mapKey}
-        <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong} />
-      {/key}
+      {#if data.leg.originAirportId !== null && data.leg.destinationAirportId !== null}
+        {#key mapKey}
+          <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong} />
+        {/key}
+      {/if}
 
       {#if data.leg.flightAwareData !== null}
         <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4 p-4 relative">
@@ -396,6 +415,19 @@
             </a>
           {/if}
         </div>
+      {:else}
+        {#if data.leg.day !== null}
+          <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4 p-4 relative">
+            <a href="/entry/day/{data.leg.day.id}?tour={data.leg.day.tourId}&active=form" class="col-span-1 xs:col-span-2 xl:col-span-4 flex flex-row gap-3 items-center group cursor-pointer">
+              <div class="bg-sky-500 p-1.5 rounded-full">
+                <CalendarDays class="w-4 h-4"/>
+              </div>
+              <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-sky-500">Go To Duty Day</div>
+              <div class="flex-grow"></div>
+              <ChevronRight class="w-5 h-5" />
+            </a>
+          </div>
+        {/if}
       {/if}
 
       {#if data.entrySettings['entry.entryMXMode'] === true}
@@ -434,12 +466,20 @@
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.leg.ident} placeholder={data.leg.aircraft.registration} />
-        <Entry.AircraftPicker required={true} title="Aircraft" name="aircraft" aircraft={data.aircraft} defaultValue={data.leg.aircraft.registration} />
-        {#if data.leg.dayId === null && data.leg.startTime_utc !== null}
-          <Entry.TimePicker name="date" title="Date" defaultValue={dateToDateStringForm(data.leg.startTime_utc, true, 'utc')} dateOnly={true}/>
+        <Entry.AircraftPicker required={true} title="Aircraft" name="aircraft" aircraft={data.aircraft} bind:value={selectedAircraft} defaultValue={data.leg.aircraft.registration} />
+        {#if data.leg.day === null && useBlock === false}
+          {#if data.leg.startTime_utc !== null}
+            <Entry.TimePicker name="date" title="Date" defaultValue={dateToDateStringForm(data.leg.startTime_utc, true, 'utc')} dateOnly={true}/>
+          {:else}
+            <Entry.TimePicker name="date" title="Date" defaultValue={null} allowNullDefault={true} dateOnly={true}/>
+          {/if}
+        {:else}
+          {#if data.leg.day !== null}
+            <Entry.TimePicker name="date-placeholder-disabled" title="Date" disabled={true} defaultValue={dateToDateStringForm(data.leg.day.startTime_utc, true, 'utc')} dateOnly={true}/>
+          {/if}
         {/if}
-        <Entry.AirportPicker required={true} airports={data.airports} bind:tz={startAirportTZ} title="From" name="from" defaultValue={data.leg.originAirportId} />
-        <Entry.AirportPicker required={true} airports={data.airports} bind:tz={endAirportTZ} title="To" name="to" bind:value={endApt} defaultValue={data.leg.destinationAirportId} />
+        <Entry.AirportPicker required={false} airports={data.airports} bind:tz={startAirportTZ} title="From" name="from" defaultValue={data.leg.originAirportId} />
+        <Entry.AirportPicker required={false} airports={data.airports} bind:tz={endAirportTZ} title="To" name="to" bind:value={endApt} defaultValue={data.leg.destinationAirportId} />
         <Entry.AirportPicker required={false} airports={data.airports} bind:tz={divertAirportTZ} title="Divert" name="divert" bind:value={divertApt} defaultValue={data.leg.diversionAirportId} />
         <Entry.Input title="Route" name="route" disabled={true} uppercase={true} defaultValue={data.leg.route ?? data.leg.flightAwareData?.filedRoute ?? null} />
         <Entry.Ticker title="Passengers" name="pax" defaultValue={data.leg.passengers} />
@@ -457,7 +497,7 @@
       </Section>
 
       <Section title="Times">
-        <Entry.FlightTime required={true} title="Total Time" name="total-time" autoFill={null} bind:value={totalTime} defaultValue={data.leg.totalTime} />
+        <Entry.FlightTime required={true} title={selectedAircraftAPI === null || selectedAircraftAPI.simulator === false ? 'Total Time' : 'Simulated Flight'} name="total-time" autoFill={null} bind:value={totalTime} defaultValue={data.leg.totalTime} />
         <Entry.FlightTime title="PIC" name="pic-time" bind:autoFill={totalTime} defaultValue={data.leg.pic} />
         <Entry.FlightTime title="SIC" name="sic-time" bind:autoFill={totalTime} defaultValue={data.leg.sic} />
         <Entry.FlightTime title="Night" name="night-time" bind:autoFill={totalTime} defaultValue={data.leg.night} />
@@ -487,7 +527,7 @@
         <Entry.Button title="Add Approach" focus={addApproach} />
       </Section>
 
-      <Section title="Training & Other" collapsable={true} visible={true}>
+      <Section title="Training & Other" collapsable={true} visible={false}>
         <Entry.FlightTime title="Solo" name="solo-time" bind:autoFill={totalTime} defaultValue={data.leg.solo} />
         <Entry.FlightTime title="Dual Given" name="dual-given-time" bind:autoFill={totalTime} defaultValue={data.leg.dualGiven} />
         <Entry.FlightTime title="Dual Received" name="dual-received-time" bind:autoFill={totalTime} defaultValue={data.leg.dualReceived} />

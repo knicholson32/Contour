@@ -190,39 +190,48 @@ export const actions = {
     let divertAirport = data.get('divert') as null | string;
     const divertAirportTZ = data.get('divert-tz') as null | string;
 
-    if (startAirport === null || startAirport === '') return API.Form.formFailure('?/default', 'from', 'Required field');
-    if (startAirportTZ === null || startAirportTZ === '') return API.Form.formFailure('?/default', 'from', 'Required field');
-    if (endAirport === null || endAirport === '') return API.Form.formFailure('?/default', 'to', 'Required field');
-    if (endAirportTZ === null || endAirportTZ === '') return API.Form.formFailure('?/default', 'to', 'Required field');
+    const startEmpty = startAirport === null || startAirport === '';
+    const endEmpty = endAirport === null || endAirport === '';
 
-    startAirport = startAirport.trim().toLocaleUpperCase();
-    endAirport = endAirport.trim().toLocaleUpperCase();
+    if ((startEmpty && !endEmpty) || (endEmpty && !startEmpty)) return API.Form.formFailure('?/default', 'from', 'Specify both start and end airport or no airports');
+    // if (startAirportTZ === null || startAirportTZ === '') return API.Form.formFailure('?/default', 'from', 'Required field');
+    // if (endAirportTZ === null || endAirportTZ === '') return API.Form.formFailure('?/default', 'to', 'Required field');
+
+
+    startAirport = startAirport?.trim().toLocaleUpperCase() ?? '';
+    if (startAirport === '') startAirport = null;
+    endAirport = endAirport?.trim().toLocaleUpperCase() ?? '';
+    if (endAirport === '') endAirport = null;
     divertAirport = divertAirport?.trim().toLocaleUpperCase() ?? '';
     if (divertAirport === '') divertAirport = null;
 
 
     // Create airport if it does not exist
-    try {
-      await addIfDoesNotExist(startAirport, aeroAPIKey);
-      const airport = await prisma.airport.findUnique({
-        where: { id: startAirport }
-      });
-      if (airport === null) return API.Form.formFailure('?/default', 'from', 'Unknown airport');
-    } catch (e) {
-      console.log(e);
-      return API.Form.formFailure('?/default', 'from', 'Error verifying airport');
+    if (startAirport !== null) {
+      try {
+        await addIfDoesNotExist(startAirport, aeroAPIKey);
+        const airport = await prisma.airport.findUnique({
+          where: { id: startAirport }
+        });
+        if (airport === null) return API.Form.formFailure('?/default', 'from', 'Unknown airport');
+      } catch (e) {
+        console.log(e);
+        return API.Form.formFailure('?/default', 'from', 'Error verifying airport');
+      }
     }
 
     // Create airport if it does not exist
-    try {
-      await addIfDoesNotExist(endAirport, aeroAPIKey);
-      const airport = await prisma.airport.findUnique({
-        where: { id: endAirport }
-      });
-      if (airport === null) return API.Form.formFailure('?/default', 'to', 'Unknown airport');
-    } catch (e) {
-      console.log(e);
-      return API.Form.formFailure('?/default', 'to', 'Error verifying airport');
+    if (endAirport !== null) {
+      try {
+        await addIfDoesNotExist(endAirport, aeroAPIKey);
+        const airport = await prisma.airport.findUnique({
+          where: { id: endAirport }
+        });
+        if (airport === null) return API.Form.formFailure('?/default', 'to', 'Unknown airport');
+      } catch (e) {
+        console.log(e);
+        return API.Form.formFailure('?/default', 'to', 'Error verifying airport');
+      }
     }
 
     // Create airport if it does not exist
@@ -230,7 +239,7 @@ export const actions = {
       try {
         await addIfDoesNotExist(divertAirport, aeroAPIKey);
         const airport = await prisma.airport.findUnique({
-          where: { id: endAirport }
+          where: { id: divertAirport }
         });
         if (airport === null) return API.Form.formFailure('?/default', 'divert', 'Unknown airport');
       } catch (e) {
@@ -284,8 +293,7 @@ export const actions = {
     let ident = data.get('ident') as null | string;
 
     if (aircraft === null || aircraft === '') return API.Form.formFailure('?/default', 'aircraft', 'Required field');
-    if (ident === null || ident === '') return API.Form.formFailure('?/default', 'ident', 'Required field');
-    ident = ident.trim().toUpperCase();
+    if (ident !== null && ident !== '') ident = ident.trim().toUpperCase();
 
     let aircraftId: string = '';
 

@@ -13,11 +13,12 @@
 
   export let dateOnly = false;
   export let defaultValue: string | null;
+  export let allowNullDefault = false;
   export let value: string | null = defaultValue;
   
   export let autoTZ: string | null = null;
   export let tz: string | null = null;
-  if (defaultValue === null) {
+  if (defaultValue === null && !allowNullDefault) {
     if (tz === 'UTC') defaultValue = dateOnly ? `${now.getUTCFullYear()}-${helpers.pad(now.getUTCMonth() + 1, 2)}-${helpers.pad(now.getUTCDate(), 2)}` : `${now.getUTCFullYear()}-${helpers.pad(now.getUTCMonth() + 1, 2)}-${helpers.pad(now.getUTCDate(), 2)}T${helpers.pad(now.getUTCHours(), 2)}:${helpers.pad(now.getUTCMinutes(), 2)}`;
     else defaultValue = dateOnly ? `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}` : `${now.getFullYear()}-${helpers.pad(now.getMonth() + 1, 2)}-${helpers.pad(now.getDate(), 2)}T${helpers.pad(now.getHours(), 2)}:${helpers.pad(now.getMinutes(), 2)}`;
   }
@@ -94,13 +95,27 @@
   $: local.setDefault(defaultValue);
   $: local.set(value);
 
+  let valueFormatted: string = '';
+  $: {
+    // 2024-03-18
+    if (value !== null) {
+      valueFormatted = value.substring(5, 7) + '/' + value.substring(8, 10) + '/' + value.substring(0, 4)
+    } else {
+      valueFormatted = '';
+    }
+  }
+
 </script>
 
 <Frame {name} unsaved={$unsaved} restore={() => local.clear(true)} {action} form={$form} {required} bind:title bind:disabled focus={focus}>
 
 
   {#if dateOnly}
-    <input {required} tabindex="0" bind:this={input} type="date" name={name} {disabled} on:change={_update} bind:value class="text-right min-w-10 p-0 disabled:cursor-not-allowed disabled:text-gray-500 border-0 bg-transparent focus:outline-none focus-within:ring-0">
+    {#if disabled}
+      <input {required} tabindex="0" bind:this={input} type="text" bind:value={valueFormatted} {disabled} class="text-right min-w-10 p-0 disabled:cursor-not-allowed disabled:text-gray-500 border-0 bg-transparent focus:outline-none focus-within:ring-0">
+    {:else}
+      <input {required} tabindex="0" bind:this={input} type="date" name={name} {disabled} on:change={_update} bind:value class="text-right min-w-10 p-0 disabled:cursor-not-allowed disabled:text-gray-500 border-0 bg-transparent focus:outline-none focus-within:ring-0">
+    {/if}
   {:else}
     <input type="hidden" name={name + '-tz'} bind:value={tz} />
     <input {required} tabindex="0" bind:this={input} type="datetime-local" on:change={_update} name={name + '-date'} {disabled} bind:value
