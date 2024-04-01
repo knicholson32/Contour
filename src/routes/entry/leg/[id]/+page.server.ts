@@ -24,6 +24,7 @@ export const load = async ({ fetch, params, url }) => {
   const entrySettings = await settings.getSet('entry');
 
 
+  // Get the actual leg that the user has clicked on
   const leg = await prisma.leg.findUnique({
     where: { id: params.id },
     include: {
@@ -40,26 +41,83 @@ export const load = async ({ fetch, params, url }) => {
     }
   });
 
+  // Check to see if we are visiting this page to fully resolve the leg with it's tour / day pair
   const resolve = url.searchParams.get('resolve');
   if (leg !== null && resolve !== null) throw redirect(302, `/entry/leg/${params.id}?active=form${leg.dayId === null ? '' : '&day=' + leg.dayId}${leg.day?.tourId === undefined ? '' : '&tour=' + leg.day.tourId}`);
 
+  // If this isn't a new leg, redirect up a level so we can select the most recent leg (or create one if there are none)
   if (leg === null && params.id !== 'new') throw redirect(302, `/entry/leg?${url.searchParams.toString()}`);
 
+  // Get the dayId from the search params, if it exists
   const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
+
+  // Get the tourId form the search params, if it exists
+  const tourId = url.searchParams.get('tour') === null ? null : parseInt(url.searchParams.get('tour') ?? '-1');
+
   let currentDay: Prisma.DutyDayGetPayload<{}> | null = null;
   if (dayId !== null) {
     currentDay = await prisma.dutyDay.findUnique({ where: { id: dayId } });
     if (currentDay === null) throw redirect(302, '/entry/leg' + url.search);
   }
 
-  type Entry = Prisma.LegGetPayload<{ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true, type: { select: { typeCode: true }} } } } }>;
+  if (tourId !== null) {
+    const tour = await prisma.tour.findUnique({ where: { id: tourId } });
+    if (tour === null) throw redirect(302, '/entry/leg' + url.search);
+  }
+
+  const legSelector = {
+    id: true,
+    dayId: true,
+    day: {
+      select: {
+        startTime_utc: true
+      }
+    },
+    originAirportId: true,
+    destinationAirportId: true,
+    diversionAirportId: true,
+    startTime_utc: true,
+    endTime_utc: true,
+    totalTime: true,
+    aircraft: { 
+      select: { 
+        registration: true,
+        id: true,
+        type: {
+          select: { 
+            typeCode: true 
+          }
+        }
+      }
+    },
+    _count: {
+      select: {
+        approaches: true,
+        positions: true
+      }
+    }
+  } satisfies Prisma.LegSelect;
+
+
+  type Entry = Prisma.LegGetPayload<{ select: typeof legSelector }>;
   let _legs: Entry[] | null = null;
   let legs: { text: string, entries: Entry[], visible: boolean }[] = [];
 
-  if (dayId === null) {
-    _legs = await prisma.leg.findMany({ select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true, type: { select: { typeCode: true }} } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
+  let displayType: 'generic' | 'day' | 'tour' = 'generic';
+
+  // Gather all the legs for the menu based on the following priority:
+  //  * Day
+  //  * Tour
+  //  * All
+  if (dayId !== null) {
+    _legs = await prisma.leg.findMany({ where: { dayId: dayId }, select: legSelector, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
+    displayType = 'day';
+  } else if (tourId !== null) {
+    _legs = await prisma.leg.findMany({ where: { day: { tourId: tourId } }, select: legSelector, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
+    displayType = 'tour';
   } else {
-    _legs = await prisma.leg.findMany({ where: { dayId: dayId }, select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true, type: { select: { typeCode: true }} } } }, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
+    _legs = await prisma.leg.findMany({ select: legSelector, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
+    displayType = 'generic';
   }
 
   // See if there are any legs that don't have a date assigned. We will put these in their own group
@@ -75,22 +133,50 @@ export const load = async ({ fetch, params, url }) => {
   
 
   if (_legs !== null && _legs.length > 0 && _legs[0].startTime_utc !== null) {
-    const d = new Date(_legs[0].startTime_utc * 1000);
-    let currentMonth = d.getMonth();
-    let currentYear = d.getFullYear();
+    let d: Date;
+    if (_legs[0].day === null) d = new Date(_legs[0].startTime_utc * 1000);
+    else d = new Date(_legs[0].day.startTime_utc * 1000);
+
+    let smallTarget: number;
+    let largeTarget: number;
+
+    if (displayType === 'tour' || displayType === 'day') {
+      smallTarget = d.getDate();
+      largeTarget = d.getMonth();
+    } else {
+      smallTarget = d.getMonth();
+      largeTarget = d.getFullYear();
+    }
+
     let entries: Entry[] = [];
     for (const leg of _legs) {
       if (leg.startTime_utc === null) continue;
-      const d = new Date(leg.startTime_utc * 1000);
-      const month = d.getMonth();
-      const year = d.getFullYear();
-      if (month !== currentMonth || year !== currentYear) {
+      let d: Date;
+      if (leg.day === null) d = new Date(leg.startTime_utc * 1000);
+      else d = new Date(leg.day.startTime_utc * 1000);
+
+      let small: number;
+      let large: number;
+      if (displayType === 'tour' || displayType === 'day') {
+        small = d.getDate();
+        large = d.getMonth();
+      } else {
+        small = d.getMonth();
+        large = d.getFullYear();
+      }
+      if (small !== smallTarget || large !== largeTarget) {
         // let v = false;
         // if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
-        legs.push({ text: `${months[currentMonth]} ${currentYear}`, entries, visible: true });
+        if (displayType === 'tour' || displayType === 'day'){
+          // Tour or day display, we are doing by day
+          legs.push({ text: `${months[largeTarget]} ${smallTarget}`, entries, visible: true }); 
+        } else {
+          // Generic display, we are doing by month/year
+          legs.push({ text: `${months[smallTarget]} ${largeTarget}`, entries, visible: true }); 
+        }
         entries = [];
-        currentMonth = month;
-        currentYear = year;
+        smallTarget = small;
+        largeTarget = large;
       }
       // Add this leg to the current year group
       entries.push(leg);
@@ -98,7 +184,13 @@ export const load = async ({ fetch, params, url }) => {
     // Add the last year to the group list
     // let v = false;
     // if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
-    legs.push({ text: `${months[currentMonth]} ${currentYear}`, entries, visible: true });
+    if (displayType === 'tour' || displayType === 'day') {
+      // Tour or day display, we are doing by day
+      legs.push({ text: `${months[largeTarget]} ${smallTarget}`, entries, visible: true });
+    } else {
+      // Generic display, we are doing by month/year
+      legs.push({ text: `${months[smallTarget]} ${largeTarget}`, entries, visible: true });
+    }
     entries = [];
   }
 
@@ -153,7 +245,7 @@ export const load = async ({ fetch, params, url }) => {
     const day = await prisma.dutyDay.findUnique({
       where: { id: dayId },
       include: {
-        legs: { select: { id: true, dayId: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true, startTime_utc: true, endTime_utc: true, totalTime: true, aircraft: { select: { registration: true, id: true, type: { select: { typeCode: true } } } } }, orderBy: { startTime_utc: 'asc' } },
+        legs: { select: legSelector, orderBy: { startTime_utc: 'asc' } },
         deadheads: { orderBy: { startTime_utc: 'asc' } }
       },
     });

@@ -18,7 +18,7 @@
   import { dateToDateStringForm, dateToDateStringFormMonthDayYear, dateToDateStringFormSimple, dateToTimeStringZulu, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
-  import { AlertCircle, CalendarDays, ChevronRight, Dot, Gauge, Link, Menu, Plus, Route, RouteOff, Table2, Timer } from 'lucide-svelte';
+  import { AlertCircle, Briefcase, CalendarDays, ChevronRight, Dot, Gauge, Link, Menu, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
   import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
@@ -212,10 +212,13 @@
       <MenuForm.Link href={`/entry/day/${data.currentDay.id}?${urlFormParam}`} type="left" text="Back to Day" />
       <MenuForm.Link href={`/entry/leg/create/fa?${urlFormParam}`} icon={icons.plus} text="Create a new leg" type="right"/>
     {:else}
-      <MenuForm.Title title="Legs" />
+      <MenuForm.Title title={$page.url.searchParams.get('tour') !== null ? 'Tour Legs' : 'Legs'} />
       <Popover.Root bind:open={legsPopoverOpen}>
         <Popover.Trigger class="w-full">
           <MenuForm.Link href="#" icon={icons.plus} text="Create a new leg" type="right"/>
+          {#if $page.url.searchParams.get('tour') !== null}
+            <MenuForm.Link href={`/entry/day?tour=${$page.url.searchParams.get('tour')}`} icon={icons.plus} text="Go back to Tour" type="left"/>
+          {/if}
         </Popover.Trigger>
         <Popover.Content side={isMobileSize ? undefined : 'right'} class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-none w-auto">
           <!-- Active: "bg-gray-100", Not Active: "" -->
@@ -233,11 +236,18 @@
             <MenuElement bind:element={menuElements[leg.id]} href="/entry/leg/{leg.id}?{urlActiveParam}" selected={leg.id === data.params.id && !isMobileSize}>
               <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
                 <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
-                  <span class="">
+                  <span class="inline-flex font-mono items-center">
                     {#if leg.originAirportId === null && leg.destinationAirportId === null}
                       No Route
                     {:else}
-                      {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId}
+                      {#if leg.diversionAirportId !== null}
+                        {leg.originAirportId} → <span class="line-through decoration-secondary decoration-2">{leg.destinationAirportId}</span> → {leg.diversionAirportId}
+                      {:else}
+                        {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId}
+                      {/if}
+                    {/if}
+                    {#if leg._count.positions > 0}
+                      <span class="text-primary ml-2"><Waypoints class="w-3 h-3"/></span>
                     {/if}
                   </span>
                   <span class="flex-grow ml-1">
@@ -258,6 +268,16 @@
                     {leg.aircraft.registration} ({leg.aircraft.type.typeCode})
                   </span>
                   <span class="flex-grow"></span>
+                  {#if leg._count.approaches > 0}
+                    <span class="mr-2">
+                      {leg._count.approaches + ' '}
+                      {#if leg._count.approaches === 1}
+                        Approach,
+                      {:else}
+                        Approaches,
+                      {/if}
+                    </span>
+                  {/if}
                   <span class="">{leg.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
                 </div>
               </div>
@@ -313,24 +333,6 @@
                   {@html icons.chevronRight}
                 </svg>
               </div>
-              <!-- <div class="flex flex-row gap-1 items-center justify-center overflow-hidden flex-initial">
-                <div class="uppercase font-bold text-xs overflow-hidden whitespace-nowrap text-ellipsis">
-                  <span class="font-mono">
-                    <span class="text-xxs text-sky-600 font-thin">{i+1}</span>
-                    {entry.entry.originAirportId} → {entry.entry.diversionAirportId === null ? entry.entry.destinationAirportId : entry.entry.diversionAirportId}
-                    <span class="text-xxs text-sky-600 font-thin ml-1">{entry.entry.aircraft.registration}</span>
-                    <span class="text-xxs text-sky-600 font-thin ml-1 lowercase">{entry.entry.totalTime.toFixed(1)}hr</span>
-                  </span>
-                  {#if $unsavedUIDs.includes(entry.id)}
-                    <Tag>UNSAVED</Tag>
-                  {/if}
-                </div>
-              </div>
-              <div class="absolute right-1">
-                <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
-                  {@html icons.chevronRight}
-                </svg>
-              </div> -->
             </MenuElement>
           {:else}
             <div class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 bg-gray-50 dark:bg-zinc-950/50">

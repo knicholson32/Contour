@@ -15,7 +15,7 @@
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
   import { dateToDateStringForm, dateToDateStringFormMonthDayYear, getInlineDateUTC } from '$lib/helpers';
-  import { CalendarOff, Plus, Timer, TowerControl } from 'lucide-svelte';
+  import { Briefcase, CalendarOff, ListOrdered, Plus, Timer, TowerControl } from 'lucide-svelte';
     import Warning from '$lib/components/Warning.svelte';
     import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
     import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
@@ -71,6 +71,9 @@
     {#if data.currentTour !== null}
       <MenuForm.Link href={`/entry/tour/${data.currentTour.id}?${urlFormParam}`} icon={icons.chevronLeft} text="Edit Tour" type="left"/>
       <MenuForm.Link href={`/entry/day/create?${urlFormParam}`} icon={icons.plus} text="Create a new day" type="right"/>
+      <MenuForm.Link href={`/entry/leg?${urlFormParam}&tour=${data.currentTour.id}`} text="View All Legs in Tour" type="right">
+        <ListOrdered class="w-3 h-3 text-white"/>
+      </MenuForm.Link>
     {/if}
     <MenuForm.SearchBar />
     <!-- Existing Aircraft -->
