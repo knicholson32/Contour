@@ -120,7 +120,7 @@
 
         {#if data.entrySettings["entry.tour.current"] !== -1}
           <div class="m-3 flex items-center">
-            <a href="/entry/tour/{data.entrySettings["entry.tour.current"]}" class="uppercase select-none border border-sky-400 text-sky-400 rounded-md py-2 px-3 whitespace-nowrap">
+            <a href="/entry/day?tour={data.entrySettings["entry.tour.current"]}" class="uppercase select-none border border-sky-400 text-sky-400 rounded-md py-2 px-3 whitespace-nowrap">
               On Tour
             </a>
           </div>
