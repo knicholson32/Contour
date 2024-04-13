@@ -54,6 +54,7 @@
   	markerLayer.addTo(map);
 
     map.fitBounds(aptLayer.getBounds()).zoomOut(1, { animate: false });
+    if (map.getZoom() > 13) map.setZoom(13);
   }
 
   $: updateMapContents(airports);

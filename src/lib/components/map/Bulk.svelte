@@ -90,6 +90,7 @@
 
     if (bound.length > 0) map.fitBounds(L.polyline(bound).getBounds(), { animate: false }).zoomOut(1, { animate: false });
     else map.fitBounds([[20, -95], [60, -95]], {animate: false });
+    if (map.getZoom() > 13) map.setZoom(13);
   }
 
   $: updateMapContents(pos);

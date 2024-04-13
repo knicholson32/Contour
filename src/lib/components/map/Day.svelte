@@ -79,6 +79,7 @@
   	markerLayer.addTo(map);
 
     map.fitBounds(L.polyline(bound).getBounds(), { animate: false }).zoomOut(1, { animate: false });
+    if (map.getZoom() > 13) map.setZoom(13);
   }
 
   $: updateMapContents(legs, deadheads, airports);
