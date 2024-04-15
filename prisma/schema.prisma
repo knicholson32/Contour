@@ -455,9 +455,10 @@ model ApproachOptions {
   id        Int    @id @default(autoincrement())
   airportId String
   type      String
-  runway    String
-  tag       String
+  runway    String?
+  tag       String?
   composite String
+  custom    Boolean @default(false)
 
   @@map("approachesOptions")
 }

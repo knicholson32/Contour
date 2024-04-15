@@ -409,6 +409,8 @@ export const actions = {
         nightTakeOffs: nightTakeoffs === null ? undefined : parseInt(nightTakeoffs),
         nightLandings: nightLandings === null ? undefined : parseInt(nightLandings),
 
+        holds: holds === null ? undefined : parseInt(holds),
+
         flightReview: flightReview,
         checkride: checkride,
         ipc: ipc,

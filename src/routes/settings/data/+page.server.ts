@@ -120,8 +120,8 @@ export const actions = {
 
 
 
-			// Clear the current approach table
-			await prisma.approachOptions.deleteMany({});
+			// Clear the current approach table (except the custom approach entries)
+			await prisma.approachOptions.deleteMany({ where: { custom: false } });
 
 			const inserts: Types.Prisma.PrismaPromise<any>[] = [];
 			// Loop through each position
@@ -207,6 +207,7 @@ export const actions = {
 				const tag = tagRaw?.groups?.tag ?? '';
 
 
+				// TODO: Break this into a shared function. Also used in InstrumentApproach.svelte
 				const composite = `${type}${tag === '' ? '' : ' ' + tag}${runway === '' ? '' : ' Rwy ' + runway}`;
 
 				// console.log(apt, composite, app);
