@@ -9,6 +9,10 @@
   export let link = false;
   export let name: string;
   export let form: null | API.Form.Type;
+
+  let clazz: string = '';
+	export { clazz as class };
+
   export let focus: () => void = () => {};
   export let restore: (() => void) | null = null;
 
@@ -23,7 +27,7 @@
 
 </script>
 
-<li class="w-full relative inline-flex items-center px-3 bg-white dark:bg-zinc-900 transition-colors py-1 gap-2 {disabled ? 'cursor-not-allowed bg-gray-50 dark:bg-zinc-950/50 text-gray-500' : ''} {link ? 'betterhover:hover:bg-gray-50 dark:betterhover:hover:bg-zinc-700' : ''}">
+<li class="w-full relative inline-flex items-center px-3 bg-white dark:bg-zinc-900 transition-colors py-1 gap-2 {disabled ? 'cursor-not-allowed bg-gray-50 dark:bg-zinc-950/50 text-gray-500' : ''} {link ? 'betterhover:hover:bg-gray-50 dark:betterhover:hover:bg-zinc-700' : ''} {clazz}">
   {#if !link}
     <button {disabled} tabindex="-1" type="button" title="" on:click={focus} 
       class="touch-manipulation w-full {disabled ? 'cursor-not-allowed' : 'cursor-default'} inline-flex items-center gap-2 ring-0 focus-within:ring-0">

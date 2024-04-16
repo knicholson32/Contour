@@ -32,6 +32,9 @@
   export let title: string;
 	export let disabled: boolean = false;
 
+  let clazz: string = '';
+	export { clazz as class };
+
   let mounted = false;
 
   export let update = () => {};
@@ -149,7 +152,7 @@
 
 </script>
 
-<Frame name={name ?? ''} {action} unsaved={$unsaved} restore={() => local.clear(true)} form={$form} {required} bind:title={title} focus={focus} bind:disabled error={warningMessage}>
+<Frame name={name ?? ''} class={clazz} {action} unsaved={$unsaved} restore={() => local.clear(true)} form={$form} {required} bind:title={title} focus={focus} bind:disabled error={warningMessage}>
   <input type="hidden" name={name} bind:value />
   <input type="hidden" name={name+'-tz'} bind:value={tz} />
   <form on:submit|preventDefault={() => {}} class="w-full">
