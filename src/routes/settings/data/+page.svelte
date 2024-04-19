@@ -32,7 +32,7 @@
 			? 'Never'
 			: intlFormatDistance(new Date(data.settingValues['data.approaches.lastSync'] * 1000), new Date());
 	const lastSyncTime =
-		data.settingValues['data.approaches.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.approaches.lastSync'] * 1000, data.generalSettings['general.timezone']);
+		data.settingValues['data.approaches.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.approaches.lastSync'] * 1000, data.settings['general.timezone']);
 
 </script>
 

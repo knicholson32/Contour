@@ -8,7 +8,8 @@
   import { icons } from "$lib/components";
   import * as Popover from "$lib/components/ui/popover";
   import { ModeWatcher } from "mode-watcher";
-  import { Briefcase, ChevronRight, Link, Plane, Send, Tag } from "lucide-svelte";
+  import { Briefcase, ChevronRight, GitCommitVertical, Link, Plane, Send, Tag } from "lucide-svelte";
+    import WhatsNew from "$lib/components/routeSpecific/WhatsNew.svelte";
 
   export let data: import('./$types').PageData;
 
@@ -118,9 +119,9 @@
           </div>
         {/if}
 
-        {#if data.entrySettings["entry.tour.current"] !== -1}
+        {#if data.settings["entry.tour.current"] !== -1}
           <div class="m-3 flex items-center">
-            <a href="/entry/day?tour={data.entrySettings["entry.tour.current"]}" class="uppercase select-none border border-sky-400 text-sky-400 rounded-md py-2 px-3 whitespace-nowrap">
+            <a href="/entry/day?tour={data.settings["entry.tour.current"]}" class="uppercase select-none border border-sky-400 text-sky-400 rounded-md py-2 px-3 whitespace-nowrap">
               On Tour
             </a>
           </div>
@@ -190,7 +191,13 @@
             <button type="button" on:click={toggleAccountDropdown} class="touch-manipulation relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
               <span class="absolute -inset-1.5"></span>
               <span class="sr-only">Open user menu</span>
-              <img class="h-8 w-8 rounded-full" src="https://www.gravatar.com/avatar/{data.generalSettings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
+              <img class="h-8 w-8 rounded-full" src="https://www.gravatar.com/avatar/{data.settings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
+              {#if data.contourUpdates}
+                <span class="absolute -top-0.5 -right-0.5 flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                </span>
+              {/if}
             </button>
           </div>
 
@@ -216,6 +223,20 @@
                       <a href="{m.href}" on:click={closeAccountDropdown} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
                     {/if}
                   {/each}
+                  {#if data.contourUpdates}
+                    <div class="w-full border-t"></div>
+                    <Popover.Root>
+                      <Popover.Trigger class="w-full text-left inline-flex items-center relative hover:bg-gray-50 dark:hover:bg-zinc-800 px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white">
+                        <div class="absolute -left-0">
+                          <GitCommitVertical class="w-4 h-4 text-sky-500" />
+                        </div>
+                        See What's New
+                      </Popover.Trigger>
+                      <Popover.Content>
+                        <WhatsNew />
+                      </Popover.Content>
+                    </Popover.Root>
+                  {/if}
                 </div>
               </div>
             </div>
@@ -267,11 +288,11 @@
       <div class="border-t bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 pb-3 pt-4">
         <div class="flex items-center px-4">
           <div class="flex-shrink-0">
-            <img class="h-10 w-10 rounded-full" src="https://www.gravatar.com/avatar/{data.generalSettings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
+            <img class="h-10 w-10 rounded-full" src="https://www.gravatar.com/avatar/{data.settings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
           </div>
           <div class="ml-3">
-            <div class="text-base font-medium text-gray-800 dark:text-gray-200">{data.generalSettings["general.name"]}</div>
-            <div class="text-sm font-medium text-gray-500">{data.generalSettings["general.email"]}</div>
+            <div class="text-base font-medium text-gray-800 dark:text-gray-200">{data.settings["general.name"]}</div>
+            <div class="text-sm font-medium text-gray-500">{data.settings["general.email"]}</div>
           </div>
           <!-- <button type="button" class="relative ml-auto flex-shrink-0 rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
             <span class="absolute -inset-1.5"></span>
@@ -289,6 +310,20 @@
               <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200">{m.title}</a>
             {/if}
           {/each}
+          {#if data.contourUpdates}
+            <div class="w-full border-t"></div>
+            <Popover.Root>
+              <Popover.Trigger class="inline-flex w-full items-center px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200">
+                <div class="absolute -left-0">
+                  <GitCommitVertical class="w-4 h-4 text-sky-500" />
+                </div>
+                See What's New
+              </Popover.Trigger>
+              <Popover.Content>
+                <WhatsNew />
+              </Popover.Content>
+            </Popover.Root>
+          {/if}
         </div>
       </div>
     </div>

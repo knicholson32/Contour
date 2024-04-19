@@ -205,7 +205,7 @@
       {/if}
 
       <Section title="Details">
-        <Entry.Select required={true} title="Company" options={['NetJets']} placeholder="Unset" name="company" defaultValue={'NetJets'} />
+        <Entry.Select required={true} title="Company" options={['NetJets', 'Cape Air']} placeholder="Unset" name="company" defaultValue={data.currentTour?.companyId ?? 'NetJets'} />
         <Entry.Switch required={true} title="Line Check" name="line-check" defaultValue={data.currentTour?.lineCheck ?? false} />
       </Section>
       <Section title="Notes">

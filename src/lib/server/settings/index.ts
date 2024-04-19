@@ -18,6 +18,7 @@ export const TypeNames = {
 	'tour.defaultStartApt': 'KPDK',
 	// System --------------------------------
 	'system.debug': 0,
+	'system.lastSeenCommit': '',
 	// Data ----------------------------------
 	'data.approaches.lastSync': -1,
 	'data.approaches.source': '',
@@ -43,6 +44,7 @@ export type ObjectType<T extends TypeName> =
 	T extends 'entry.defaultStartApt' ? string : 	// String
 	T extends 'entry.entryMXMode' ? boolean : // Boolean
 	T extends 'system.debug' ? number : 					// Integer
+	T extends 'system.lastSeenCommit' ? string :  // String
 	T extends 'data.approaches.lastSync' ? number :	// Integer
 	T extends 'data.approaches.source' ? string :	// String
 	T extends 'general.encKey' ? string : 				// String
@@ -102,6 +104,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			case 'entry.flight_id.last':
 			case 'tour.defaultStartApt':
 			case 'data.approaches.source':
+			case 'system.lastSeenCommit':
 			case 'general.encKey':
 			case 'general.email':
 			case 'general.name':

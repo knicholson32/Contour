@@ -228,7 +228,7 @@
           class="w-full xs:w-auto sm:max-w-md text-sm border-0 rounded-md text-gray-900 dark:text-gray-100 dark:bg-transparent shadow-sm ring-1 placeholder:text-gray-400 disabled:cursor-not-allowed select:disabled:text-red-500 disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:text-gray-500 dark:disabled:text-gray-600 disabled:ring-gray-200 ring-gray-300 dark:ring-zinc-500 focus:border-gray-900 focus-within:ring-2 focus-within:ring-sky-600 focus-within:border-0">
           <option disabled value={null}>Unset</option>
           {#each approachOptions as option}
-            <option selected={false} value={option.id}>{option.composite} {option.id}</option>
+            <option selected={false} value={option.id}>{option.composite}</option>
           {/each}
           <option value={-1}>Custom</option>
         </select>
