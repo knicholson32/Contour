@@ -33,15 +33,6 @@
     checkRegistrationExists();
   }
 
-  // const updateDefaults = async (reg: string) => {
-  //   const res = await (await fetch(`http://localhost:5173/api/aircraft/faa/${reg}`)).json() as API.Response;
-  //     if (res.ok === true) {
-  //       const regInfo = res as API.FAAReg;
-  //       lookupYear = regInfo.aircraft.manufactureYear.toFixed(0);
-  //       lookupSerial = regInfo.aircraft.serial;
-  //     }
-  // }
-
 
   let urlActiveParam: string;
   let isMobileSize: boolean;
@@ -61,7 +52,7 @@
 
     if (reg !== null) {
       if (selectedReg !== undefined && selectedReg !== null) {
-        const res = await (await fetch(`http://localhost:5173/api/aircraft/faa/${selectedReg}`)).json() as API.Response;
+        const res = await (await fetch(`/api/aircraft/faa/${selectedReg}`)).json() as API.Response;
         if (res.ok === true) {
           const regInfo = res as API.FAAReg;
           data.lookupYear = regInfo.aircraft.manufactureYear.toFixed(0);

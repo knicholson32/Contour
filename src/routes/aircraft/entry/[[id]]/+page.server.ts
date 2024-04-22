@@ -70,7 +70,7 @@ export const load = async ({ fetch, params, url }) => {
 
 
   if (currentAircraft !== null) {
-    const res = await (await fetch(`http://localhost:5173/api/aircraft/faa/${currentAircraft.registration}`)).json() as API.Response;
+    const res = await (await fetch(`/api/aircraft/faa/${currentAircraft.registration}`)).json() as API.Response;
     if (res.ok === true) {
       const regInfo = res as API.FAAReg;
       lookupYear = regInfo.aircraft.manufactureYear.toFixed(0);
