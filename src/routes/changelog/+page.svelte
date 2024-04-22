@@ -4,19 +4,20 @@
   import { invalidateAll } from '$app/navigation';
   import { browser } from '$app/environment';
   import { GitCommitIcon } from 'lucide-svelte';
+  import { page } from '$app/stores';
+  
 
   export let data: import('./$types').PageData;
   if (browser && data.contourUpdates === true) invalidateAll();
 
   let newRemaining = true;
   const getIsNewCommit = (commit: string) => {
-    if (commit === data.lastCommit) {
+    if (commit === ($page.url.searchParams.get('lastCommit') ?? data.lastCommit)) {
       newRemaining = false;
       return false;
     }
     return newRemaining;
   }
-
 
 </script>
 
