@@ -56,8 +56,6 @@
 	<Settings.Switch name="entry.entryMXMode" {form} bind:value={data.settingValues['entry.entryMXMode']} title="Enable data entry maintenance mode" update={optionUpdate} hoverTitle={'Whether or not to allow FlightAware data to be deleted from leg and other maintenance features.'} />
 </Settings.List>
 
-{JSON.stringify(form)}
-
 
 <Settings.List class="" {form} action="?/updateApproaches" bind:unsavedChanges={approachUnsavedChanges} bind:update={approachUpdate} >
 	<span slot="title">Approach Database</span>
