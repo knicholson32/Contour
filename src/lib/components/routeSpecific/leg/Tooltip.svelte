@@ -17,7 +17,7 @@
         {#if position.updateType === DB.UpdateType.PROJECTED || position.groundspeed === 0}
           Unknown
         {:else}
-          {(position.altitude * 100).toLocaleString()} ft
+          {(position.altitude * 100).toLocaleString({}, {maximumFractionDigits: 0})} ft
         {/if}
         <div class="flex-grow"></div>
         <span class="uppercase text-xs opacity-70 ml-2">{position.altitudeChange}</span>

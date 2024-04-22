@@ -16,7 +16,7 @@
     </a>
     <div class="inline-flex items-center gap-1 text-zinc-500 text-xs">
       <a href="{commit.author.html_url}" target="_blank" class="inline-flex items-center gap-2 group">
-        <img class="rounded-full" src="{commit.author.avatar_url}" width="20" alt="Profile picture for {commit.author.login}" />
+        <img class="rounded-full w-[20px] h-[20px]" src="{commit.author.avatar_url}" width="20" alt="Profile picture for {commit.author.login}" />
         <span class="group-hover:underline">
           {commit.author.login}
         </span>

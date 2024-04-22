@@ -30,6 +30,7 @@
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte": "^2.30.0",
+		"fast-xml-parser": "^4.3.6",
 		"leaflet": "^1.9.4",
 		"lucide-svelte": "^0.340.0",
 		"mime-types": "^2.1.35",

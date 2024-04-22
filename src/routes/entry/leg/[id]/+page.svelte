@@ -195,6 +195,8 @@
 
   $: refreshSelectedAC(selectedAircraft);
 
+  // console.log(data.leg.positions);
+
 
 </script>
 
@@ -374,7 +376,14 @@
 
       {#if data.leg.originAirportId !== null && data.leg.destinationAirportId !== null}
         {#key mapKey}
-          <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong} />
+          <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong}>
+            {#if data.leg.positions.length === 0}
+              <a href="/entry/leg/{data.leg.id}/upload-positions" class="absolute bottom-2 right-2 z-50 inline-flex items-center gap-1 text-xs font-mono uppercase border border-gray-400 select-none bg-gray-100 hover:bg-white py-1 px-2 rounded-full">
+                <span>Upload KLM</span>
+                <Waypoints class="w-4 h-4" />
+              </a>
+            {/if}
+          </Map.Leg>
         {/key}
       {/if}
 

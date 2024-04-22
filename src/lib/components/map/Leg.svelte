@@ -150,4 +150,7 @@
   }
 </style>
 
-<div bind:this={element} style="height:400px;width:100%;position:relative;" {...$$restProps} />
+<div class="relative">
+  <div bind:this={element} style="height:400px;width:100%;position:relative;" {...$$restProps} />
+  <slot />
+</div>

@@ -36,3 +36,56 @@ export enum DayNewEntryState {
 	LINK_ENTERED = 'LINK_ENTERED',
 	LINK_CONFIRMED = 'LINK_CONFIRMED',
 }
+
+
+// ------------------------------------------------------------------------------------------------
+// ForeFlight KML
+// ------------------------------------------------------------------------------------------------
+
+export type GXTrack = {
+	name: string,
+	styleURL: string,
+	'gx:Track': {
+		altitudeMode: string[],
+		extrude: number,
+		'gx:interpolate': number,
+		'gx:coord': string[],
+		when: string[]
+	}
+}
+
+export type Point = {
+	name: string,
+	Point: {
+		coordinates: string
+	}
+}
+
+export type KML = {
+	'?xml': string,
+	kml: {
+		Document: {
+			ExtendedData: {
+				Data: {
+					displayName?: string,
+					value: string,
+					'@_name': string
+				}[],
+				SchemaData: {
+					'gx:SimpleArrayData': {
+						'gx:value': number[],
+						'@_name': string
+					}[]
+				}
+			},
+			Placemark: (GXTrack | Point)[],
+			style: {
+				LineStyle?: { color: string, width: number, '@_id': string },
+				PolyStyle?: { color: string, '@_id': string },
+				IconStyle?: { Icon: { href: string }, '@_id': string},
+			}[],
+			open: number,
+			visibility: number
+		}
+	}
+}
