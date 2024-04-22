@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { API } from '$lib/types';
+  import type { API } from '$lib/types';
 	import Frame from './Frame.svelte';
 
 	export let value: string;

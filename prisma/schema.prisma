@@ -243,7 +243,7 @@ model Leg {
   fixes      Fix[]
   approaches Approach[]
 
-  route String?
+  route         String?
   forceUseBlock Boolean @default(false)
 
   flightAwareData FlightAwareData?
@@ -253,8 +253,8 @@ model Leg {
   originAirportId      String? // @db.VarChar(5)
   destinationAirportId String? // @db.VarChar(5)
   diversionAirportId   String? // @db.VarChar(5)
-  originAirport        Airport?  @relation("originAirport", fields: [originAirportId], references: [id], onDelete: Restrict)
-  destinationAirport   Airport?  @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
+  originAirport        Airport? @relation("originAirport", fields: [originAirportId], references: [id], onDelete: Restrict)
+  destinationAirport   Airport? @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
   diversionAirport     Airport? @relation("diversionAirport", fields: [diversionAirportId], references: [id], onDelete: Restrict)
 
   startTime_utc Int?
@@ -452,7 +452,7 @@ model Approach {
 }
 
 model ApproachOptions {
-  id        Int    @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   airportId String
   type      String
   runway    String?
@@ -461,6 +461,14 @@ model ApproachOptions {
   custom    Boolean @default(false)
 
   @@map("approachesOptions")
+}
+
+model AircraftRegistrationLookup {
+  reg             String @id
+  manufactureYear Int
+  serial          String
+
+  @@map("aircraftRegistrationLookup")
 }
 
 model Position {

@@ -13,7 +13,7 @@ export const load = async ({ params }) => {
 	if (indexRaw.status !== 200) console.log('ERROR: Unable to fetch aeronav data: Status', indexRaw.status, indexRaw.statusText);
 	const index = await indexRaw.text()
 
-	const settingValues = await settings.getMany('data.approaches.lastSync', 'data.approaches.source', 'entry.entryMXMode');
+	const settingValues = await settings.getMany('data.approaches.lastSync', 'data.aircraftReg.lastSync', 'data.approaches.source', 'entry.entryMXMode');
 
 	const regex = /\/CIFP_[0-9]+.zip/gm;
 
@@ -54,11 +54,20 @@ export const load = async ({ params }) => {
 		if (g !== undefined) effectiveDate = `${g.day}-${months[parseInt(g.month) - 1]}-20${g.year}`;
 	}
 
+	let years: string | null = null;
+
+	const y0 = await prisma.aircraftRegistrationLookup.findFirst({ where: { manufactureYear: { not: 0 } }, orderBy: { manufactureYear: 'asc' }, select: { manufactureYear: true }});
+	const y1 = await prisma.aircraftRegistrationLookup.findFirst({ where: { manufactureYear: { not: 0 } }, orderBy: { manufactureYear: 'desc' }, select: { manufactureYear: true }});
+
+	if (y0 !== null && y1 !== null) years = `${y0.manufactureYear} - ${y1.manufactureYear}`;
+
 
 	return {
 		settingValues,
 		effectiveDate,
 		numApproaches: await prisma.approachOptions.count(),
+		numRegs: await prisma.aircraftRegistrationLookup.count(),
+		years,
 		options
 	};
 };
@@ -72,7 +81,7 @@ export const actions = {
 
 	},
 	updateApproaches: async ({ request }) => {
-		const data = await request.formData();
+		const data = await request.formData(); 
 
 		const option = data.get('approach.option') as string | null;
 
@@ -81,21 +90,7 @@ export const actions = {
 		if (option === null) return API.Form.formFailure('?/updateApproaches', 'approach.option', 'Required field');
 
 		const source = `https://aeronav.faa.gov/Upload_313-d/cifp/${option}`;
-		// const zipRaw = await fetch(source);
-		// if (zipRaw.status !== 200) {
-		// 	console.log('ERROR: Source not found', source, zipRaw);
-		// 	return API.Form.formFailure('?/updateApproaches', 'approach.option', 'Source not found: ' + zipRaw.statusText);
-		// }
 
-		// console.log(zipRaw.type);
-		// zipRaw.headers.forEach((v, k) => {
-		// 	console.log(k, '=', v);
-		// });
-
-
-	
-		// const timezone = (data.get('general.timezone') ?? undefined) as undefined | string;
-		// if (timezone !== undefined) await settings.set('general.timezone', timezone);
 
 		try {
 			const { entries } = await unzip(source);
@@ -212,13 +207,15 @@ export const actions = {
 
 				// console.log(apt, composite, app);
 
-				inserts.push(prisma.approachOptions.create({ data: {
-					airportId: apt,
-					type,
-					tag,
-					runway,
-					composite
-				}}));
+				inserts.push(prisma.approachOptions.create({
+					data: {
+						airportId: apt,
+						type,
+						tag,
+						runway,
+						composite
+					}
+				}));
 			}
 
 			try {
@@ -235,13 +232,116 @@ export const actions = {
 				return API.Form.formFailure('?/updateApproaches', 'approach.option', 'Unable to save: ' + err.message);
 			}
 
-			
+
 
 
 		} catch (e) {
 			const err = e as Error;
 			console.log('ERROR: Source not found', source, e);
 			return API.Form.formFailure('?/updateApproaches', 'approach.option', 'Source error: ' + err.message);
+		}
+
+		console.log('Approaches');
+
+	},
+
+	updateRegLookup: async ({ request }) => {
+		const data = await request.formData();
+
+		const update = data.get('update.switch') === 'true';
+
+		if (update === false) return;
+
+		// https://www.faa.gov/licenses_certificates/aircraft_certification/aircraft_registry/releasable_aircraft_download
+		const source = `https://registry.faa.gov/database/ReleasableAircraft.zip`;
+
+		try {
+			const { entries } = await unzip(source);
+
+			// print all entries and their sizes
+			// console.log(entries);
+			let found = {
+				master: false,
+				acftref: false
+			}
+			for (const entry of Object.entries(entries)) {
+				const [key, _] = entry;
+				if (key === 'MASTER.txt') {
+					found.master = true;
+				}
+				if (key === 'ACFTREF.txt') {
+					found.acftref = true;
+				}
+			}
+
+			if (found.master === false || found.acftref === false) {
+				if (found.master === true) throw Error('Could not find \'ACFTREF.txt\' file in zip');
+				if (found.acftref === true) throw Error('Could not find \'MASTER.txt\' file in zip');
+				throw Error('Could not find \'MASTER.txt\' or \'ACFTREF.txt\' file in zip');
+			}
+
+			console.log(found);
+
+			// read an entry as text
+			// const aircraftRef = (await entries['ACFTREF.txt'].text()).split('\n');
+			const master = (await entries['MASTER.txt'].text()).split('\n');
+
+
+			// Clear the current approach table (except the custom approach entries)
+			await prisma.aircraftRegistrationLookup.deleteMany({ });
+
+			const inserts: Types.Prisma.PrismaPromise<any>[] = [];
+			// Loop through each position
+			for (const line of master) {
+				const fields = line.split(',');
+				if (fields.length < 5) continue;
+				const reg = fields[0].trim();
+				if (reg === 'N-NUMBER') continue;
+
+				const serial = fields[1].trim();
+				// const manufactureCode = fields[2].trim();
+				const year = parseInt(fields[4].trim());
+				if (isNaN(year)) continue;
+
+				inserts.push(prisma.aircraftRegistrationLookup.create({
+					data: {
+						reg,
+						serial,
+						manufactureYear: year,
+					}
+				}));
+			}
+
+			try {
+
+				// if (inserts.length > 1000) {
+				// 	while (inserts.length > 0) {
+				// 		const insertsPage = inserts.splice(0, 1000)
+				// 		// Execute the prisma transaction that  will add all the points
+				// 		console.log('1000 set');
+				// 		await prisma.$transaction(insertsPage)
+				// 	}
+				// } else {
+					await prisma.$transaction(inserts)
+				// }
+
+
+				// await settings.set('data.approaches.source', option);
+				await settings.set('data.aircraftReg.lastSync', Math.floor(Date.now() / 1000));
+
+			} catch (e) {
+				const err = e as Error;
+				console.log('Unable to add aircraft registrations!', e);
+				return API.Form.formFailure('?/updateRegLookup', 'update.switch', 'Unable to save: ' + err.message);
+			}
+
+
+
+
+		} catch (e) {
+			const err = e as Error;
+			console.log('ERROR: Source not found', source, e);
+			return API.Form.formFailure('?/updateRegLookup', 'update.switch', 'Source error: ' + err.message);
 		}
 
 		console.log('Approaches');

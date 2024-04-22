@@ -18,21 +18,33 @@
 	// let timezone = data.settingValues['general.timezone'];
 	let source: string = 'unset';
 
+	// Registration
+	let regUpdate: () => {};
+	let regUnsavedChanges = false;
+
 	// Utilities
 	beforeNavigate(({ cancel }) => {
-		if (approachUnsavedChanges || optionsUnsavedChanges) {
+		if (approachUnsavedChanges || optionsUnsavedChanges || regUnsavedChanges) {
 			if (!confirm('Are you sure you want to leave this page? You have unsaved changes that will be lost.')) {
 				cancel();
 			}
 		}
 	});
 
-	const lastSync =
+	$: lastSync =
 		data.settingValues['data.approaches.lastSync'] === -1
 			? 'Never'
 			: intlFormatDistance(new Date(data.settingValues['data.approaches.lastSync'] * 1000), new Date());
-	const lastSyncTime =
+	$: lastSyncTime =
 		data.settingValues['data.approaches.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.approaches.lastSync'] * 1000, data.settings['general.timezone']);
+
+
+	$: lastSyncReg =
+		data.settingValues['data.aircraftReg.lastSync'] === -1
+			? 'Never'
+			: intlFormatDistance(new Date(data.settingValues['data.aircraftReg.lastSync'] * 1000), new Date());
+	$: lastSyncTimeReg =
+		data.settingValues['data.aircraftReg.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.aircraftReg.lastSync'] * 1000, data.settings['general.timezone']);
 
 </script>
 
@@ -43,6 +55,8 @@
 
 	<Settings.Switch name="entry.entryMXMode" {form} bind:value={data.settingValues['entry.entryMXMode']} title="Enable data entry maintenance mode" update={optionUpdate} hoverTitle={'Whether or not to allow FlightAware data to be deleted from leg and other maintenance features.'} />
 </Settings.List>
+
+{JSON.stringify(form)}
 
 
 <Settings.List class="" {form} action="?/updateApproaches" bind:unsavedChanges={approachUnsavedChanges} bind:update={approachUpdate} >
@@ -57,7 +71,7 @@
 	/>
 
 	<DataContainer>
-		<DataEntry title={'Approaches'} data={data.numApproaches}/>
+		<DataEntry title={'Approaches'} data={data.numApproaches.toFixed(0)}/>
 		<DataEntry title={'Effective'} data={data.effectiveDate}/>
 		<DataEntry title={'Data Source'}>
 			{#if data.settingValues['data.approaches.source'] === ''}
@@ -69,6 +83,25 @@
 		<DataEntry title={'Last Sync'}>
 				<span title={lastSyncTime}>{lastSync}</span>
 			</DataEntry>
+	</DataContainer>
+
+</Settings.List>
+
+<Settings.List class="" {form} action="?/updateRegLookup" bind:unsavedChanges={regUnsavedChanges} bind:update={regUpdate} >
+	<span slot="title">Aircraft Registration Database</span>
+	<span slot="description">Update the Aircraft Registration Database source.</span>
+
+	<Settings.Switch {form} name="update.switch" title="Update" value={false} update={regUpdate}/>
+
+	<DataContainer>
+		<DataEntry title={'Aircraft'} data={data.numRegs.toFixed(0)}/>
+		<DataEntry title={'Years'} data={data.years ?? 'Unknown'}/>
+		<DataEntry title={'Data Source'}>
+			<a target="_blank" href="https://www.faa.gov/licenses_certificates/aircraft_certification/aircraft_registry/releasable_aircraft_download">FAA Registry</a>
+		</DataEntry>
+		<DataEntry title={'Last Sync'}>
+			<span title={lastSyncTimeReg}>{lastSyncReg}</span>
+		</DataEntry>
 	</DataContainer>
 
 </Settings.List>

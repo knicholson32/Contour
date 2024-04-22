@@ -21,6 +21,7 @@ export const TypeNames = {
 	'system.lastSeenCommit': '',
 	// Data ----------------------------------
 	'data.approaches.lastSync': -1,
+	'data.aircraftReg.lastSync': -1,
 	'data.approaches.source': '',
 	// General -------------------------------
 	'general.encKey': 'UNSET',
@@ -46,6 +47,7 @@ export type ObjectType<T extends TypeName> =
 	T extends 'system.debug' ? number : 					// Integer
 	T extends 'system.lastSeenCommit' ? string :  // String
 	T extends 'data.approaches.lastSync' ? number :	// Integer
+	T extends 'data.aircraftReg.lastSync' ? number : // Integer
 	T extends 'data.approaches.source' ? string :	// String
 	T extends 'general.encKey' ? string : 				// String
 	T extends 'general.aeroAPI' ? string : 				// String
@@ -91,6 +93,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			case 'entry.day.current':
 			case 'system.debug':
 			case 'data.approaches.lastSync':
+			case 'data.aircraftReg.lastSync':
 				return parseInt(settingVal.value) as ObjectType<T>;
 
 			// Float Conversion --------------------------------------------------------------------------

@@ -12,6 +12,7 @@
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
     import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
+    import type { API } from '$lib/types';
 
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
@@ -28,8 +29,18 @@
   $:{
     $page.url.pathname;
     data.aircraft?.id;
+    // if (data.aircraft?.id !== undefined) updateDefaults(data.aircraft.registration);
     checkRegistrationExists();
   }
+
+  // const updateDefaults = async (reg: string) => {
+  //   const res = await (await fetch(`http://localhost:5173/api/aircraft/faa/${reg}`)).json() as API.Response;
+  //     if (res.ok === true) {
+  //       const regInfo = res as API.FAAReg;
+  //       lookupYear = regInfo.aircraft.manufactureYear.toFixed(0);
+  //       lookupSerial = regInfo.aircraft.serial;
+  //     }
+  // }
 
 
   let urlActiveParam: string;
@@ -37,11 +48,29 @@
 
   let selectedReg: string | null;
   let registrationExists = false;
-  const checkRegistrationExists = () => {
+
+  // const lookupYear = data.lookupYear;
+  // const lookupSerial = data.lookupSerial;
+
+  const checkRegistrationExists = async () => {
     if (selectedReg !== null && selectedReg !== undefined && selectedReg.trim().toUpperCase() !== data.aircraft?.registration && data.tails.includes(selectedReg.trim().toUpperCase())) {
       registrationExists = true;
     } else {
       registrationExists = false;
+    }
+
+    if (reg !== null) {
+      if (selectedReg !== undefined && selectedReg !== null) {
+        const res = await (await fetch(`http://localhost:5173/api/aircraft/faa/${selectedReg}`)).json() as API.Response;
+        if (res.ok === true) {
+          const regInfo = res as API.FAAReg;
+          data.lookupYear = regInfo.aircraft.manufactureYear.toFixed(0);
+          data.lookupSerial = regInfo.aircraft.serial;
+        }
+      } else {
+        data.lookupYear = null;
+        data.lookupSerial = null;
+      }
     }
   }
 
@@ -52,8 +81,9 @@
   let submitting = false;
   let deleting = false;
 
-  const ref = $page.url.searchParams.get('ref');
-  const reg = $page.url.searchParams.get('reg');
+  $:ref = $page.url.searchParams.get('ref');
+  $:reg = $page.url.searchParams.get('reg');
+
 
 
 </script>
@@ -137,11 +167,13 @@
         </MenuForm.FormHeader>
       {/if}
 
+      {data.lookupYear}
+
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Select required={true} title="Type" name="type" options={data.typeOptions} placeholder={"Unset"} defaultValue={data.aircraft?.aircraftTypeId ?? null} />
         <Entry.Input required={true} title="Tail Number" name="tail" placeholder="N4321J" uppercase={true} error={registrationExists ? 'Already exists' : ''} update={checkRegistrationExists} bind:value={selectedReg} defaultValue={(data.aircraft === null && reg !== null) ? reg : data.aircraft?.registration ?? null} />
-        <Entry.Input title="Year" name="year" placeholder="1969" validator={validate} useNumberPattern={true} defaultValue={data.aircraft?.year === null || data.aircraft?.year === undefined ? null : String(data.aircraft?.year)} />
-        <Entry.Input title="Serial" name="serial" placeholder="1969-0-2-22" defaultValue={data.aircraft?.serial ?? null} />
+        <Entry.Input title="Year" name="year" placeholder={data.lookupYear ?? 'Unknown'} validator={validate} useNumberPattern={true} defaultValue={data.aircraft?.year === null || data.aircraft?.year === undefined ? (reg === null ? null : data.lookupYear) : String(data.aircraft?.year)} />
+        <Entry.Input title="Serial" name="serial" placeholder={data.lookupSerial ?? 'Unknown'} defaultValue={data.aircraft?.serial ?? (reg === null ? null : data.lookupSerial)} />
       </Section>
       <Section title="Configuration">
         <Entry.Switch title="Simulator" name="sim" defaultValue={data.aircraft?.simulator ?? false} />

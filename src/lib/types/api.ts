@@ -24,10 +24,11 @@ namespace API {
 			}
 		}>
 
-		export type ApproachOption = Prisma.ApproachOptionsGetPayload<{}>
+		export type ApproachOption = Prisma.ApproachOptionsGetPayload<{}>;
 
-		export type Tour = Prisma.TourGetPayload<{}>
-		export type Aircraft = Prisma.AircraftGetPayload<{ include: { type: true } }>
+		export type Tour = Prisma.TourGetPayload<{}>;
+		export type Aircraft = Prisma.AircraftGetPayload<{ include: { type: true } }>;
+		export type Reg = Prisma.AircraftRegistrationLookupGetPayload<{}>;
 	}
 
 	// Export the basic response with all the available API responses
@@ -40,6 +41,7 @@ namespace API {
 		| Aircraft
 		| Approach
 		| TourList
+		| FAAReg
 
 	// Create a basic API interface that all other APIs will extend
 	interface API {
@@ -91,6 +93,11 @@ namespace API {
 	export interface Aircraft extends Success {
 		type: 'aircraft';
 		aircraft: Types.Aircraft
+	}
+
+	export interface FAAReg extends Success {
+		type: 'faa';
+		aircraft: Types.Reg
 	}
 
 	export interface Approach extends Success {

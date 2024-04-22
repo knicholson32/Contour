@@ -65,6 +65,19 @@ export const load = async ({ fetch, params, url }) => {
     diversionPercent = currentAircraft.legs.length === 0 ? 0 : diversionPercent / currentAircraft.legs.length;
   }
 
+  let lookupYear: string | null = null;
+  let lookupSerial: string | null = null;
+
+
+  if (currentAircraft !== null) {
+    const res = await (await fetch(`http://localhost:5173/api/aircraft/faa/${currentAircraft.registration}`)).json() as API.Response;
+    if (res.ok === true) {
+      const regInfo = res as API.FAAReg;
+      lookupYear = regInfo.aircraft.manufactureYear.toFixed(0);
+      lookupSerial = regInfo.aircraft.serial;
+    }
+  }
+
   // Get all tail numbers (so we know if one exists)
   const tails = aircrafts.map((v) => v.registration);
   return {
@@ -75,6 +88,8 @@ export const load = async ({ fetch, params, url }) => {
     typeOptions,
     orderGroups,
     avgLegLen,
+    lookupYear,
+    lookupSerial,
     diversionPercent,
     tails,
     types,
