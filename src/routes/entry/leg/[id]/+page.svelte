@@ -387,7 +387,7 @@
         {/key}
       {/if}
 
-      {#if data.leg.flightAwareData !== null}
+      {#if data.leg.flightAwareData !== null || data.leg.positions.length > 0}
         <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4 p-4 relative">
           <Card.Root class="col-span-1 xs:col-span-2 xl:col-span-4">
             <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
