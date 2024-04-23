@@ -12,7 +12,7 @@
 
   let newRemaining = true;
   const getIsNewCommit = (commit: string) => {
-    if (commit === ($page.url.searchParams.get('lastCommit') ?? data.lastCommit)) {
+    if (commit === ($page.url.searchParams.get('lastCommit'))) {
       newRemaining = false;
       return false;
     }

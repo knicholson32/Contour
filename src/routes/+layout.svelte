@@ -223,7 +223,7 @@
                     {/if}
                   {/each}
                   <div class="w-full border-t"></div>
-                  <a href="/changelog" data-sveltekit-reload on:click={closeAccountDropdown} class="w-full text-left inline-flex items-center relative hover:bg-gray-50 dark:hover:bg-zinc-800 px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white">
+                  <a href="/changelog?lastCommit={data.lastCommit}" data-sveltekit-reload on:click={closeAccountDropdown} class="w-full text-left inline-flex items-center relative hover:bg-gray-50 dark:hover:bg-zinc-800 px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white">
                     {#if data.contourUpdates}
                       <div class="absolute -left-0">
                         <GitCommitVertical class="w-4 h-4 text-sky-500" />
@@ -305,7 +305,7 @@
             {/if}
           {/each}
           <div class="w-full border-t"></div>
-          <a href="/changelog" data-sveltekit-reload on:click={closeMobileMenu} class="inline-flex w-full items-center px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200"> 
+          <a href="/changelog?lastCommit={data.lastCommit}" data-sveltekit-reload on:click={closeMobileMenu} class="inline-flex w-full items-center px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200"> 
             {#if data.contourUpdates}
               <div class="absolute -left-0">
                 <GitCommitVertical class="w-4 h-4 text-sky-500" />
