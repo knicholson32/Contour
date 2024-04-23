@@ -7,7 +7,7 @@
 
 </script>
 
-<div class="select-none -mt-[1px] py-1 sticky top-0 z-[1] border-y !border-gray-200 dark:!border-zinc-700/65 inline-flex w-full gap-2 items-center cursor-default text-left px-3 uppercase font-medium tracking-wider text-xs bg-gray-50 dark:bg-zinc-800 text-gray-900/65 dark:text-gray-200/65">
+<div class="select-none -mt-[0.5px] py-1 sticky -top-[1px] z-[1] border-y !border-gray-200 dark:!border-zinc-700/65 inline-flex w-full gap-2 items-center cursor-default text-left px-2 uppercase font-medium tracking-wider text-xs bg-gray-50 dark:bg-zinc-800 text-gray-900/65 dark:text-gray-200/65">
   <span class="inline-flex items-center gap-2">
     {title}
     {#if subtitle !== null}

@@ -275,7 +275,7 @@
           </Card.Header>
           <Card.Content class="p-4 pt-0">
             <!-- <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label> -->
-            <input bind:files type="file" name="file.upload" id="file-input" accept=".csv,.kml" on:change={fileUpdate} class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+            <input bind:files type="file" name="file.upload" id="file-input" accept=".kml" on:change={fileUpdate} class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
               cursor-pointer
               file:cursor-pointer
             file:bg-gray-50 file:border-0
@@ -285,7 +285,7 @@
             <div class="inline-flex w-full mt-1 text-sm text-gray-500 dark:text-gray-300">
               <p>{size.toFixed(1)}MB</p>
               <div class="flex-grow"/>
-              <p>KML, CSV (max 10MB)</p>
+              <p>KML (max 10MB)</p>
             </div>
             {#if form?.ok === false}
               <p class="text-xxs text-red-500">{form?.message}</p>

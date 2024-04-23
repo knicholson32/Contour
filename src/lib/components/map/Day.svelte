@@ -7,6 +7,9 @@
   import { browser } from '$app/environment';
   import './helpers/leaflet.css';
 
+  export let paddingTopLeft: [number, number] = [30, 20];
+  export let paddingBottomRight: [number, number] = [50, 30];
+
   type T = Types.Prisma.LegGetPayload<{ include: { positions: true} }>;
   type D = Types.Prisma.DeadheadGetPayload<{ include: { originAirport: true, destinationAirport: true} }>;
 
@@ -78,7 +81,10 @@
  		}
   	markerLayer.addTo(map);
 
-    map.fitBounds(L.polyline(bound).getBounds(), { animate: false }).zoomOut(1, { animate: false });
+    const bounds = new L.LatLngBounds([[airports[0].latitude, airports[0].longitude], [airports[0].latitude, airports[0].longitude]]);
+    for(const airport of airports) bounds.extend([airport.latitude, airport.longitude]);
+
+    map.fitBounds(bounds, { animate: false, paddingTopLeft, paddingBottomRight });
     if (map.getZoom() > 13) map.setZoom(13);
   }
 

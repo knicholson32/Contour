@@ -3,6 +3,10 @@ import type * as Types from '@prisma/client';
 import { getDistanceFromLatLonInKm } from '$lib/server/helpers';
 import { CalendarDate } from '@internationalized/date';
 import * as settings from '$lib/server/settings';
+import { redirect } from '@sveltejs/kit';
+import { pad } from '$lib/helpers';
+// import type { PageServerLoad } from './$types';
+// import type { PageData } from './$types';
 
 
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -11,7 +15,7 @@ const TEN_DAYS = 10 * TWENTY_FOUR_HOURS;
 const THIRTY_DAYS = 30 * TWENTY_FOUR_HOURS;
 
 
-export const load = async ({ url }) => {
+export const load = async ({ parent, url }) => {
 
   const sets = await settings.getMany('general.timezone', 'system.debug');
   const timeZone = sets['general.timezone'];
@@ -43,7 +47,16 @@ export const load = async ({ url }) => {
     end = new CalendarDate(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7)), parseInt(s.substring(8, 10)));
   }
 
-  if (start === null || end === null) return null;
+  // If there is not start and end window (because the user didn't put one in and there is no tour to fallback on), retry with Year to Date values
+  if (start === null || end === null) {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const startStr = `${year}-01-01`;
+    const endStr = `${year}-${pad(month, 2)}-${pad(day, 2)}`;
+    throw redirect(301, `/?start=${startStr}&end=${endStr}&preset=ytd`)
+  }
 
   let s = Math.floor(start.toDate(timeZone).getTime() / 1000);
   let sCal = start;
@@ -118,12 +131,51 @@ export const load = async ({ url }) => {
 
       operations += 2;
 
-      if (airports.findIndex((a) => a.id === leg.originAirportId) === -1) airports.push({ id: leg.originAirportId, latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude });
+      if (airports.findIndex((a) => a.id === leg.originAirportId) === -1 && leg.originAirport !== null) airports.push({ id: leg.originAirport.id, latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude });
       if (leg.diversionAirportId !== null && leg.diversionAirport !== null) {
         if (airports.findIndex((a) => a.id === leg.diversionAirportId) === -1) airports.push({ id: leg.diversionAirportId, latitude: leg.diversionAirport.latitude, longitude: leg.diversionAirport.longitude });
       } else {
-        if (airports.findIndex((a) => a.id === leg.destinationAirportId) === -1) airports.push({ id: leg.destinationAirportId, latitude: leg.destinationAirport.latitude, longitude: leg.destinationAirport.longitude });
+        if (airports.findIndex((a) => a.id === leg.destinationAirportId) === -1 && leg.destinationAirport !== null) airports.push({ id: leg.destinationAirport.id, latitude: leg.destinationAirport.latitude, longitude: leg.destinationAirport.longitude });
       }
+    }
+  }
+
+  let legs = await prisma.leg.findMany({
+    where: {
+      AND: [
+        { startTime_utc: { gte: s } },
+        { endTime_utc: { lte: e } },
+        { day: null }
+      ]
+    }, orderBy: { startTime_utc: 'asc' }, include: { aircraft: true, positions: true, originAirport: true, destinationAirport: true, diversionAirport: true, _count: { select: { approaches: true } } }
+  });
+
+  for (const leg of legs) {
+    if (leg.aircraft.aircraftTypeId in acTypeList) {
+      acTypeList[leg.aircraft.aircraftTypeId] += leg.totalTime;
+    } else {
+      acTypeList[leg.aircraft.aircraftTypeId] = leg.totalTime;
+    }
+
+    const idx = acList.findIndex((v) => v.id === leg.aircraftId);
+    if (idx !== -1) {
+      acList[idx].time += leg.totalTime;
+    } else {
+      acList.push({ id: leg.aircraftId, time: leg.totalTime });
+    }
+
+    const posGroup: [number, number][] = [];
+    for (const p of leg.positions) posGroup.push([p.latitude, p.longitude]);
+    posGroups.push(posGroup);
+    posGroupsIDs.push(leg.id);
+
+    operations += 2;
+
+    if (airports.findIndex((a) => a.id === leg.originAirportId) === -1 && leg.originAirport !== null) airports.push({ id: leg.originAirport.id, latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude });
+    if (leg.diversionAirportId !== null && leg.diversionAirport !== null) {
+      if (airports.findIndex((a) => a.id === leg.diversionAirportId) === -1) airports.push({ id: leg.diversionAirportId, latitude: leg.diversionAirport.latitude, longitude: leg.diversionAirport.longitude });
+    } else {
+      if (airports.findIndex((a) => a.id === leg.destinationAirportId) === -1 && leg.destinationAirport !== null) airports.push({ id: leg.destinationAirport.id, latitude: leg.destinationAirport.latitude, longitude: leg.destinationAirport.longitude });
     }
   }
 
@@ -224,10 +276,6 @@ export const load = async ({ url }) => {
           isOnTour = true;
           break;
         }
-        // // Check that the day overlaps the start
-        // else if (start <= t.startTime_utc && (end >= t.startTime_utc && end <= t.endTime_utc)) toursCoveringDay.push(t)
-        // // Check that the day overlaps the end
-        // else if (end >= t.endTime_utc && (start >= t.startTime_utc && start <= t.endTime_utc)) toursCoveringDay.push(t)
       }
     }
 
@@ -372,6 +420,6 @@ export const load = async ({ url }) => {
         flight: periodFlight
       }
     }
-  }
+  };
   
 }

@@ -11,8 +11,8 @@
   export let airports: Types.Airport[];
   export let target: [number, number] | null = null;
 
-  export let paddingTopLeft: [number, number] = [30, 20];
-  export let paddingBottomRight: [number, number] = [50, 30];
+  export let paddingTopLeft: [number, number] = [275, 20];
+  export let paddingBottomRight: [number, number] = [50, 225];
 
   let element: HTMLDivElement;
 
@@ -27,6 +27,32 @@
   let posLayer: L.Polyline<any, any> | null = null;
   let markerLayer: L.LayerGroup<any> | null = null;
   let targetLayer: L.LayerGroup<any> | null = null;
+
+  export const center: (animate?: boolean) => void = (animate = false) => {
+    console.log('center!');
+    try {
+      if (posLayer === null) throw new Error();
+      // .zoomOut(1, { animate: false });
+      const bounds = posLayer.getBounds();
+      if (fixLayer !== null) bounds.extend(fixLayer.getBounds());
+      for(const airport of airports) bounds.extend([airport.latitude, airport.longitude]);
+      map.fitBounds(bounds, { animate, paddingTopLeft, paddingBottomRight });
+      
+    } catch (e) {
+      let smallestLat = airports[0].latitude;
+      let largestLat = airports[0].latitude;
+      let smallestLon = airports[0].longitude;
+      let largestLon = airports[0].longitude;
+      for (const a of airports) {
+        if (a.latitude < smallestLat) smallestLat = a.latitude;
+        if (a.latitude > largestLat) largestLat = a.latitude;
+        if (a.longitude < smallestLon) smallestLon = a.longitude;
+        if (a.longitude > largestLon) largestLon = a.longitude;
+      }
+      // .zoomOut(1, { animate: false });
+      map.fitBounds([[smallestLat, smallestLon], [largestLat, largestLon]], {animate, paddingTopLeft, paddingBottomRight })
+    }
+  }
 
   let targetMarker: L.Marker | null = null;
 
@@ -93,28 +119,7 @@
     targetLayer.addLayer(targetMarker);
     targetLayer.addTo(map);
 
-    try {
-      if (posLayer === null) throw new Error();
-
-      const bounds = posLayer.getBounds();
-      if (fixLayer !== null) bounds.extend(fixLayer.getBounds());
-      for(const airport of airports) bounds.extend([airport.latitude, airport.longitude]);
-      map.fitBounds(bounds, { animate: false, paddingTopLeft, paddingBottomRight });
-      // map.fitBounds(posLayer.getBounds(), { animate: false, paddingBottomRight, paddingTopLeft});
-    } catch (e) {
-      // if (bound.length > 0) map.fitBounds(L.polyline(bound).getBounds(), { animate: false }).zoomOut(1, { animate: false });
-      let smallestLat = airports[0].latitude;
-      let largestLat = airports[0].latitude;
-      let smallestLon = airports[0].longitude;
-      let largestLon = airports[0].longitude;
-      for (const a of airports) {
-        if (a.latitude < smallestLat) smallestLat = a.latitude;
-        if (a.latitude > largestLat) largestLat = a.latitude;
-        if (a.longitude < smallestLon) smallestLon = a.longitude;
-        if (a.longitude > largestLon) largestLon = a.longitude;
-      }
-      map.fitBounds([[smallestLat, smallestLon], [largestLat, largestLon]], {animate: false, paddingBottomRight, paddingTopLeft});
-    }
+    center();
   }
 
   $: updateMapContents(positions, fixes);
@@ -126,7 +131,7 @@
 
 
     const implementMap = (container: HTMLDivElement) => {
-      map = helpers.createMap(L, container);
+      map = helpers.createMap(L, container, { noLegal: true, noMapControls: true });
 
       updateMapContents(positions, fixes);
 
@@ -159,7 +164,7 @@
   }
 </style>
 
-<div class="relative">
-  <div bind:this={element} style="height:400px;width:100%;position:relative;" {...$$restProps} />
+<div class="absolute top-0 bottom-0 right-0 left-0 bg-[#FBF8F4] dark:bg-zinc-950">
+  <div bind:this={element} style="height:100%;width:100%;position:relative;" {...$$restProps} />
   <slot />
 </div>

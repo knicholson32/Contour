@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import * as settings from '$lib/server/settings';
 import prisma from '$lib/server/prisma';
-import { API, ImageUploadState } from '$lib/types';
+import { API, ImageUploadState, legSelector, type Entry } from '$lib/types';
 import { dateToDateStringForm, delay, getTimezoneObjectFromTimezone, timeStrAndTimeZoneToUTC } from '$lib/helpers/index.js';
 import { DB } from '$lib/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,12 +12,11 @@ import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
 import { filterOutliers, generateAirportList, getDistanceFromLatLonInKm } from '$lib/server/helpers';
 import type * as Types from '@prisma/client';
+import { fetchLegsForSideMenu } from '$lib/server/lib/leg';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
 const AVG_FILTER_NUM = 2;
-
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 export const load = async ({ fetch, params, url }) => {
 
@@ -65,134 +64,8 @@ export const load = async ({ fetch, params, url }) => {
     if (tour === null) throw redirect(302, '/entry/leg' + url.search);
   }
 
-  const legSelector = {
-    id: true,
-    dayId: true,
-    day: {
-      select: {
-        startTime_utc: true
-      }
-    },
-    originAirportId: true,
-    destinationAirportId: true,
-    diversionAirportId: true,
-    startTime_utc: true,
-    endTime_utc: true,
-    totalTime: true,
-    aircraft: { 
-      select: { 
-        registration: true,
-        id: true,
-        type: {
-          select: { 
-            typeCode: true 
-          }
-        }
-      }
-    },
-    _count: {
-      select: {
-        approaches: true,
-        positions: true
-      }
-    }
-  } satisfies Prisma.LegSelect;
-
-
-  type Entry = Prisma.LegGetPayload<{ select: typeof legSelector }>;
-  let _legs: Entry[] | null = null;
-  let legs: { text: string, entries: Entry[], visible: boolean }[] = [];
-
-  let displayType: 'generic' | 'day' | 'tour' = 'generic';
-
-  // Gather all the legs for the menu based on the following priority:
-  //  * Day
-  //  * Tour
-  //  * All
-  if (dayId !== null) {
-    _legs = await prisma.leg.findMany({ where: { dayId: dayId }, select: legSelector, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
-    displayType = 'day';
-  } else if (tourId !== null) {
-    _legs = await prisma.leg.findMany({ where: { day: { tourId: tourId } }, select: legSelector, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
-    displayType = 'tour';
-  } else {
-    _legs = await prisma.leg.findMany({ select: legSelector, orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }] });
-    displayType = 'generic';
-  }
-
-  // See if there are any legs that don't have a date assigned. We will put these in their own group
-  if (_legs.findIndex((l) => l.startTime_utc === null) !== -1) {
-    let entries: Entry[] = [];
-    // Add each leg to the unassigned date group
-    for (const leg of _legs) if (leg.startTime_utc === null) entries.push(leg);
-    // Submit the group
-    legs.push({ text: 'No Date', entries, visible: true});
-    // Remove each of the legs added here from the primary leg list
-    // _legs = _legs.filter((leg) => entries.findIndex((entry) => entry.id === leg.id) === -1);
-  }
-  
-
-  if (_legs !== null && _legs.length > 0 && _legs[0].startTime_utc !== null) {
-    let d: Date;
-    if (_legs[0].day === null) d = new Date(_legs[0].startTime_utc * 1000);
-    else d = new Date(_legs[0].day.startTime_utc * 1000);
-
-    let smallTarget: number;
-    let largeTarget: number;
-
-    if (displayType === 'tour' || displayType === 'day') {
-      smallTarget = d.getDate();
-      largeTarget = d.getMonth();
-    } else {
-      smallTarget = d.getMonth();
-      largeTarget = d.getFullYear();
-    }
-
-    let entries: Entry[] = [];
-    for (const leg of _legs) {
-      if (leg.startTime_utc === null) continue;
-      let d: Date;
-      if (leg.day === null) d = new Date(leg.startTime_utc * 1000);
-      else d = new Date(leg.day.startTime_utc * 1000);
-
-      let small: number;
-      let large: number;
-      if (displayType === 'tour' || displayType === 'day') {
-        small = d.getDate();
-        large = d.getMonth();
-      } else {
-        small = d.getMonth();
-        large = d.getFullYear();
-      }
-      if (small !== smallTarget || large !== largeTarget) {
-        // let v = false;
-        // if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
-        if (displayType === 'tour' || displayType === 'day'){
-          // Tour or day display, we are doing by day
-          legs.push({ text: `${months[largeTarget]} ${smallTarget}`, entries, visible: true }); 
-        } else {
-          // Generic display, we are doing by month/year
-          legs.push({ text: `${months[smallTarget]} ${largeTarget}`, entries, visible: true }); 
-        }
-        entries = [];
-        smallTarget = small;
-        largeTarget = large;
-      }
-      // Add this leg to the current year group
-      entries.push(leg);
-    }
-    // Add the last year to the group list
-    // let v = false;
-    // if (entries.findIndex((l) => l.id === params.id) !== -1) v = true;
-    if (displayType === 'tour' || displayType === 'day') {
-      // Tour or day display, we are doing by day
-      legs.push({ text: `${months[largeTarget]} ${smallTarget}`, entries, visible: true });
-    } else {
-      // Generic display, we are doing by month/year
-      legs.push({ text: `${months[smallTarget]} ${largeTarget}`, entries, visible: true });
-    }
-    entries = [];
-  }
+  // Fetch all the legs for the side menu
+  const legs = await fetchLegsForSideMenu(dayId, tourId);
 
 
   // if (day === null) throw redirect(301, '/tour/' + params.tour + '/day');
@@ -338,6 +211,10 @@ export const load = async ({ fetch, params, url }) => {
 
   return {
     params,
+    searchParams: {
+      dayId,
+      tourId
+    },
     entrySettings,
     leg,
     legs,

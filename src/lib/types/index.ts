@@ -1,3 +1,5 @@
+import type { Prisma } from '@prisma/client';
+
 export { DB } from './prisma';
 
 // -------------------------------------------------------------------------------------------------
@@ -89,3 +91,42 @@ export type KML = {
 		}
 	}
 }
+
+// ------------------------------------------------------------------------------------------------
+// Leg Types
+// ------------------------------------------------------------------------------------------------
+
+export const legSelector = {
+	id: true,
+	dayId: true,
+	day: {
+		select: {
+			startTime_utc: true
+		}
+	},
+	originAirportId: true,
+	destinationAirportId: true,
+	diversionAirportId: true,
+	startTime_utc: true,
+	endTime_utc: true,
+	totalTime: true,
+	aircraft: {
+		select: {
+			registration: true,
+			id: true,
+			type: {
+				select: {
+					typeCode: true
+				}
+			}
+		}
+	},
+	_count: {
+		select: {
+			approaches: true,
+			positions: true
+		}
+	}
+} satisfies Prisma.LegSelect;
+
+export type Entry = Prisma.LegGetPayload<{ select: typeof legSelector }>;

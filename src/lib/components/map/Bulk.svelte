@@ -6,7 +6,7 @@
   import type * as Types from '@prisma/client';
   import { browser } from '$app/environment';
   import './helpers/leaflet.css';
-    import { goto } from '$app/navigation';
+  import { goto } from '$app/navigation';
 
   type T = [number, number][];
   type A = Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>;
@@ -15,6 +15,9 @@
   export let pos: T[];
   export let legIDs: string[];
   export let airports: A[];
+
+  export let paddingTopLeft: [number, number] = [30, 30];
+  export let paddingBottomRight: [number, number] = [30, 30];
 
   let element: HTMLDivElement;
 
@@ -88,7 +91,7 @@
  		}
   	markerLayer.addTo(map);
 
-    if (bound.length > 0) map.fitBounds(L.polyline(bound).getBounds(), { animate: false }).zoomOut(1, { animate: false });
+    if (bound.length > 0) map.fitBounds(L.polyline(bound).getBounds(), { animate: false, paddingTopLeft, paddingBottomRight })
     else map.fitBounds([[20, -95], [60, -95]], {animate: false });
     if (map.getZoom() > 13) map.setZoom(13);
   }

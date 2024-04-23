@@ -18,13 +18,14 @@
   import { dateToDateStringForm, dateToDateStringFormMonthDayYear, dateToDateStringFormSimple, dateToTimeStringZulu, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
-  import { AlertCircle, Briefcase, CalendarDays, ChevronRight, Dot, Gauge, Link, Menu, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
+  import { AlertCircle, Briefcase, CalendarDays, ChevronRight, Dot, Fullscreen, Gauge, Link, Maximize, Menu, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
   import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
   import { onMount } from 'svelte';
-    import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
-    import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
+  import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
+  import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
+  import LegEntry from '$lib/components/routeSpecific/leg/LegEntry.svelte';
 
   export let form: import('./$types').ActionData;
   export let data: import('./$types').PageData;
@@ -197,6 +198,17 @@
 
   // console.log(data.leg.positions);
 
+  let tourDayInfo = '';
+  const updateTourDayInfo = (params: {dayId: number | null, tourId: number | null}) => {
+    // $: tourDayInfo = data.searchParams.dayId === null ;
+    if (params.dayId === null && params.tourId === null) tourDayInfo = '';
+    else if (params.dayId !== null && params.tourId !== null) tourDayInfo = `day=${params.dayId}&tour=${params.tourId}`;
+    else if (params.dayId !== null) tourDayInfo = `day=${params.dayId}`;
+    else tourDayInfo = `tour=${params.tourId}`;
+  }
+  $: updateTourDayInfo(data.searchParams);
+
+
 
 </script>
 
@@ -236,58 +248,7 @@
         <MenuSection title="{group.text}">
           {#each group.entries as leg, i (leg.id)}
             <MenuElement bind:element={menuElements[leg.id]} href="/entry/leg/{leg.id}?{urlActiveParam}" selected={leg.id === data.params.id && !isMobileSize}>
-              <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
-                <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
-                  <span class="inline-flex font-mono items-center">
-                    {#if leg.originAirportId === null && leg.destinationAirportId === null}
-                      No Route
-                    {:else}
-                      {#if leg.diversionAirportId !== null}
-                        {leg.originAirportId} → <span class="line-through decoration-secondary decoration-2">{leg.destinationAirportId}</span> → {leg.diversionAirportId}
-                      {:else}
-                        {leg.originAirportId} → {leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId}
-                      {/if}
-                    {/if}
-                    {#if leg._count.positions > 0}
-                      <span class="text-primary ml-2"><Waypoints class="w-3 h-3"/></span>
-                    {/if}
-                  </span>
-                  <span class="flex-grow ml-1">
-                    {#if $unsavedUIDs.includes(leg.id)}
-                      <Tag>UNSAVED</Tag>
-                    {/if}
-                  </span>
-                  <span class="text-sky-600">
-                    {#if leg.startTime_utc === null}
-                      No Date
-                    {:else}
-                      {dateToDateStringFormMonthDayYear(leg.startTime_utc)}
-                    {/if}
-                  </span>
-                </div>
-                <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
-                  <span class="font-normal text-gray-400 dark:text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis">
-                    {leg.aircraft.registration} ({leg.aircraft.type.typeCode})
-                  </span>
-                  <span class="flex-grow"></span>
-                  {#if leg._count.approaches > 0}
-                    <span class="mr-2">
-                      {leg._count.approaches + ' '}
-                      {#if leg._count.approaches === 1}
-                        Approach,
-                      {:else}
-                        Approaches,
-                      {/if}
-                    </span>
-                  {/if}
-                  <span class="">{leg.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
-                </div>
-              </div>
-              <div class="absolute right-1">
-                <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
-                  {@html icons.chevronRight}
-                </svg>
-              </div>
+              <LegEntry leg={leg} unsaved={$unsavedUIDs.includes(leg.id)} />
             </MenuElement>
           {/each}
         </MenuSection>
@@ -381,6 +342,11 @@
               <a href="/entry/leg/{data.leg.id}/upload-positions" class="absolute bottom-2 right-2 z-50 inline-flex items-center gap-1 text-xs font-mono uppercase border border-gray-400 select-none bg-gray-100 hover:bg-white py-1 px-2 rounded-full">
                 <span>Upload KLM</span>
                 <Waypoints class="w-4 h-4" />
+              </a>
+            {:else}
+              <a href="/entry/leg/{data.leg.id}/fullscreen?{tourDayInfo}" class="absolute group top-2 right-2 z-50">
+                <Maximize class="w-5 h-5 dark:text-white group-hover:hidden" />
+                <Fullscreen class="w-5 h-5 dark:text-white hidden group-hover:block" />
               </a>
             {/if}
           </Map.Leg>

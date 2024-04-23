@@ -1,17 +1,45 @@
 import { browser } from '$app/environment';
 
-export const createMap = (L: typeof import('leaflet'), container: HTMLDivElement): L.Map => {
+export type CreateMapOptions = { 
+  noLegal?: boolean, 
+  noMapControls?: boolean
+}
+
+const defaultOptions: CreateMapOptions = {};
+
+export const createMap = (L: typeof import('leaflet'), container: HTMLDivElement, options: CreateMapOptions = defaultOptions): L.Map => {
+
+  let noLegal = false;
+  let noMapControls = false;
+
+  if (options.noLegal === true) noLegal = true;
+  if (options.noMapControls === true) noMapControls = true;
 
   let theme: Theme = 'voyager';
   if (browser && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) theme = 'darkMatterNoLabels';
 
-  let m = L.map(container, { dragging: !L.Browser.mobile, attributionControl: false });
+  let m = L.map(container, { 
+    dragging: !L.Browser.mobile,
+    attributionControl: false,
+    zoomControl: !noMapControls,
+    zoomSnap: 0.1,
+    zoomDelta: 10,
+    wheelPxPerZoomLevel: 6,
+    bounceAtZoomLimits: true,
+    minZoom: 3,
+    maxZoom: 13,
+    zoomAnimation: true,
+    fadeAnimation: true,
+    // zoomAnimationThreshold: 2,
+  });
   const tileLayer = generateTileLayer(L, theme);
   tileLayer.addTo(m);
 
-  L.control.attribution({
-    position: 'bottomleft'
-  }).addTo(m);
+  if (!noLegal) {
+    L.control.attribution({
+      position: 'bottomleft'
+    }).addTo(m);
+  }
 
   return m;
 }

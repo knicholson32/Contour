@@ -63,13 +63,9 @@
   }
 
   let formDiv: HTMLDivElement;
-  const scrollFormTop = () => {
-    formDiv.scrollTo({ top: 0 });
-  }
-
   afterNavigate(() => {
     updateURLParams();
-    scrollFormTop();
+    formDiv.scrollTo({ top: 0 });
   });
 
   // @see https://stackoverflow.com/a/22480938/5441886

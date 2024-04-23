@@ -3,7 +3,7 @@ import * as settings from '$lib/server/settings';
 
 const MAX_MB = 10;
 
-export const load = async ({ fetch, url }) => {
+export const load = async ({ parent, fetch, url }) => {
 
   const commit = process.env.GIT_COMMIT ?? '';
   const set = await settings.getMany('system.debug', 'system.lastSeenCommit', 'entry.tour.current', 'general.gravatar.hash', 'general.name', 'general.email', 'general.timezone');
@@ -14,6 +14,6 @@ export const load = async ({ fetch, url }) => {
     settings: set,
     MAX_MB,
     contourUpdates,
-    lastCommit: set['system.lastSeenCommit']
+    lastCommit: set['system.lastSeenCommit'],
   };
 };
