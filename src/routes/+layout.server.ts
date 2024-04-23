@@ -14,6 +14,6 @@ export const load = async ({ fetch, url }) => {
     settings: set,
     MAX_MB,
     contourUpdates,
-    lastCommit: commit
+    lastCommit: set['system.lastSeenCommit']
   };
 };
