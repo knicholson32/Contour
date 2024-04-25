@@ -17,13 +17,17 @@
   /**
    * Specifies which side should be active in single-column mode
    */
-  let activeOnSingleCol: 'menu' | 'form' = $page.url.searchParams.get('active') as 'menu' | 'form';
-  if (activeOnSingleCol !== 'menu' && activeOnSingleCol !== 'form') activeOnSingleCol = 'menu';
+  let activeOnSingleCol: 'menu' | 'form';
+
+  $: {
+    activeOnSingleCol = $page.url.searchParams.get('active') as 'menu' | 'form';
+    if (activeOnSingleCol !== 'menu' && activeOnSingleCol !== 'form') activeOnSingleCol = 'menu';
+  }
   // export let urlActiveParam = 'active=' + (activeOnSingleCol === 'form' ? 'menu' : 'form');
   
 
   let _altURLParamsObj: URLSearchParams = new URLSearchParams($page.url.search);
-  _altURLParamsObj.set('active', (activeOnSingleCol === 'form' ? 'menu' : 'form'));
+  // _altURLParamsObj.set('active', (activeOnSingleCol === 'form' ? 'menu' : 'form'));
 
   export let urlActiveParam: string = _altURLParamsObj.toString();
   export let urlFormParam: string = _altURLParamsObj.toString();

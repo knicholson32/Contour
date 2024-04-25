@@ -15,6 +15,7 @@
   import * as Entry from '$lib/components/entry';
     import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
     import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
+    import { Search } from 'lucide-svelte';
 
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
@@ -104,12 +105,18 @@
       {#if data.type !== null}
         <MenuForm.FormHeader title={`${data.type.make} ${data.type.model}`}>
           <Stats values={[
-            {title: 'Total Legs', value: data.numLegs.toLocaleString()},
+            {title: 'Total Legs', value: data.numLegs.toLocaleString(), href: `/entry/leg?active=form&search=${data.type.typeCode}`},
             {title: 'Total Flight Time', value: data.totalTime.toFixed(1) + ' hr'},
             {title: 'Avg. Leg Length', value: (data.numLegs === 0 ? 0 : (data.totalTime / data.numLegs).toFixed(1)) + ' hr'},
             {title: 'Diversion %', value: (data.numLegs === 0 ? 0 : (100 * data.numDiversions / data.numLegs).toFixed(0)) + '%'}
           ]}/>
           <div class="w-full h-1"></div>
+          <MenuForm.Link theme='FormHeader' href={`/aircraft/entry?active=form&search=${data.type.typeCode}`} text={`See Aircraft of this Type`}>
+            <Search class="w-3 h-3 text-white"/>
+          </MenuForm.Link>
+          <MenuForm.Link theme='FormHeader' href={`/entry/leg?active=form&search=${data.type.typeCode}`} text={`See Legs for this Type`}>
+            <Search class="w-3 h-3 text-white"/>
+          </MenuForm.Link>
         </MenuForm.FormHeader>
       {/if}
 

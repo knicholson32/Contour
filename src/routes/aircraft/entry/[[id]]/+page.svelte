@@ -13,6 +13,7 @@
   import * as Entry from '$lib/components/entry';
     import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
     import type { API } from '$lib/types';
+    import { ListOrdered, Search } from 'lucide-svelte';
 
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
@@ -149,16 +150,17 @@
       {#if data.aircraft !== null}
         <MenuForm.FormHeader title={`${data.aircraft.registration} - ${data.aircraft.type.make} ${data.aircraft.type.model}`}>
           <Stats values={[
-            {title: 'Total Legs', value: data.aircraft._count.legs.toLocaleString()},
+            {title: 'Total Legs', value: data.aircraft._count.legs.toLocaleString(), href: `/entry/leg?active=form&search=${data.aircraft.registration}`},
             {title: 'Total Flight Time', value: data.aircraftTimes[data.aircraft.id] + ' hr'},
             {title: 'Avg. Leg Length', value: data.avgLegLen.toFixed(1) + ' hr'},
             {title: 'Diversion %', value: (data.diversionPercent * 100).toFixed(0) + '%'}
           ]}/>
           <MenuForm.Link theme='FormHeader' href={`/aircraft/type/${data.aircraft.type.id}?active=form&ref=/aircraft/entry/${data.aircraft.id}?active=form`} icon={icons.circleStack} text={`Edit ${data.aircraft.type.make} ${data.aircraft.type.model} Type`} />
+          <MenuForm.Link theme='FormHeader' href={`/entry/leg?active=form&search=${data.aircraft.registration}`} text={`See Legs for this Aircraft`}>
+            <Search class="w-3 h-3 text-white"/>
+          </MenuForm.Link>
         </MenuForm.FormHeader>
       {/if}
-
-      {data.lookupYear}
 
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Select required={true} title="Type" name="type" options={data.typeOptions} placeholder={"Unset"} defaultValue={data.aircraft?.aircraftTypeId ?? null} />

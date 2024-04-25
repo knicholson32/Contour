@@ -13,6 +13,7 @@ import { generateDeadheads } from '$lib/server/db/deadhead';
 import { filterOutliers, generateAirportList, getDistanceFromLatLonInKm } from '$lib/server/helpers';
 import type * as Types from '@prisma/client';
 import { fetchLegsForSideMenu } from '$lib/server/lib/leg';
+import Fuse from 'fuse.js';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
@@ -65,7 +66,7 @@ export const load = async ({ fetch, params, url }) => {
   }
 
   // Fetch all the legs for the side menu
-  const legs = await fetchLegsForSideMenu(dayId, tourId);
+  const legs = await fetchLegsForSideMenu(dayId, tourId, { search: url.searchParams.get('search')});
 
 
   // if (day === null) throw redirect(301, '/tour/' + params.tour + '/day');

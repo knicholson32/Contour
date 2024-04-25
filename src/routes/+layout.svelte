@@ -9,6 +9,9 @@
   import * as Popover from "$lib/components/ui/popover";
   import { ModeWatcher } from "mode-watcher";
   import { Briefcase, ChevronRight, GitCommitVertical, Link, Plane, Send, Tag } from "lucide-svelte";
+  // import ProgressBar from "$lib/components/decorations/ProgressBar.svelte";
+  import { afterNavigate, beforeNavigate } from "$app/navigation";
+  import NProgress from 'nprogress';
 
   export let data: import('./$types').PageData;
 
@@ -68,6 +71,58 @@
 	const toggleAccountDropdown = () => profileMenuVisible = !profileMenuVisible;
 	const closeAccountDropdown = () => profileMenuVisible = false;
 
+  // let progress: ProgressBar;
+  let width = 0;
+
+  NProgress.settings.showSpinner = false;
+
+
+  beforeNavigate((navigate) => {
+    console.log('beforeNav', navigate);
+    if (navigate.type !== 'leave') {
+      // NProgress.trickle();
+      NProgress.start();
+      // if (NProgress.isStarted())
+    }
+    // if (progress !== undefined && (navigate.type !== 'leave' && navigate.type !== 'popstate')) {
+    //   progress.start();
+    //   // width = 0.75;
+    //   // navigate.complete.finally(() => {
+    //   //   if (progress !== undefined) progress.complete();
+    //   // });
+    // }
+    navigate.complete.finally(() => {
+      NProgress.done();
+    });
+  });
+
+  afterNavigate((navigate) => {
+
+    closeAccountDropdown();
+    closeMobileMenu();
+
+  //   /**
+  //    * New page load:
+  //    *  from: null
+  //    *  to: {params: {…}, route: {…}, url: URL}
+  //    *  type: "enter"
+  //    *  willUnload: false
+  //    * 
+  //    * In-App Navigation:
+  //    *  from: {params: {…}, route: {…}, url: URL}
+  //    *  to: {params: {…}, route: {…}, url: URL}
+  //    *  type: "link"
+  //    *  willUnload: false
+  //    * 
+  //    * Back / Forward Button:
+  //    *  from: {params: {…}, route: {…}, url: URL}
+  //    *  to: {params: {…}, route: {…}, url: URL}
+  //    *  delta: -1
+  //    *  type: "popstate"
+  //    *  willUnload: false
+  //    */
+    if (NProgress.isStarted()) NProgress.done();
+  });
 
 </script>
 
@@ -319,6 +374,9 @@
   {/if}
 </nav>
 
-<div class="overflow-y-hidden -mt-[1px] pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem + 1px);">
+<div class="relative overflow-y-hidden -mt-[1px] pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem + 1px);">
+  <div class="fixed top-[4rem] left-0 right-0 z-[101] h-[2px] overflow-hidden">
+    <!-- <ProgressBar bind:this={progress} minimum={0} bind:width={width} /> -->
+  </div>
   <slot/>
 </div>

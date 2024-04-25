@@ -205,6 +205,11 @@
     else if (params.dayId !== null && params.tourId !== null) tourDayInfo = `day=${params.dayId}&tour=${params.tourId}`;
     else if (params.dayId !== null) tourDayInfo = `day=${params.dayId}`;
     else tourDayInfo = `tour=${params.tourId}`;
+    const search = $page.url.searchParams.get('search');
+    if (search !== null && search !== '') {
+      if (tourDayInfo === '') tourDayInfo = 'search=' + search;
+      else tourDayInfo = tourDayInfo + '&search=' + search;
+    }
   }
   $: updateTourDayInfo(data.searchParams);
 
@@ -339,7 +344,7 @@
         {#key mapKey}
           <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong}>
             {#if data.leg.positions.length === 0}
-              <a href="/entry/leg/{data.leg.id}/upload-positions" class="absolute bottom-2 right-2 z-50 inline-flex items-center gap-1 text-xs font-mono uppercase border border-gray-400 select-none bg-gray-100 hover:bg-white py-1 px-2 rounded-full">
+              <a href="/entry/leg/{data.leg.id}/upload-positions" class="absolute bottom-2 right-2 z-50 inline-flex items-center gap-1 text-xs font-mono uppercase border select-none border-gray-400 bg-gray-100 hover:bg-white dark:bg-zinc-900 py-1 px-2 rounded-full">
                 <span>Upload KLM</span>
                 <Waypoints class="w-4 h-4" />
               </a>

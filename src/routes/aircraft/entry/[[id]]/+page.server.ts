@@ -5,6 +5,7 @@ import { API, ImageUploadState } from '$lib/types';
 import { DB } from '$lib/types';
 import { delay } from '$lib/helpers/index.js';
 import { v4 as uuidv4 } from 'uuid';
+import Fuse from 'fuse.js';
 
 import * as helpers from '$lib/server/helpers';
 
@@ -15,10 +16,47 @@ export const load = async ({ fetch, params, url }) => {
   const entrySettings = await settings.getSet('entry');
   // const debug = await settings.get('system.debug');
 
-  const aircrafts = await prisma.aircraft.findMany({ include: { type: true, _count: true, legs: { select: { totalTime: true } } }, orderBy: [{ type: { typeCode: 'asc' } }, { registration: 'asc' }] });
-  if (params.id === undefined) {
-    if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].id + '?active=menu')
-    else throw redirect(301, '/aircraft/entry/new')
+  let aircrafts = await prisma.aircraft.findMany({ include: { type: true, _count: true, legs: { select: { totalTime: true } } }, orderBy: [{ type: { typeCode: 'asc' } }, { registration: 'asc' }] });
+
+  let search = url.searchParams.get('search');
+  if (search === '') search = null;
+  if (search !== null) {
+    const fuseOptions = {
+      // isCaseSensitive: false,
+      // includeScore: false,
+      shouldSort: false,
+      // includeMatches: false,
+      // findAllMatches: false,
+      // minMatchCharLength: 1,
+      // location: 0,
+      threshold: 0.3,
+      // distance: 100,
+      // useExtendedSearch: false,
+      // ignoreLocation: false,
+      // ignoreFieldNorm: false,
+      // fieldNormWeight: 1,
+      keys: [
+        "registration",
+        "type.make",
+        "type.model",
+        "type.typeCode",
+        "serial",
+        "year",
+        "notes",
+      ]
+    };
+
+    const fuse = new Fuse(aircrafts, fuseOptions);
+    aircrafts = fuse.search(search).flatMap((v) => v.item);
+    if (params.id === undefined) {
+      if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].id + '?active=menu&search=' + search)
+      else throw redirect(301, '/aircraft/entry/new')
+    }
+  } else {
+    if (params.id === undefined) {
+      if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].id + '?active=menu')
+      else throw redirect(301, '/aircraft/entry/new')
+    }
   }
 
   const aircraftTimes: { [key: string]: string } = {};

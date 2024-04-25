@@ -115,15 +115,33 @@
     else if (params.dayId !== null && params.tourId !== null) tourDayInfo = `day=${params.dayId}&tour=${params.tourId}`;
     else if (params.dayId !== null) tourDayInfo = `day=${params.dayId}`;
     else tourDayInfo = `tour=${params.tourId}`;
+    const search = $page.url.searchParams.get('search');
+    if (search !== null && search !== '') {
+      if (tourDayInfo === '') tourDayInfo = 'search=' + search;
+      else tourDayInfo = tourDayInfo + '&search=' + search;
+    }
   }
   $: updateTourDayInfo(data.searchParams);
 
-
-
   let center = (animate?: boolean) => {};
 
+  let innerWidth: number;
+  let paddingTopLeft: [number, number] = [40, 40];
+  let paddingBottomRight: [number, number] = [40, 40];
+  $: {
+    if (innerWidth < 768) {
+      paddingTopLeft = [40, 40];
+      paddingBottomRight = [40, 40];
+    } else {
+      paddingTopLeft = [275, 20];
+      paddingBottomRight = [50, 225];
+    }
+    center();
+  }
 
 </script>
+
+<svelte:window bind:innerWidth />
 
 <div class="hidden">
   <Tooltip bind:el={tooltip} bind:position />
@@ -134,7 +152,7 @@
   <div class="flex-shrink relative">
     <div class="fixed top-0 bottom-0 left-0 right-0 z-40">
       {#key mapKey}
-        <Map.Fullscreen bind:center={center} positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong}>
+        <Map.Fullscreen bind:center={center} bind:paddingBottomRight bind:paddingTopLeft positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong}>
           <a title="Exit full screen" href="/entry/leg/{data.leg.id}?active=form&{tourDayInfo}" class="absolute group top-2 right-2 z-50 w-5 h-5 inline-flex items-center justify-center">
             <Minimize class="w-5 h-5 dark:text-white group-hover:w-4 group-hover:h-4 transition-all" />
           </a>

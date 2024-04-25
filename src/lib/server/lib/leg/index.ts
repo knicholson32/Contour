@@ -1,13 +1,15 @@
 import prisma from '$lib/server/prisma';
 import { legSelector, type Entry } from '$lib/types';
 import type { Prisma } from '@prisma/client';
+import Fuse from 'fuse.js';
 
 
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 
 export type LegOptions = {
-  positionsOnly?: boolean
+  positionsOnly?: boolean,
+  search?: string | null
 }
 const optionDefault: LegOptions = {}
 export const fetchLegsForSideMenu = async (dayId: number | null, tourId: number | null, options: LegOptions = optionDefault) => {
@@ -50,6 +52,34 @@ export const fetchLegsForSideMenu = async (dayId: number | null, tourId: number 
       orderBy: [{ startTime_utc: 'desc' }, { relativeOrder: 'desc' }]
     });
     displayType = 'generic';
+  }
+
+  if (options.search !== undefined && options.search !== null && options.search !== '') {
+    const fuseOptions = {
+      // isCaseSensitive: false,
+      // includeScore: false,
+      shouldSort: false,
+      // includeMatches: false,
+      // findAllMatches: false,
+      // minMatchCharLength: 1,
+      // location: 0,
+      threshold: 0.0,
+      // distance: 100,
+      // useExtendedSearch: false,
+      // ignoreLocation: false,
+      // ignoreFieldNorm: false,
+      // fieldNormWeight: 1,
+      keys: [
+        "destinationAirportId",
+        "originAirportId",
+        "diversionAirportId",
+        "aircraft.registration",
+        "aircraft.type.typeCode",
+      ]
+    };
+
+    const fuse = new Fuse(_legs, fuseOptions);
+    _legs = fuse.search(options.search).flatMap((v) => v.item);
   }
 
   if (positionsOnly) _legs = _legs.filter((l) => l._count.positions > 0);

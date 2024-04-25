@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { page } from "$app/stores";
+  import { page } from "$app/stores";
 
 
-  export let value: string = '';
+  export let value: string = $page.url.searchParams.get('search') ?? '';
   export let onInput: () => void = () => {};
   export let onSearch: () => void = () => {};
 
@@ -10,7 +10,7 @@
 
 </script>
 
-<div class="flex flex-1 items-center justify-center bg-gray-100 dark:bg-zinc-900 sticky top-0 -z-10">
+<div class="flex flex-1 items-center justify-center bg-gray-100 dark:bg-zinc-900">
   <div class="w-full max-w-lg lg:max-w-xs">
     <label for="search" class="sr-only">Search</label>
     <div class="relative z-50">
@@ -20,8 +20,13 @@
         </svg>
       </div>
       {#if form}
-        <form action="?{$page.url.search}">
+        <form method="get" action="?{$page.url.search}">
           <input id="search" name="search" on:input={onInput} on:submit={onSearch} bind:value class="block relative z-50 w-full border-0 bg-transparent py-1.5 pl-10 pr-3 text-gray-900 dark:text-gray-200 ring-0 placeholder:text-gray-400 focus:ring-0 focus:ring-inset sm:text-sm sm:leading-6" placeholder="Search" type="search">
+          {#each $page.url.searchParams.keys() as searchKey}
+            {#if searchKey !== 'search'}
+              <input name={searchKey} value="{$page.url.searchParams.get(searchKey)}" type="hidden" />
+            {/if}
+          {/each}
         </form>
       {:else}
         <input id="search" name="search" on:input={onInput} on:submit={onSearch} bind:value class="block relative z-50 w-full border-0 bg-transparent py-1.5 pl-10 pr-3 text-gray-900 dark:text-gray-200 ring-0 placeholder:text-gray-400 focus:ring-0 focus:ring-inset sm:text-sm sm:leading-6" placeholder="Search" type="search">

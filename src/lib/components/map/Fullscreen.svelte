@@ -11,8 +11,9 @@
   export let airports: Types.Airport[];
   export let target: [number, number] | null = null;
 
-  export let paddingTopLeft: [number, number] = [275, 20];
-  export let paddingBottomRight: [number, number] = [50, 225];
+  
+  export let paddingTopLeft: [number, number] = [40, 40];
+  export let paddingBottomRight: [number, number] = [40, 40];
 
   let element: HTMLDivElement;
 
@@ -29,7 +30,7 @@
   let targetLayer: L.LayerGroup<any> | null = null;
 
   export const center: (animate?: boolean) => void = (animate = false) => {
-    console.log('center!');
+    if (map === undefined) return;
     try {
       if (posLayer === null) throw new Error();
       // .zoomOut(1, { animate: false });
@@ -37,7 +38,7 @@
       if (fixLayer !== null) bounds.extend(fixLayer.getBounds());
       for(const airport of airports) bounds.extend([airport.latitude, airport.longitude]);
       map.fitBounds(bounds, { animate, paddingTopLeft, paddingBottomRight });
-      
+
     } catch (e) {
       let smallestLat = airports[0].latitude;
       let largestLat = airports[0].latitude;

@@ -82,7 +82,7 @@ export const load = async ({ fetch, params, url }) => {
   const tourId = (url.searchParams.get('tour') === null || url.searchParams.get('tour') === '') ? null : parseInt(url.searchParams.get('tour') ?? '-1');
 
   // Fetch all the legs for the side menu
-  const legs = await fetchLegsForSideMenu(dayId, tourId, { positionsOnly: true });
+  const legs = await fetchLegsForSideMenu(dayId, tourId, { positionsOnly: true, search: url.searchParams.get('search') });
 
   return {
     params,
