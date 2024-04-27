@@ -37,6 +37,7 @@
 		"lucide-svelte": "^0.340.0",
 		"mime-types": "^2.1.35",
 		"mode-watcher": "^0.2.1",
+		"neat-csv": "^7.0.0",
 		"node-fetch": "^3.3.2",
 		"nprogress": "^0.2.0",
 		"pluralize": "^8.0.0",

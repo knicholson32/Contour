@@ -471,6 +471,28 @@ model AircraftRegistrationLookup {
   @@map("aircraftRegistrationLookup")
 }
 
+model NavDataNav {
+  index         Int             @id @default(autoincrement())
+  id            String
+  name          String?
+  type          String
+  latitude      Float
+  longitude     Float
+  NavDataAirway NavDataAirway[]
+
+  @@map("navDataNav")
+}
+
+model NavDataAirway {
+  index        Int          @id @default(autoincrement())
+  id           String
+  airwayString String
+  region       String // (C) Contential, (H) Hawaii, (A) Alaska
+  fixes        NavDataNav[]
+
+  @@map("navDataAirway")
+}
+
 model Position {
   legId          String
   altitude       Int

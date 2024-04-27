@@ -22,9 +22,14 @@
 	let regUpdate: () => {};
 	let regUnsavedChanges = false;
 
+	// Navigation
+	let navUpdate: () => {};
+	let navUnsavedChanges = false;
+	let navSource: string = 'unset';
+
 	// Utilities
 	beforeNavigate(({ cancel }) => {
-		if (approachUnsavedChanges || optionsUnsavedChanges || regUnsavedChanges) {
+		if (approachUnsavedChanges || optionsUnsavedChanges || regUnsavedChanges || navUnsavedChanges) {
 			if (!confirm('Are you sure you want to leave this page? You have unsaved changes that will be lost.')) {
 				cancel();
 			}
@@ -45,6 +50,13 @@
 			: intlFormatDistance(new Date(data.settingValues['data.aircraftReg.lastSync'] * 1000), new Date());
 	$: lastSyncTimeReg =
 		data.settingValues['data.aircraftReg.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.aircraftReg.lastSync'] * 1000, data.settings['general.timezone']);
+
+	$: lastSyncNav =
+		data.settingValues['data.navData.lastSync'] === -1
+			? 'Never'
+			: intlFormatDistance(new Date(data.settingValues['data.navData.lastSync'] * 1000), new Date());
+	$: lastSyncTimeNav =
+		data.settingValues['data.navData.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.navData.lastSync'] * 1000, data.settings['general.timezone']);
 
 </script>
 
@@ -99,6 +111,31 @@
 		</DataEntry>
 		<DataEntry title={'Last Sync'}>
 			<span title={lastSyncTimeReg}>{lastSyncReg}</span>
+		</DataEntry>
+	</DataContainer>
+
+</Settings.List>
+
+<Settings.List class="" {form} action="?/updateNavData" bind:unsavedChanges={navUnsavedChanges} bind:update={navUpdate} >
+	<span slot="title">FAA Navigation Database</span>
+	<span slot="description">Update the FAA Navigation Database source.</span>
+
+	<Settings.Select {form} name="nav.option" title="Update To" update={navUpdate} bind:value={navSource}
+		options={data.navDataOptions}
+	/>
+
+	<DataContainer>
+		<DataEntry title={'Fixes'} data={data.numFixes.toFixed(0)}/>
+		<DataEntry title={'Effective'} data={data.effectiveDateNav}/>
+		<DataEntry title={'Data Source'}>
+			{#if data.settingValues['data.navData.source'] === ''}
+				None
+			{:else}
+				<a target="_blank" href="{data.settingValues['data.navData.source']}">FAA NASR</a>
+			{/if}
+		</DataEntry>
+		<DataEntry title={'Last Sync'}>
+			<span title={lastSyncTimeNav}>{lastSyncNav}</span>
 		</DataEntry>
 	</DataContainer>
 
