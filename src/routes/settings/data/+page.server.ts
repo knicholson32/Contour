@@ -1,11 +1,12 @@
 import prisma from '$lib/server/prisma';
 import * as settings from '$lib/server/settings';
-import { API, type NavAirway, type NavFix, type NavNav } from '$lib/types';
+import { API, type NavAirway, type NavDPRoute, type NavFix, type NavNav, type NavSTARRoute } from '$lib/types';
 import { unzip } from 'unzipit';
 import type * as Types from '@prisma/client';
 import neatCsv from "neat-csv";
 import { getDistanceFromLatLonInKm } from '$lib/server/helpers';
 import { pad } from '$lib/helpers';
+import { v4 as uuidv4 } from 'uuid';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -69,6 +70,26 @@ export const load = async ({ params }) => {
 		unset: true,
 		value: 'unset'
 	}];
+
+	// const val = await prisma.navDataSIDSTAR.findUnique({ where: { id: 'CIITY', type: 'DP' }, 
+	// 	include: { 
+	// 		runwayLeads: { where: { airport: 'KSFO', runway: '10R' },include: { fixes: true }}, 
+	// 		transitions: { where: { identifier: 'SYRAH' },include: { fixes: true }} 
+	// 	}
+	// });
+
+	// if (val !== null) {
+	// 	const runwayLead = val.runwayLeads[0];
+	// 	const runwayOrder = runwayLead.fixesOrder.split(', ').flatMap((v) => parseInt(v));
+	// 	runwayLead.fixes.sort((a, b) => runwayOrder.findIndex((v) => v === a.index) - runwayOrder.findIndex((v) => v === b.index));
+
+	// 	const transition = val.transitions[0];
+	// 	const transitionOrder = transition.fixesOrder.split(', ').flatMap((v) => parseInt(v));
+	// 	transition.fixes.sort((a, b) => transitionOrder.findIndex((v) => v === a.index) - transitionOrder.findIndex((v) => v === b.index));
+
+	// 	console.log(JSON.stringify(transition));
+	// 	console.log(JSON.stringify(runwayLead));
+	// }
 
 
 	const starterDate = new Date('01/26/2023 00:00:00Z');
@@ -385,6 +406,9 @@ export const actions = {
 		const sourceKey = `${pad(optionDate.getUTCDate(), 2)}_${months[optionDate.getUTCMonth()]}_${optionDate.getUTCFullYear()}_CSV.zip`;
 		const source = `https://nfdc.faa.gov/webContent/28DaySub/extra/${sourceKey}`;
 
+		// console.log(source);
+		// return;
+
 		try {
 			const { entries } = await unzip(source);
 
@@ -392,7 +416,9 @@ export const actions = {
 			let found = {
 				nav: false,
 				fix: false,
-				airway: false
+				airway: false,
+				sid: false,
+				star: false,
 			}
 			for (const entry of Object.entries(entries)) {
 				const [key, _] = entry;
@@ -405,13 +431,21 @@ export const actions = {
 				if (key === 'AWY_BASE.csv') {
 					found.airway = true;
 				}
+				if (key === 'DP_RTE.csv') {
+					found.sid = true;
+				}
+				if (key === 'STAR_RTE.csv') {
+					found.star = true;
+				}
 			}
 
-			if (found.nav === false || found.fix === false || found.airway === false) {
+			if (found.nav === false || found.fix === false || found.airway === false || found.sid === false || found.star === false) {
 				let missing: string[] = [];
 				if (found.nav === false) missing.push('NAV_BASE.csv');
 				if (found.fix === false) missing.push('FIX_BASE.csv');
 				if (found.airway === false) missing.push('AWY_BASE.csv');
+				if (found.sid === false) missing.push('DP_RTE.csv');
+				if (found.star === false) missing.push('STAR_RTE.csv');
 				return API.Form.formFailure('?/updateNavData', 'nav.option', `Missing files in Navigation Data (${source}): ${missing.join(', ')}`);
 			}
 
@@ -421,11 +455,15 @@ export const actions = {
 				nav: await neatCsv(await entries['NAV_BASE.csv'].text()) as NavNav[],
 				fixes: await neatCsv(await entries['FIX_BASE.csv'].text()) as NavFix[],
 				airways: await neatCsv(await entries['AWY_BASE.csv'].text()) as NavAirway[],
+				sids: await neatCsv(await entries['DP_RTE.csv'].text()) as NavDPRoute[],
+				stars: await neatCsv(await entries['STAR_RTE.csv'].text()) as NavSTARRoute[],
 			}
 
 			// Clear the current nav data
-			await prisma.navDataNav.deleteMany({});
+			await prisma.navDataSIDSTARRouteSegment.deleteMany({});
+			await prisma.navDataSIDSTAR.deleteMany({});
 			await prisma.navDataAirway.deleteMany({});
+			await prisma.navDataNav.deleteMany({});
 
 
 			let inserts: Types.Prisma.PrismaPromise<any>[] = [];
@@ -497,6 +535,302 @@ export const actions = {
 				}
 			}
 
+			
+			// Save airway and nav points
+			await prisma.$transaction(inserts) as Types.Prisma.NavDataAirwayGetPayload<{}>[];
+			inserts = [];
+
+			// SID --------------------------------------------------------
+			{
+				let parsing = true;
+
+				let row: NavDPRoute | undefined = undefined;
+				let set: NavDPRoute[] = [];
+				let routeName: string;
+				let dpComputerCode: string;
+
+				let index = 0;
+
+				let runwaySets: string[] = [];
+				let transitionSets: string[] = [];
+				let airportsServiced: string[] = [];
+
+				while (parsing) {
+					// Get the current row
+					row = nav.sids[index];
+					// Get the DP name
+					dpComputerCode = row.DP_COMPUTER_CODE;
+					// Clear the set ID arrays
+					runwaySets = [];
+					transitionSets = [];
+					airportsServiced = [];
+					// Loop until we get to another DP
+					while (row !== undefined && row.DP_COMPUTER_CODE === dpComputerCode) {
+						// Clear the current set
+						set = [];
+						// Get the current row
+						row = nav.sids[index];
+						// Get the route name. We will use the route name to get a set of points
+						routeName = row.ROUTE_NAME;
+						// Loop until we get to another row
+						while (row !== undefined && row.ROUTE_NAME === routeName) {
+							// Add this row to the set
+							set.push(row);
+							// Get and assign the next row
+							row = nav.sids[index++];
+						}
+						// Go back an index so we can get this row again for the next round
+						index--;
+
+						// We need to parse the set
+						if (set.length > 0) {
+
+							// Resolve the points for this segment
+							const points: string[] = [];
+							const fixIndices: number[] = [];
+							// Add each point to an array in reverse order (because it is a SID)
+							for (const s of set) if (!points.includes(s.POINT)) points.unshift(s.POINT);
+							// Get all fixes based on the list of point names
+							const fixes = await prisma.navDataNav.findMany({ where: { id: { in: points } } });
+							// Generate an array to assist in connecting fixes to this segment
+							const fixesConnect: Types.Prisma.NavDataNavWhereUniqueInput[] = [];
+							// Loop through the points (fixes) and connect them
+							for (const point of points) {
+								const pt = fixes.find((v) => v.id === point);
+								if (pt !== undefined) {
+									fixesConnect.push({ index: pt.index });
+									fixIndices.push(pt.index);
+								}
+							}
+
+							// Check if this is a runway segment (body) or a transition segment
+							if (set[0].ROUTE_PORTION_TYPE === 'BODY') {
+								// It is a runway segment. We need to duplicate this segment for each runway option
+
+								// Get the airport-runway combos for this set
+								const aptRunways = set[0].ARPT_RWY_ASSOC.split(', ');
+
+								// Loop for each of those combos
+								for (const aptRunway of aptRunways) {
+									// Generate an ID for this segment
+									const id = uuidv4();
+									// Add the ID to the list of IDs to add to this SID entry
+									runwaySets.push(id);
+									// Generate the identifier
+									const split = aptRunway.split('/');
+									const airport = isNaN(parseInt(split[0].charAt(0))) ? 'K' + split[0] : split[0];
+									if (!airportsServiced.includes(airport)) airportsServiced.push(airport);
+									const runway = split.length > 1 ? split[1] : null
+									// Add the segment
+									inserts.push(prisma.navDataSIDSTARRouteSegment.create({
+										data: {
+											id,
+											airport: airport,
+											runway: runway,
+											name: set[0].ROUTE_NAME,
+											type: set[0].ROUTE_PORTION_TYPE,
+											fixes: { connect: fixesConnect },
+											fixesOrder: fixIndices.join(', ')
+										}
+									}));
+								}
+							} else {
+								// It is a transition segment. Add it normally.
+								// Generate an ID for this segment
+								const id = uuidv4();
+								// Add the ID to the list of IDs to add to this SID entry
+								transitionSets.push(id);
+								// Add the segment
+								inserts.push(prisma.navDataSIDSTARRouteSegment.create({
+									data: {
+										id,
+										identifier: set[0].TRANSITION_COMPUTER_CODE.split('.')[1],
+										name: set[0].ROUTE_NAME,
+										type: set[0].ROUTE_PORTION_TYPE,
+										fixes: { connect: fixesConnect },
+										fixesOrder: fixIndices.join(', ')
+									}
+								}));
+							}
+						}
+					}
+
+					// This DP is resolved. We can save it.
+					// Resolve the runway and transition sets
+					const runwayLeads: Types.Prisma.NavDataSIDSTARRouteSegmentWhereUniqueInput[] = [];
+					const transitions: Types.Prisma.NavDataSIDSTARRouteSegmentWhereUniqueInput[] = [];
+					for (const rSet of runwaySets) runwayLeads.push({ id: rSet });
+					for (const tSet of transitionSets) transitions.push({ id: tSet });
+
+					// Get the SID revision number
+					const code = dpComputerCode.split('.')[0];
+					const codeParsed = parseInt(code.charAt(code.length - 1));
+					const revision = isNaN(codeParsed) ? 1 : codeParsed;
+
+					if (code !== 'NOT ASSIGNED') {
+						// Save the DP
+						inserts.push(prisma.navDataSIDSTAR.create({
+							data: {
+								id: code.substring(0, code.length - 1),
+								revision,
+								airportsServiced: airportsServiced.join(', '),
+								type: 'DP',
+								runwayLeads: { connect: runwayLeads },
+								transitions: { connect: transitions },
+							}
+						}));
+					}
+					// If the row is undefined, we are at the end. Parsing is done
+					if (row === undefined) parsing = false;
+				}
+			}
+
+			// STAR -------------------------------------------------------
+			{
+				let parsing = true;
+
+				let row: NavSTARRoute | undefined = undefined;
+				let set: NavSTARRoute[] = [];
+				let routeName: string;
+				let starComputerCode: string;
+
+				let index = 0;
+
+				let runwaySets: string[] = [];
+				let transitionSets: string[] = [];
+				let airportsServiced: string[] = [];
+
+				while (parsing) {
+					// Get the current row
+					row = nav.stars[index];
+					// Get the STAR name
+					starComputerCode = row.STAR_COMPUTER_CODE;
+					// Clear the set ID arrays
+					runwaySets = [];
+					transitionSets = [];
+					airportsServiced = [];
+					// Loop until we get to another STAR
+					while (row !== undefined && row.STAR_COMPUTER_CODE === starComputerCode) {
+						// Clear the current set
+						set = [];
+						// Get the current row
+						row = nav.stars[index];
+						// Get the route name. We will use the route name to get a set of points
+						routeName = row.ROUTE_NAME;
+						// Loop until we get to another row
+						while (row !== undefined && row.ROUTE_NAME === routeName) {
+							// Add this row to the set
+							set.push(row);
+							// Get and assign the next row
+							row = nav.stars[index++];
+						}
+						// Go back an index so we can get this row again for the next round
+						index--;
+
+						// We need to parse the set
+						if (set.length > 0) {
+
+							// Resolve the points for this segment
+							const points: string[] = [];
+							const fixIndices: number[] = [];
+							// Add each point to an array
+							for (const s of set) if (!points.includes(s.POINT)) points.unshift(s.POINT);
+							// Get all fixes based on the list of point names
+							const fixes = await prisma.navDataNav.findMany({ where: { id: { in: points } } });
+							// Generate an array to assist in connecting fixes to this segment
+							const fixesConnect: Types.Prisma.NavDataNavWhereUniqueInput[] = [];
+							// Loop through the points (fixes) and connect them
+							for (const point of points) {
+								const pt = fixes.find((v) => v.id === point);
+								if (pt !== undefined) {
+									fixesConnect.push({ index: pt.index });
+									fixIndices.push(pt.index);
+								}
+							}
+
+							// Check if this is a runway segment (body) or a transition segment
+							if (set[0].ROUTE_PORTION_TYPE === 'BODY') {
+								// It is a runway segment. We need to duplicate this segment for each runway option
+
+								// Get the airport-runway combos for this set
+								const aptRunways = set[0].ARPT_RWY_ASSOC.split(', ');
+
+								// Loop for each of those combos
+								for (const aptRunway of aptRunways) {
+									// Generate an ID for this segment
+									const id = uuidv4();
+									// Add the ID to the list of IDs to add to this SID entry
+									runwaySets.push(id);
+									// Generate the identifier
+									const split = aptRunway.split('/');
+									const airport = isNaN(parseInt(split[0].charAt(0))) ? 'K' + split[0] : split[0];
+									if (!airportsServiced.includes(airport)) airportsServiced.push(airport);
+									const runway = split.length > 1 ? split[1] : null
+									// Add the segment
+									inserts.push(prisma.navDataSIDSTARRouteSegment.create({
+										data: {
+											id,
+											airport: airport,
+											runway: runway,
+											name: set[0].ROUTE_NAME,
+											type: set[0].ROUTE_PORTION_TYPE,
+											fixes: { connect: fixesConnect },
+											fixesOrder: fixIndices.join(', ')
+										}
+									}));
+								}
+							} else {
+								// It is a transition segment. Add it normally.
+								// Generate an ID for this segment
+								const id = uuidv4();
+								// Add the ID to the list of IDs to add to this SID entry
+								transitionSets.push(id);
+								// Add the segment
+								inserts.push(prisma.navDataSIDSTARRouteSegment.create({
+									data: {
+										id,
+										identifier: set[0].TRANSITION_COMPUTER_CODE.split('.')[0],
+										name: set[0].ROUTE_NAME,
+										type: set[0].ROUTE_PORTION_TYPE,
+										fixes: { connect: fixesConnect },
+										fixesOrder: fixIndices.join(', ')
+									}
+								}));
+							}
+						}
+					}
+
+					// This STAR is resolved. We can save it.
+					// Resolve the runway and transition sets
+					const runwayLeads: Types.Prisma.NavDataSIDSTARRouteSegmentWhereUniqueInput[] = [];
+					const transitions: Types.Prisma.NavDataSIDSTARRouteSegmentWhereUniqueInput[] = [];
+					for (const rSet of runwaySets) runwayLeads.push({ id: rSet });
+					for (const tSet of transitionSets) transitions.push({ id: tSet });
+
+					// Get the STAR revision number
+					const code = starComputerCode.split('.')[1];
+					const codeParsed = parseInt(code.charAt(code.length - 1));
+					const revision = isNaN(codeParsed) ? 1 : codeParsed;
+
+					if (code !== 'NOT ASSIGNED') {
+						// Save the STAR
+						inserts.push(prisma.navDataSIDSTAR.create({
+							data: {
+								id: code.substring(0, code.length - 1),
+								revision,
+								airportsServiced: airportsServiced.join(', '),
+								type: 'STAR',
+								runwayLeads: { connect: runwayLeads },
+								transitions: { connect: transitions },
+							}
+						}));
+					}
+					// If the row is undefined, we are at the end. Parsing is done
+					if (row === undefined) parsing = false;
+				}
+			}
+
+			// Save airway and nav points
 			await prisma.$transaction(inserts) as Types.Prisma.NavDataAirwayGetPayload<{}>[];
 
 			await settings.set('data.navData.lastSync', Math.floor(new Date().getTime() / 1000));

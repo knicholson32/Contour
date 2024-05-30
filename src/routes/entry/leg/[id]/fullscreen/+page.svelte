@@ -83,7 +83,7 @@
     return pad(date.getUTCHours(), 2) + ':' + pad(date.getUTCMinutes(), 2);
   }
 
-  let speedScaler = 1;
+  // let speedScaler = 1;
 
   const x = (d: Types.Position) => d.timestamp;
   const yAltitude = (d: Types.Position) => {
@@ -92,7 +92,7 @@
   }
   const ySpeed = (d: Types.Position) => {
     if (d.updateType === DB.UpdateType.PROJECTED || d.groundspeed === 0) return undefined;
-    return d.groundspeed * speedScaler;
+    return d.groundspeed * data.speedScaler;
   }
   const crosshairColor = (d: Types.Position, i: number) => [color()(),color({ secondary: true })()][i]
 

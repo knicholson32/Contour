@@ -249,3 +249,36 @@ export type NavAirway = {
 	REMARK: string,
 	AIRWAY_STRING: string,
 }
+
+export type NavDPRoute = {
+	EFF_DATE: string,
+	DP_NAME: string,
+	ARTCC: string,
+	DP_COMPUTER_CODE: string,
+	ROUTE_PORTION_TYPE: string,
+	ROUTE_NAME: string,
+	BODY_SEQ: string,
+	TRANSITION_COMPUTER_CODE: string,
+	POINT_SEQ: string,
+	POINT: string,
+	ICAO_REGION_CODE: string,
+	POINT_TYPE: string,
+	NEXT_POINT: string,
+	ARPT_RWY_ASSOC: string
+}
+
+export type NavSTARRoute = {
+	EFF_DATE: string,
+	STAR_COMPUTER_CODE: string,
+	ARTCC: string,
+	ROUTE_PORTION_TYPE: string,
+	ROUTE_NAME: string,
+	BODY_SEQ: string,
+	TRANSITION_COMPUTER_CODE: string,
+	POINT_SEQ: string,
+	POINT: string,
+	ICAO_REGION_CODE: string,
+	POINT_TYPE: string,
+	NEXT_POINT: string,
+	ARPT_RWY_ASSOC: string
+}

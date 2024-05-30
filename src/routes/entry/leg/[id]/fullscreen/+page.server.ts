@@ -74,6 +74,18 @@ export const load = async ({ fetch, params, url }) => {
     tickValues.push(last);
   }
 
+  let speedScaler = 1;
+  let maxSpeed = 0;
+  let maxAlt = 0;
+
+  if (leg !== null) {
+    for (const p of leg.positions) {
+      if (p.altitude * 100 > maxAlt) maxAlt = p.altitude * 100;
+      if (p.groundspeed > maxSpeed) maxSpeed = p.groundspeed;
+    }
+    speedScaler = maxAlt / maxSpeed * 1;
+  }
+
 
   // Get the dayId from the search params, if it exists
   const dayId = (url.searchParams.get('day') === null || url.searchParams.get('day') === '') ? null : parseInt(url.searchParams.get('day') ?? '-1');
@@ -100,6 +112,7 @@ export const load = async ({ fetch, params, url }) => {
     //   distance
     // },
     tickValues,
+    speedScaler,
     startTime: dateToDateStringForm(leg?.startTime_utc ?? 0, false, 'UTC'),
     startTimezone: originAirport === null || leg === null ? null : getTimezoneObjectFromTimezone(originAirport.timezone),
     endTime: dateToDateStringForm(leg?.endTime_utc ?? 0, false, 'UTC'),

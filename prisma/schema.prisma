@@ -472,13 +472,16 @@ model AircraftRegistrationLookup {
 }
 
 model NavDataNav {
-  index         Int             @id @default(autoincrement())
-  id            String
-  name          String?
-  type          String
-  latitude      Float
-  longitude     Float
-  NavDataAirway NavDataAirway[]
+  index               Int                          @id @default(autoincrement())
+  id                  String
+  name                String?
+  type                String
+  latitude            Float
+  longitude           Float
+  NavDataAirway       NavDataAirway[]
+  // NavDataSID      NavDataSIDSTAR[] @relation("SIDBody")
+  // NavDataSIDFixes NavDataSIDSTAR[]
+  NavDataSIDSTARRoute NavDataSIDSTARRouteSegment[] @relation("SIDSTARRoute")
 
   @@map("navDataNav")
 }
@@ -491,6 +494,36 @@ model NavDataAirway {
   fixes        NavDataNav[]
 
   @@map("navDataAirway")
+}
+
+model NavDataSIDSTARRouteSegment {
+  id String @id @default(uuid())
+  identifier                 String?  // XXXXX
+  airport                    String?  // XXX
+  runway                     String?  // ##X
+  type                       String   // BODY or TRANSITION
+  name                       String
+  fixes                      NavDataNav[]     @relation("SIDSTARRoute")
+  fixesOrder                 String   // 123, 456, 555, 890
+  navDataSIDSTARRWLead       NavDataSIDSTAR?  @relation("SIDSTARRWLeads", fields: [navDataSIDSTARRWLeadId], references: [id])
+  navDataSIDSTARRWLeadId     String?
+  navDataSIDSTARTransition   NavDataSIDSTAR?  @relation("SIDSTARTransitions", fields: [navDataSIDSTARTransitionId], references: [id])
+  navDataSIDSTARTransitionId String?
+
+  @@map("navDataSIDSTARRouteSegment")
+}
+
+model NavDataSIDSTAR {
+  id   String  @id
+  revision Int
+
+  runwayLeads NavDataSIDSTARRouteSegment[] @relation("SIDSTARRWLeads")
+  transitions NavDataSIDSTARRouteSegment[] @relation("SIDSTARTransitions")
+
+  airportsServiced String
+  type String
+
+  @@map("navDataSIDSTAR")
 }
 
 model Position {
