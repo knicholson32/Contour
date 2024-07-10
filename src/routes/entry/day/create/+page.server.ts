@@ -36,6 +36,9 @@ export const load = async ({ params, fetch, url }) => {
 
   const lastDay = await prisma.dutyDay.findFirst({ where: { tourId: currentTour.id }, orderBy: { endTime_utc: 'desc'} });
 
+  // Reset the last used flight ID
+  await settings.set('entry.flight_id.last', '');
+
   return {
     entrySettings,
     // tourSettings,

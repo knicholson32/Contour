@@ -128,8 +128,11 @@ export const actions = {
       });
 
       await settings.set('entry.tour.current', -1);
-
-      await prisma.option.deleteMany({ where: { tourId: tourId } });
+      await settings.set('entry.flight_id.last', '');
+      await prisma.option.deleteMany({ where: { OR: [
+        { tourId: tourId },
+        { tourId: null }
+      ] } });
 
     } catch (e) {
       console.log(e);

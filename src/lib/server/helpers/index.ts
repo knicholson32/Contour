@@ -559,3 +559,45 @@ export const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: numb
 export const deg2rad = (deg: number) => {
 	return deg * (Math.PI / 180)
 }
+
+
+export const lookupSIDOrSTAR = async (type: 'DP' | 'STAR', procedureIdentifier: string, transition: string, options: { airport?: string, runway?: string }) => {
+	// let runwayLeads: Types.Prisma.NavDataSIDSTAR$runwayLeadsArgs;
+	// if (options.airport !== undefined || options.runway !== undefined) {
+	// 	if (options.runway === undefined) {
+	// 		runwayLeads = { where: { airport: options.airport }, include: { fixes: true } }
+	// 	} else {
+	// 		runwayLeads = { where: { airport: options.airport, runway: options.runway }, include: { fixes: true } }
+	// 	}
+	// } else {
+	// 	runwayLeads = { include: { fixes: true } };
+	// }
+	// const t = { include: {
+	// 	transitions: { where: { identifier: transition }, include: { fixes: true } },
+	// 	runwayLeads: { where: { identifier: transition }, include: { fixes: true } },
+	// }};
+	const val = await prisma.navDataSIDSTAR.findUnique({ where: { id: procedureIdentifier, type }, 
+		include: {
+			transitions: { where: { identifier: transition }, include: { fixes: true }},
+			runwayLeads: { where: { airport: options.airport, runway: options.runway }, include: { fixes: true } },
+		}
+	});
+
+	if (val !== null) {
+		if (val.transitions.length === 0) return null;
+		for (const transition of val.transitions) {
+			const transitionOrder = transition.fixesOrder.split(', ').flatMap((v) => parseInt(v));
+			transition.fixes.sort((a, b) => transitionOrder.findIndex((v) => v === a.index) - transitionOrder.findIndex((v) => v === b.index));
+		}
+
+		if (val.runwayLeads.length !== 0) {
+			for (const lead of val.runwayLeads) {
+				const runwayOrder = lead.fixesOrder.split(', ').flatMap((v) => parseInt(v));
+				lead.fixes.sort((a, b) => runwayOrder.findIndex((v) => v === a.index) - runwayOrder.findIndex((v) => v === b.index));
+			}
+		}
+
+		return val;
+	}
+	return null;
+}

@@ -66,6 +66,11 @@
 	<span slot="description">Alter how data is entered into Contour.</span>
 
 	<Settings.Switch name="entry.entryMXMode" {form} bind:value={data.settingValues['entry.entryMXMode']} title="Enable data entry maintenance mode" update={optionUpdate} hoverTitle={'Whether or not to allow FlightAware data to be deleted from leg and other maintenance features.'} />
+
+	{#if data.settingValues['entry.entryMXMode']}
+		<Settings.Switch {form} name="options.clear" title="Clear Options ({data.numFlightOptions} in DB)" value={false} update={optionUpdate}/>
+		
+	{/if}
 </Settings.List>
 
 
@@ -91,8 +96,8 @@
 			{/if}
 		</DataEntry>
 		<DataEntry title={'Last Sync'}>
-				<span title={lastSyncTime}>{lastSync}</span>
-			</DataEntry>
+			<span title={lastSyncTime}>{lastSync}</span>
+		</DataEntry>
 	</DataContainer>
 
 </Settings.List>

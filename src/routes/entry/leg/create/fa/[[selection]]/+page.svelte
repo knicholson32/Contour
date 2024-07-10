@@ -63,6 +63,8 @@
   });
 
   console.log(data.flightIDOptions);
+  
+  const now = Math.floor((new Date()).getTime() / 1000);
 
   let flightIDs: string;
   const addOption = (option: string) => {
@@ -149,7 +151,7 @@
                 {o.ident}
               </a></td>
               <td class="text-yellow-500 pl-2 md:pl-0">
-                {#if o.progress === 0 || o.inaccurateTiming === true}
+                {#if o.progress === 0 || o.inaccurateTiming === true || o.startTime === 0 || o.startTime <= now - (10 * 24 * 60 * 60)}
                   <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
                     {@html icons.warning}
                   </svg>
@@ -232,6 +234,7 @@
 
       <form method="post" enctype="multipart/form-data" use:enhance={() => {
         submitting = true;
+        formManager.clearUID();
         return async ({ update }) => {
           await update({ reset: false });
           submitting = false;

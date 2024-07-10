@@ -86,7 +86,6 @@ export const load = async ({ params, fetch, url }) => {
 
   const flightIDOptions: string[] = [];
   const availableOptionsTotal = await prisma.option.findMany({ where: { cancelled: false }, select: { ident: true } });
-  console.log(availableOptionsTotal);
   for (const o of availableOptionsTotal) if (!flightIDOptions.includes(o.ident)) flightIDOptions.push(o.ident);
 
   if (fetchAirports === true) {

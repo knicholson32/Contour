@@ -4,7 +4,7 @@ import { API, type NavAirway, type NavDPRoute, type NavFix, type NavNav, type Na
 import { unzip } from 'unzipit';
 import type * as Types from '@prisma/client';
 import neatCsv from "neat-csv";
-import { getDistanceFromLatLonInKm } from '$lib/server/helpers';
+import { getDistanceFromLatLonInKm, lookupSIDOrSTAR } from '$lib/server/helpers';
 import { pad } from '$lib/helpers';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -71,27 +71,6 @@ export const load = async ({ params }) => {
 		value: 'unset'
 	}];
 
-	// const val = await prisma.navDataSIDSTAR.findUnique({ where: { id: 'CIITY', type: 'DP' }, 
-	// 	include: { 
-	// 		runwayLeads: { where: { airport: 'KSFO', runway: '10R' },include: { fixes: true }}, 
-	// 		transitions: { where: { identifier: 'SYRAH' },include: { fixes: true }} 
-	// 	}
-	// });
-
-	// if (val !== null) {
-	// 	const runwayLead = val.runwayLeads[0];
-	// 	const runwayOrder = runwayLead.fixesOrder.split(', ').flatMap((v) => parseInt(v));
-	// 	runwayLead.fixes.sort((a, b) => runwayOrder.findIndex((v) => v === a.index) - runwayOrder.findIndex((v) => v === b.index));
-
-	// 	const transition = val.transitions[0];
-	// 	const transitionOrder = transition.fixesOrder.split(', ').flatMap((v) => parseInt(v));
-	// 	transition.fixes.sort((a, b) => transitionOrder.findIndex((v) => v === a.index) - transitionOrder.findIndex((v) => v === b.index));
-
-	// 	console.log(JSON.stringify(transition));
-	// 	console.log(JSON.stringify(runwayLead));
-	// }
-
-
 	const starterDate = new Date('01/26/2023 00:00:00Z');
 	const now = new Date();
 
@@ -126,10 +105,15 @@ export const load = async ({ params }) => {
 	if (y0 !== null && y1 !== null) years = `${y0.manufactureYear} - ${y1.manufactureYear}`;
 
 
+	// const star = await lookupSIDOrSTAR('STAR', 'PIRAT', 'CINNY', { airport: 'KOAK' });
+	// console.log(JSON.stringify(star));
+
+
 	return {
 		settingValues,
 		effectiveDate,
 		effectiveDateNav,
+		numFlightOptions: await prisma.option.count(),
 		numApproaches: await prisma.approachOptions.count(),
 		numRegs: await prisma.aircraftRegistrationLookup.count(),
 		numFixes: await prisma.navDataNav.count(),
@@ -146,6 +130,9 @@ export const actions = {
 
 		const entryMXMode = (data.get('entry.entryMXMode') ?? undefined) as undefined | string;
 		if (entryMXMode !== undefined) await settings.set('entry.entryMXMode', entryMXMode === 'true');
+
+		const clearOptions = data.get('options.clear') === 'true';
+		if (clearOptions) await prisma.option.deleteMany({ });
 
 	},
 	updateApproaches: async ({ request }) => {

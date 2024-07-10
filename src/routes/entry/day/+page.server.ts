@@ -16,8 +16,6 @@ export const load = async ({ params, fetch, url }) => {
 
   let days: Prisma.TourGetPayload<{ select: { id: true }}>[] | null = null;
 
-  console.log('tour!');
-
   if (tour === null) {
     // We don't have a tour restriction, so all days are possible
     days = await prisma.dutyDay.findMany({ select: { id: true }, orderBy: { startTime_utc: 'desc' }, take: 1 });
