@@ -64,7 +64,6 @@ export const load = async ({ params, fetch, url }) => {
         if (currentDay === null) {
           // We do not. Rely on the date selected during the search
           const date = url.searchParams.get('date');
-          console.log('date!', date);
           if (date !== null) {
             const d = Math.floor((new Date(date)).getTime() / 1000);
             await options.getOptionsAndCache(aeroAPIKey, currentTour?.id ?? null, flightIDs, { startTime: d, endTime: d + TWENTY_FOUR_HOURS });

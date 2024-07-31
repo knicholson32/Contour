@@ -104,7 +104,7 @@ export const getFlightsBulk = async (callsign: string, aeroAPIKey: string, optio
     // Log the bulk request
     console.log(chalk.red('AeroAPI: ') + chalk.grey(`getFlightsBulk(${callsign}, ####, ${JSON.stringify(options)})`) + ' -> Requested');
     // Resolve the ident_type
-    if (options.ident_type === undefined) options.ident_type = 'designator';
+    if (options.ident_type === undefined) options.ident_type = 'registration';
     // Declare the request
     let request: string;
     // See if we are using times

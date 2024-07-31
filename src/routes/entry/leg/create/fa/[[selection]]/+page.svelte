@@ -61,8 +61,6 @@
     deleteQueries(['no-cache', 'expansive']);
     progress = false;
   });
-
-  console.log(data.flightIDOptions);
   
   const now = Math.floor((new Date()).getTime() / 1000);
 

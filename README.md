@@ -20,44 +20,20 @@ Typical `docker-compose.yml`:
 ```yml
 version: '3.8'
 services:
-  db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: contour-root-password # Change this!
-      MYSQL_DATABASE: contour
-      MYSQL_USER: contour
-      MYSQL_PASSWORD: contour-password # Change this!
-    ports:
-      - 3306:3306
-    volumes:
-      - /path/to/db:/var/lib/mysql
-
-  phpmyadmin:
-    image: phpmyadmin
-    restart: always
-    ports:
-      - 8080:80
-    environment:
-      PMA_ARBITRARY: 1
-    depends_on:
-      - db
-
   contour:
     image: 'keenanrnicholson/contour:local'
     container_name: contour
     restart: unless-stopped
+    volumes:
+      - /path/to/db/folder:/db
+      - /path/to/file/folder:/files
     environment:
       PUID: 1000
       PGID: 1000
       ORIGIN: 'http://localhost:5173'
       TZ: 'America/New_York'
-      DATABASE_URL: 'mysql://contour:contour-password@db:/contour' # Change this!
     ports:
       - '5173:3000'
-    depends_on:
-      - db
 ```
 
 Contour is _not_ designed to be accessible to the public internet. A reverse proxy such as [traefik](https://traefik.io/traefik/) or [Nginx Proxy Manager](https://nginxproxymanager.com/) should be used if `https` is required. Access to Contour should be confined to your local network or intelligently managed.
