@@ -38,7 +38,7 @@
     { title: 'Dashboard', popover: false,  href: '/' },
     { title: 'Entry', popover: false, href: `/entry`, submenu: [ { title: 'Tours', href: '/entry/tour', icon: 'briefcase', description: 'Enter flights that are associated with a work tour or duty day.'}, { title: 'Legs', href: '/entry/leg', icon: 'send', description: 'Enter generic flights that are not associated with a tour.'}] },
     { title: 'Aircraft', popover: false, href: '/aircraft', submenu: [ { title: 'Aircraft', href: '/aircraft/entry', icon: 'plane', description: 'Document specific aircraft flown in flight legs.'}, { title: 'Types', href: '/aircraft/type', icon: 'tag', description: 'Create and manage common aircraft types.'}] },
-    { title: 'Logbook', popover: false, href: '/log' },
+    { title: 'Logbook', popover: false, href: '/logbook' },
     { title: 'Airports', popover: false, href: '/airports' },
   ];
 

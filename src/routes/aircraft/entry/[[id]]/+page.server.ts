@@ -66,8 +66,15 @@ export const load = async ({ fetch, params, url }) => {
     else aircraftTimes[ac.id] = (0).toFixed(1);
   }
 
+
   const currentAircraft = await prisma.aircraft.findUnique({ where: { id: params.id }, include: { type: true, _count: true, legs: { select: { totalTime: true, diversionAirportId: true } } } });
   if (params.id !== 'new' && currentAircraft === null) throw redirect(301, '/aircraft/entry/new');
+
+  // TODO: Remove this database auto-mod
+  if (currentAircraft?.simulator === true && currentAircraft.simulatorType === null) {
+    await prisma.aircraft.update({ where: { id: currentAircraft.id }, data: { simulatorType: 'ATD' }});
+    currentAircraft.simulatorType = 'ATD';
+  }
 
   let orderGroups: { typeCode: string, regs: (typeof aircrafts[0])[] }[] = []
   let currentType = '';
@@ -83,7 +90,12 @@ export const load = async ({ fetch, params, url }) => {
   if (currentType !== '') orderGroups.push({ typeCode: currentType, regs: currentGroup });
 
   const types = await prisma.aircraftType.findMany();
-  const typeOptions: { title: string; value: string; unset?: boolean }[] = []
+  const typeOptions: { title: string; value: string; unset?: boolean }[] = [];
+  const simTypeOptions: { title: string; value: string; unset?: boolean }[] = [
+    { title: 'FFS', value: 'FFS' },
+    { title: 'FTD', value: 'FTD' },
+    { title: 'ATD', value: 'ATD' },
+  ];
 
   for (const t of types) {
     typeOptions.push({
@@ -124,6 +136,7 @@ export const load = async ({ fetch, params, url }) => {
     aircraftTimes,
     aircraft: currentAircraft,
     typeOptions,
+    simTypeOptions,
     orderGroups,
     avgLegLen,
     lookupYear,
@@ -159,6 +172,7 @@ export const actions = {
     let year = data.get('year');
     let serial = data.get('serial');
     const sim = data.get('sim');
+    const simType = data.get('sim-type') ?? 'ATD';
     const complex = data.get('complex');
     const taa = data.get('taa');
     const hp = data.get('hp');
@@ -183,6 +197,7 @@ export const actions = {
           year: year === null ? null : parseInt(year as string),
           serial: serial as string | null,
           simulator: (sim as string) === 'true',
+          simulatorType: (sim as string) === 'true' && simType !== null ? simType as string : null,
           complex: complex === null ? null : complex === 'true',
           taa: taa === null ? null : taa === 'true',
           highPerformance: hp === null ? null : hp === 'true',
@@ -210,6 +225,7 @@ export const actions = {
           year: year === null ? null : parseInt(year as string),
           serial: serial as string | null,
           simulator: (sim as string) === 'true',
+          simulatorType: (sim as string) === 'true' && simType !== null ? simType as string : null,
           complex: complex === null ? null : (complex === 'true') === currentData?.type.complex ? null : (complex === 'true'),
           taa: taa === null ? null : (taa === 'true') === currentData?.type.taa ? null : (taa === 'true'),
           highPerformance: hp === null ? null : (hp === 'true') === currentData?.type.highPerformance ? null : (hp === 'true'),

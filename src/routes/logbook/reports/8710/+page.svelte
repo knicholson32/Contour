@@ -1,0 +1,116 @@
+<script lang="ts">
+  import FAA8710ClassHours from '$lib/components/routeSpecific/reports/FAA8710ClassHours.svelte';
+  import FAA8710Row from '$lib/components/routeSpecific/reports/FAA8710Row.svelte';
+  import FAA8710RowSim from '$lib/components/routeSpecific/reports/FAA8710RowSim.svelte';
+    import { timeConverter } from '$lib/helpers';
+    import { Time } from '@internationalized/date';
+
+
+  export let data: import('./$types').PageData;
+
+  const now = (new Date);
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
+
+
+</script>
+
+<div class="m-6">
+  <table class="w-full text-xs text-center">
+    <thead class="uppercase">
+      <tr>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal"></th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Total</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Instruction Received</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Solo</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">PIC & SIC</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Cross Country Instruction Received</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Cross Country Solo</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Cross Country <span class="whitespace-nowrap">PIC / SIC</span></th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Instrument</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night Instruction Received</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night Take-Off / Landing</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night <span class="whitespace-nowrap">PIC / SIC</span></th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night Take-Off / Landing <span class="whitespace-nowrap">PIC / SIC</span></th>
+      </tr>
+    </thead>
+    <tbody class="bg-zinc-900 divide-y dark:divide-zinc-700 border dark:border-zinc-700">
+      <FAA8710Row data={data.airplane} title="Airplane" />
+      <FAA8710Row data={data.rc} title="R.C." />
+      <FAA8710Row data={data.pl} title="P.L." />
+      <FAA8710Row data={data.glider} title="Gliders" />
+      <FAA8710Row data={data.lta} title="L.T.A." />
+      <FAA8710RowSim data={data.ffs} title="FFS" />
+      <FAA8710RowSim data={data.ftd} title="FTD" />
+      <FAA8710RowSim data={data.atd} title="ATD" />
+    </tbody>
+    
+  </table>
+</div>
+
+<div class="m-6 mb-14 flex flex-row gap-6">
+  <div class="w-[38.4615%] flex-shrink-0 overflow-hidden">
+    <div class="uppercase text-center text-xs font-normal mb-1">Class Hours</div>
+    <FAA8710ClassHours data={data.classHours} />
+  </div>
+  <div class="flex-grow">
+    <div class="uppercase text-center text-xs font-normal mb-1">Summary</div>
+    <div class="bg-gray-50 dark:bg-zinc-900 shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700">
+      <dl class="flex flex-wrap gap-x-3">
+        <div class="flex-auto pl-6 pt-6">
+          <dt class="text-sm font-semibold leading-6 text-gray-900 dark:text-zinc-50">Total Hours</dt>
+          <dd class="mt-1 text-base font-semibold font-mono leading-6 text-gray-900 dark:text-zinc-50">{data.total.toFixed(1)} hours</dd>
+        </div>
+        <div class="flex-auto pl-6 pt-6">
+          <dt class="text-sm font-semibold leading-6 text-gray-900 dark:text-zinc-50">Total Legs</dt>
+          <dd class="mt-1 text-base font-semibold font-mono leading-6 text-gray-900 dark:text-zinc-50">{data.legs}</dd>
+        </div>
+        <!-- <div class="flex-none self-end px-6 pt-4">
+          <dt class="sr-only">Status</dt>
+          <dd class="rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-600 ring-1 ring-inset ring-green-600/20">Paid</dd>
+        </div> -->
+        <div class="mt-6 flex w-full flex-none gap-x-4 border-t border-gray-900/5 dark:border-zinc-700 px-6 pt-6">
+          <dt class="flex-none">
+            <span class="sr-only">Client</span>
+            <img class="h-5 w-5 rounded-full" src="https://www.gravatar.com/avatar/{data.settings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
+          </dt>
+          <dd class="text-sm font-medium leading-6 text-gray-900 dark:text-zinc-50">{data.name}</dd>
+        </div>
+        <div class="mt-4 flex w-full flex-none gap-x-4 px-6">
+          <dt class="flex-none">
+            <span class="sr-only">Date Generated</span>
+            <svg class="h-6 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path d="M5.25 12a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H6a.75.75 0 01-.75-.75V12zM6 13.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V14a.75.75 0 00-.75-.75H6zM7.25 12a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H8a.75.75 0 01-.75-.75V12zM8 13.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V14a.75.75 0 00-.75-.75H8zM9.25 10a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H10a.75.75 0 01-.75-.75V10zM10 11.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V12a.75.75 0 00-.75-.75H10zM9.25 14a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H10a.75.75 0 01-.75-.75V14zM12 9.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V10a.75.75 0 00-.75-.75H12zM11.25 12a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H12a.75.75 0 01-.75-.75V12zM12 13.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V14a.75.75 0 00-.75-.75H12zM13.25 10a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H14a.75.75 0 01-.75-.75V10zM14 11.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V12a.75.75 0 00-.75-.75H14z" />
+              <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd" />
+            </svg>
+          </dt>
+          <dd class="text-sm leading-6 text-gray-500 dark:text-zinc-500">
+            <time datetime="2023-01-31">{timeConverter(now.getTime() / 1000)}</time>
+          </dd>
+        </div>
+        <div class="mt-4 flex w-full flex-none gap-x-4 px-6">
+          <dt class="flex-none">
+            <span class="sr-only">Status</span>
+            <img class="w-5" src="/logo-inverted.png" alt="Contour">
+          </dt>
+          <dd class="text-sm leading-6 text-gray-500 dark:text-zinc-500">Generated by Contour</dd>
+        </div>
+      </dl>
+      <div class="mt-6 border-t border-gray-900/5 dark:border-zinc-700 px-6 py-6">
+        <a href="#" class="text-sm font-semibold leading-6 text-gray-900 dark:text-zinc-50 group">Download PDF <span class="transition-padding group-hover:pl-1" aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+  </div>
+</div>

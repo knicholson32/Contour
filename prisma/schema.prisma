@@ -71,6 +71,12 @@ datasource db {
 //   TS // Turboshaft
 // }
 
+// enum SimType {
+//   FFS
+//   FTD
+//   ATD
+// }
+
 // ------------------------------------------------------------------------------------------------
 // Primary Datatypes
 // ------------------------------------------------------------------------------------------------
@@ -368,6 +374,7 @@ model Aircraft {
   serial         String?
 
   simulator       Boolean  @default(false)
+  simulatorType   String? // @db.VarChar(3) // ENUM: SimType
   complex         Boolean?
   taa             Boolean?
   highPerformance Boolean?
@@ -497,31 +504,31 @@ model NavDataAirway {
 }
 
 model NavDataSIDSTARRouteSegment {
-  id String @id @default(uuid())
-  identifier                 String?  // XXXXX
-  airport                    String?  // XXX
-  runway                     String?  // ##X
-  type                       String   // BODY or TRANSITION
+  id                         String          @id @default(uuid())
+  identifier                 String? // XXXXX
+  airport                    String? // XXX
+  runway                     String? // ##X
+  type                       String // BODY or TRANSITION
   name                       String
-  fixes                      NavDataNav[]     @relation("SIDSTARRoute")
-  fixesOrder                 String   // 123, 456, 555, 890
-  navDataSIDSTARRWLead       NavDataSIDSTAR?  @relation("SIDSTARRWLeads", fields: [navDataSIDSTARRWLeadId], references: [id])
+  fixes                      NavDataNav[]    @relation("SIDSTARRoute")
+  fixesOrder                 String // 123, 456, 555, 890
+  navDataSIDSTARRWLead       NavDataSIDSTAR? @relation("SIDSTARRWLeads", fields: [navDataSIDSTARRWLeadId], references: [id])
   navDataSIDSTARRWLeadId     String?
-  navDataSIDSTARTransition   NavDataSIDSTAR?  @relation("SIDSTARTransitions", fields: [navDataSIDSTARTransitionId], references: [id])
+  navDataSIDSTARTransition   NavDataSIDSTAR? @relation("SIDSTARTransitions", fields: [navDataSIDSTARTransitionId], references: [id])
   navDataSIDSTARTransitionId String?
 
   @@map("navDataSIDSTARRouteSegment")
 }
 
 model NavDataSIDSTAR {
-  id   String  @id
+  id       String @id
   revision Int
 
   runwayLeads NavDataSIDSTARRouteSegment[] @relation("SIDSTARRWLeads")
   transitions NavDataSIDSTARRouteSegment[] @relation("SIDSTARTransitions")
 
   airportsServiced String
-  type String
+  type             String
 
   @@map("navDataSIDSTAR")
 }

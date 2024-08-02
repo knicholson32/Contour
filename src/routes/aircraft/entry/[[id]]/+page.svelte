@@ -76,6 +76,8 @@
   $:ref = $page.url.searchParams.get('ref');
   $:reg = $page.url.searchParams.get('reg');
 
+  let sim: boolean;
+
 
 
 </script>
@@ -169,7 +171,10 @@
         <Entry.Input title="Serial" name="serial" placeholder={data.lookupSerial ?? 'Unknown'} defaultValue={data.aircraft?.serial ?? (reg === null ? null : data.lookupSerial)} />
       </Section>
       <Section title="Configuration">
-        <Entry.Switch title="Simulator" name="sim" defaultValue={data.aircraft?.simulator ?? false} />
+        <Entry.Switch title="Simulator" name="sim" defaultValue={data.aircraft?.simulator ?? false} bind:value={sim} />
+        {#if sim}
+          <Entry.Select required={true} title="Sim Type" name="sim-type" options={data.simTypeOptions} defaultValue={data.aircraft?.simulatorType ?? 'ATD'} />
+        {/if}
       </Section>
       <Section title="Aircraft Image" error={form !== null && form.ok === false && form.action === '?/default' && form.name === 'image' ? form.message : null}>
         <Entry.ImageUpload name="image" imageRequired={data.aircraft === null} initialImageId={data.aircraft?.imageId ?? null} maxMB={data.MAX_MB}/>
