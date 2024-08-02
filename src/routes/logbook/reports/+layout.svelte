@@ -17,7 +17,7 @@
 
 </script>
 
-<TwoColumn menu="scroll" form="scroll" bind:urlActiveParam minSizes={{menu: 200, form: 475 }} defaultRatio={0.01} backText="Back">
+<TwoColumn menu="scroll" form="scroll" resizable={false} bind:urlActiveParam minSizes={{menu: 205, form: 475 }} defaultRatio={0.01} backText="Back">
 
   <!-- Menu Side -->
   <nav slot="menu" class="flex-shrink dark:divide-zinc-800" aria-label="Directory">

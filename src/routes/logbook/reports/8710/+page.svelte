@@ -27,47 +27,11 @@
 
 </script>
 
-<div class="m-6">
-  <table class="w-full text-xs text-center">
-    <thead class="uppercase">
-      <tr>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal"></th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Total</th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Instruction Received</th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Solo</th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">PIC & SIC</th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Cross Country Instruction Received</th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Cross Country Solo</th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Cross Country <span class="whitespace-nowrap">PIC / SIC</span></th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Instrument</th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night Instruction Received</th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night Take-Off / Landing</th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night <span class="whitespace-nowrap">PIC / SIC</span></th>
-        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night Take-Off / Landing <span class="whitespace-nowrap">PIC / SIC</span></th>
-      </tr>
-    </thead>
-    <tbody class="bg-zinc-900 divide-y dark:divide-zinc-700 border dark:border-zinc-700">
-      <FAA8710Row data={data.airplane} title="Airplane" />
-      <FAA8710Row data={data.rc} title="R.C." />
-      <FAA8710Row data={data.pl} title="P.L." />
-      <FAA8710Row data={data.glider} title="Gliders" />
-      <FAA8710Row data={data.lta} title="L.T.A." />
-      <FAA8710RowSim data={data.ffs} title="FFS" />
-      <FAA8710RowSim data={data.ftd} title="FTD" />
-      <FAA8710RowSim data={data.atd} title="ATD" />
-    </tbody>
-    
-  </table>
-</div>
 
-<div class="m-6 mb-14 flex flex-row gap-6">
-  <div class="w-[38.4615%] flex-shrink-0 overflow-hidden">
-    <div class="uppercase text-center text-xs font-normal mb-1">Class Hours</div>
-    <FAA8710ClassHours data={data.classHours} />
-  </div>
-  <div class="flex-grow">
+<div class="m-6 flex flex-row gap-6">
+  <div class="flex-grow h-full">
     <div class="uppercase text-center text-xs font-normal mb-1">Summary</div>
-    <div class="bg-gray-50 dark:bg-zinc-900 shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700">
+    <div class="bg-gray-50 h-full pb-[7px] dark:bg-zinc-900 shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700">
       <dl class="flex flex-wrap gap-x-3">
         <div class="flex-auto pl-6 pt-6">
           <dt class="text-sm font-semibold leading-6 text-gray-900 dark:text-zinc-50">Total Hours</dt>
@@ -113,4 +77,41 @@
       </div>
     </div>
   </div>
+  <div class="w-[38.4615%] flex-shrink-0 overflow-hidden">
+    <div class="uppercase text-center text-xs font-normal mb-1">Class Hours</div>
+    <FAA8710ClassHours data={data.classHours} />
+  </div>
+</div>
+
+<div class="m-6 mb-16">
+  <table class="w-full text-xs text-center">
+    <thead class="uppercase">
+      <tr>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal"></th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Total</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Instruction Received</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Solo</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">PIC & SIC</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Cross Country Instruction Received</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Cross Country Solo</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Cross Country <span class="whitespace-nowrap">PIC / SIC</span></th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Instrument</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night Instruction Received</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night Take-Off / Landing</th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night <span class="whitespace-nowrap">PIC / SIC</span></th>
+        <th class="w-[calc(7.6923076923%)] aspect-1 font-normal">Night Take-Off / Landing <span class="whitespace-nowrap">PIC / SIC</span></th>
+      </tr>
+    </thead>
+    <tbody class="bg-zinc-900 divide-y dark:divide-zinc-700 border dark:border-zinc-700">
+      <FAA8710Row data={data.airplane} title="Airplane" />
+      <FAA8710Row data={data.rc} title="R.C." />
+      <FAA8710Row data={data.pl} title="P.L." />
+      <FAA8710Row data={data.glider} title="Gliders" />
+      <FAA8710Row data={data.lta} title="L.T.A." />
+      <FAA8710RowSim data={data.ffs} title="FFS" />
+      <FAA8710RowSim data={data.ftd} title="FTD" />
+      <FAA8710RowSim data={data.atd} title="ATD" />
+    </tbody>
+    
+  </table>
 </div>
