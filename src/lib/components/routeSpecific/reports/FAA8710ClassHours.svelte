@@ -1,4 +1,5 @@
 <script lang="ts">
+  import FAA8710ClassHoursTile from "./FAA8710ClassHoursTile.svelte";
 
   export let data: {
     airplane: {
@@ -46,134 +47,52 @@
     }
   };
 
-  const format = (val: number, dec=1): string => {
-    if (val === 0) return '';
-    else return val.toFixed(dec);
-  }
-
 </script>
 
-<table class="w-full m-0 p-0 text-xs text-center">
-  <tbody class="bg-zinc-900 divide-y dark:divide-zinc-700 border dark:border-zinc-700">
-    <tr class="bg-zinc-50 dark:bg-zinc-900 even:bg-zinc-100 dark:even:bg-zinc-800/30 divide-x dark:divide-zinc-700 font-thin">
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center font-bold select-none">Airplane</div></td>
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center font-normal divide-y dark:divide-zinc-700">
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">SEL PIC</div>
-          <div>{format(data.airplane.sel.pic)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">SEL SIC</div>
-          <div>{format(data.airplane.sel.sic)}</div>
-        </div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center font-normal divide-y dark:divide-zinc-700">
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">SES PIC</div>
-          <div>{format(data.airplane.ses.pic)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">SES SIC</div>
-          <div>{format(data.airplane.ses.sic)}</div>
-        </div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center font-normal divide-y dark:divide-zinc-700">
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">MEL PIC</div>
-          <div>{format(data.airplane.mel.pic)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">MEL SIC</div>
-          <div>{format(data.airplane.mel.sic)}</div>
-        </div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center font-normal divide-y dark:divide-zinc-700">
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">MES PIC</div>
-          <div>{format(data.airplane.mes.pic)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">MES SIC</div>
-          <div>{format(data.airplane.mes.sic)}</div>
-        </div>
-      </div></td>
-    </tr>
-    <tr class="bg-zinc-50 dark:bg-zinc-900 even:bg-zinc-100 dark:even:bg-zinc-800/30 divide-x dark:divide-zinc-700 font-thin">
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center font-bold select-none">R.C.</div></td>
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center relative">
-        <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">HEL</div>
-        <div>{format(data.rc.hel)}</div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center relative">
-        <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">GRYO</div>
-        <div>{format(data.rc.gyro)}</div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center bg-hashLight dark:bg-hashDark"></div></td>
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center bg-hashLight dark:bg-hashDark"></div></td>
-    </tr>
-    <tr class="bg-zinc-50 dark:bg-zinc-900 even:bg-zinc-100 dark:even:bg-zinc-800/30 divide-x dark:divide-zinc-700">
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center font-bold select-none">L.T.A.</div></td>
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center relative">
-        <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">Balloon</div>
-        <div>{format(data.lta.balloon)}</div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center relative">
-        <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">Airship</div>
-        <div>{format(data.lta.airship)}</div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center bg-hashLight dark:bg-hashDark"></div></td>
-      <td class="w-1/5 p-0"><div class="aspect-2 content-center bg-hashLight dark:bg-hashDark"></div></td>
-    </tr>
-    <tr class="bg-zinc-50 dark:bg-zinc-900 even:bg-zinc-100 dark:even:bg-zinc-800/30 divide-x dark:divide-zinc-700 font-thin">
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center font-bold select-none">Simulators</div></td>
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center divide-y dark:divide-zinc-700">
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">FFS ME</div>
-          <div>{format(data.sim.ffs.me)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">FFS SE</div>
-          <div>{format(data.sim.ffs.se)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">FFS HEL</div>
-          <div>{format(data.sim.ffs.hel)}</div>
-        </div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center divide-y dark:divide-zinc-700">
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">FTD ME</div>
-          <div class="">{format(data.sim.ftd.me)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">FTD SE</div>
-          <div>{format(data.sim.ftd.se)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">FTD HEL</div>
-          <div>{format(data.sim.ftd.hel)}</div>
-        </div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center divide-y dark:divide-zinc-700">
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">ATD ME</div>
-          <div>{format(data.sim.atd.me)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">ATD SE</div>
-          <div>{format(data.sim.atd.se)}</div>
-        </div>
-        <div class="relative aspect-2 content-center">
-          <div class="absolute top-0 left-0.5 opacity-40 text-xxs font-normal select-none">ATD HEL</div>
-          <div>{format(data.sim.atd.hel)}</div>
-        </div>
-      </div></td>
-      <td class="w-1/5 p-0"><div class="aspect-1 content-center divide-y dark:divide-zinc-700">
-        <div class="relative aspect-2 content-center bg-hashLight dark:bg-hashDark"></div>
-        <div class="relative aspect-2 content-center bg-hashLight dark:bg-hashDark"></div>
-        <div class="relative aspect-2 content-center bg-hashLight dark:bg-hashDark"></div>
-      </div></td>
-    </tr>
-  </tbody>
-  
-</table>
+<div class="grid grid-cols-5 text-xs relative shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700">
+  <div class="absolute -z-10 top-0 bottom-0 left-0 right-0 bg-hashLight dark:bg-hashDark"/>
+  <!-- Airplane -->
+  <div class="row-span-2 border-b content-center text-center font-bold select-none bg-gray-50 dark:bg-zinc-900">
+    <div class="-rotate-90 sm:-rotate-45 md:rotate-0">Airplane</div>
+  </div>
+  <FAA8710ClassHoursTile class="border-l border-b" title="SEL PIC" value={data.airplane.sel.pic} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="SES PIC" value={data.airplane.ses.pic} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="MEL PIC" value={data.airplane.mel.pic} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="MES PIC" value={data.airplane.mes.pic} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="SEL SIC" value={data.airplane.sel.sic} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="SES SIC" value={data.airplane.ses.sic} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="MEL SIC" value={data.airplane.mel.sic} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="MES SIC" value={data.airplane.mes.sic} />
+  <!-- R.C. -->
+  <div class="row-span-1 border-b content-center text-center font-bold select-none bg-gray-100 dark:bg-zinc-950">
+    <div class="-rotate-90 sm:-rotate-45 md:rotate-0">R.C.</div>
+  </div>
+  <FAA8710ClassHoursTile class="border-l border-b" title="HEL" value={data.rc.hel} striped={true} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="GYRO" value={data.rc.gyro} striped={true} />
+  <div class="bg-gray-100 dark:bg-zinc-950 -z-20 border-l border-b"/>
+  <div class="bg-gray-100 dark:bg-zinc-950 -z-20 border-l border-b"/>
+  <!-- L.T.A. -->
+  <div class="row-span-1 border-b content-center text-center font-bold select-none bg-gray-50 dark:bg-zinc-900">
+    <div class="-rotate-90 sm:-rotate-45 md:rotate-0">L.T.A.</div>
+  </div>
+  <FAA8710ClassHoursTile class="border-l border-b" title="Balloon" value={data.lta.balloon} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="Airship" value={data.lta.airship} />
+  <div class="bg-gray-50 dark:bg-zinc-900 -z-20 border-l border-b"/>
+  <div class="bg-gray-50 dark:bg-zinc-900 -z-20 border-l border-b"/>
+  <!-- Simulators -->
+  <div class="row-span-3 content-center text-center font-bold select-none bg-gray-100 dark:bg-zinc-950">
+    <div class="-rotate-90 sm:-rotate-45 md:rotate-0">Simulators</div>
+  </div>
+  <FAA8710ClassHoursTile class="border-l border-b" title="FFS ME" value={data.sim.ffs.me} striped={true} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="FTD ME" value={data.sim.ftd.me} striped={true} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="ATD ME" value={data.sim.atd.me} striped={true} />
+  <div class="bg-gray-100 dark:bg-zinc-950 -z-20 border-l border-b"/>
+  <FAA8710ClassHoursTile class="border-l border-b" title="FFS SE" value={data.sim.ffs.se} striped={true} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="FTD SE" value={data.sim.ftd.se} striped={true} />
+  <FAA8710ClassHoursTile class="border-l border-b" title="ATD SE" value={data.sim.atd.se} striped={true} />
+  <div class="bg-gray-100 dark:bg-zinc-950 -z-20 border-l border-b"/>
+  <FAA8710ClassHoursTile class="border-l" title="FFS HEL" value={data.sim.ffs.hel} striped={true} />
+  <FAA8710ClassHoursTile class="border-l" title="FTD HEL" value={data.sim.ftd.hel} striped={true} />
+  <FAA8710ClassHoursTile class="border-l" title="ATD HEL" value={data.sim.atd.hel} striped={true} />
+  <div class="bg-gray-100 dark:bg-zinc-950 -z-20 border-l"/>
+</div>

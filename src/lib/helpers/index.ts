@@ -520,6 +520,17 @@ export const deepCopy = <T>(obj: T): T => {
 };
 
 /**
+ * Format a number into a string, and return empty if the number is 0
+ * @param val the value
+ * @param dec the number of decimals
+ * @returns the string
+ */
+export const formatNumberOmitZero = (val: number, dec = 1): string => {
+	if (val === 0) return '';
+	return val.toFixed(dec);
+}
+
+/**
  * Returns a number whose value is limited to the given range.
  *
  * Example: limit the output of this computation to between 0 and 255

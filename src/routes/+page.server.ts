@@ -212,7 +212,6 @@ export const load = async ({ parent, url }) => {
     if (dayDuration > longestDayDuration) longestDayDuration = dayDuration;
 
     // Calculate rest
-    console.log(day.startTime_utc, lastDayEndUTC);
     if (lastDayEndUTC !== -1 && day.startTime_utc - lastDayEndUTC <= 86400 * 1.5) {
       const rest = day.startTime_utc - lastDayEndUTC;
       if (shortestRest === -1 || rest < shortestRest) shortestRest = rest;
@@ -238,7 +237,6 @@ export const load = async ({ parent, url }) => {
   }
 
   if (restIndex > 0) avgRest = avgRest / restIndex;
-  console.log('sr', shortestRest);
   if (shortestRest <= 0) shortestRest = NaN;
 
   miles = miles * 0.54;
