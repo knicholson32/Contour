@@ -45,11 +45,11 @@
 <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal">{formatNumberOmitZero(data.instructionReceived)}</div>
 <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal">{formatNumberOmitZero(data.solo)}</div>
 <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal flex flex-col divide-y">
-  <div class="flex-grow relative content-center inline-flex items-center gap-2 p-2">
+  <div class="flex-grow relative content-center inline-flex items-center gap-1 py-2 px-1">
     <div class="opacity-40 text-xxs font-normal select-none">PIC</div>
     <div>{formatNumberOmitZero(data.pic)}</div>
   </div>
-  <div class="flex-grow relative content-center inline-flex items-center gap-2 p-2">
+  <div class="flex-grow relative content-center inline-flex items-center gap-1 py-2 px-1">
     <div class="opacity-40 text-xxs font-normal select-none">SIC</div>
     <div>{formatNumberOmitZero(data.sic)}</div>
   </div>
@@ -60,11 +60,11 @@
   <div class="{$$restProps.class} border-r border-b bg-gray-100 dark:bg-zinc-925 -z-20"></div>
 {:else}
   <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal flex flex-col divide-y">
-    <div class="flex-grow relative content-center inline-flex items-center gap-2 p-2">
+    <div class="flex-grow relative content-center inline-flex items-center gap-1 py-2 px-1">
       <div class="opacity-40 text-xxs font-normal select-none">PIC</div>
       <div>{formatNumberOmitZero(data.xc.pic)}</div>
     </div>
-    <div class="flex-grow relative content-center inline-flex items-center gap-2 p-2">
+    <div class="flex-grow relative content-center inline-flex items-center gap-1 py-2 px-1">
       <div class="opacity-40 text-xxs font-normal select-none">SIC</div>
       <div>{formatNumberOmitZero(data.xc.sic)}</div>
     </div>
@@ -80,21 +80,21 @@
   <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal">{formatNumberOmitZero(data.night.instructionReceived)}</div>
   <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal">{formatNumberOmitZero(data.night.tolTotal, 0)}</div>
   <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal flex flex-col divide-y">
-    <div class="flex-grow relative content-center inline-flex items-center gap-2 p-2">
+    <div class="flex-grow relative content-center inline-flex items-center gap-1 py-2 px-1">
       <div class="opacity-40 text-xxs font-normal select-none">PIC</div>
       <div>{formatNumberOmitZero(data.night.pic)}</div>
     </div>
-    <div class="flex-grow relative content-center inline-flex items-center gap-2 p-2">
+    <div class="flex-grow relative content-center inline-flex items-center gap-1 py-2 px-1">
       <div class="opacity-40 text-xxs font-normal select-none">SIC</div>
       <div>{formatNumberOmitZero(data.night.sic)}</div>
     </div>
   </div>
   <div class="{$$restProps.class} border-b aspect-1-bak content-center font-normal flex flex-col divide-y">
-    <div class="flex-grow relative content-center inline-flex items-center gap-2 p-2">
+    <div class="flex-grow relative content-center inline-flex items-center gap-1 py-2 px-1">
       <div class="opacity-40 text-xxs font-normal select-none">PIC</div>
       <div>{formatNumberOmitZero(data.night.picTol, 0)}</div>
     </div>
-    <div class="flex-grow relative content-center inline-flex items-center gap-2 p-2">
+    <div class="flex-grow relative content-center inline-flex items-center gap-1 py-2 px-1">
       <div class="opacity-40 text-xxs font-normal select-none">SIC</div>
       <div>{formatNumberOmitZero(data.night.sicTol, 0)}</div>
     </div>

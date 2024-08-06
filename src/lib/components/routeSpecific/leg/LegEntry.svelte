@@ -2,7 +2,8 @@
     import icons from "$lib/components/icons";
     import { dateToDateStringFormMonthDayYear } from "$lib/helpers";
     import type { Entry } from "$lib/types";
-    import { Tag, Waypoints } from "lucide-svelte";
+    import { Waypoints } from "lucide-svelte";
+    import Tag from "$lib/components/decorations/Tag.svelte";
 
     export let unsaved: boolean;
     export let leg: Entry;
@@ -26,9 +27,9 @@
         <span class="text-primary ml-2"><Waypoints class="w-3 h-3"/></span>
       {/if}
     </span>
-    <span class="flex-grow ml-1">
+    <span class="flex-grow ml-1 leading-5">
       {#if unsaved}
-        <Tag>UNSAVED</Tag>
+        <Tag class="h-[20px]">UNSAVED</Tag>
       {/if}
     </span>
     <span class="text-sky-600">

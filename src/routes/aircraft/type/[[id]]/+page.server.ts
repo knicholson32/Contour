@@ -114,6 +114,7 @@ export const actions = {
     const taa = data.get('taa');
     const highPerformance = data.get('highPerformance');
     const pressurized = data.get('pressurized');
+    let typeRatingRequired = data.get('typeRatingRequired');
     const image = data.get('image');
     const imageState = data.get('image-state');
     if (typeCode === null || typeCode === '') return API.Form.formFailure('?/default', 'typeCode', 'Required field');
@@ -126,6 +127,8 @@ export const actions = {
     if (taa === null || taa === '') return API.Form.formFailure('?/default', 'taa', 'Required field');
     if (highPerformance === null || highPerformance === '') return API.Form.formFailure('?/default', 'highPerformance', 'Required field');
     if (pressurized === null || pressurized === '') return API.Form.formFailure('?/default', 'pressurized', 'Required field');
+
+    if (typeRatingRequired === null) typeRatingRequired = engine !== null && (engine as string).startsWith('T') ? 'true' : 'false';
 
     // Check enums
     if (!DB.validate.categoryClass(catClass as string)) return API.Form.formFailure('?/default', 'catClass', 'Invalid selection');
@@ -147,6 +150,7 @@ export const actions = {
           taa: taa === 'true',
           highPerformance: highPerformance === 'true',
           pressurized: pressurized === 'true',
+          typeRatingRequired: typeRatingRequired === 'true'
         };
         console.log('create', data);
         await prisma.aircraftType.create({ data });
@@ -169,6 +173,7 @@ export const actions = {
           taa: taa === 'true',
           highPerformance: highPerformance === 'true',
           pressurized: pressurized === 'true',
+          typeRatingRequired: typeRatingRequired === 'true'
         };
         console.log('update', data);
         await prisma.aircraftType.update({ where: { id }, data });

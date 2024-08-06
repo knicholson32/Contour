@@ -343,17 +343,18 @@ model Settings {
 model AircraftType {
   id String @id
 
-  typeCode        String
-  subCode         String?
-  make            String
-  model           String
-  catClass        String // @db.VarChar(5) // ENUM: CategoryClass
-  gear            String // @db.VarChar(2) // ENUM: GearType
-  engine          String // @db.VarChar(2) // ENUM: EngineType
-  complex         Boolean
-  taa             Boolean
-  highPerformance Boolean
-  pressurized     Boolean
+  typeCode           String
+  subCode            String?
+  make               String
+  model              String
+  catClass           String // @db.VarChar(5) // ENUM: CategoryClass
+  gear               String // @db.VarChar(2) // ENUM: GearType
+  engine             String // @db.VarChar(2) // ENUM: EngineType
+  complex            Boolean
+  taa                Boolean
+  highPerformance    Boolean
+  pressurized        Boolean
+  typeRatingRequired Boolean @default(false)
 
   image   Image?  @relation(fields: [imageId], references: [id], onDelete: Restrict)
   imageId String? @unique

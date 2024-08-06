@@ -39,6 +39,8 @@
     else goto(ref);
   }
 
+  let engineType: string | null = null;
+
 </script>
 
 <TwoColumn menu="scroll" {ref} form="scroll" bind:urlActiveParam bind:isMobileSize backText="Back" onMenuBack={onMenuBack} >
@@ -130,11 +132,12 @@
       <Section title="Type">
         <Entry.Select required={true} title="Category / Class" options={data.enums.categoryClass ?? null} placeholder="Unset" name="catClass" defaultValue={data.type?.catClass ?? null} />
         <Entry.Select required={true} title="Gear Type" options={data.enums.gearType ?? null} name="gear" defaultValue={data.type?.gear ?? null} placeholder="Unset" />
-        <Entry.Select required={true} title="Engine Type" options={data.enums.engineType ?? null} placeholder="Unset" name="engine" defaultValue={data.type?.engine ?? null} />
+        <Entry.Select required={true} title="Engine Type" options={data.enums.engineType ?? null} placeholder="Unset" name="engine" defaultValue={data.type?.engine ?? null} bind:value={engineType} />
         <Entry.Switch title="Complex" name="complex" defaultValue={data.type?.complex ?? false} />
         <Entry.Switch title="Technically Advanced" name="taa" defaultValue={data.type?.taa ?? false} />
         <Entry.Switch title="High Performance" name="highPerformance" defaultValue={data.type?.highPerformance ?? false} />
         <Entry.Switch title="Pressurized" name="pressurized" defaultValue={data.type?.pressurized ?? false} />
+        <Entry.Switch title="Type Rating Required" name="typeRatingRequired" disabled={engineType !== null && engineType.startsWith('T')} defaultValue={engineType !== null && engineType.startsWith('T') ? true : data.type?.typeRatingRequired ?? false} />
       </Section>
 
       <Section title="Generic Type Image" error={form !== null && form.ok === false && form.action === '?/default' && form.name === 'image' ? form.message : null}>

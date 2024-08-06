@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { page } from '$app/stores';
   import FAA8710ClassHours from '$lib/components/routeSpecific/reports/FAA8710ClassHours.svelte';
   import FAA8710Row from '$lib/components/routeSpecific/reports/FAA8710Row.svelte';
   import FAA8710RowSim from '$lib/components/routeSpecific/reports/FAA8710RowSim.svelte';

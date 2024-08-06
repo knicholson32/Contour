@@ -1,9 +1,7 @@
 <script lang='ts'>
     import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
-    import * as Tabs from "$lib/components/ui/tabs";
     import * as Card from "$lib/components/ui/card";
     import { BedDouble, Gauge, Plane, Route, Table2, Timer, TowerControl } from "lucide-svelte";
-
 
 </script>
 
