@@ -89,7 +89,7 @@
 <div class="relative p-6 px-0 mb-8">
   <!-- <div class="bg-gradient-to-l from-zinc-900 absolute right-0 top-0 bottom-0 w-12 z-500"></div> -->
   <div class="p-1 pb-6 w-full overflow-x-scroll pr-6 touch-pan-x lg:overflow-x-hidden lg:touch-auto relative">
-    <div class="grid grid-cols-13 min-w-[1000px] lg:min-w-full">
+    <div class="grid grid-cols-13 min-w-[1000px] lg:min-w-full relative">
       <!-- Column Titles -->
       <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2"></div>
       <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">Total</div>
@@ -131,18 +131,18 @@
         <div class="-rotate-45">ATD</div>
       </div>
 
-      <div class="col-span-12 col-start-2 row-span-8 grid grid-cols-12 grid-rows-subgrid text-xs text-center shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700">
-
+      <div class="col-span-12 col-start-2 row-span-8 grid grid-cols-12 grid-rows-subgrid text-xs text-center shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700 relative">
+        <div class="absolute -z-10 top-0 bottom-0 left-0 right-0 bg-hashLight dark:bg-hashDark dark:opacity-50"/>
         <!-- Rows -->
         <!-- bg-zinc-50 dark:bg-zinc-900 even:bg-zinc-100 dark:even:bg-zinc-800/30 divide-x dark:divide-zinc-700 -->
         <FAA8710Row class="bg-zinc-50 dark:bg-zinc-900" data={data.airplane} title="Airplane" />
-        <FAA8710Row class="bg-zinc-100 dark:bg-zinc-950/40" data={data.rc} title="R.C." />
+        <FAA8710Row class="bg-zinc-100 dark:bg-zinc-925" data={data.rc} title="R.C." />
         <FAA8710Row class="bg-zinc-50 dark:bg-zinc-900" data={data.pl} title="P.L." />
-        <FAA8710Row class="bg-zinc-100 dark:bg-zinc-950/40" data={data.glider} title="Gliders" />
+        <FAA8710Row class="bg-zinc-100 dark:bg-zinc-925" data={data.glider} title="Gliders" />
         <FAA8710Row class="bg-zinc-50 dark:bg-zinc-900" data={data.lta} title="L.T.A." />
-        <FAA8710RowSim class="bg-zinc-100 dark:bg-zinc-950/40" data={data.ffs} title="FFS" />
+        <FAA8710RowSim class="bg-zinc-100 dark:bg-zinc-925" data={data.ffs} title="FFS" />
         <FAA8710RowSim class="bg-zinc-50 dark:bg-zinc-900" data={data.ftd} title="FTD" />
-        <FAA8710RowSim class="bg-zinc-100 dark:bg-zinc-950/40" data={data.atd} title="ATD" last={true} />
+        <FAA8710RowSim class="bg-zinc-100 dark:bg-zinc-925" data={data.atd} title="ATD" last={true} />
 
       </div>
     </div>

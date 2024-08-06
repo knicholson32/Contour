@@ -58,7 +58,7 @@
 <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal">{formatNumberOmitZero(data.xc.instructionReceived)}</div>
 <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal">{formatNumberOmitZero(data.xc.solo)}</div>
 {#if title === 'Gliders'}
-  <div class="{$$restProps.class} border-r border-b bg-hashLight dark:bg-hashDark"></div>
+  <div class="{$$restProps.class} border-r border-b bg-gray-100 dark:bg-zinc-925 -z-20"></div>
 {:else}
   <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal flex flex-col divide-y">
     <div class="flex-grow relative content-center inline-flex items-center gap-2 p-2">
@@ -73,10 +73,10 @@
 {/if}
 <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal">{formatNumberOmitZero(data.instrument)}</div>
 {#if title === 'Gliders'}
-  <div class="border-r border-b bg-hashLight dark:bg-hashDark "></div>
-  <div class="border-r border-b bg-hashLight dark:bg-hashDark "></div>
-  <div class="border-r border-b bg-hashLight dark:bg-hashDark "></div>
-  <div class="border-b bg-hashLight dark:bg-hashDark "></div>
+  <div class="border-r border-b bg-gray-100 dark:bg-zinc-925 -z-20"></div>
+  <div class="border-r border-b bg-gray-100 dark:bg-zinc-925 -z-20"></div>
+  <div class="border-r border-b bg-gray-100 dark:bg-zinc-925 -z-20"></div>
+  <div class="border-b bg-gray-100 dark:bg-zinc-925 -z-20"></div>
 {:else}
   <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal">{formatNumberOmitZero(data.night.instructionReceived)}</div>
   <div class="{$$restProps.class} border-r border-b aspect-1-bak content-center font-normal">{formatNumberOmitZero(data.night.tolTotal, 0)}</div>
