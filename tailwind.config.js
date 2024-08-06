@@ -16,6 +16,7 @@ const config = {
 		},
     screens: {
       'xs': '475px',
+			print: { raw: 'print' },
       ...defaultTheme.screens,
     },
 		extend: {
@@ -109,7 +110,14 @@ const config = {
 			}
 		}
 	},
-  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/aspect-ratio')]
+	darkMode: null,
+  plugins: [
+		require('@tailwindcss/forms'),
+		require('@tailwindcss/aspect-ratio'),
+		require('tailwindcss/plugin')(function ({ addVariant }) {
+			addVariant('dark', '@media not print { :is(:where(.dark) &) }')
+		}),
+	]
 };
 
 export default config;

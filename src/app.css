@@ -1,7 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
+@layer utilities {
+  .print-color-adjust-exact {
+    -webkit-print-color-adjust: exact;
+  }
+
+  .print-color-adjust-economy {
+    -webkit-print-color-adjust: economy;
+  }
+}
+
+@page {
+  size: auto;
+  margin: 0mm;
+}
+
 @layer base {
   :root {
       --background: 0 0% 100% /* white */;

@@ -147,7 +147,7 @@
   ```
 -->
 
-<nav bind:this={menuHeaderBar} class="relative z-50 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 h-16">
+<nav bind:this={menuHeaderBar} class="print:hidden relative z-50 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 h-16">
   <div class="mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 justify-between select-none">
       <div class="flex">
@@ -374,7 +374,7 @@
   {/if}
 </nav>
 
-<div class="relative overflow-y-hidden -mt-[1px] pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem + 1px);">
+<div class=" relative overflow-y-hidden -mt-[1px] pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem + 1px);">
   <div class="fixed top-[4rem] left-0 right-0 z-[101] h-[2px] overflow-hidden">
     <!-- <ProgressBar bind:this={progress} minimum={0} bind:width={width} /> -->
   </div>

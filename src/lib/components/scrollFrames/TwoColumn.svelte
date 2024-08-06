@@ -211,7 +211,7 @@
 <!-- Menu -->
 <div bind:this={wrapper} class="h-full w-full flex flex-row relative overflow-hidden" style="--column-width: {ratio * 100}%; --menu-min-width: {minSizes.menu}px;" role="presentation">
   {#if menu === 'safe'}
-    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border mb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
+    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border mb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex print:hidden print:md:hidden">
       <slot name="menu"/>
     </div>
     <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
@@ -220,7 +220,7 @@
       </slot>
     </div> -->
   {:else}
-    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex">
+    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex print:hidden print:md:hidden">
       <slot name="menu"/>
     </div>
     <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
@@ -232,7 +232,7 @@
 
   <!-- Separator -->
   {#if resizable}
-    <div class="h-full flex-shrink-0 bg-gray-100 dark:bg-zinc-800 relative select-none w-2 justify-center hidden md:flex">
+    <div class="h-full flex-shrink-0 bg-gray-100 dark:bg-zinc-800 relative select-none w-2 justify-center hidden md:flex print:md:hidden">
       <div on:mousedown={dragStart} on:touchstart={dragStart} class="absolute z-30 w-6 border-l border-white dark:border-zinc-700 bg-transparant cursor-col-resize top-0 bottom-0 left-1 flex justify-center" role="presentation">
         <!-- <div class="h-full w-[1px] bg-white dark:bg-zinc-700"></div> -->
       </div>
@@ -243,11 +243,11 @@
 
   <!-- Form -->
   {#if form === 'safe'}
-    <div style="-webkit-transform: translateZ(0);" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-900 mb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
+    <div style="-webkit-transform: translateZ(0);" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-925 mb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
       <slot name="form"/>
     </div>
   {:else}
-    <div style="-webkit-transform: translateZ(0);" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-900 pb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
+    <div style="-webkit-transform: translateZ(0);" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-925 pb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
       <slot name="form"/>
     </div>
   {/if}

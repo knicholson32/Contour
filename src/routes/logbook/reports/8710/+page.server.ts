@@ -1,6 +1,7 @@
 import * as settings from '$lib/server/settings';
 import prisma from '$lib/server/prisma';
 import { redirect } from '@sveltejs/kit';
+import { timeConverter } from '$lib/helpers';
 
 type FAA8710Row = {
   total: number,
@@ -494,6 +495,7 @@ export const load = async ({ fetch, params, parent, url }) => {
 
   }
 
+  const name = await settings.get('general.name');
 
   return {
     airplane: await getCategoryClass(['ASEL', 'AMEL', 'ASES', 'AMES']),
@@ -507,7 +509,10 @@ export const load = async ({ fetch, params, parent, url }) => {
     classHours: await getClassHours(),
     total: (await prisma.leg.aggregate({ where: { aircraft: { simulator: false } }, _sum: { totalTime: true } }))._sum.totalTime ?? 0,
     legs: await prisma.leg.count(),
-    name: await settings.get('general.name')
+    name,
+    seo: {
+      title: name + ' FAA 8710 ' + timeConverter((new Date()).getTime() / 1000, { dateOnly: true })
+    }
   }
 
 };

@@ -34,7 +34,7 @@
     </Section>
     
   </nav>
-  <div slot="form" class="flex-shrink dark:bg-zinc-925">
+  <div slot="form" class="flex-shrink z-0">
     <slot/>
   </div>
 

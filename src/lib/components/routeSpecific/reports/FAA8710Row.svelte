@@ -33,7 +33,6 @@
 
   export let data: FAA8710Row;
   export let title: string;
-  export let striped = false;
 
 </script>
 
