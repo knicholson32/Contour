@@ -91,43 +91,43 @@
   <div class="p-1 pb-6 w-full overflow-x-scroll pr-6 touch-pan-x lg:overflow-x-hidden lg:touch-auto relative">
     <div class="grid grid-cols-13 min-w-[1000px] lg:min-w-full">
       <!-- Column Titles -->
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2"></div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">Total</div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">Dual Received</div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">Solo</div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">PIC & SIC</div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">XC Dual Received</div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">XC Solo</div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">XC <span class="whitespace-nowrap">PIC / SIC</span></div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">Inst.</div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">Night Dual Received</div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">Night TOL</div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">Night <span class="whitespace-nowrap">PIC / SIC</span></div>
-      <div class="text-xxs xl:text-xs  content-end text-center uppercase mb-2">Night TOL <span class="whitespace-nowrap">PIC / SIC</span></div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2"></div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">Total</div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">Dual Received</div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">Solo</div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">PIC & SIC</div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">XC Dual Received</div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">XC Solo</div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">XC <span class="whitespace-nowrap">PIC / SIC</span></div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">Inst.</div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">Night Dual Received</div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">Night TOL</div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">Night <span class="whitespace-nowrap">PIC / SIC</span></div>
+      <div class="text-xxs xl:text-xs select-none content-end text-center uppercase mb-2">Night TOL <span class="whitespace-nowrap">PIC / SIC</span></div>
 
       <!-- Row Titles -->
-      <div class="row-start-3 text-xxs xl:text-xs uppercase inline-flex items-center justify-center">
+      <div class="row-start-3 text-xxs xl:text-xs uppercase inline-flex items-center justify-center select-none">
         <div class="-rotate-45">R.C.</div>
       </div>
-      <div class="row-start-2 text-xxs xl:text-xs uppercase inline-flex items-center justify-center">
+      <div class="row-start-2 text-xxs xl:text-xs uppercase inline-flex items-center justify-center select-none">
         <div class="-rotate-45">Airplane</div>
       </div>
-      <div class="row-start-4 text-xxs xl:text-xs uppercase inline-flex items-center justify-center">
+      <div class="row-start-4 text-xxs xl:text-xs uppercase inline-flex items-center justify-center select-none">
         <div class="-rotate-45">P.L.</div>
       </div>
-      <div class="row-start-5 text-xxs xl:text-xs uppercase inline-flex items-center justify-center">
+      <div class="row-start-5 text-xxs xl:text-xs uppercase inline-flex items-center justify-center select-none">
         <div class="-rotate-45">Gliders</div>
       </div>
-      <div class="row-start-6 text-xxs xl:text-xs uppercase inline-flex items-center justify-center">
+      <div class="row-start-6 text-xxs xl:text-xs uppercase inline-flex items-center justify-center select-none">
         <div class="-rotate-45">L.T.A.</div>
       </div>
-      <div class="row-start-7 text-xxs xl:text-xs uppercase inline-flex items-center justify-center">
+      <div class="row-start-7 text-xxs xl:text-xs uppercase inline-flex items-center justify-center select-none">
         <div class="-rotate-45">FFS</div>
       </div>
-      <div class="row-start-8 text-xxs xl:text-xs uppercase inline-flex items-center justify-center">
+      <div class="row-start-8 text-xxs xl:text-xs uppercase inline-flex items-center justify-center select-none">
         <div class="-rotate-45">FTD</div>
       </div>
-      <div class="row-start-9 text-xxs xl:text-xs uppercase inline-flex items-center justify-center">
+      <div class="row-start-9 text-xxs xl:text-xs uppercase inline-flex items-center justify-center select-none">
         <div class="-rotate-45">ATD</div>
       </div>
 

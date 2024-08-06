@@ -30,31 +30,31 @@
 <!-- <div class="{$$restProps.class} content-center aspect-2 font-bold select-none">
   <div class="-rotate-45">{title}</div>
 </div> -->
-<div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-thin">{formatNumberOmitZero(data.total)}</div>
-<div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-thin">{formatNumberOmitZero(data.instructionReceived)}</div>
+<div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-normal">{formatNumberOmitZero(data.total)}</div>
+<div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-normal">{formatNumberOmitZero(data.instructionReceived)}</div>
 <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} bg-hashLight dark:bg-hashDark"></div>
 <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} bg-hashLight dark:bg-hashDark"></div>
 <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} bg-hashLight dark:bg-hashDark"></div>
 <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} bg-hashLight dark:bg-hashDark"></div>
 <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} bg-hashLight dark:bg-hashDark"></div>
-<div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-thin">{formatNumberOmitZero(data.instrument)}</div>
+<div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-normal">{formatNumberOmitZero(data.instrument)}</div>
 {#if title === 'ATD'}
   <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} bg-hashLight dark:bg-hashDark "></div>
 {:else}
-  <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-thin">{formatNumberOmitZero(data.night.instructionReceived)}</div>
+  <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-normal">{formatNumberOmitZero(data.night.instructionReceived)}</div>
 {/if}
 {#if title === 'FFS'}
-  <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-thin">{formatNumberOmitZero(data.night.tol, 0)}</div>
+  <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-normal">{formatNumberOmitZero(data.night.tol, 0)}</div>
 {:else}
   <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} bg-hashLight dark:bg-hashDark "></div>
 {/if}
 {#if title === 'ATD'}
   <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} bg-hashLight dark:bg-hashDark "></div>
 {:else}
-  <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-thin">{formatNumberOmitZero(data.night.total)}</div>
+  <div class="{$$restProps.class} border-r {last === true ? '' : 'border-b'} content-center aspect-2 font-normal">{formatNumberOmitZero(data.night.total)}</div>
 {/if}
 {#if title === 'FFS'}
-  <div class="{$$restProps.class} {last === true ? '' : 'border-b'} content-center aspect-2 font-thin">{formatNumberOmitZero(data.night.tol, 0)}</div>
+  <div class="{$$restProps.class} {last === true ? '' : 'border-b'} content-center aspect-2 font-normal">{formatNumberOmitZero(data.night.tol, 0)}</div>
 {:else}
   <div class="{$$restProps.class} {last === true ? '' : 'border-b'} bg-hashLight dark:bg-hashDark "></div>
 {/if}
