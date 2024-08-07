@@ -151,6 +151,30 @@ export const load = async ({ fetch, params, parent, url }) => {
   });
   const ASELCurrency = calculateCurrency(aselLegs);
 
+  const amelLegs = await prisma.leg.findMany({
+    where: {
+      AND: [
+        { aircraft: { type: { catClass: 'AMEL' } } },
+        {
+          OR: [
+            { dayTakeOffs: { gt: 0 } },
+            { nightTakeOffs: { gt: 0 } },
+          ]
+        },
+        {
+          OR: [
+            { dayLandings: { gt: 0 } },
+            { nightLandings: { gt: 0 } },
+          ]
+        },
+        { startTime_utc: { gte: nowSeconds - (60 * 60 * 24 * 90) } }
+      ]
+    },
+    select: legSelect,
+    orderBy: { startTime_utc: 'desc' }
+  });
+  const AMELCurrency = calculateCurrency(aselLegs);
+
 
 
   const ifrCatClass = [
@@ -288,6 +312,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     nowSeconds,
     currency: {
       asel: ASELCurrency,
+      amel: AMELCurrency,
       ifr: IFRCurrency,
       types
     }

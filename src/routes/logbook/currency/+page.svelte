@@ -1,14 +1,62 @@
 <script lang="ts">
-  import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
+    import CalendarBar from "$lib/components/routeSpecific/currency/CalendarBar.svelte";
+  import CurrencyChip from "$lib/components/routeSpecific/currency/CurrencyChip.svelte";
+    import CurrencyChipGenNight from "$lib/components/routeSpecific/currency/CurrencyChipGenNight.svelte";
+import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   import * as Card from "$lib/components/ui/card";
+    import { dateToDateStringFormMonthDayYear } from "$lib/helpers";
+    import { BookCheck, Check, X } from "lucide-svelte";
 
   export let data: import('./$types').PageData;
+
+  let selected: null | {
+    currencyExpiry: number,
+    title: string
+  } = null;
+  // {
+  //   currencyExpiry: data.currency.asel.general.currencyExpiry,
+  //   title: 'ASEL General'
+  // }
 
 </script>
 
 <OneColumn>
+
+  <div class="flex flex-col gap-4 p-4">
+      <h2 class="text-3xl font-thin tracking-wide">Currency</h2>
+      <div class="flex flex-row gap-4">
+        <div class="grow border rounded-2xl bg-zinc-900 flex flex-col gap-6 p-3 relative overflow-hidden">
+          <div class="absolute left-0 right-0 top-0 h-16 border-b">
+            <div class="w-full h-full bg-hashThickLight dark:bg-hashThickDark opacity-25" />
+          </div>
+          <div class="flex flex-row items-center relative">
+            <button on:click={() => selected = null} class="bg-zinc-800 group rounded-lg p-2 border border-zinc-700/30">
+              {#if selected === null}
+                <BookCheck class="w-5 h-5"/>
+              {:else}
+                <X class="w-5 h-5 group-hover:text-red-500"/>
+              {/if}
+            </button>
+            <div class="grow mx-4 h-full">
+              <CalendarBar {selected}/>
+            </div>
+            <div class="text-xxs font-mono select-none">as of <span class="text-sky-500 select-all">{dateToDateStringFormMonthDayYear(data.nowSeconds)}</span></div>
+          </div>
+          <div class="flex flex-col xs:flex-row flex-wrap items-center justify-center md:justify-start gap-4">
+            <CurrencyChipGenNight bind:selected data={{general: data.currency.asel.general, night: data.currency.asel.night }} title="ASEL" nowSeconds={data.nowSeconds} />
+            <CurrencyChipGenNight bind:selected data={{general: data.currency.amel.general, night: data.currency.amel.night }} title="AMEL" nowSeconds={data.nowSeconds} />
+            <CurrencyChip bind:selected isCurrent={data.currency.ifr.isCurrent} catClass="Airplane" type="IFR" currencyExpiry={data.currency.ifr.currencyExpiry} nowSeconds={data.nowSeconds} />
+            {#each data.currency.types as type}
+              <CurrencyChipGenNight bind:selected data={{general: type.general, night: type.night }} title={type.type.typeCode} nowSeconds={data.nowSeconds} />
+            {/each}
+          </div>
+        </div>
+        <!-- <div class="grow border rounded-2xl bg-zinc-900 h-24">test 123</div> -->
+      </div>
+
+  </div>
   
-  <div class="flex-col md:flex">
+  <div class="flex-col hidden">
     <div class="flex-1 space-y-4 p-3 md:p-6 pt-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between space-y-2">
         <h2 class="text-3xl font-bold tracking-tight">Currency</h2>

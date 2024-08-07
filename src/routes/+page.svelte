@@ -239,7 +239,8 @@
   <div class="flex-col md:flex">
     <div class="flex-1 space-y-4 p-3 md:p-6 pt-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between space-y-2">
-        <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <!-- <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2> -->
+        <h2 class="text-3xl font-thin tracking-wide">Dashboard</h2>
         <div class="relative flex flex-col md:flex-row items-start sm:items-center gap-4">
           <div class="hidden md:inline-flex gap-1 items-center h-12">
             {#if moreAircraft}
