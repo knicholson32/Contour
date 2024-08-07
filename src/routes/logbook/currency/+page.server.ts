@@ -173,7 +173,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     select: legSelect,
     orderBy: { startTime_utc: 'desc' }
   });
-  const AMELCurrency = calculateCurrency(aselLegs);
+  const AMELCurrency = calculateCurrency(amelLegs);
 
 
 
