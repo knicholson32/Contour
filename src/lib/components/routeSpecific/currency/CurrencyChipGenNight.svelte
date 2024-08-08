@@ -59,7 +59,7 @@
         </div>
       {/if}
       {#if data.general.currencyExpiry - nowSeconds < 0}
-        <div class="font-mono text-xxs text-center">none</div>
+        <div class="font-mono text-xxs text-center text-gray-500">not current</div>
       {:else}
         <div class="font-mono text-xxs text-center text-gray-500"><span class="text-gray-300">{Math.floor((data.general.currencyExpiry - nowSeconds) / (60 * 60 * 24))}</span> days rem</div>
       {/if}
