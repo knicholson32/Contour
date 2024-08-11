@@ -236,8 +236,8 @@
 
 <OneColumn>
 
-  <div class="flex-col md:flex">
-    <div class="flex-1 space-y-4 p-3 md:p-6 pt-6">
+  <div class="flex-col md:flex ">
+    <div class="flex-1 space-y-4 p-3 md:p-6 pt-6 h-full">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between space-y-2">
         <!-- <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2> -->
         <h2 class="text-3xl font-thin tracking-wide">Dashboard</h2>
@@ -309,7 +309,7 @@
           <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
           <Tabs.Trigger value="duty">Flight/Duty Time</Tabs.Trigger>
         </Tabs.List>
-        <Tabs.Content value="overview" class="space-y-2">
+        <Tabs.Content value="overview" class="space-y-2 h-full">
           <div class="w-full px-2 sm:hidden gap-1 items-center h-12 grid justify-center place-items-center" style="grid-template-columns: repeat({Object.keys(data.acList).length}, minmax(0, 1fr));">
             {#each data.acList as ac (ac.id)}
               <AircraftHoverCard id={ac.id} time={ac.time} compress={false} />
@@ -458,14 +458,14 @@
                 </VisXYContainer>
               </Card.Content>
             </Card.Root> -->
-            <Card.Root class="col-span-5 xl:col-span-4">
-              <Card.Content class="p-0 relative">
-                {#key mapKey}
-                  <Map.Bulk bind:this={map} class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" pos={data.positions} legIDs={data.legIDs} airports={data.airports} />
-                {/key}
-              </Card.Content>
-            </Card.Root>
           </div>
+          <Card.Root class="h-[calc(100vh-720px-1.5rem)] min-h-[400px]">
+            <Card.Content class="p-0 relative h-full">
+              {#key mapKey}
+                <Map.Bulk bind:this={map} class="!h-full rounded-md bg-transparent border-red-500 ring-0" pos={data.positions} legIDs={data.legIDs} airports={data.airports} />
+              {/key}
+            </Card.Content>
+          </Card.Root>
         </Tabs.Content>
         <Tabs.Content value="duty" class="space-y-2">
           <div class="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
