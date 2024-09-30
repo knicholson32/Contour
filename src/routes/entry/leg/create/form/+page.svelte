@@ -216,11 +216,11 @@
         <Entry.Button title="Add Approach" focus={addApproach} />
       </Section>
 
-      <Section title="Training & Other" collapsable={false} visible={false}>
+      <Section title="Training & Other" collapsable={true} visible={false}>
         <Entry.FlightTime title="Solo" name="solo-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Given" name="dual-given-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Received" name="dual-received-time" bind:autoFill={totalTime} defaultValue={null} />
-        <Entry.FlightTime title="Simulated Flight" name="sim-time" bind:autoFill={totalTime} defaultValue={null} />
+        <Entry.FlightTime title="Simulated Flight" name="sim-time" bind:autoFill={totalTime} defaultValue={selectedAircraftAPI === null || selectedAircraftAPI.simulator === false ? null : calcTotalTime} />
         <Entry.Switch title="Flight Review" name="flight-review" defaultValue={false} />
         <Entry.Switch title="Checkride" name="checkride" defaultValue={false} />
         <Entry.Switch title="IPC" name="ipc" defaultValue={false} />
