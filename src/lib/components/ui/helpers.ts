@@ -1,9 +1,11 @@
-export function color(options?: { opacity?: string, secondary?: boolean }) {
+export function color(options?: { opacity?: string, secondary?: boolean, accent?: boolean }) {
   let o = "1";
   let s = false;
+  let a = false;
   if (options?.opacity !== undefined) o = options.opacity;
   if (options?.secondary !== undefined) s = options.secondary;
-  return () => `hsl(var(--${s ? 'secondary' : 'primary'}) / ${o})`;
+  if (options?.accent !== undefined) a = options.accent;
+  return () => `hsl(var(--${s ? 'secondary' : a ? 'accent' : 'primary'}) / ${o})`;
 }
 
 export type Data = { average: number; today: number; id: number };

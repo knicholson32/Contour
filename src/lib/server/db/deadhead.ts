@@ -6,7 +6,16 @@ import prisma from "$lib/server/prisma"
 
 
 export const generateDeadheads = async (dayId: number) => {
-  const day = await prisma.dutyDay.findUnique({ where: { id: dayId }, include: { legs: { orderBy: { startTime_utc: 'asc' } } }});
+  // Get the day and all legs, except those legs with simulated flight (those are training flights only)
+  const day = await prisma.dutyDay.findUnique({ 
+    where: { id: dayId }, 
+    include: { 
+      legs: { 
+        orderBy: { startTime_utc: 'asc' },
+        where: { sim: 0 }
+      }
+    }
+  });
 
   if (day === null) return;
 
@@ -16,7 +25,7 @@ export const generateDeadheads = async (dayId: number) => {
 
     // Generate deadheads
 
-    console.log(day);
+    console.log('Deadhead generation', day);
 
     // 1. Leg from duty-day start to first
 
@@ -53,6 +62,7 @@ export const generateDeadheads = async (dayId: number) => {
 
       let i = 0;
 
+      // If there is more than one leg, we may have intermediate deadheads
       if (day.legs.length > 1) {
         for (i = 0; i < day.legs.length - 1; i++) {
           const lastLeg = day.legs[i];
@@ -71,6 +81,7 @@ export const generateDeadheads = async (dayId: number) => {
         }
       }
 
+      // Work on the last leg of the day
       const legDest = day.legs[i].diversionAirportId === null ? day.legs[i].destinationAirportId : day.legs[i].diversionAirportId as string;
 
       if (day.endAirportId !== legDest) {

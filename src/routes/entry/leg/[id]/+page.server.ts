@@ -115,11 +115,14 @@ export const load = async ({ fetch, params, url }) => {
 
   let legDeadheadCombo: LegOrDeadhead[] | null = null;
 
+  let simulatedLegs: Entry[] = [];
+
   if (dayId !== null) {
+    simulatedLegs = await prisma.leg.findMany({ where: { sim: { gt: 0 }, dayId: dayId }, select: legSelector });
     const day = await prisma.dutyDay.findUnique({
       where: { id: dayId },
       include: {
-        legs: { select: legSelector, orderBy: { startTime_utc: 'asc' } },
+        legs: { select: legSelector, orderBy: { startTime_utc: 'asc' }, where: { sim: 0 } },
         deadheads: { orderBy: { startTime_utc: 'asc' } }
       },
     });
@@ -224,6 +227,7 @@ export const load = async ({ fetch, params, url }) => {
     // positions: await prisma.position.findMany({ where: { legId: params.leg } }),
     // fixes: await prisma.fix.findMany({ where: { legId: params.leg } }),
     legDeadheadCombo,
+    simulatedLegs,
     stats: {
       time: leg === null || leg.positions.length === 0 ? null : (leg.positions[leg.positions.length - 1].timestamp - leg.positions[0].timestamp) / 60 / 60,
       avgSpeed: speed,
@@ -573,5 +577,55 @@ export const actions = {
     if (dayId !== null) u.set('day', dayId);
     if (tourId !== null) u.set('tour', tourId);
     throw redirect(302, `/entry/leg?${u.toString()}`);
+  },
+
+  modifyDutyDay: async ({ request, url, params }) => {
+    const data = await request.formData();
+    for (const key of data.keys()) console.log(key, data.getAll(key));
+
+    // Get the day ID that the user submitted
+    let dayId = data.get('dutyDayID') as null | string;
+    // If blank, the day should be removed, so assign null
+    if (dayId === '') dayId = null;
+
+    // Get the current leg info so we can see if there is currently a day. We'll use that
+    // to decide if we should generate deadheads for the updated day.
+    const currentLeg = await prisma.leg.findUnique({ where: { id: params.id } });
+    if (currentLeg === null) return API.Form.formFailure('?/modifyDutyDay', '*', 'Leg does not exist');
+
+    // Try-Catch for error protection
+    try {
+      // Check if the day should be removed
+      if (dayId === null) {
+        // It should. Update the leg to remove the duty day association
+        await prisma.leg.update({ where: { id: params.id }, data: { dayId: null } });
+      } else {
+        // We are modifying or adding a day association
+
+        // Get the numeric value passed by the user. If not a number, error.
+        let dayIdNumeric = parseInt(dayId);
+        if (isNaN(dayIdNumeric)) return API.Form.formFailure('?/modifyDutyDay', '*', 'Leg is not a number');
+
+        // Check that the day actually exists
+        const proposedDay = await prisma.dutyDay.findUnique({ where: { id: dayIdNumeric }});
+        if (proposedDay === null) return API.Form.formFailure('?/modifyDutyDay', '*', 'Proposed day does not exist');
+
+        // Modify the leg to associate with the day
+        await prisma.leg.update({ where: { id: params.id }, data: { dayId: dayIdNumeric } })
+        // Update the deadheads for the day we just added the leg to
+        await generateDeadheads(dayIdNumeric);
+      }
+
+      // If the leg was assigned to a day, update that day's deadheads
+      if (currentLeg.dayId !== null) await generateDeadheads(currentLeg.dayId);
+
+      // Done!
+      return API.Form.formSuccess('?/modifyDutyDay');
+
+    } catch (e) {
+      // We had an error somewhere in the process
+      console.log('Error modifying a leg duty day', e);
+      return API.Form.formFailure('?/modifyDutyDay', '*', 'Could not modify');
+    }
   }
 };

@@ -167,6 +167,7 @@ export const load = async ({ fetch, params, parent, url }) => {
 
   const duty = (currentDay.endTime_utc - currentDay.startTime_utc) / 60 / 60;
   let flight = 0;
+  let simulated = 0;
   let distance = 0;
   let apts: string[] = [];
   let operations = 0;
@@ -178,6 +179,7 @@ export const load = async ({ fetch, params, parent, url }) => {
 
   for (const leg of currentDay.legs) {
     flight += leg.totalTime;
+    simulated += leg.sim;
     if (!apts.includes(leg.originAirportId)) apts.push(leg.originAirportId);
     if (!apts.includes(leg.destinationAirportId)) apts.push(leg.destinationAirportId);
     if (leg.diversionAirportId !== null && !apts.includes(leg.diversionAirportId)) apts.push(leg.diversionAirportId);
@@ -223,6 +225,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     legDeadheadCombo,
     stats: {
       flight,
+      simulated,
       duty,
       distance,
       airports: apts.length,

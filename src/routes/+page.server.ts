@@ -245,13 +245,15 @@ export const load = async ({ parent, url }) => {
   if (days.length !== 0) dutyDayDuration = dutyDayDuration / days.length;
   if (timeCounter !== 0) groundSpeed = groundSpeed / timeCounter;
 
-  type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, flight: number | null, distance: number | null, duty: number | null };
+  type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, flight: number | null, sim: number | null, distance: number | null, duty: number | null };
 
   let statistics: DayStat[] = []
 
   let dayIndex = 0;
 
   let cal = sCal.copy();
+
+  let containsSimTime = false;
 
   while (cal.compare(eCal) <= 0) {
     const date = cal.toDate(timeZone);
@@ -304,6 +306,7 @@ export const load = async ({ parent, url }) => {
       onTour: isOnTour,
       startTime: start,
       flight: null,
+      sim: null,
       distance: null,
       duty: null
     }
@@ -313,11 +316,14 @@ export const load = async ({ parent, url }) => {
       days = days.filter((d) => d.id !== targetDay?.id);
       const dayDuration = targetDay.endTime_utc - targetDay.startTime_utc;
       let flightTime = 0;
+      let simulatedTime = 0;
       let distance = 0;
       for (const leg of targetDay.legs) {
+        flightTime += leg.totalTime - leg.sim < 0 ? 0 : leg.totalTime - leg.sim;
+        simulatedTime += leg.sim;
+        if (leg.sim > 0) containsSimTime = true;
         if (leg.positions.length <= 1) continue;
         let lastPos = leg.positions[0];
-        flightTime += leg.totalTime;
         for (let i = 1; i < leg.positions.length; i++) {
           const pos = leg.positions[i];
           const dist = getDistanceFromLatLonInKm(lastPos.latitude, lastPos.longitude, pos.latitude, pos.longitude);
@@ -327,6 +333,7 @@ export const load = async ({ parent, url }) => {
       }
 
       stat.flight = flightTime;
+      stat.sim = simulatedTime;
       stat.distance = distance / 1.15;
       stat.duty = dayDuration
     }
@@ -388,6 +395,7 @@ export const load = async ({ parent, url }) => {
       time: maxTime,
       ac: mostCommonAC,
     },
+    containsSimTime,
     acList,
     dutyDays: {
       duration: {

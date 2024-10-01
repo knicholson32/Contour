@@ -2,7 +2,7 @@
     import icons from "$lib/components/icons";
     import { dateToDateStringFormMonthDayYear } from "$lib/helpers";
     import type { Entry } from "$lib/types";
-    import { Waypoints } from "lucide-svelte";
+    import { Waypoints, Server } from "lucide-svelte";
     import Tag from "$lib/components/decorations/Tag.svelte";
 
     export let unsaved: boolean;
@@ -40,7 +40,7 @@
       {/if}
     </span>
   </div>
-  <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+  <div class="inline-flex items-center overflow-hidden whitespace-nowrap text-ellipsis">
     <span class="font-normal text-gray-400 dark:text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis">
       {leg.aircraft.registration} ({leg.aircraft.type.typeCode})
     </span>
@@ -55,7 +55,15 @@
         {/if}
       </span>
     {/if}
-    <span class="">{leg.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
+    <span class="">
+      {leg.totalTime.toFixed(1)}
+    </span>
+    <span class="font-light ml-1">
+      Total
+    </span>
+    {#if leg.sim > 0}
+      <span class="text-primary ml-1"><Server class="w-3 h-3"/></span>
+    {/if}
   </div>
 </div>
 <div class="absolute right-1">

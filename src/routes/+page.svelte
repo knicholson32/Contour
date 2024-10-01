@@ -171,7 +171,7 @@
     goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: false, noScroll: false, invalidateAll: true });
   }
 
-  type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, flight: number | null, distance: number | null, duty: number | null };
+  type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, flight: number | null, sim: number | null, distance: number | null, duty: number | null };
 
 	const x = (d: DayStat) => d.index;
 
@@ -194,8 +194,9 @@
 
 	const yDist = (d: DayStat) => d.distance;
   const yFlight = (d: DayStat) => (d.flight ?? 0);
+  const ySim = (d: DayStat) => (d.sim ?? 0);
   const flightTemplate = (d: DayStat) => (d.flight ?? 0).toFixed(1) + ' hr<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
-  const dualTemplate = (d: DayStat) => (d.flight ?? 0).toFixed(1) + ' hr Flight<br/>' + ((d.duty ?? 0) / 60 / 60).toFixed(1) + ' hr Duty<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
+  const dualTemplate = (d: DayStat) => ((d.duty ?? 0) / 60 / 60).toFixed(1) + ' hr Duty<br/>' + (d.flight ?? 0 > 0 ? (d.flight ?? 0).toFixed(1) + ' hr Flight<br/>' : '') + ((d.sim ?? 0) > 0 ? ((d.sim ?? 0).toFixed(1) + ' hr Sim<br/>') : '') + '<span class="text-xs">' + tickFormat(d.index) + '</span>';
   const yDuty = (d: DayStat) => (d.duty ?? 0) / 60 / 60;
   const dutyTemplate = (d: DayStat) =>  ((d.duty ?? 0) / 60 / 60).toFixed(1) + ' hr<br/><span class="text-xs">' + tickFormat(d.index) + '</span>';
 
@@ -419,11 +420,15 @@
                   <VisCrosshair template={dualTemplate} color={crosshairColor}/>
                   <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer} />
                   <VisArea curveType="linear" {x} y={yTourAreaFlight} color={color({ opacity: '0.2'})} excludeFromDomainCalculation={true} />
+                  {#if data.containsSimTime}
+                    <VisLine {x} y={ySim} color={color({secondary: false, accent: true})} lineDashArray={[5]} />
+                  {/if}
                   <VisLine {x} y={yFlight} color={color({secondary: false})} />
                   <VisLine {x} y={yDuty} color={color({ secondary: true })} />
                   <VisBulletLegend items={[
-                    { name: 'Flight', color: color()() },
                     { name: 'Duty', color: color({ secondary: true })() },
+                    { name: 'Flight', color: color()() },
+                    { name: 'Sim', color: color({ accent: true })() },
                   ]} />
                   <!-- <VisScatter {x} y={yFlight} cursor="pointer" size={6} color={scatterPointColors} strokeColor={scatterPointStrokeColors} strokeWidth={2} /> -->
                 </VisXYContainer>

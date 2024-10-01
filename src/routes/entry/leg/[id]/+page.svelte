@@ -18,7 +18,7 @@
   import { dateToDateStringForm, dateToDateStringFormMonthDayYear, dateToDateStringFormSimple, dateToTimeStringZulu, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
-  import { AlertCircle, Briefcase, CalendarDays, ChevronRight, Dot, Fullscreen, Gauge, Link, Maximize, Menu, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
+  import { AlertCircle, Briefcase, CalendarDays, ChevronRight, Server, Dot, Fullscreen, Gauge, Link, Maximize, Menu, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
   import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
@@ -229,7 +229,17 @@
     {#if data.currentDay !== null}
       <MenuForm.Title title="Duty Day Legs" />
       <MenuForm.Link href={`/entry/day/${data.currentDay.id}?${urlFormParam}`} type="left" text="Back to Day" />
-      <MenuForm.Link href={`/entry/leg/create/fa?${urlFormParam}`} icon={icons.plus} text="Create a new leg" type="right"/>
+      <!-- <MenuForm.Link href={`/entry/leg/create/fa?${urlFormParam}`} icon={icons.plus} text="Create a new leg" type="right"/> -->
+      <Popover.Root bind:open={legsPopoverOpen}>
+        <Popover.Trigger class="w-full">
+          <MenuForm.Link href="#" icon={icons.plus} text="Create a new leg" type="right"/>
+        </Popover.Trigger>
+        <Popover.Content side={isMobileSize ? undefined : 'right'} class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-none w-auto">
+          <!-- Active: "bg-gray-100", Not Active: "" -->
+          <a href="/entry/leg/create/fa?{urlFormParam}" on:click={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From FlightAware</a>
+          <a href="/entry/leg/create/form?{urlFormParam}" on:click={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From Scratch</a>
+        </Popover.Content>
+      </Popover.Root>
     {:else}
       <MenuForm.Title title={$page.url.searchParams.get('tour') !== null ? 'Tour Legs' : 'Legs'} />
       <Popover.Root bind:open={legsPopoverOpen}>
@@ -259,41 +269,94 @@
         </MenuSection>
       {/each}
     {:else}
-      <MenuSection title="Legs">
-        {#each data.legDeadheadCombo as entry, i (entry.id)}
-          {#if entry.type === 'leg'}
+      {#if data.legDeadheadCombo.length !== 0 && !(data.legDeadheadCombo.length === 1 && data.legDeadheadCombo[0].type === 'deadhead' && data.legDeadheadCombo[0].entry.originAirportId === data.legDeadheadCombo[0].entry.destinationAirportId)}
+        <MenuSection title="Legs">
+          {#each data.legDeadheadCombo as entry, i (entry.id)}
+            {#if entry.type === 'leg'}
+              <MenuElement href="/entry/leg/{entry.id}?{urlActiveParam}" selected={entry.id === data.params.id && !isMobileSize}>
+                <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
+                  <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+                    <span class="">
+                      {#if entry.entry.originAirportId === null && entry.entry.destinationAirportId === null}
+                        No Route
+                      {:else}
+                        {entry.entry.originAirportId} → {entry.entry.diversionAirportId === null ? entry.entry.destinationAirportId : entry.entry.diversionAirportId}
+                      {/if}
+                    </span>
+                    <span class="flex-grow ml-1">
+                      {#if $unsavedUIDs.includes(entry.entry.id)}
+                        <Tag>UNSAVED</Tag>
+                      {/if}
+                    </span>
+                    <span class="mr-2">
+                      <div class="w-4 h-4 text-xxs flex items-center justify-center font-bold rounded-full bg-sky-600 text-white">{i + 1}</div>
+                    </span>
+                    <span class="text-sky-600">
+                      {#if entry.entry.startTime_utc === null}
+                        No Date
+                      {:else}
+                        {dateToTimeStringZulu(entry.entry.startTime_utc)}
+                      {/if}
+                    </span>
+                  </div>
+                  <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+                    <span class="font-normal text-gray-400 dark:text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis">
+                      {entry.entry.aircraft.registration} ({entry.entry.aircraft.type.typeCode})
+                    </span>
+                    <span class="flex-grow"></span>
+                    <span class="">{entry.entry.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
+                  </div>
+                </div>
+                <div class="absolute right-1">
+                  <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+                    {@html icons.chevronRight}
+                  </svg>
+                </div>
+              </MenuElement>
+            {:else}
+              <div class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 bg-gray-50 dark:bg-zinc-950/50">
+                <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
+                  <div class="uppercase font-bold font-mono text-xs overflow-hidden whitespace-nowrap text-ellipsis text-gray-400 dark:text-zinc-700">
+                    <span class="text-xxs font-thin">{i+1}</span> {entry.entry.originAirportId} → {entry.entry.destinationAirportId} (Deadhead)
+                  </div>
+                </div>
+              </div>
+            {/if}
+          {/each}
+        </MenuSection>
+      {/if}
+      {#if data.simulatedLegs.length > 0}
+        <MenuSection title="Simulated Flights">
+          {#each data.simulatedLegs as entry, i}
             <MenuElement href="/entry/leg/{entry.id}?{urlActiveParam}" selected={entry.id === data.params.id && !isMobileSize}>
               <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
                 <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
                   <span class="">
-                    {#if entry.entry.originAirportId === null && entry.entry.destinationAirportId === null}
+                    {#if entry.originAirportId === null && entry.destinationAirportId === null}
                       No Route
                     {:else}
-                      {entry.entry.originAirportId} → {entry.entry.diversionAirportId === null ? entry.entry.destinationAirportId : entry.entry.diversionAirportId}
+                      {entry.originAirportId} → {entry.diversionAirportId === null ? entry.destinationAirportId : entry.diversionAirportId}
                     {/if}
                   </span>
                   <span class="flex-grow ml-1">
-                    {#if $unsavedUIDs.includes(entry.entry.id)}
+                    {#if $unsavedUIDs.includes(entry.id)}
                       <Tag>UNSAVED</Tag>
                     {/if}
                   </span>
                   <span class="mr-2">
-                    <div class="w-4 h-4 text-xxs flex items-center justify-center font-bold rounded-full bg-sky-600 text-white">{i + 1}</div>
+                    <Server class="w-4 h-4" />
+                    <!-- <div class="w-4 h-4 text-xxs flex items-center justify-center font-bold rounded-full bg-sky-600 text-white">{i + 1}</div> -->
                   </span>
                   <span class="text-sky-600">
-                    {#if entry.entry.startTime_utc === null}
-                      No Date
-                    {:else}
-                      {dateToTimeStringZulu(entry.entry.startTime_utc)}
-                    {/if}
+                    Simulated
                   </span>
                 </div>
                 <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
                   <span class="font-normal text-gray-400 dark:text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis">
-                    {entry.entry.aircraft.registration} ({entry.entry.aircraft.type.typeCode})
+                    {entry.aircraft.registration} ({entry.aircraft.type.typeCode})
                   </span>
                   <span class="flex-grow"></span>
-                  <span class="">{entry.entry.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
+                  <span class="">{entry.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
                 </div>
               </div>
               <div class="absolute right-1">
@@ -302,17 +365,9 @@
                 </svg>
               </div>
             </MenuElement>
-          {:else}
-            <div class="relative select-none flex flex-row justify-left items-center gap-2 pl-2 pr-6 py-0 bg-gray-50 dark:bg-zinc-950/50">
-              <div class="flex flex-row gap-1 items-center justify-center overflow-hidden py-2 flex-initial">
-                <div class="uppercase font-bold font-mono text-xs overflow-hidden whitespace-nowrap text-ellipsis text-gray-400 dark:text-zinc-700">
-                  <span class="text-xxs font-thin">{i+1}</span> {entry.entry.originAirportId} → {entry.entry.destinationAirportId} (Deadhead)
-                </div>
-              </div>
-            </div>
-          {/if}
-        {/each}
-      </MenuSection>
+          {/each}
+        </MenuSection>
+      {/if}
     {/if}
   </nav>
   
@@ -330,10 +385,23 @@
           {/if}
           {#if data.currentDay !== null}
             <div class="mt-6">
-              <a href="/entry/leg/create/fa?{urlFormParam}" class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
+              <Popover.Root>
+                <Popover.Trigger class="w-full">
+                  <div class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
+                    <Plus class="-ml-0.5 mr-1.5 h-5 w-5" />
+                    Create A New Leg
+                  </div>
+                </Popover.Trigger>
+                <Popover.Content  class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-none w-auto">
+                  <!-- Active: "bg-gray-100", Not Active: "" -->
+                  <a href="/entry/leg/create/fa?{urlFormParam}" on:click={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From FlightAware</a>
+                  <a href="/entry/leg/create/form?{urlFormParam}" on:click={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From Scratch</a>
+                </Popover.Content>
+              </Popover.Root>
+              <!-- <a href="/entry/leg/create/fa?{urlFormParam}" class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
                 <Plus class="-ml-0.5 mr-1.5 h-5 w-5" />
                 Create A New Leg
-              </a>
+              </a> -->
             </div>
           {/if}
         </div>
@@ -481,6 +549,15 @@
               <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-red-500">Erase FlightAware Data</div>
             </button>
             <div class="flex-grow"></div>
+          </form>
+          <form action="?/modifyDutyDay" method="post" enctype="multipart/form-data" class="flex flex-row gap-3 items-center">
+            <Entry.Input title="Duty Day" name="dutyDayID" error={form !== null && form.ok === false && form.action === '?/modifyDutyDay' ? form.message : ''} uppercase={true} defaultValue={`${data.leg.dayId ?? ''}`} placeholder="Enter a Duty Day ID here" />
+            <button type="submit" class="flex flex-row gap-3 items-center group px-2">
+              <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-green-500">Apply</div>
+              <div class="p-0 rounded-full text-green-500">
+                <ChevronRight class="w-7 h-7"/>
+              </div>
+            </button>
           </form>
           <a slot="message" href="/settings/data" class="flex flex-row gap-3 items-center group">
             <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-sky-500">Modify Settings</div>

@@ -142,8 +142,13 @@
             <Timer class="h-4 w-4 text-muted-foreground" />
           </Card.Header>
           <Card.Content>
-            <div class="text-2xl font-bold">{data.stats.flight.toFixed(1)} hr</div>
-            <p class="text-xs text-muted-foreground">{data.stats.distance.toFixed(0)} nmi traveled</p>
+            {#if data.stats.simulated > 0}
+              <div class="text-2xl font-bold">{data.stats.flight.toFixed(1)} hr</div>
+              <p class="text-xs text-sky-500">{data.stats.simulated.toFixed(1)} hr simulated</p>
+            {:else}
+              <div class="text-2xl font-bold">{data.stats.flight.toFixed(1)} hr</div>
+              <p class="text-xs text-muted-foreground">{data.stats.distance.toFixed(0)} nmi traveled</p>
+            {/if}
           </Card.Content>
         </Card.Root>
         <Card.Root>

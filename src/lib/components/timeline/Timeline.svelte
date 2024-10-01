@@ -22,7 +22,7 @@
 
   const dataCleaned: typeof data = [];
   for (const d of data) {
-    if (d.endTime_utc === null || d.startTime_utc === null) continue;
+    if (d.endTime_utc === null || d.startTime_utc === null || (d.type === 'leg' && (d as Types.Leg).sim !== 0)) continue;
     dataCleaned.push(d);
   }
 
