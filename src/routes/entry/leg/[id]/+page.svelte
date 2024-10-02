@@ -139,6 +139,7 @@
     setTimeout(() => {
       resetMap()
     }, 1);
+    useBlock = (data.leg?.day ?? null) === null ? false : data.leg?.startTime_utc !== data.leg?.day?.startTime_utc;
   });
 
   const ref = $page.url.searchParams.get('ref');
@@ -172,6 +173,7 @@
   if (browser) tooltipContainer = document.body;
 
   let legsPopoverOpen = false;
+  // Use Block times is defaulted to true if the start time isn't the same as the start of the day (duty or assigned)
   let useBlock: boolean;
 
   let submitFADelete: HTMLButtonElement;
@@ -345,7 +347,6 @@
                   </span>
                   <span class="mr-2">
                     <Server class="w-4 h-4" />
-                    <!-- <div class="w-4 h-4 text-xxs flex items-center justify-center font-bold rounded-full bg-sky-600 text-white">{i + 1}</div> -->
                   </span>
                   <span class="text-sky-600">
                     Simulated
@@ -602,10 +603,10 @@
       </Section>
 
       <Section title="Block Times">
-        {#if data.leg.dayId === null && data.leg.forceUseBlock === false}
+        {#if (data.leg.dayId === null && data.leg.forceUseBlock === false) || (selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true)}
           <Entry.Switch title="Use Block Times" name="use-block" noLocalStorage={true} bind:value={useBlock} defaultValue={false} />
         {/if}
-        {#if useBlock || data.leg.dayId !== null || data.leg.forceUseBlock === true}
+        {#if useBlock || (data.leg.dayId !== null && !(selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true)) || data.leg.forceUseBlock === true}
           <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTime} />
           <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZBind} defaultValue={data.endTime} />
           <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
@@ -643,11 +644,10 @@
         <Entry.Button title="Add Approach" focus={addApproach} />
       </Section>
 
-      <Section title="Training & Other" collapsable={true} visible={false}>
+      <Section title="Training & Other" collapsable={true} visible={(selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true)}>
         <Entry.FlightTime title="Solo" name="solo-time" bind:autoFill={totalTime} defaultValue={data.leg.solo} />
         <Entry.FlightTime title="Dual Given" name="dual-given-time" bind:autoFill={totalTime} defaultValue={data.leg.dualGiven} />
         <Entry.FlightTime title="Dual Received" name="dual-received-time" bind:autoFill={totalTime} defaultValue={data.leg.dualReceived} />
-        <Entry.FlightTime title="Simulated Flight" name="sim-time" bind:autoFill={totalTime} defaultValue={data.leg.sim} />
         <Entry.Switch title="Flight Review" name="flight-review" defaultValue={data.leg.flightReview} />
         <Entry.Switch title="Checkride" name="checkride" defaultValue={data.leg.checkride} />
         <Entry.Switch title="IPC" name="ipc" defaultValue={data.leg.ipc} />

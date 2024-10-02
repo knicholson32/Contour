@@ -50,7 +50,7 @@ export const generateDeadheads = async (dayId: number) => {
 
       // First leg
       if (day.startAirportId !== day.legs[0].originAirportId) {
-        console.log('first leg mismatch');
+        console.log('first leg mismatch', day.startAirportId, day.legs[0].originAirportId);
         await prisma.deadhead.create({ data: {
           dayId,
           originAirportId: day.startAirportId,

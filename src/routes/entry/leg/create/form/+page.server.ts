@@ -21,10 +21,12 @@ const EIGHT_HOURS = 8 * 60 * 60;
 /** @type {import('./$types').PageServerLoad} */
 export const load = async ({ params, fetch, url }) => {
 
+
   const entrySettings = await settings.getSet('entry');
   const aeroAPIKey = await settings.get('general.aeroAPI');
 
   const selection = url.searchParams.get('selection') === null ? null : url.searchParams.get('selection');
+  const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
 
   if (selection !== null && (entrySettings['entry.day.entry.fa_id'] === '' || entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED)) throw redirect(301, '../link' + url.search);
   if (aeroAPIKey === '') throw redirect(301, '/settings');
@@ -37,7 +39,8 @@ export const load = async ({ params, fetch, url }) => {
   if (selection === null) {
     return {
       airports,
-      aircraft
+      aircraft,
+      dayId
     };
   }
 
@@ -134,7 +137,6 @@ export const load = async ({ params, fetch, url }) => {
   u.delete('selection');
   u.set('active', 'menu');
   const changeSourceURL = `/entry/leg/create/fa${selection === null ? '' : '/' + selection}?${u.toString()}`;
-  const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
 
   return {
     entry,
@@ -164,6 +166,7 @@ export const actions = {
     const fa = await settings.get('entry.day.entry.fa_id');
 
     const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
+    const day = dayId === -1 || dayId === null ? null : await prisma.dutyDay.findUnique({ where: { id: dayId }});
     const selection = url.searchParams.get('selection') === null ? null : url.searchParams.get('selection');
 
     let entry = await options.getFlightOptionFaFlightID(fa);
@@ -296,9 +299,10 @@ export const actions = {
     if (ident !== null && ident !== '') ident = ident.trim().toUpperCase();
 
     let aircraftId: string = '';
+    let ac: Prisma.AircraftGetPayload<{}> | null = null;
 
     try {
-      const ac = await prisma.aircraft.findUnique({ where: { registration: aircraft as string }, select: { id: true } });
+      ac = await prisma.aircraft.findUnique({ where: { registration: aircraft as string } });
       if (ac === null) return API.Form.formFailure('?/default', 'aircraft', 'Aircraft does not exist.');
       aircraftId = ac.id;
     } catch (e) {
@@ -319,7 +323,6 @@ export const actions = {
     let simulatedInstrumentTime = data.get('simulated-instrument-time') as null | string;
     let dualGivenTime = data.get('dual-given-time') as null | string;
     let dualReceivedTime = data.get('dual-received-time') as null | string;
-    let simTime = data.get('sim-time') as null | string;
 
     if (totalTime === null || totalTime === '') return API.Form.formFailure('?/default', 'total-time', 'Required field');
     if (picTime === null || picTime === '' || isNaN(parseFloat(picTime))) picTime = null;
@@ -331,11 +334,15 @@ export const actions = {
     if (simulatedInstrumentTime === null || simulatedInstrumentTime === '' || isNaN(parseFloat(simulatedInstrumentTime))) simulatedInstrumentTime = null;
     if (dualGivenTime === null || dualGivenTime === '' || isNaN(parseFloat(dualGivenTime))) dualGivenTime = null;
     if (dualReceivedTime === null || dualReceivedTime === '' || isNaN(parseFloat(dualReceivedTime))) dualReceivedTime = null;
-    if (simTime === null || simTime === '' || isNaN(parseFloat(simTime))) simTime = null;
+
+    // Calculate sim time based on whether or not this is a sim aircraft
+    let simTime = 0;
+    if (ac.simulator) simTime = parseFloat(totalTime);
 
     // If we have provided a date, the user wants to use that instead of the flight aware info.
-    if (date !== null) {
-      startUTCValue = Math.floor(new Date(date).getTime() / 1000);
+    if (date !== null || (day !== null && !useBlock)) {
+      if (date === null) startUTCValue = Math.floor(day?.startTime_utc ?? 0); // This will never happen (the ??) but TS doesn't know that
+      else startUTCValue = Math.floor(new Date(date).getTime() / 1000);
       endUTCValue = startUTCValue + (parseFloat(totalTime) * 60 * 60);
       relativeOrder = await prisma.leg.count({ where: { startTime_utc: startUTCValue } });
     }
@@ -402,7 +409,7 @@ export const actions = {
         simulatedInstrument: simulatedInstrumentTime === null ? undefined : parseFloat(simulatedInstrumentTime),
         dualGiven: dualGivenTime === null ? undefined : parseFloat(dualGivenTime),
         dualReceived: dualReceivedTime === null ? undefined : parseFloat(dualReceivedTime),
-        sim: simTime === null ? undefined : parseFloat(simTime),
+        sim: simTime,
 
         dayTakeOffs: dayTakeoffs === null ? undefined : parseInt(dayTakeoffs),
         dayLandings: dayLandings === null ? undefined : parseInt(dayLandings),

@@ -180,10 +180,10 @@
       </Section>
 
       <Section title="Block Times">
-        {#if data.dayId === null || data.dayId === undefined}
+        {#if data.dayId === null || data.dayId === undefined || (selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true)}
           <Entry.Switch title="Use Block Times" name="use-block" noLocalStorage={true} bind:value={useBlock} defaultValue={false} />
         {/if}
-        {#if useBlock || (data.dayId !== null && data.dayId !== undefined)}
+        {#if useBlock || (data.dayId !== null && data.dayId !== undefined && !(selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true))}
           <Entry.TimePicker required={true} title="Out" name="out" bind:autoTZ={startAirportTZ} bind:tz={outTZ} bind:value={outTime} defaultValue={data.startTime ?? null} />
           <Entry.TimePicker required={true} title="In" name="in" autoTZ={outTZAuto} bind:tz={inTZ} bind:value={inTime} defaultValue={data.endTime ?? null} />
           <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
@@ -220,7 +220,7 @@
         <Entry.FlightTime title="Solo" name="solo-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Given" name="dual-given-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Received" name="dual-received-time" bind:autoFill={totalTime} defaultValue={null} />
-        <Entry.FlightTime title="Simulated Flight" name="sim-time" bind:autoFill={totalTime} defaultValue={selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true ? (totalTime === null ? null : parseFloat(totalTime)) : null} />
+        <!-- <Entry.FlightTime title="Simulated Flight" name="sim-time" bind:autoFill={totalTime} defaultValue={selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true ? (totalTime === null ? null : parseFloat(totalTime)) : null} /> -->
         <Entry.Switch title="Flight Review" name="flight-review" defaultValue={false} />
         <Entry.Switch title="Checkride" name="checkride" defaultValue={false} />
         <Entry.Switch title="IPC" name="ipc" defaultValue={false} />

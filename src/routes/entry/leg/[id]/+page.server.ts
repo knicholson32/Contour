@@ -271,7 +271,7 @@ export const actions = {
 
     const id = params.id;
 
-    const currentLeg = await prisma.leg.findUnique({ where: { id }});
+    const currentLeg = await prisma.leg.findUnique({ where: { id }, include: { day: true }});
     if (currentLeg === null) return API.Form.formFailure('?/default', '*', 'Leg does not exist');
 
     const data = await request.formData();
@@ -350,6 +350,27 @@ export const actions = {
     }
 
     // -----------------------------------------------------------------------------------------------------------------
+    // Aircraft
+    // -----------------------------------------------------------------------------------------------------------------
+
+    let aircraft = data.get('aircraft') as null | string;
+    let ident = data.get('ident') as null | string;
+
+    if (aircraft === null || aircraft === '') return API.Form.formFailure('?/default', 'aircraft', 'Required field');
+    if (ident !== null && ident !== '') ident = ident.trim().toUpperCase();
+
+    let aircraftId: string = '';
+    let ac: Prisma.AircraftGetPayload<{ include: { type: true } }> | null = null;
+    try {
+      ac = await prisma.aircraft.findUnique({ where: { registration: aircraft as string }, include: { type: true } });
+      if (ac === null) return API.Form.formFailure('?/default', 'aircraft', 'Aircraft does not exist.');
+      aircraftId = ac.id;
+
+    } catch (e) {
+      return API.Form.formFailure('?/default', 'aircraft', 'Invalid data');
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
     // Out / In Times
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -365,8 +386,9 @@ export const actions = {
     let endUTCValue = currentLeg.endTime_utc;
     let relativeOrder = currentLeg.relativeOrder;
 
+    let usedBlockTimes = false;
 
-    if (useBlock || currentLeg.dayId !== null) {
+    if (useBlock || (currentLeg.dayId !== null && ac.simulator === false)) {
       if (startTime === null || startTime === '') return API.Form.formFailure('?/default', 'out', 'Required field');
       if (startTimeTZ === null || startTimeTZ === '') return API.Form.formFailure('?/default', 'out', 'Required field');
       if (endTime === null || endTime === '') return API.Form.formFailure('?/default', 'in', 'Required field');
@@ -383,27 +405,8 @@ export const actions = {
 
       startUTCValue = startUTC.value;
       endUTCValue = endUTC.value;
-    }
 
-    // -----------------------------------------------------------------------------------------------------------------
-    // Aircraft
-    // -----------------------------------------------------------------------------------------------------------------
-
-    let aircraft = data.get('aircraft') as null | string;
-    let ident = data.get('ident') as null | string;
-
-    if (aircraft === null || aircraft === '') return API.Form.formFailure('?/default', 'aircraft', 'Required field');
-    if (ident !== null && ident !== '') ident = ident.trim().toUpperCase();
-    
-    let aircraftId: string = '';
-
-    try {
-      const ac = await prisma.aircraft.findUnique({ where: { registration: aircraft as string }, select: { id: true, registration: true } });
-      if (ac === null) return API.Form.formFailure('?/default', 'aircraft', 'Aircraft does not exist.');
-      aircraftId = ac.id;
-
-    } catch (e) {
-      return API.Form.formFailure('?/default', 'aircraft', 'Invalid data');
+      usedBlockTimes = true;
     }
 
 
@@ -421,7 +424,6 @@ export const actions = {
     let simulatedInstrumentTime = data.get('simulated-instrument-time') as null | string;
     let dualGivenTime = data.get('dual-given-time') as null | string;
     let dualReceivedTime = data.get('dual-received-time') as null | string;
-    let simTime = data.get('sim-time') as null | string;
 
     if (totalTime === null || totalTime === '') return API.Form.formFailure('?/default', 'total-time', 'Required field');
     if (picTime === null || picTime === '' || isNaN(parseFloat(picTime))) picTime = null;
@@ -433,11 +435,15 @@ export const actions = {
     if (simulatedInstrumentTime === null || simulatedInstrumentTime === '' || isNaN(parseFloat(simulatedInstrumentTime))) simulatedInstrumentTime = null;
     if (dualGivenTime === null || dualGivenTime === '' || isNaN(parseFloat(dualGivenTime))) dualGivenTime = null;
     if (dualReceivedTime === null || dualReceivedTime === '' || isNaN(parseFloat(dualReceivedTime))) dualReceivedTime = null;
-    if (simTime === null || simTime === '' || isNaN(parseFloat(simTime))) simTime = null;
+
+    // Calculate sim time based on whether or not this is a sim aircraft
+    let simTime = 0;
+    if (ac.simulator) simTime = parseFloat(totalTime);
 
     // If we have provided a date, the user wants to use that instead of the flight aware info.
-    if (date !== null && !useBlock && !currentLeg.forceUseBlock) {
-      startUTCValue = Math.floor(new Date(date).getTime() / 1000);
+    if (!usedBlockTimes && ((date !== null || currentLeg.day !== null) && !useBlock && !currentLeg.forceUseBlock)) {
+      if (date !== null) startUTCValue = Math.floor(new Date(date).getTime() / 1000);
+      else startUTCValue = currentLeg.day?.startTime_utc ?? 0; // This will never happen (the ??) but TS doesn't know that
       endUTCValue = startUTCValue + (parseFloat(totalTime) * 60 * 60);
       // TODO: Probably we should then go through all the other legs that share this date and resolve any order gaps
       relativeOrder = await prisma.leg.count({ where: { startTime_utc: startUTCValue } });
@@ -500,7 +506,7 @@ export const actions = {
         simulatedInstrument: simulatedInstrumentTime === null ? undefined : parseFloat(simulatedInstrumentTime),
         dualGiven: dualGivenTime === null ? undefined : parseFloat(dualGivenTime),
         dualReceived: dualReceivedTime === null ? undefined : parseFloat(dualReceivedTime),
-        sim: simTime === null ? undefined : parseFloat(simTime),
+        sim: simTime,
 
         dayTakeOffs: dayTakeoffs === null ? undefined : parseInt(dayTakeoffs),
         dayLandings: dayLandings === null ? undefined : parseInt(dayLandings),
@@ -520,6 +526,7 @@ export const actions = {
       }});
 
 
+      console.log('GENERATE', leg.dayId !== null);
       if (leg.dayId !== null) await generateDeadheads(leg.dayId);
 
       // ---------------------------------------------------------------------------------------------------------------

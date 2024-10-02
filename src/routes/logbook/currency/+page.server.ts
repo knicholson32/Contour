@@ -272,6 +272,8 @@ export const load = async ({ fetch, params, parent, url }) => {
     }
   });
 
+  console.log(typeRatings);
+
   const types: ({ type: Prisma.AircraftTypeGetPayload<{}>} & GeneralAndNightCurrency)[] = [];
   for (const typeRating of typeRatings) {
     const typeLegs = await prisma.leg.findMany({ 
@@ -305,8 +307,6 @@ export const load = async ({ fetch, params, parent, url }) => {
     })
 
   }
-
-  console.log(IFRCurrency.entries.affecting);
 
   return {
     nowSeconds,

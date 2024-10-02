@@ -4,10 +4,12 @@ import prisma from '$lib/server/prisma';
 import { API, ImageUploadState } from '$lib/types';
 import { DB } from '$lib/types';
 import { delay } from '$lib/helpers/index.js';
+import type * as Types from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import Fuse from 'fuse.js';
 
 import * as helpers from '$lib/server/helpers';
+import { generateDeadheads } from '$lib/server/db/deadhead.js';
 
 const MAX_MB = 10;
 
@@ -162,7 +164,6 @@ export const actions = {
     const debug = await settings.get('system.debug');
 
     const data = await request.formData();
-    await delay(500);
     if (debug) for (const key of data.keys()) console.log(key, data.getAll(key));
 
     // return API.Form.formFailure('?/default', 'tail', 'Required field');
@@ -214,6 +215,7 @@ export const actions = {
       try {
         
         const currentData = await prisma.aircraft.findUnique({ where: { id }, include: { type: true }});
+        if (currentData === null) return API.Form.formFailure('?/default', '*', 'Aircraft does not exist');
 
         // console.log('1', (taa === 'true') === currentData?.taa);
         // console.log('2', taa === null ? null : (taa === 'true') === currentData?.taa ? null : (taa === 'true'));
@@ -234,6 +236,33 @@ export const actions = {
         };
         if (debug) console.log('update', data);
         await prisma.aircraft.update({ where: { id }, data });
+
+        if (currentData?.simulator !== data.simulator) {
+          // We changed the simulator status. We need to:
+          //  1. Update each leg that uses this aircraft and recalculate the simulator time
+          //  2. Recalculate each duty day's deadheads associated with each of these legs
+
+          // Get the legs that use this aircraft
+          const legs = await prisma.leg.findMany({ where: { aircraftId: id }, include: { day: { select: { id: true } } }});
+
+          // Create some arrays to hold the inserts and hashes created in the loop
+          const legUpdates: Types.Prisma.PrismaPromise<any>[] = [];
+          const daysToRecalculate: number[] = [];
+
+          // Update every leg and either assign the sim time to the total time (if simulator), or 0 (if not a simulator)
+          for (const leg of legs) {
+            legUpdates.push(prisma.leg.update({ where: { id: leg.id }, data: { sim: data.simulator ? leg.totalTime : 0 } }));
+            if (leg.dayId !== null && !daysToRecalculate.includes(leg.dayId)) daysToRecalculate.push(leg.dayId);
+          }
+
+          // Update all the legs with the new sim times
+          await prisma.$transaction(legUpdates)
+
+          // Recalculate all the deadheads
+          // TODO: This could be more efficient with transactions
+          for (const dayId of daysToRecalculate) await generateDeadheads(dayId);
+        }
+
       } catch (e) {
         console.log(e);
         return API.Form.formFailure('?/default', '*', 'An unknown error occurred. See logs.');

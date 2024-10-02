@@ -8,6 +8,9 @@
   export let data: ((Types.Deadhead | Types.Leg) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[];
   export let day: Types.DutyDay;
 
+  // Sort the data so deadheads come before flights if they start at the same time
+  data.sort((a, b) => a.startTime_utc === b.startTime_utc ? (a.type === 'deadhead' ? -1 : 1) : 0);
+
   let dutyDayLength = ((day.endTime_utc - day.startTime_utc) / 60 / 60).toFixed(1);
 
   const dataFormatted: {
