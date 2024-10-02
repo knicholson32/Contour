@@ -2,7 +2,7 @@
     import icons from "$lib/components/icons";
     import { dateToDateStringFormMonthDayYear } from "$lib/helpers";
     import type { Entry } from "$lib/types";
-    import { Waypoints, Server } from "lucide-svelte";
+    import { Waypoints, Server, Briefcase } from "lucide-svelte";
     import Tag from "$lib/components/decorations/Tag.svelte";
 
     export let unsaved: boolean;
@@ -32,7 +32,10 @@
         <Tag class="h-[20px]">UNSAVED</Tag>
       {/if}
     </span>
-    <span class="text-sky-600">
+    <span class="text-sky-600 inline-flex items-center gap-1">
+      {#if leg.dayId !== null}
+        <Briefcase class="w-3 h-3 text-gray-400 dark:text-zinc-500" />
+      {/if}
       {#if leg.startTime_utc === null}
         No Date
       {:else}
