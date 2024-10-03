@@ -427,6 +427,8 @@ export const actions = {
         ipc: ipc,
         faa6158: faa6158,
 
+        useBlock: useBlock,
+
         passengers: pax === null ? undefined : parseInt(pax),
 
         notes: notes === null ? undefined : notes
