@@ -374,7 +374,7 @@ export const actions = {
     // Out / In Times
     // -----------------------------------------------------------------------------------------------------------------
 
-    const useBlock = data.get('use-block') === 'true';
+    let useBlock = data.get('use-block') === 'true';
     const startTime = data.get('out-date') as null | string;
     const startTimeTZ = data.get('out-tz') as null | string;
     const endTime = data.get('in-date') as null | string;
@@ -385,8 +385,6 @@ export const actions = {
     let startUTCValue = currentLeg.startTime_utc;
     let endUTCValue = currentLeg.endTime_utc;
     let relativeOrder = currentLeg.relativeOrder;
-
-    let usedBlockTimes = false;
 
     if (useBlock || (currentLeg.dayId !== null && ac.simulator === false)) {
       if (startTime === null || startTime === '') return API.Form.formFailure('?/default', 'out', 'Required field');
@@ -403,10 +401,12 @@ export const actions = {
       if (startUTC.value > endUTC.value) return API.Form.formFailure('?/default', 'out', 'Out is after In');
       if (endUTC.value - startUTC.value > 86400) return API.Form.formFailure('?/default', 'out', 'Flight time is longer than 24 hours');
 
+      // Assign the start and end values based on the time pickers
       startUTCValue = startUTC.value;
       endUTCValue = endUTC.value;
 
-      usedBlockTimes = true;
+      // Assign useBlock as true, just in case this is a duty day without a sim and the user somehow selected false
+      useBlock = true;
     }
 
 
@@ -441,7 +441,8 @@ export const actions = {
     if (ac.simulator) simTime = parseFloat(totalTime);
 
     // If we have provided a date, the user wants to use that instead of the flight aware info.
-    if (!usedBlockTimes && ((date !== null || currentLeg.day !== null) && !useBlock && !currentLeg.forceUseBlock)) {
+    if (!useBlock) {
+      // Set the start value to the start of the duty day, or the date for the leg
       if (date !== null) startUTCValue = Math.floor(new Date(date).getTime() / 1000);
       else startUTCValue = currentLeg.day?.startTime_utc ?? 0; // This will never happen (the ??) but TS doesn't know that
       endUTCValue = startUTCValue + (parseFloat(totalTime) * 60 * 60);
@@ -519,6 +520,8 @@ export const actions = {
         checkride: checkride,
         ipc: ipc,
         faa6158: faa6158,
+
+        useBlock: useBlock,
 
         passengers: pax === null ? undefined : parseInt(pax),
 

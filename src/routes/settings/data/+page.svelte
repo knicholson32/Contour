@@ -69,7 +69,7 @@
 
 	{#if data.settingValues['entry.entryMXMode']}
 		<Settings.Switch {form} name="options.clear" title="Clear Options ({data.numFlightOptions} in DB)" value={false} update={optionUpdate}/>
-		
+		<Settings.Switch {form} name="useBlock.migrate" title="Migrate 'UseBlock' to DB" value={false} update={optionUpdate}/>
 	{/if}
 </Settings.List>
 

@@ -252,43 +252,6 @@ export const actions = {
     }
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Out / In Times
-    // -----------------------------------------------------------------------------------------------------------------
-
-    const useBlock = data.get('use-block') !== 'false';
-    const startTime = data.get('out-date') as null | string;
-    const startTimeTZ = data.get('out-tz') as null | string;
-    const endTime = data.get('in-date') as null | string;
-    const endTimeTZ = data.get('in-tz') as null | string;
-    const date = data.get('date') as null | string;
-
-    // Initialize time variables that we may modify later
-    let startUTCValue = Math.floor(new Date().getTime() / 1000);
-    let endUTCValue = startUTCValue;
-    let relativeOrder = 0;
-
-    if (useBlock) {
-      if (startTime === null || startTime === '') return API.Form.formFailure('?/default', 'out', 'Required field');
-      if (startTimeTZ === null || startTimeTZ === '') return API.Form.formFailure('?/default', 'out', 'Required field');
-      if (endTime === null || endTime === '') return API.Form.formFailure('?/default', 'in', 'Required field');
-      if (endTimeTZ === null || endTimeTZ === '') return API.Form.formFailure('?/default', 'in', 'Required field');
-      if (date === null && dayId === null) return API.Form.formFailure('?/default', 'date', 'Required field');
-
-      const startUTC = helpers.timeStrAndTimeZoneToUTC(startTime, startTimeTZ);
-      if (startUTC === null) return API.Form.formFailure('?/default', 'out', 'Unknown Timezone');
-
-      const endUTC = helpers.timeStrAndTimeZoneToUTC(endTime, endTimeTZ);
-      if (endUTC === null) return API.Form.formFailure('?/default', 'in', 'Unknown Timezone');
-
-      if (startUTC.value > endUTC.value) return API.Form.formFailure('?/default', 'out', 'In is after Out');
-      if (endUTC.value - startUTC.value > 86400) return API.Form.formFailure('?/default', 'out', 'Flight time is longer than 24 hours');
-
-      startUTCValue = startUTC.value;
-      endUTCValue = endUTC.value;
-    }
-    
-
-    // -----------------------------------------------------------------------------------------------------------------
     // Aircraft
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -308,6 +271,47 @@ export const actions = {
     } catch (e) {
       return API.Form.formFailure('?/default', 'aircraft', 'Invalid data');
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Out / In Times
+    // -----------------------------------------------------------------------------------------------------------------
+
+    let useBlock = data.get('use-block') !== 'false';
+    const startTime = data.get('out-date') as null | string;
+    const startTimeTZ = data.get('out-tz') as null | string;
+    const endTime = data.get('in-date') as null | string;
+    const endTimeTZ = data.get('in-tz') as null | string;
+    const date = data.get('date') as null | string;
+
+    // Initialize time variables that we may modify later
+    let startUTCValue = Math.floor(new Date().getTime() / 1000);
+    let endUTCValue = startUTCValue;
+    let relativeOrder = 0;
+
+    if (useBlock || (day !== null && ac.simulator === false)) {
+      if (startTime === null || startTime === '') return API.Form.formFailure('?/default', 'out', 'Required field');
+      if (startTimeTZ === null || startTimeTZ === '') return API.Form.formFailure('?/default', 'out', 'Required field');
+      if (endTime === null || endTime === '') return API.Form.formFailure('?/default', 'in', 'Required field');
+      if (endTimeTZ === null || endTimeTZ === '') return API.Form.formFailure('?/default', 'in', 'Required field');
+      if (date === null && dayId === null) return API.Form.formFailure('?/default', 'date', 'Required field');
+
+      const startUTC = helpers.timeStrAndTimeZoneToUTC(startTime, startTimeTZ);
+      if (startUTC === null) return API.Form.formFailure('?/default', 'out', 'Unknown Timezone');
+
+      const endUTC = helpers.timeStrAndTimeZoneToUTC(endTime, endTimeTZ);
+      if (endUTC === null) return API.Form.formFailure('?/default', 'in', 'Unknown Timezone');
+
+      if (startUTC.value > endUTC.value) return API.Form.formFailure('?/default', 'out', 'In is after Out');
+      if (endUTC.value - startUTC.value > 86400) return API.Form.formFailure('?/default', 'out', 'Flight time is longer than 24 hours');
+
+      // Assign the start and end values based on the time pickers
+      startUTCValue = startUTC.value;
+      endUTCValue = endUTC.value;
+
+      // Assign useBlock as true, just in case this is a duty day without a sim and the user somehow selected false
+      useBlock = true;
+    }
+    
 
     // -----------------------------------------------------------------------------------------------------------------
     // Times
@@ -340,7 +344,7 @@ export const actions = {
     if (ac.simulator) simTime = parseFloat(totalTime);
 
     // If we have provided a date, the user wants to use that instead of the flight aware info.
-    if (date !== null || (day !== null && !useBlock)) {
+    if (!useBlock) {
       if (date === null) startUTCValue = Math.floor(day?.startTime_utc ?? 0); // This will never happen (the ??) but TS doesn't know that
       else startUTCValue = Math.floor(new Date(date).getTime() / 1000);
       endUTCValue = startUTCValue + (parseFloat(totalTime) * 60 * 60);

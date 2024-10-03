@@ -139,7 +139,8 @@
     setTimeout(() => {
       resetMap()
     }, 1);
-    useBlock = (data.leg?.day ?? null) === null ? false : data.leg?.startTime_utc !== data.leg?.day?.startTime_utc;
+
+    if ((data.leg?.dayId ?? null) !== null && (selectedAircraftAPI !== null && selectedAircraftAPI.simulator === false)) useBlock = true;
   });
 
   const ref = $page.url.searchParams.get('ref');
@@ -175,6 +176,8 @@
   let legsPopoverOpen = false;
   // Use Block times is defaulted to true if the start time isn't the same as the start of the day (duty or assigned)
   let useBlock: boolean;
+  $: useBlockRequired = (data.leg?.dayId ?? null) !== null && (selectedAircraftAPI !== null && selectedAircraftAPI.simulator === false);
+  $: if (useBlockRequired === true) useBlock = true;
 
   let submitFADelete: HTMLButtonElement;
   const faDelete = async () => {
@@ -584,7 +587,7 @@
       <Section title="General" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.Input title="Ident" name="ident" uppercase={true} defaultValue={data.leg.ident} placeholder={data.leg.aircraft.registration} />
         <Entry.AircraftPicker required={true} title="Aircraft" name="aircraft" aircraft={data.aircraft} bind:value={selectedAircraft} defaultValue={data.leg.aircraft.registration} />
-        {#if data.leg.day === null && useBlock === false}
+        {#if data.leg.day === null}
           {#if data.leg.startTime_utc !== null}
             <Entry.TimePicker name="date" title="Date" defaultValue={dateToDateStringForm(data.leg.startTime_utc, true, 'utc')} dateOnly={true}/>
           {:else}
@@ -603,14 +606,17 @@
       </Section>
 
       <Section title="Block Times">
-        {#if (data.leg.dayId === null && data.leg.forceUseBlock === false) || (selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true)}
-          <Entry.Switch title="Use Block Times" name="use-block" noLocalStorage={true} bind:value={useBlock} defaultValue={false} />
+        {#if useBlockRequired}
+          <input type="hidden" name="use-block" value="true" />
+        {:else}
+          <Entry.Switch title="Use Block Times" name="use-block{useBlockRequired ? '-disabled' : ''}" tooltip={useBlockRequired ? 'Disabled because this leg must use block time (it is attached to a duty day).' : ''} disabled={useBlockRequired} bind:value={useBlock} defaultValue={data.leg.useBlock} />
         {/if}
-        {#if useBlock || (data.leg.dayId !== null && !(selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true)) || data.leg.forceUseBlock === true}
+        <!-- {/if} -->
+        {#if useBlock || useBlockRequired}
           <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTime} />
           <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZBind} defaultValue={data.endTime} />
           <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
-          {/if}
+        {/if}
       </Section>
 
       <Section title="Times">

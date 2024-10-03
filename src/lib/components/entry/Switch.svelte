@@ -10,6 +10,7 @@
   export let noLocalStorage = false;
   export let title: string;
 	export let disabled: boolean = false;
+  export let tooltip = '';
   export let action: string = '?/default';
   export let required: boolean = true;
 
@@ -45,7 +46,7 @@
 
 </script>
 
-<Frame {name} {action} unsaved={$unsaved} restore={noLocalStorage ? null : () => local.clear(true)} form={$form} required={false} bind:title focus={click} bind:disabled>
+<Frame {name} {action} {tooltip} unsaved={$unsaved} restore={noLocalStorage ? null : () => local.clear(true)} form={$form} required={false} bind:title focus={click} bind:disabled>
   <div class="flex items-center cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-0 focus:mr-1" tabindex="0" role="switch" aria-checked={value}>
     <input {disabled} {required} type="hidden" bind:value name={name} />
     <div class="touch-manipulation shadow-sm rounded-full {value ? disabled ? 'bg-gray-200 dark:bg-zinc-900' : 'bg-sky-600' : 'bg-gray-200 dark:bg-zinc-700'} disabled:cursor-not-allowed relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="annual-billing-label">

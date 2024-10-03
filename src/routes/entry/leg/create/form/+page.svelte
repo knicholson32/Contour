@@ -83,6 +83,8 @@
 
   let ac: string;
   let useBlock: boolean = false;
+  $: useBlockRequired = (data.dayId ?? null) !== null && (selectedAircraftAPI !== null && selectedAircraftAPI.simulator === false);
+  $: if (useBlockRequired === true) useBlock = true;
 
   $: {
     form;
@@ -180,12 +182,15 @@
       </Section>
 
       <Section title="Block Times">
-        {#if data.dayId === null || data.dayId === undefined || (selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true)}
-          <Entry.Switch title="Use Block Times" name="use-block" noLocalStorage={true} bind:value={useBlock} defaultValue={false} />
+        {#if useBlockRequired}
+          <input type="hidden" name="use-block" value="true" />
+        {:else}
+          <Entry.Switch title="Use Block Times" name="use-block{useBlockRequired ? '-disabled' : ''}" tooltip={useBlockRequired ? 'Disabled because this leg must use block time (it is attached to a duty day).' : ''} disabled={useBlockRequired} bind:value={useBlock} defaultValue={useBlock} />
         {/if}
-        {#if useBlock || (data.dayId !== null && data.dayId !== undefined && !(selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true))}
-          <Entry.TimePicker required={true} title="Out" name="out" bind:autoTZ={startAirportTZ} bind:tz={outTZ} bind:value={outTime} defaultValue={data.startTime ?? null} />
-          <Entry.TimePicker required={true} title="In" name="in" autoTZ={outTZAuto} bind:tz={inTZ} bind:value={inTime} defaultValue={data.endTime ?? null} />
+        <!-- {/if} -->
+        {#if useBlock || useBlockRequired}
+          <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTime ?? null} />
+          <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZ} defaultValue={data.endTime ?? null} />
           <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
         {/if}
       </Section>

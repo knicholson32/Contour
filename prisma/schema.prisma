@@ -249,8 +249,8 @@ model Leg {
   fixes      Fix[]
   approaches Approach[]
 
-  route         String?
-  forceUseBlock Boolean @default(false)
+  route    String?
+  useBlock Boolean
 
   flightAwareData FlightAwareData?
 
