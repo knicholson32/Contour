@@ -196,7 +196,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     if (leg.diversionAirportId !== null && !apts.includes(leg.diversionAirportId)) apts.push(leg.diversionAirportId);
 
     operations += 2;
-    
+
     if (leg.positions.length > 1) {
       let lastPos = leg.positions[0];
       numPositions += leg.positions.length;
@@ -359,6 +359,30 @@ export const actions = {
           notes: notes ?? undefined
         }
       });
+
+      // Get all the legs associated with this day that are not using block times. We will reassign the times.
+      const legs = await prisma.leg.findMany({ where: { dayId: currentDay.id, useBlock: false }, select: { id: true, totalTime: true } });
+
+      // Initialize a transaction
+      const inserts: Prisma.PrismaPromise<any>[] = [];
+
+      // Loop through each leg
+      for (const leg of legs) {
+        // Set the start value to the start of the duty day, or the date for the leg
+        inserts.push(prisma.leg.update({
+          where: { id: leg.id }, data: {
+            startTime_utc: startUTC.value,
+            endTime_utc: startUTC.value + (leg.totalTime * 60 * 60)
+          }
+        }));
+      }
+
+      try {
+        // Execute the prisma transaction that will modify the leg start times
+        await prisma.$transaction(inserts)
+      } catch (e) {
+        console.log('Unable to modify leg times!', e);
+      }
 
       await generateDeadheads(day.id);
 
