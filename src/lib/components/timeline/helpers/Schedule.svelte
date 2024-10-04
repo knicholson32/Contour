@@ -6,8 +6,8 @@
     export let entry: {
       startTime_utc: number | null,
       endTime_utc: number | null,
-      originAirportId: string,
-      destinationAirportId: string,
+      originAirportId: string | null,
+      destinationAirportId: string | null,
       diversionAirportId: string | null,
       type: 'deadhead' | 'leg'
       id: string | null,

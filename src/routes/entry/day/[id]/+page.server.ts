@@ -65,7 +65,12 @@ export const load = async ({ fetch, params, parent, url }) => {
           startTime_utc: 'asc'
         },
         include: {
-          positions: true
+          positions: true,
+          aircraft: {
+            select: {
+              simulator: true
+            }
+          }
         }
       },
       deadheads: {
@@ -96,7 +101,7 @@ export const load = async ({ fetch, params, parent, url }) => {
   if (!isNaN(parseInt(params.id))) {
     currentDay = await prisma.dutyDay.findUnique({
       where: { 
-        id: parseInt(params.id)
+        id: parseInt(params.id),
       },
       include: {
         legs: {
@@ -104,7 +109,12 @@ export const load = async ({ fetch, params, parent, url }) => {
             startTime_utc: 'asc'
           },
           include: {
-            positions: true
+            positions: true,
+            aircraft: { 
+              select: {
+                simulator: true
+              }
+            }
           }
         },
         deadheads: {
@@ -178,12 +188,15 @@ export const load = async ({ fetch, params, parent, url }) => {
 
 
   for (const leg of currentDay.legs) {
-    flight += leg.totalTime;
-    simulated += leg.sim;
-    if (!apts.includes(leg.originAirportId)) apts.push(leg.originAirportId);
-    if (!apts.includes(leg.destinationAirportId)) apts.push(leg.destinationAirportId);
+    if (leg.aircraft.simulator) simulated += leg.totalTime;
+    else flight += leg.totalTime;
+
+    if (leg.originAirportId !== null && !apts.includes(leg.originAirportId)) apts.push(leg.originAirportId);
+    if (leg.destinationAirportId !== null && !apts.includes(leg.destinationAirportId)) apts.push(leg.destinationAirportId);
     if (leg.diversionAirportId !== null && !apts.includes(leg.diversionAirportId)) apts.push(leg.diversionAirportId);
+
     operations += 2;
+    
     if (leg.positions.length > 1) {
       let lastPos = leg.positions[0];
       numPositions += leg.positions.length;

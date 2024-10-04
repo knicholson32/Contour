@@ -5,7 +5,7 @@
   import Schedule from './helpers/Schedule.svelte';
   import Blank from './helpers/Blank.svelte';
 
-  export let data: ((Types.Deadhead | Types.Leg) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[];
+  export let data: ((Types.Deadhead | (Types.Leg & { aircraft: { simulator: boolean } })) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[];
   export let day: Types.DutyDay;
 
   // Sort the data so deadheads come before flights if they start at the same time
@@ -25,7 +25,7 @@
 
   const dataCleaned: typeof data = [];
   for (const d of data) {
-    if (d.endTime_utc === null || d.startTime_utc === null || (d.type === 'leg' && (d as Types.Leg).sim !== 0)) continue;
+    if (d.endTime_utc === null || d.startTime_utc === null || (d.type === 'leg' && (d as (Types.Leg & { aircraft: { simulator: boolean } })).aircraft.simulator === true)) continue;
     dataCleaned.push(d);
   }
 

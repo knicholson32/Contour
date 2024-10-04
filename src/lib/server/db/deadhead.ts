@@ -12,7 +12,7 @@ export const generateDeadheads = async (dayId: number) => {
     include: { 
       legs: { 
         orderBy: { startTime_utc: 'asc' },
-        where: { sim: 0 }
+        where: { aircraft: { simulator: false } }
       }
     }
   });

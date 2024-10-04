@@ -135,9 +135,9 @@ export const GET = async ({ setHeaders }) => {
           // AircraftID
           data.push(l.aircraft.registration);
           // From
-          data.push(l.originAirportId);
+          data.push(l.originAirportId ?? '');
           // To
-          if (l.diversionAirportId === null) data.push(l.destinationAirportId);
+          if (l.diversionAirportId === null) data.push(l.destinationAirportId ?? '');
           else data.push(l.diversionAirportId);
           // Route
           data.push('');

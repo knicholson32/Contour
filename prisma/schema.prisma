@@ -263,8 +263,8 @@ model Leg {
   destinationAirport   Airport? @relation("destinationAirport", fields: [destinationAirportId], references: [id], onDelete: Restrict)
   diversionAirport     Airport? @relation("diversionAirport", fields: [diversionAirportId], references: [id], onDelete: Restrict)
 
-  startTime_utc Int?
-  endTime_utc   Int?
+  startTime_utc Int
+  endTime_utc   Int
 
   relativeOrder Int @default(0)
 
@@ -287,12 +287,11 @@ model Leg {
 
   dualGiven    Float @default(0)
   dualReceived Float @default(0)
-  sim          Float @default(0)
 
-  flightReview Boolean @default(false)
-  checkride    Boolean @default(false)
-  ipc          Boolean @default(false)
-  faa6158      Boolean @default(false)
+  flightReview    Boolean @default(false)
+  checkride       Boolean @default(false)
+  ipc             Boolean @default(false)
+  faa6158         Boolean @default(false)
 
   passengers Int @default(0)
 

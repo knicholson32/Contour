@@ -64,7 +64,7 @@
     <span class="font-light ml-1">
       Total
     </span>
-    {#if leg.sim > 0}
+    {#if leg.aircraft.simulator}
       <span class="text-primary ml-1"><Server class="w-3 h-3"/></span>
     {/if}
   </div>

@@ -118,11 +118,11 @@ export const load = async ({ fetch, params, url }) => {
   let simulatedLegs: Entry[] = [];
 
   if (dayId !== null) {
-    simulatedLegs = await prisma.leg.findMany({ where: { sim: { gt: 0 }, dayId: dayId }, select: legSelector });
+    simulatedLegs = await prisma.leg.findMany({ where: { aircraft: { simulator: true }, dayId: dayId }, select: legSelector });
     const day = await prisma.dutyDay.findUnique({
       where: { id: dayId },
       include: {
-        legs: { select: legSelector, orderBy: { startTime_utc: 'asc' }, where: { sim: 0 } },
+        legs: { select: legSelector, orderBy: { startTime_utc: 'asc' }, where: { aircraft: { simulator: false } } },
         deadheads: { orderBy: { startTime_utc: 'asc' } }
       },
     });
@@ -507,7 +507,6 @@ export const actions = {
         simulatedInstrument: simulatedInstrumentTime === null ? undefined : parseFloat(simulatedInstrumentTime),
         dualGiven: dualGivenTime === null ? undefined : parseFloat(dualGivenTime),
         dualReceived: dualReceivedTime === null ? undefined : parseFloat(dualReceivedTime),
-        sim: simTime,
 
         dayTakeOffs: dayTakeoffs === null ? undefined : parseInt(dayTakeoffs),
         dayLandings: dayLandings === null ? undefined : parseInt(dayLandings),

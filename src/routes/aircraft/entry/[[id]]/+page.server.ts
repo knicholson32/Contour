@@ -239,24 +239,14 @@ export const actions = {
 
         if (currentData?.simulator !== data.simulator) {
           // We changed the simulator status. We need to:
-          //  1. Update each leg that uses this aircraft and recalculate the simulator time
-          //  2. Recalculate each duty day's deadheads associated with each of these legs
+          //  1. Recalculate each duty day's deadheads associated with each of these legs
 
           // Get the legs that use this aircraft
           const legs = await prisma.leg.findMany({ where: { aircraftId: id }, include: { day: { select: { id: true } } }});
-
-          // Create some arrays to hold the inserts and hashes created in the loop
-          const legUpdates: Types.Prisma.PrismaPromise<any>[] = [];
           const daysToRecalculate: number[] = [];
 
-          // Update every leg and either assign the sim time to the total time (if simulator), or 0 (if not a simulator)
-          for (const leg of legs) {
-            legUpdates.push(prisma.leg.update({ where: { id: leg.id }, data: { sim: data.simulator ? leg.totalTime : 0 } }));
-            if (leg.dayId !== null && !daysToRecalculate.includes(leg.dayId)) daysToRecalculate.push(leg.dayId);
-          }
-
-          // Update all the legs with the new sim times
-          await prisma.$transaction(legUpdates)
+          // See if we should recalculate each day
+          for (const leg of legs) if (leg.dayId !== null && !daysToRecalculate.includes(leg.dayId)) daysToRecalculate.push(leg.dayId);
 
           // Recalculate all the deadheads
           // TODO: This could be more efficient with transactions

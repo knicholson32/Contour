@@ -413,7 +413,6 @@ export const actions = {
         simulatedInstrument: simulatedInstrumentTime === null ? undefined : parseFloat(simulatedInstrumentTime),
         dualGiven: dualGivenTime === null ? undefined : parseFloat(dualGivenTime),
         dualReceived: dualReceivedTime === null ? undefined : parseFloat(dualReceivedTime),
-        sim: simTime,
 
         dayTakeOffs: dayTakeoffs === null ? undefined : parseInt(dayTakeoffs),
         dayLandings: dayLandings === null ? undefined : parseInt(dayLandings),

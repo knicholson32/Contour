@@ -110,10 +110,10 @@ export const legSelector = {
 	startTime_utc: true,
 	endTime_utc: true,
 	totalTime: true,
-	sim: true,
 	aircraft: {
 		select: {
 			registration: true,
+			simulator: true,
 			id: true,
 			type: {
 				select: {

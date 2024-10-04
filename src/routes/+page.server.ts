@@ -319,9 +319,10 @@ export const load = async ({ parent, url }) => {
       let simulatedTime = 0;
       let distance = 0;
       for (const leg of targetDay.legs) {
-        flightTime += leg.totalTime - leg.sim < 0 ? 0 : leg.totalTime - leg.sim;
-        simulatedTime += leg.sim;
-        if (leg.sim > 0) containsSimTime = true;
+        if (leg.aircraft.simulator) simulatedTime += leg.totalTime;
+        else flightTime += leg.totalTime;
+        
+        if (leg.aircraft.simulator) containsSimTime = true;
         if (leg.positions.length <= 1) continue;
         let lastPos = leg.positions[0];
         for (let i = 1; i < leg.positions.length; i++) {
