@@ -66,20 +66,30 @@ export const load = async ({ parent, url }) => {
 
   const highlightDates: string[] = [];
 
+  // Get all tours and select the start and end times only
   const toursSimple = await prisma.tour.findMany({ orderBy: { startTime_utc: 'asc' }, select: { startTime_utc: true, endTime_utc: true } });
+  // Loop through the tours
+  let i = 0;
   for (const t of toursSimple) {
+    // Calculate the start and end dates
     const sDate = new Date(t.startTime_utc * 1000);
     const eDate = t.endTime_utc === null ? new Date() : new Date(t.endTime_utc * 1000);
 
+    // Convert to calendar dates
     const start = new CalendarDate(sDate.getFullYear(), sDate.getMonth() + 1, sDate.getDate());
     const end = new CalendarDate(eDate.getFullYear(), eDate.getMonth() + 1, eDate.getDate());
 
+    // Get the first day of the tour
     let current = start.copy();
     while (current.compare(end) <= 0) {
+      // Get a day of the tour in string-form
       const str = current.toString();
+      // Add it as a highlight if it isn't there already
       if (!highlightDates.includes(str)) highlightDates.push(str);
+      // Go to the next day of the tour
       current = current.add({ days: 1 });
     }
+    i++;
   }
 
   const tours = await prisma.tour.findMany({ where: {
@@ -245,39 +255,23 @@ export const load = async ({ parent, url }) => {
   if (days.length !== 0) dutyDayDuration = dutyDayDuration / days.length;
   if (timeCounter !== 0) groundSpeed = groundSpeed / timeCounter;
 
-  type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, flight: number | null, sim: number | null, distance: number | null, duty: number | null };
+  type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, endTime: number, flight: number | null, sim: number | null, extendedDay: boolean, distance: number | null, duty: number | null };
 
   let statistics: DayStat[] = []
 
   let dayIndex = 0;
 
+  // Get the start day for the range
   let cal = sCal.copy();
 
   let containsSimTime = false;
 
+  // Loop through each day in the range
   while (cal.compare(eCal) <= 0) {
+    // Get the start and end times for the day
     const date = cal.toDate(timeZone);
     const start = Math.floor(date.getTime() / 1000);
     const end = Math.round(date.getTime() / 1000 + TWENTY_FOUR_HOURS);
-
-    // Find if a tour fits this day
-    let isOnTour = false;
-    for (const t of tours) {
-      if (t.endTime_utc === null) {
-        // The tour is in-progress. Just check if it started before the day ended
-        if (t.startTime_utc <= end) {
-          isOnTour = true;
-          break;
-        }
-      } else {
-        // The tour is completed.
-        // Check that the day is fully contained by the tour
-        if (start >= t.startTime_utc && end <= t.endTime_utc) {
-          isOnTour = true;
-          break;
-        }
-      }
-    }
 
     // Find if a day fits this day
     let targetDay: typeof days[0] | null = null;
@@ -285,33 +279,66 @@ export const load = async ({ parent, url }) => {
       // Check if the duty day is fully contained by this date
       if (start <= d.startTime_utc && end >= d.endTime_utc) {
         targetDay = d;
+        // console.log(cal.toString(), 'Contained', d.startAirportId, d.endAirportId, (start/10000).toFixed(2), (end/10000).toFixed(2), '|', (d.startTime_utc/10000).toFixed(2), (d.endTime_utc/10000).toFixed(2));
         break;
       }
       // Check that the day overlaps the start
       else if (start <= d.startTime_utc && (end >= d.startTime_utc && end <= d.endTime_utc)) {
         targetDay = d;
+        // console.log(cal.toString(), 'Start   ', d.startAirportId, d.endAirportId, (start/10000).toFixed(2), (end/10000).toFixed(2), '|', (d.startTime_utc/10000).toFixed(2), (d.endTime_utc/10000).toFixed(2));
         break;
       }
       // Check that the day overlaps the end
       else if (end >= d.endTime_utc && (start >= d.startTime_utc && start <= d.endTime_utc)) {
         targetDay = d;
+        // console.log(cal.toString(), 'End     ', d.startAirportId, d.endAirportId, (start/10000).toFixed(2), (end/10000).toFixed(2), '|', (d.startTime_utc/10000).toFixed(2), (d.endTime_utc/10000).toFixed(2));
         break;
       }
     }
 
+    // Find if a tour fits this day
+    let isOnTour = false;
+    for (const t of tours) {
+      if (t.endTime_utc === null) {
+        // The tour is in-progress. Check if it started before the day ended
+        if (t.startTime_utc <= end) {
+          isOnTour = true;
+          break;
+        }
+      } else {
+        // The tour is completed.
+        // Check that the day is fully contained by the tour
+        // console.log(cal.toString(), start, t.startTime_utc, end, t.endTime_utc, start >= t.startTime_utc && end <= t.endTime_utc)
+        if (targetDay !== null) {
+          if (targetDay.startTime_utc >= t.startTime_utc && targetDay.endTime_utc <= t.endTime_utc) {
+            isOnTour = true;
+            break;
+          }
+        } else {
+          if (start >= t.startTime_utc && end <= t.endTime_utc) {
+            isOnTour = true;
+            break;
+          }
+        }
+      }
+    }
+
+    // Initialize the day stat
     const stat: DayStat = {
       id: null,
       index: dayIndex++,
       dateString: cal.toString(),
       onTour: isOnTour,
       startTime: start,
+      extendedDay: false,
+      endTime: end,
       flight: null,
       sim: null,
       distance: null,
       duty: null
     }
 
-    // If the day exists, remove it from the pool
+    // Check that the target day exists: IE: this "day" matches a duty day
     if (targetDay !== null) {
       days = days.filter((d) => d.id !== targetDay?.id);
       const dayDuration = targetDay.endTime_utc - targetDay.startTime_utc;
@@ -336,13 +363,35 @@ export const load = async ({ parent, url }) => {
       stat.flight = flightTime;
       stat.sim = simulatedTime;
       stat.distance = distance / 1.15;
-      stat.duty = dayDuration
+      stat.duty = dayDuration;
+
+    } else if (dayIndex > 0 && isOnTour) {
+
+      // This "day" doesn't have a duty day. Lets see if the previous duty bleeds into this day
+      const prevDay = statistics[dayIndex - 2];
+      // console.log('pd', prevDay);
+      if (prevDay !== undefined && prevDay.onTour === true && prevDay.endTime >= start && prevDay.extendedDay === false) {
+        // console.log('pd', prevDay);
+        // The previous day was on tour, and the duty day ended on that day
+        // This is a special case where the duty day is split between two days, or the duty day is over 24 hours
+        stat.flight = prevDay.flight;
+        stat.sim = prevDay.sim;
+        stat.distance = prevDay.distance;
+        stat.duty = prevDay.duty;
+        stat.extendedDay = true;
+        stat.startTime = prevDay.startTime;
+
+        stat.onTour = true;
+      }
+
     }
 
     statistics.push(stat);
 
     cal = cal.add({ days: 1 });
   }
+
+  // console.log(statistics);
 
   let flightSum = 0;
   let dutySum = 0;

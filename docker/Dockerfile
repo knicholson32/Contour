@@ -9,7 +9,7 @@ FROM node:${NODE_VERSION}-alpine AS node_install
 
 
 ######### Node Modules & Build #####################################################################
-FROM node:${NODE_VERSION}-alpine3.18 as build
+FROM node:${NODE_VERSION}-alpine3.18 AS build
 
 # Copy the application and move to the copied folder
 COPY ./ /app/
@@ -25,14 +25,14 @@ RUN echo "---- BUILD SERVER ----" \
 
 
 ######### Production Stage #########################################################################
-FROM node:${NODE_VERSION}-alpine3.18 as prod
+FROM node:${NODE_VERSION}-alpine3.18 AS prod
 
 # Assign labels
-LABEL org.opencontainers.image.title contour
-LABEL org.opencontainers.image.description Docker container for managing and archiving audiobooks
-LABEL org.opencontainers.image.documentation https://github.com/knicholson32/contour
-LABEL org.opencontainers.image.authors Keenan Nicholson, Norris Nicholson
-LABEL org.opencontainers.image.source https://github.com/knicholson32/contour
+LABEL org.opencontainers.image.title=contour
+LABEL org.opencontainers.image.description="Docker container for managing and archiving audiobooks"
+LABEL org.opencontainers.image.documentation="https://github.com/knicholson32/contour"
+LABEL org.opencontainers.image.authors="Keenan Nicholson, Norris Nicholson"
+LABEL org.opencontainers.image.source="https://github.com/knicholson32/contour"
 
 # Renew args from above
 ARG AAXtoMP3_VERSION

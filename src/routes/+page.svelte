@@ -171,15 +171,16 @@
     goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: false, noScroll: false, invalidateAll: true });
   }
 
-  type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, flight: number | null, sim: number | null, distance: number | null, duty: number | null };
+  type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, endTime: number, flight: number | null, sim: number | null, extendedDay: boolean, distance: number | null, duty: number | null };
 
 	const x = (d: DayStat) => d.index;
 
   const tickFormat = (i: number) => {
-    const d = data.dutyDays.statistics[i].startTime;
+    const day = data.dutyDays.statistics[i]; 
+    const d = day.startTime;
     if (d === undefined) return '';
     const date = new Date(d * 1000);
-    return weekDaysShort[date.getDay()] + ' ' + pad(date.getMonth() + 1, 2) + '/' + pad(date.getDate(), 2);
+    return weekDaysShort[date.getDay()] + ' ' + pad(date.getMonth() + 1, 2) + '/' + pad(date.getDate(), 2) + (day.extendedDay ? ' (Cont.)' : '');
   }
 
   let maxFlight = 0;
@@ -188,6 +189,8 @@
     if (d.flight !== null && d.flight > maxFlight) maxFlight = d.flight;
     if (d.duty !== null && d.duty > maxDuty) maxDuty = d.duty;
   }
+
+  // console.log(data.dutyDays.statistics);
 
   const yTourAreaDuty = (d: DayStat) => d.onTour === true ? (maxDuty / 60 / 60) * 1000 : 0;
   const yTourAreaFlight = (d: DayStat) => d.onTour === true ? maxFlight * 1000 : 0;
