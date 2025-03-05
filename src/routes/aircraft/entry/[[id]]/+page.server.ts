@@ -51,12 +51,12 @@ export const load = async ({ fetch, params, url }) => {
     const fuse = new Fuse(aircrafts, fuseOptions);
     aircrafts = fuse.search(search).flatMap((v) => v.item);
     if (params.id === undefined) {
-      if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].id + '?active=menu&search=' + search)
+      if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].registration + '?active=menu&search=' + search)
       else throw redirect(301, '/aircraft/entry/new')
     }
   } else {
     if (params.id === undefined) {
-      if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].id + '?active=menu')
+      if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].registration + '?active=menu')
       else throw redirect(301, '/aircraft/entry/new')
     }
   }
@@ -69,7 +69,8 @@ export const load = async ({ fetch, params, url }) => {
   }
 
 
-  const currentAircraft = await prisma.aircraft.findUnique({ where: { id: params.id }, include: { type: true, _count: true, legs: { select: { totalTime: true, diversionAirportId: true } } } });
+  let currentAircraft = await prisma.aircraft.findUnique({ where: { id: params.id }, include: { type: true, _count: true, legs: { select: { totalTime: true, diversionAirportId: true } } } });
+  if (currentAircraft === null) currentAircraft = await prisma.aircraft.findUnique({ where: { registration: params.id.toUpperCase() }, include: { type: true, _count: true, legs: { select: { totalTime: true, diversionAirportId: true } } } });
   if (params.id !== 'new' && currentAircraft === null) throw redirect(301, '/aircraft/entry/new');
 
   // TODO: Remove this database auto-mod
@@ -159,12 +160,19 @@ export const load = async ({ fetch, params, url }) => {
 export const actions = {
   createOrModify: async ({ request, params, url }) => {
 
-    const id = (params.id !== 'new' ? params.id : undefined) ?? uuidv4();
+    let id = (params.id !== 'new' ? params.id : undefined) ?? uuidv4();
 
     const debug = await settings.get('system.debug');
 
     const data = await request.formData();
     if (debug) for (const key of data.keys()) console.log(key, data.getAll(key));
+
+    if (params.id !== 'new' && await prisma.aircraft.findUnique({ where: { id } }) === null) {
+      // This is probably a registration. Get the ID based on registration
+      const aircraft = await prisma.aircraft.findUnique({ where: { registration: params.id } });
+      if (aircraft === null) return API.Form.formFailure('?/default', '*', 'Aircraft does not exist');
+      id = aircraft.id;
+    }
 
     // return API.Form.formFailure('?/default', 'tail', 'Required field');
     
@@ -293,15 +301,22 @@ export const actions = {
     const ref = url.searchParams.get('ref');
     if (debug) console.log('ref',ref);
     if (ref !== null) throw redirect(301, ref);
-    else throw redirect(301, '/aircraft/entry/' + id + '?active=form');
+    else throw redirect(301, '/aircraft/entry/' +(tail as string).toUpperCase() + '?active=form');
   },
 
   delete: async ({ request, params }) => {
 
     const data = await request.formData();
-    const id = data.get('id');
+    let id = data.get('id');
     if (id === null || id === '') return API.Form.formFailure('?/delete', 'id', 'Required field');
     await delay(500);
+
+    if (await prisma.aircraft.findUnique({ where: { id: (id as string) } }) === null) {
+      // This is probably a registration. Get the ID based on registration
+      const aircraft = await prisma.aircraft.findUnique({ where: { registration: params.id } });
+      if (aircraft === null) return API.Form.formFailure('?/default', '*', 'Aircraft does not exist');
+      id = aircraft.id;
+    }
 
     try {
       await prisma.aircraft.delete({ where: { id: id as string } });

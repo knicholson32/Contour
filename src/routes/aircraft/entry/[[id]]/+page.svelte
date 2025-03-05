@@ -99,7 +99,7 @@
       {#each data.orderGroups as group (group.typeCode)}
         <Section title={group.typeCode} subtitle={`${group.regs.length} Aircraft`} collapsable={true} >
           {#each group.regs as ac (ac.id)}
-            <MenuElement href="/aircraft/entry/{ac.id}?{urlActiveParam}" selected={ac.id === data.params.id && !isMobileSize}>
+            <MenuElement href="/aircraft/entry/{ac.registration}?{urlActiveParam}" selected={ac.id === data.params.id && !isMobileSize}>
               {#if ac.imageId !== null}
                 <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
                   <Badge class="h-full">{ac._count.legs}</Badge>
