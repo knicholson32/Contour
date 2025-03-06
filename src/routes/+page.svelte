@@ -256,13 +256,13 @@
                 </HoverCard.Trigger>
                 <HoverCard.Content class="w-auto p-0 inline-flex bg-transparent border-0 -mt-0 pl-2">
                   {#each extraAircraftKeys as ac (ac.id)}
-                    <AircraftHoverCard id={ac.id} time={ac.time} />
+                    <AircraftHoverCard id={ac.id} reg={ac.reg} time={ac.time} />
                   {/each}
                 </HoverCard.Content>
               </HoverCard.Root>
             {/if}
             {#each flownAircraftKeys as ac (ac.id)}
-              <AircraftHoverCard id={ac.id} time={ac.time} />
+              <AircraftHoverCard id={ac.id} reg={ac.reg} time={ac.time} />
             {/each}
           </div>
           <DateRangePicker bind:value={dateRange} highlights={data.dutyDays.highlightDates} class="w-full sm:w-[300px]" />
@@ -316,7 +316,7 @@
         <Tabs.Content value="overview" class="space-y-2 h-full">
           <div class="w-full px-2 sm:hidden gap-1 items-center h-12 grid justify-center place-items-center" style="grid-template-columns: repeat({Object.keys(data.acList).length}, minmax(0, 1fr));">
             {#each data.acList as ac (ac.id)}
-              <AircraftHoverCard id={ac.id} time={ac.time} compress={false} />
+              <AircraftHoverCard id={ac.id} time={ac.time} reg={ac.reg} compress={false} />
             {/each}
           </div>
 

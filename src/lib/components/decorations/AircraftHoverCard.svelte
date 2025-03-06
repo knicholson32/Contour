@@ -6,6 +6,7 @@
   import { CalendarDays, Fingerprint, Loader2, Plane, RotateCw, Unlink } from "lucide-svelte";
 
   export let id: string;
+  export let reg: string;
   export let time: number = 0;
   export let compress = true;
 
@@ -23,7 +24,7 @@
 {#if aircraft !== null}
 
   <HoverCard.Root>
-    <HoverCard.Trigger href="/aircraft/entry/{id}?active=form" class="{compress ? '-ml-4' : ''} w-12 h-12 border-4 border-gray-100 bg-gray-100 dark:border-zinc-900 dark:bg-zinc-900 rounded-full relative flex justify-center items-center">
+    <HoverCard.Trigger href="/aircraft/entry/{reg}?active=form" class="{compress ? '-ml-4' : ''} w-12 h-12 border-4 border-gray-100 bg-gray-100 dark:border-zinc-900 dark:bg-zinc-900 rounded-full relative flex justify-center items-center">
       <Image class="w-12 rounded-full object-cover aspect-1 absolute top-0 left-0" size={48} id={aircraft.imageId} alt={aircraft.registration}/>
       <div class="bg-foreground/15 w-full h-full rounded-full flex justify-center items-center">
         <Plane class="h-4 w-4" />

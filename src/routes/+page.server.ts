@@ -118,7 +118,7 @@ export const load = async ({ parent, url }) => {
   let operations = 0;
 
   const acTypeList: { [key: string]: number } = {};
-  const acList: { id: string, time: number }[] = [];
+  const acList: { id: string, time: number, reg: string }[] = [];
   for (const day of days) {
     for (const leg of day.legs) {
       if (leg.aircraft.aircraftTypeId in acTypeList) {
@@ -131,7 +131,7 @@ export const load = async ({ parent, url }) => {
       if (idx !== -1) {
         acList[idx].time += leg.totalTime;
       } else {
-        acList.push({ id: leg.aircraftId, time: leg.totalTime});
+        acList.push({ id: leg.aircraftId, time: leg.totalTime, reg: leg.aircraft.registration });
       }
 
       const posGroup: [number, number][] = [];
@@ -171,7 +171,7 @@ export const load = async ({ parent, url }) => {
     if (idx !== -1) {
       acList[idx].time += leg.totalTime;
     } else {
-      acList.push({ id: leg.aircraftId, time: leg.totalTime });
+      acList.push({ id: leg.aircraftId, time: leg.totalTime, reg: leg.aircraft.registration });
     }
 
     const posGroup: [number, number][] = [];
