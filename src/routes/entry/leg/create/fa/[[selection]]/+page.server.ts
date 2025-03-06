@@ -18,7 +18,7 @@ export const load = async ({ params, fetch, url }) => {
   const entrySettings = await settings.getSet('entry');
   const settingsResults = await settings.getMany('general.aeroAPI', 'entry.flight_id.last');
   const aeroAPIKey = settingsResults['general.aeroAPI'];
-  if (aeroAPIKey === '') throw redirect(302, '/settings');
+  if (aeroAPIKey === '') redirect(302, '/settings');
 
   let currentDay: Prisma.DutyDayGetPayload<{}> | null = null;
   let currentTour: Prisma.TourGetPayload<{}> | null = null;
@@ -27,13 +27,13 @@ export const load = async ({ params, fetch, url }) => {
   const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
   if (dayId !== null) {
     currentDay = await prisma.dutyDay.findUnique({ where: { id: dayId }, include: { legs: true } });
-    if (currentDay === null) throw redirect(302, '/entry/leg' + url.search);
+    if (currentDay === null) redirect(302, '/entry/leg' + url.search);
   }
 
   // Resolve the tour info it the day exists
   if (currentDay !== null) {
     currentTour = await prisma.tour.findUnique({ where: { id: currentDay.tourId } });
-    if (currentTour === null) throw redirect(301, '/entry/day');
+    if (currentTour === null) redirect(301, '/entry/day');
   }
 
   // TODO: This needs to be updated to support adding legs without a tour or day
@@ -52,7 +52,7 @@ export const load = async ({ params, fetch, url }) => {
   if ((flightIDs.length === 0) && settingsResults['entry.flight_id.last'] !== '') {
     const u = new URLSearchParams(url.search);
     u.set('flight-id', settingsResults['entry.flight_id.last']);
-    throw redirect(301, `/entry/leg/create/fa?${u.toString()}`);
+    redirect(301, `/entry/leg/create/fa?${u.toString()}`);
   }
 
   if (noCache && flightIDs.length !== 0){
@@ -96,7 +96,7 @@ export const load = async ({ params, fetch, url }) => {
   }
 
   const selected = (params.selection === undefined) ? null : await prisma.option.findUnique({ where: { faFlightId: params.selection } });
-  if (selected !== null && availableOptions.length === 0) throw redirect(301, '../');
+  if (selected !== null && availableOptions.length === 0) redirect(301, '../');
 
   if (selected !== null) {
     await addIfDoesNotExist(selected.originAirportId, aeroAPIKey);
@@ -241,7 +241,7 @@ export const actions = {
     const aeroAPIKey = await settings.get('general.aeroAPI');
     if (aeroAPIKey === '') return API.Form.formFailure('?/default', '*', 'Configure Aero API key in settings');
 
-    if (params.selection === undefined) throw redirect(301, '/entry/leg/create/fa');
+    if (params.selection === undefined) redirect(301, '/entry/leg/create/fa');
     const selected = await prisma.option.findUnique({ where: { faFlightId: params.selection }});
     if (selected === null) return API.Form.formFailure('?/default', '*', 'Option does not exist');
 
@@ -252,7 +252,7 @@ export const actions = {
     const u = new URLSearchParams(url.search);
     u.set('selection', params.selection);
     u.set('clearChanges', 'true');
-    throw redirect(301, '/entry/leg/create/form?' + u.toString());
+    redirect(301, '/entry/leg/create/form?' + u.toString());
 
   }
 };

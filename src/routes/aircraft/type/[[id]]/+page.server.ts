@@ -19,8 +19,8 @@ export const load = async ({ fetch, params, url }) => {
 
   let types = await prisma.aircraftType.findMany({ select: { typeCode: true, make: true, model: true, catClass: true, id: true, imageId: true, _count: true }, orderBy: [{ make: 'asc' }, { model: 'asc' }] });
   if (params.id === undefined) {
-    if (types.length > 0) throw redirect(301, '/aircraft/type/' + types[0].id + '?active=menu')
-    else throw redirect(301, '/aircraft/type/new' + url.search)
+    if (types.length > 0) redirect(301, '/aircraft/type/' + types[0].id + '?active=menu');
+    else redirect(301, '/aircraft/type/new' + url.search);
   }
 
   let search = url.searchParams.get('search');
@@ -51,7 +51,7 @@ export const load = async ({ fetch, params, url }) => {
   }
 
   const currentType = await prisma.aircraftType.findUnique({ where: { id: params.id } });
-  if (params.id !== 'new' && currentType === null) throw redirect(301, '/aircraft/type/new');
+  if (params.id !== 'new' && currentType === null) redirect(301, '/aircraft/type/new');
 
   let orderGroups: { make: string, types: (typeof types[0])[] }[] = []
   let currentMake = '';
@@ -215,8 +215,8 @@ export const actions = {
     
     const ref = url.searchParams.get('ref');
     console.log('ref', ref);
-    if (ref !== null) throw redirect(301, ref);
-    else throw redirect(301, '/aircraft/type/' + id + '?active=form');
+    if (ref !== null) redirect(301, ref);
+    else redirect(301, '/aircraft/type/' + id + '?active=form');
   },
   delete: async ({ request, params }) => {
 
@@ -236,6 +236,6 @@ export const actions = {
     await helpers.clearHangingImages()
 
     // Done!
-    throw redirect(301, '/aircraft/type');
+    redirect(301, '/aircraft/type');
   },
 };

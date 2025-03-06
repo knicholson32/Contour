@@ -19,7 +19,7 @@ export const load = async ({ params, fetch, url }) => {
 
   console.log('abc123', entrySettings['entry.day.entry.state']);
 
-  if (entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED) throw redirect(301, `/entry/leg/create/fa?${url.searchParams.toString()}`);
-  else if (entrySettings['entry.day.entry.state'] === DayNewEntryState.LINK_CONFIRMED) throw redirect(301, `/entry/leg/create/form?${url.searchParams.toString()}`);
+  if (entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED) redirect(301, `/entry/leg/create/fa?${url.searchParams.toString()}`);
+  else if (entrySettings['entry.day.entry.state'] === DayNewEntryState.LINK_CONFIRMED) redirect(301, `/entry/leg/create/form?${url.searchParams.toString()}`);
 
 };

@@ -41,7 +41,7 @@ export const load = async ({ fetch, params, url }) => {
     }
   });
 
-  if (leg === null) throw redirect(302, `/entry/leg/${params.id}?active=form`);
+  if (leg === null) redirect(302, `/entry/leg/${params.id}?active=form`);
 
 
   const legSelector = {
@@ -297,7 +297,7 @@ export const actions = {
       return API.Form.formFailure('?/update', 'file.upload', 'Unable to save: ' + err.message);
     }
 
-    throw redirect(301, `/entry/leg/${id}`);
+    redirect(301, `/entry/leg/${id}`);
     
   },
 

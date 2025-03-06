@@ -55,7 +55,7 @@ export const load = async ({ parent, url }) => {
     const day = now.getDate();
     const startStr = `${year}-01-01`;
     const endStr = `${year}-${pad(month, 2)}-${pad(day, 2)}`;
-    throw redirect(301, `/?start=${startStr}&end=${endStr}&preset=ytd`)
+    redirect(301, `/?start=${startStr}&end=${endStr}&preset=ytd`);
   }
 
   let s = Math.floor(start.toDate(timeZone).getTime() / 1000);

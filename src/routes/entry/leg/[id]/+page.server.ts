@@ -43,10 +43,10 @@ export const load = async ({ fetch, params, url }) => {
 
   // Check to see if we are visiting this page to fully resolve the leg with it's tour / day pair
   const resolve = url.searchParams.get('resolve');
-  if (leg !== null && resolve !== null) throw redirect(302, `/entry/leg/${params.id}?active=form${leg.dayId === null ? '' : '&day=' + leg.dayId}${leg.day?.tourId === undefined ? '' : '&tour=' + leg.day.tourId}`);
+  if (leg !== null && resolve !== null) redirect(302, `/entry/leg/${params.id}?active=form${leg.dayId === null ? '' : '&day=' + leg.dayId}${leg.day?.tourId === undefined ? '' : '&tour=' + leg.day.tourId}`);
 
   // If this isn't a new leg, redirect up a level so we can select the most recent leg (or create one if there are none)
-  if (leg === null && params.id !== 'new') throw redirect(302, `/entry/leg?${url.searchParams.toString()}`);
+  if (leg === null && params.id !== 'new') redirect(302, `/entry/leg?${url.searchParams.toString()}`);
 
   // Get the dayId from the search params, if it exists
   const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
@@ -57,12 +57,12 @@ export const load = async ({ fetch, params, url }) => {
   let currentDay: Prisma.DutyDayGetPayload<{}> | null = null;
   if (dayId !== null) {
     currentDay = await prisma.dutyDay.findUnique({ where: { id: dayId } });
-    if (currentDay === null) throw redirect(302, '/entry/leg' + url.search);
+    if (currentDay === null) redirect(302, '/entry/leg' + url.search);
   }
 
   if (tourId !== null) {
     const tour = await prisma.tour.findUnique({ where: { id: tourId } });
-    if (tour === null) throw redirect(302, '/entry/leg' + url.search);
+    if (tour === null) redirect(302, '/entry/leg' + url.search);
   }
 
   // Fetch all the legs for the side menu
@@ -585,7 +585,7 @@ export const actions = {
     u.delete('/delete');
     if (dayId !== null) u.set('day', dayId);
     if (tourId !== null) u.set('tour', tourId);
-    throw redirect(302, `/entry/leg?${u.toString()}`);
+    redirect(302, `/entry/leg?${u.toString()}`);
   },
 
   modifyDutyDay: async ({ request, url, params }) => {

@@ -51,13 +51,13 @@ export const load = async ({ fetch, params, url }) => {
     const fuse = new Fuse(aircrafts, fuseOptions);
     aircrafts = fuse.search(search).flatMap((v) => v.item);
     if (params.id === undefined) {
-      if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].registration + '?active=menu&search=' + search)
-      else throw redirect(301, '/aircraft/entry/new')
+      if (aircrafts.length > 0) redirect(301, '/aircraft/entry/' + aircrafts[0].registration + '?active=menu&search=' + search);
+      else redirect(301, '/aircraft/entry/new');
     }
   } else {
     if (params.id === undefined) {
-      if (aircrafts.length > 0) throw redirect(301, '/aircraft/entry/' + aircrafts[0].registration + '?active=menu')
-      else throw redirect(301, '/aircraft/entry/new')
+      if (aircrafts.length > 0) redirect(301, '/aircraft/entry/' + aircrafts[0].registration + '?active=menu');
+      else redirect(301, '/aircraft/entry/new');
     }
   }
 
@@ -71,7 +71,7 @@ export const load = async ({ fetch, params, url }) => {
 
   let currentAircraft = await prisma.aircraft.findUnique({ where: { id: params.id }, include: { type: true, _count: true, legs: { select: { totalTime: true, diversionAirportId: true } } } });
   if (currentAircraft === null) currentAircraft = await prisma.aircraft.findUnique({ where: { registration: params.id.toUpperCase() }, include: { type: true, _count: true, legs: { select: { totalTime: true, diversionAirportId: true } } } });
-  if (params.id !== 'new' && currentAircraft === null) throw redirect(301, '/aircraft/entry/new');
+  if (params.id !== 'new' && currentAircraft === null) redirect(301, '/aircraft/entry/new');
 
   // TODO: Remove this database auto-mod
   if (currentAircraft?.simulator === true && currentAircraft.simulatorType === null) {
@@ -300,8 +300,8 @@ export const actions = {
 
     const ref = url.searchParams.get('ref');
     if (debug) console.log('ref',ref);
-    if (ref !== null) throw redirect(301, ref);
-    else throw redirect(301, '/aircraft/entry/' +(tail as string).toUpperCase() + '?active=form');
+    if (ref !== null) redirect(301, ref);
+    else redirect(301, '/aircraft/entry/' +(tail as string).toUpperCase() + '?active=form');
   },
 
   delete: async ({ request, params }) => {
@@ -329,6 +329,6 @@ export const actions = {
     await helpers.clearHangingImages()
 
     // Done!
-    throw redirect(301, '/aircraft/entry');
+    redirect(301, '/aircraft/entry');
   },
 };

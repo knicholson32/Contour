@@ -20,15 +20,15 @@ export const load = async ({ params, fetch, url }) => {
     // We don't have a tour restriction, so all days are possible
     days = await prisma.dutyDay.findMany({ select: { id: true }, orderBy: { startTime_utc: 'desc' }, take: 1 });
     // Redirect if nothing is found
-    if (days === null || days.length === 0) throw redirect(302, '/entry/tour');
+    if (days === null || days.length === 0) redirect(302, '/entry/tour');
   } else {
     // We have tour restriction. Only days in this tour are possible
     days = await prisma.dutyDay.findMany({ where: { tourId: parseInt(tour) }, select: { id: true }, orderBy: { startTime_utc: 'desc' }, take: 1 });
     // Redirect if nothing is found
-    if (days === null || days.length === 0) throw redirect(302, `/entry/day/new?${url.searchParams.toString()}`);
+    if (days === null || days.length === 0) redirect(302, `/entry/day/new?${url.searchParams.toString()}`);
   }
 
   // Redirect as required
-  throw redirect(302, `/entry/day/${days[0].id}?${url.searchParams.toString()}`);
+  redirect(302, `/entry/day/${days[0].id}?${url.searchParams.toString()}`);
 };
 

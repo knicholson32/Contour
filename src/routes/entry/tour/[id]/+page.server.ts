@@ -17,7 +17,7 @@ export const load = async ({ fetch, params, url }) => {
 
   if (url.searchParams.get('tour') !== null) {
     url.searchParams.delete('tour');
-    throw redirect(302, `/entry/tour/${params.id}?${url.searchParams.toString()}`);
+    redirect(302, `/entry/tour/${params.id}?${url.searchParams.toString()}`);
   }
 
   const entrySettings = await settings.getSet('entry');
@@ -31,13 +31,13 @@ export const load = async ({ fetch, params, url }) => {
   if (params.id !== 'new') {
     if (!isNaN(parseInt(params.id))) tour = await prisma.tour.findUnique({ where: { id: parseInt(params.id) }, include: { days: true } });
     if (tour === null) {
-      if (tours.length === 0) throw redirect(301, '/entry/tour/new');
-      else throw redirect(302, '/entry/tour/' + tours[0].id);
+      if (tours.length === 0) redirect(301, '/entry/tour/new');
+      else redirect(302, '/entry/tour/' + tours[0].id);
     }
   }
   
   const aeroAPIKey = await settings.get('general.aeroAPI');
-  if (aeroAPIKey === '') throw redirect(302, '/settings');
+  if (aeroAPIKey === '') redirect(302, '/settings');
 
   const tourSettings = await settings.getSet('tour');
   if (tourSettings['tour.defaultStartApt'] !== '') {
@@ -184,7 +184,7 @@ export const actions = {
   updateOrCreate: async ({ request, url, params }) => {
 
     const tourId = parseInt(params.id);
-    if (isNaN(tourId) && params.id !== 'new') throw redirect(302, '/entry/tour/new');
+    if (isNaN(tourId) && params.id !== 'new') redirect(302, '/entry/tour/new');
 
     const aeroAPIKey = await settings.get('general.aeroAPI');
     if (aeroAPIKey === '') return API.Form.formFailure('?/default', '*', 'Configure Aero API key in settings');
@@ -321,8 +321,8 @@ export const actions = {
 
     console.log('tour', tour);
 
-    if (tour === null) throw redirect(302, '/entry/tour');
-    else throw redirect(301, `/entry/tour/${tour.id}`);
+    if (tour === null) redirect(302, '/entry/tour');
+    else redirect(301, `/entry/tour/${tour.id}`);
   },
 
   delete: async ({ request, url }) => {
@@ -347,6 +347,6 @@ export const actions = {
       return API.Form.formFailure('?/update', '*', 'Could not delete');
     }
 
-    throw redirect(302, '/entry/tour');
+    redirect(302, '/entry/tour');
   }
 };

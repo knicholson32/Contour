@@ -21,7 +21,7 @@ export const load = async ({ params, fetch, url }) => {
   const tourId = url.searchParams.get('tour') === null ? null : parseInt(url.searchParams.get('tour') ?? '-1');
   let currentTour: Prisma.TourGetPayload<{}> | null = null;
   if (tourId !== null) currentTour = await prisma.tour.findUnique({ where: { id: tourId } });
-  if (currentTour === null) throw redirect(302, '/tour/new');
+  if (currentTour === null) redirect(302, '/tour/new');
 
   // const currentDay = await prisma.dutyDay.findUnique({
   //   where: { id: entrySettings['entry.day.current'] },
@@ -58,7 +58,7 @@ export const actions = {
     const tourId = url.searchParams.get('tour') === null ? null : parseInt(url.searchParams.get('tour') ?? '-1');
     let currentTour: Prisma.TourGetPayload<{}> | null = null;
     if (tourId !== null) currentTour = await prisma.tour.findUnique({ where: { id: tourId } });
-    if (currentTour === null) throw redirect(302, '/tour/new');
+    if (currentTour === null) redirect(302, '/tour/new');
 
     const data = await request.formData();
     for (const key of data.keys()) {
@@ -173,7 +173,7 @@ export const actions = {
       return API.Form.formFailure('?/default', '*', 'Error creating duty day');
     }
 
-    throw redirect(301, '/entry/day/' + redirectId + url.search);
+    redirect(301, '/entry/day/' + redirectId + url.search);
 
     // return API.Form.formFailure('?/default', '*', 'test');
 

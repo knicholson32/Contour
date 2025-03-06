@@ -38,7 +38,7 @@ export const load = async ({ fetch, params, url }) => {
     }
   });
 
-  if (leg === null) throw redirect(302, `/entry/leg/${params.id}?active=form`);
+  if (leg === null) redirect(302, `/entry/leg/${params.id}?active=form`);
 
 
   

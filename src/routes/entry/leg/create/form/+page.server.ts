@@ -28,8 +28,8 @@ export const load = async ({ params, fetch, url }) => {
   const selection = url.searchParams.get('selection') === null ? null : url.searchParams.get('selection');
   const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
 
-  if (selection !== null && (entrySettings['entry.day.entry.fa_id'] === '' || entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED)) throw redirect(301, '../link' + url.search);
-  if (aeroAPIKey === '') throw redirect(301, '/settings');
+  if (selection !== null && (entrySettings['entry.day.entry.fa_id'] === '' || entrySettings['entry.day.entry.state'] === DayNewEntryState.NOT_STARTED)) redirect(301, '../link' + url.search);
+  if (aeroAPIKey === '') redirect(301, '/settings');
 
   const airportsRaw = await ((await fetch('/api/airports')).json()) as API.Airports;
   const airports = (airportsRaw.ok === true) ? airportsRaw.airports : [] as API.Types.Airport[]
@@ -52,7 +52,7 @@ export const load = async ({ params, fetch, url }) => {
     console.log(`Could not verify - FA Flight ID ${entrySettings['entry.day.entry.fa_id']} did not load a value from the DB.`);
     await settings.set('entry.day.entry.fa_id', '');
     await settings.set('entry.day.entry.state', DayNewEntryState.NOT_STARTED);
-    throw redirect(301, '../link' + url.search);
+    redirect(301, '../link' + url.search);
   }
 
 
@@ -70,7 +70,7 @@ export const load = async ({ params, fetch, url }) => {
       u.set('reg', entry.registration);
       u.set('ref', `/entry/leg/create/form?${url.searchParams.toString()}`);
       u.set('active', 'form');
-      throw redirect(301, `/aircraft/entry/new?${u.toString()}`);
+      redirect(301, `/aircraft/entry/new?${u.toString()}`);
     }
   }
 
@@ -578,6 +578,6 @@ export const actions = {
     u.delete('selection');
     u.delete('flight-id');
     u.delete('date');
-    throw redirect(301, `/entry/leg/${id}?${u.toString()}`);
+    redirect(301, `/entry/leg/${id}?${u.toString()}`);
   }
 };

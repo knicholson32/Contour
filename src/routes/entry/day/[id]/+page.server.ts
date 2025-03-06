@@ -14,7 +14,7 @@ export const load = async ({ fetch, params, parent, url }) => {
 
   if (url.searchParams.get('day') !== null) {
     url.searchParams.delete('day');
-    throw redirect(302, `/entry/day/${params.id}?${url.searchParams.toString()}`);
+    redirect(302, `/entry/day/${params.id}?${url.searchParams.toString()}`);
   }
 
   const entrySettings = await settings.getSet('entry');
@@ -23,7 +23,7 @@ export const load = async ({ fetch, params, parent, url }) => {
   let currentTour: Prisma.TourGetPayload<{}> | null = null;
   if (tourId !== null) {
     currentTour = await prisma.tour.findUnique({ where: { id: tourId } });
-    if (currentTour === null) throw redirect(301, '/entry/day');
+    if (currentTour === null) redirect(301, '/entry/day');
   }
 
   let days: Prisma.DutyDayGetPayload<{select: { id: true, startAirportId: true, endAirportId: true, startTime_utc: true }}>[] | null = null;
@@ -141,7 +141,7 @@ export const load = async ({ fetch, params, parent, url }) => {
         tour: true
       },
     });
-    if (currentDay === null) throw redirect(302, `/entry/day?${url.searchParams.toString()}`);
+    if (currentDay === null) redirect(302, `/entry/day?${url.searchParams.toString()}`);
   }
 
   if (currentDay === null) {
@@ -267,7 +267,7 @@ export const actions = {
     // if (currentTour === null) throw redirect(301, '/tour/new');
 
     const currentDay = await prisma.dutyDay.findUnique({ where: { id: parseInt(params.id) } });
-    if (currentDay === null) throw redirect(302, `/entry/day/new?${url.searchParams.toString()}`);
+    if (currentDay === null) redirect(302, `/entry/day/new?${url.searchParams.toString()}`);
 
     const data = await request.formData();
     for (const key of data.keys()) {
@@ -416,6 +416,6 @@ export const actions = {
     const u = new URLSearchParams(url.search);
     u.delete('/delete');
     if (tourId !== null) u.set('tour', tourId);
-    throw redirect(302, `/entry/day?${u.toString()}`);
+    redirect(302, `/entry/day?${u.toString()}`);
   }
 };

@@ -13,9 +13,9 @@ export const load = async ({ fetch, params, parent }) => {
   const entrySettings = await settings.getSet('entry');
 
   
-  if (isNaN(parseInt(params.id))) throw redirect(301, '/entry/tour');
+  if (isNaN(parseInt(params.id))) redirect(301, '/entry/tour');
   const tour = await prisma.tour.findUnique({ where: { id: parseInt(params.id) } });
-  if (tour === null) throw redirect(301, '/entry/tour');
+  if (tour === null) redirect(301, '/entry/tour');
 
   const tourSettings = await settings.getSet('tour');
   const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
@@ -36,10 +36,10 @@ export const actions = {
   default: async ({ request, url, params }) => {
 
     const tourId = parseInt(params.id);
-    if (isNaN(tourId)) throw redirect(301, '/entry/tour');
+    if (isNaN(tourId)) redirect(301, '/entry/tour');
 
     let tour = await prisma.tour.findUnique({ where: { id: tourId }});
-    if (tour === null) throw redirect(301, '/entry/tour');
+    if (tour === null) redirect(301, '/entry/tour');
 
     const aeroAPIKey = await settings.get('general.aeroAPI');
     if (aeroAPIKey === '') return API.Form.formFailure('?/default', '*', 'Configure Aero API key in settings');
@@ -140,6 +140,6 @@ export const actions = {
     }
 
 
-    throw redirect(301, '/entry/tour/' + params.id + '?active=form');
+    redirect(301, '/entry/tour/' + params.id + '?active=form');
   },
 };

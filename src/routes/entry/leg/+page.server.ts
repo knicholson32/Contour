@@ -21,12 +21,12 @@ export const load = async ({ params, fetch , url}) => {
     // We don't have a day restriction, so all days are possible
     legs = await prisma.leg.findMany({ select: { id: true, destinationAirportId: true, originAirportId: true, diversionAirportId: true, aircraft: { select: { registration: true, type: { select: { typeCode: true } } } } }, orderBy: { startTime_utc: 'desc' } });
     // Redirect if nothing is found
-    if (legs === null || legs.length === 0) throw redirect(302, `/entry/leg/new?${url.searchParams.toString()}`);
+    if (legs === null || legs.length === 0) redirect(302, `/entry/leg/new?${url.searchParams.toString()}`);
   } else {
     // We have day restriction. Only legs in this day are possible
     legs = await prisma.leg.findMany({ where: { dayId: parseInt(day) }, select: { id: true, destinationAirportId: true, originAirportId: true, diversionAirportId: true, aircraft: { select: { registration: true, type: { select: { typeCode: true } } } } }, orderBy: { startTime_utc: 'desc' } });
     // Redirect if nothing is found
-    if (legs === null || legs.length === 0) throw redirect(302, `/entry/leg/new?${url.searchParams.toString()}`);
+    if (legs === null || legs.length === 0) redirect(302, `/entry/leg/new?${url.searchParams.toString()}`);
   }
 
   let search = url.searchParams.get('search');
@@ -60,7 +60,7 @@ export const load = async ({ params, fetch , url}) => {
   }
 
   // Redirect as required
-  throw redirect(302, `/entry/leg/${legs[0].id}?${url.searchParams.toString()}`);
+  redirect(302, `/entry/leg/${legs[0].id}?${url.searchParams.toString()}`);
 };
 
 

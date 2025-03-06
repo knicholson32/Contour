@@ -9,7 +9,7 @@ export const load = async ({ fetch, params, url }) => {
   if (lastCommit !== commit) {
     await settings.set('system.lastSeenCommit', commit);
     if (url.searchParams.get('lastCommit') === null) {
-      throw redirect(301, '/changelog?lastCommit=' + lastCommit);
+      redirect(301, '/changelog?lastCommit=' + lastCommit);
     }
   }
 
