@@ -5,12 +5,21 @@
   import type { API } from "$lib/types";
   import { CalendarDays, Fingerprint, Loader2, Plane, RotateCw, Unlink } from "lucide-svelte";
 
-  export let id: string;
-  export let reg: string;
-  export let time: number = 0;
-  export let compress = true;
+  interface Props {
+    id: string;
+    reg: string;
+    time?: number;
+    compress?: boolean;
+  }
 
-  let aircraft: API.Types.Aircraft | null = null
+  let {
+    id,
+    reg,
+    time = 0,
+    compress = true
+  }: Props = $props();
+
+  let aircraft: API.Types.Aircraft | null = $state(null)
 
   onMount(async () => {
     const res = await(await fetch('/api/aircraft/' + id)).json() as API.Aircraft;
@@ -30,7 +39,7 @@
         <Plane class="h-4 w-4" />
       </div>
     </HoverCard.Trigger>
-    <HoverCard.Content class="w-auto p-0">
+    <HoverCard.Content class="w-auto p-0 animate-in fade-in">
       <div class="flex flex-row gap-4">
         <div class="w-[256px] relative">
           <Image class="object-cover rounded-l-sm relative" size={256} id={aircraft.imageId} alt={aircraft.registration}/>

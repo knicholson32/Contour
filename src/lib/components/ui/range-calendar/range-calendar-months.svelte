@@ -1,17 +1,20 @@
 <script lang="ts">
-	import { cn } from "$lib/utils";
+	import type { WithElementRef } from "bits-ui";
 	import type { HTMLAttributes } from "svelte/elements";
+	import { cn } from "$lib/utils.js";
 
-	type $$Props = HTMLAttributes<HTMLDivElement> & { numberOfMonths: number };
-
-	let className: $$Props["class"] = undefined;
-	export { className as class };
-	export let numberOfMonths: $$Props['numberOfMonths'];
+	let {
+		ref = $bindable(null),
+		class: className,
+		children,
+		...restProps
+	}: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
 </script>
 
 <div
-	class={cn("mt-4 flex  space-y-4 sm:space-x-4 sm:space-y-0", numberOfMonths > 1 ? 'flex-col sm:flex-row' : 'flex-row', className)}
-	{...$$restProps}
+	bind:this={ref}
+	class={cn("mt-4 flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0", className)}
+	{...restProps}
 >
-	<slot />
+	{@render children?.()}
 </div>

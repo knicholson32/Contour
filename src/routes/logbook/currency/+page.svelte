@@ -82,7 +82,7 @@ import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
                 </div>
                 <p class="text-xs text-muted-foreground">Longest day was 0 hr</p>
               </div>
-              <div class="grow" />
+              <div class="grow"></div>
               <div class="text-right">
                 <div>{Math.floor((data.currency.asel.general.currencyExpiry - data.nowSeconds) / (60 * 60 * 24))} days</div>
                 <div>Remaining</div>
@@ -108,7 +108,7 @@ import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
                 </div>
                 <p class="text-xs text-muted-foreground">Longest day was 0 hr</p>
               </div>
-              <div class="grow" />
+              <div class="grow"></div>
               <div class="text-right">
                 <div>{Math.floor((data.currency.asel.night.currencyExpiry - data.nowSeconds) / (60 * 60 * 24))} days</div>
                 <div>Remaining</div>
@@ -134,7 +134,7 @@ import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
                 </div>
                 <p class="text-xs text-muted-foreground">Longest day was 0 hr</p>
               </div>
-              <div class="grow" />
+              <div class="grow"></div>
               <div class="text-right">
                 <div>{Math.floor((data.currency.ifr.currencyExpiry - data.nowSeconds) / (60 * 60 * 24))} days</div>
                 <div>Remaining</div>
@@ -162,7 +162,7 @@ import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
                   </div>
                   <p class="text-xs text-muted-foreground">Longest day was 0 hr</p>
                 </div>
-                <div class="grow" />
+                <div class="grow"></div>
                 <div class="text-right">
                   <div>{Math.floor((type.general.currencyExpiry - data.nowSeconds) / (60 * 60 * 24))} days</div>
                   <div>Remaining</div>
@@ -188,7 +188,7 @@ import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
                   </div>
                   <p class="text-xs text-muted-foreground">Longest day was 0 hr</p>
                 </div>
-                <div class="grow" />
+                <div class="grow"></div>
                 <div class="text-right">
                   <div>{Math.floor((type.night.currencyExpiry - data.nowSeconds) / (60 * 60 * 24))} days</div>
                   <div>Remaining</div>

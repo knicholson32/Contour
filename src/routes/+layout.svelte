@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { cubicIn, cubicInOut, cubicOut } from "svelte/easing";
   import "../app.css";
   import { EscapeOrClickOutside } from "$lib/components/events";
@@ -78,7 +78,6 @@
 
 
   beforeNavigate((navigate) => {
-    console.log('beforeNav', navigate);
     if (navigate.type !== 'leave') {
       // NProgress.trickle();
       NProgress.start();
@@ -127,12 +126,12 @@
 </script>
 
 <svelte:head>
-	{#if $page.data.seo === undefined}
+	{#if page.data.seo === undefined}
 		<title>Contour</title>
 		<meta name="description" content="Contour" />
 	{:else}
-		<title>Contour | {$page.data.seo.title}</title>
-		<meta name="description" content={$page.data.seo?.description} />
+		<title>Contour | {page.data.seo.title}</title>
+		<meta name="description" content={page.data.seo?.description} />
 	{/if}
 </svelte:head>
 
@@ -187,7 +186,7 @@
           {#each menu as m, i}
             {#if m.submenu !== undefined}
               <Popover.Root bind:open={m.popover} >
-                  {#if ($page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && $page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
+                  {#if (page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
                     <Popover.Trigger class="border-sky-500 relative z-40 text-gray-900 dark:text-white inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</Popover.Trigger>
                   {:else}
                     <Popover.Trigger class="border-transparent relative z-40 text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</Popover.Trigger>
@@ -221,7 +220,7 @@
                 </Popover.Root>
             {:else}
               <!-- Current: "border-sky-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-              {#if ($page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && $page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
+              {#if (page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
                 <a href="{m.href}" class="border-sky-500 relative z-40 text-gray-900 dark:text-white inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium" aria-current="page">{m.title}</a>  
               {:else}
                 <a href="{m.href}" class="border-transparent relative z-40 text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</a>  
@@ -271,7 +270,7 @@
                 <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-zinc-900 py-1 shadow-lg ring-1 ring-black dark:ring-zinc-800 ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                   <!-- Active: "bg-gray-100", Not Active: "" -->
                   {#each profileMenu as m}
-                    {#if $page.url.pathname.startsWith(m.href)}
+                    {#if page.url.pathname.startsWith(m.href)}
                       <a href="{m.href}" on:click={closeAccountDropdown} class="bg-gray-100 dark:bg-zinc-800 block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
                     {:else}
                       <a href="{m.href}" on:click={closeAccountDropdown} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
@@ -319,7 +318,7 @@
         <!-- Mobile Menu -->
         {#each menu as m}
           <!-- Current: "border-sky-500 bg-sky-50 text-sky-700", Default: "border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800" -->
-            {#if ($page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && $page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
+            {#if (page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
               <a href="{m.href}" on:click={closeMobileMenu} class="border-sky-500 bg-sky-50/50 dark:bg-slate-800/25 text-sky-500 block border-l-4 py-2 pl-3 pr-4 text-base font-medium" aria-current="page">{m.title}</a>  
             {:else}
               <a href="{m.href}" on:click={closeMobileMenu} class="border-transparent text-gray-600 dark:text-gray-400 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">{m.title}</a>  
@@ -353,7 +352,7 @@
         </div>
         <div class="mt-3 space-y-1">
           {#each profileMenu as m}
-            {#if $page.url.pathname.startsWith(m.href)}
+            {#if page.url.pathname.startsWith(m.href)}
               <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium border-sky-500 bg-sky-50 dark:bg-slate-800/25 text-sky-700 dark:text-sky-400">{m.title}</a>
             {:else}
               <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200">{m.title}</a>

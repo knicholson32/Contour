@@ -2,32 +2,50 @@
 	import { enhance } from '$app/forms';
 	import { beforeNavigate } from '$app/navigation';
 	import { Submit } from '$lib/components/buttons';
-    import type { API } from '$lib/types';
+  import type { API } from '$lib/types';
 
-	let classExport: string = '';
 
-	export let action: string;
-	export { classExport as class };
-	export let confirmAction: ((f: FormData) => boolean) | string | null = null;
-	export let form: API.Form.Type | null = null;
+	interface Props {
+		class?: string;
+		action: string;
+		confirmAction?: ((f: FormData) => boolean) | string | null;
+		form?: API.Form.Type | null;
+		submitting?: boolean;
+		unsavedChanges?: boolean;
+		title?: import('svelte').Snippet;
+		description?: import('svelte').Snippet;
+		button?: import('svelte').Snippet;
+		children?: import('svelte').Snippet;
+	}
 
-	export let submitting = false;
-	export let unsavedChanges = false;
+	let {
+		class: classExport = '',
+		action,
+		confirmAction = null,
+		form = null,
+		submitting = $bindable(false),
+		unsavedChanges = $bindable(false),
+		title,
+		description,
+		button,
+		children
+	}: Props = $props();
 
 	export const update = () => {
 		unsavedChanges = true;
 	};
 
-	$: {
-		form?.ok;
-		clearChangesFlag();
-	}
 
 	const clearChangesFlag = () => {
 		if (form?.ok === false && form?.action === action)
 			unsavedChanges = true;
 		else unsavedChanges = false;
 	};
+
+	$effect(() => {
+		form?.ok;
+		clearChangesFlag();
+	});
 </script>
 
 <form
@@ -58,18 +76,18 @@
 		<div class="flex items-center gap-x-2">
 			<div class="max-w-md">
 				<h2 class="text-lg font-semibold leading-7 text-gray-900 dark:text-white">
-					<slot name="title">Settings</slot>
+					{#if title}{@render title()}{:else}Settings{/if}
 					{#if unsavedChanges === true}
 						<span class="text-gray-400 text-xxs uppercase ml-2"> Unsaved Changes </span>
 					{/if}
 				</h2>
 				<p class="mt-1 text-sm leading-6 text-gray-500">
-					<slot name="description" />
+					{@render description?.()}
 				</p>
 			</div>
-			<div class="flex-grow" />
+			<div class="flex-grow"></div>
 			<div class="sm:mr-3 inline-flex gap-2 relative">
-				<slot name="button" />
+				{@render button?.()}
 				<Submit
 					class="w-full sm:w-auto"
 					theme={{ primary: 'white', done: 'white', fail: 'white' }}
@@ -85,14 +103,14 @@
 					<span class="absolute flex h-3 w-3 -mt-1 -right-1">
 						<span
 							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"
-						/>
-						<span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500" />
+						></span>
+						<span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
 					</span>
 				{/if}
 			</div>
 		</div>
 		<dl class="mt-6 space-y-6 divide-y divide-gray-100 dark:divide-zinc-800 border-t border-gray-200 dark:border-zinc-800 text-sm leading-6">
-			<slot />
+			{@render children?.()}
 		</dl>
 	</div>
 </form>

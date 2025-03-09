@@ -3,7 +3,11 @@
   import { VisSingleContainer, VisChordDiagram } from '@unovis/svelte'
   import { ChordLabelAlignment } from '@unovis/ts'
 
-  export let data: import('./$types').PageData;
+  interface Props {
+    data: import('./$types').PageData;
+  }
+
+  let { data }: Props = $props();
 
   type NodeDatum = {
     id: string;

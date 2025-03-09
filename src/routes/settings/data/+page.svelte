@@ -6,26 +6,30 @@
 	import { timeZonesNames } from '@vvo/tzdb';
   import { intlFormatDistance } from 'date-fns';
 
-	export let data: import('./$types').PageData;
-	export let form: import('./$types').ActionData;
+	interface Props {
+		data: import('./$types').PageData;
+		form: import('./$types').ActionData;
+	}
+
+	let { data = $bindable(), form }: Props = $props();
 
 	// Approach
-	let approachUpdate: () => {};
-	let approachUnsavedChanges = false;
+	let approachList: Settings.List | null = $state(null);
+	let approachUnsavedChanges = $state(false);
 
-	let optionUpdate: () => {};
-	let optionsUnsavedChanges = false;
+	let optionList: Settings.List | null = $state(null);
+	let optionsUnsavedChanges = $state(false);
 	// let timezone = data.settingValues['general.timezone'];
-	let source: string = 'unset';
+	let source: string = $state('unset');
 
 	// Registration
-	let regUpdate: () => {};
-	let regUnsavedChanges = false;
+	let regList: Settings.List | null = $state(null);
+	let regUnsavedChanges = $state(false);
 
 	// Navigation
-	let navUpdate: () => {};
-	let navUnsavedChanges = false;
-	let navSource: string = 'unset';
+	let navList: Settings.List | null = $state(null);
+	let navUnsavedChanges = $state(false);
+	let navSource: string = $state('unset');
 
 	// Utilities
 	beforeNavigate(({ cancel }) => {
@@ -36,52 +40,63 @@
 		}
 	});
 
-	$: lastSync =
-		data.settingValues['data.approaches.lastSync'] === -1
+	let lastSync =
+		$derived(data.settingValues['data.approaches.lastSync'] === -1
 			? 'Never'
-			: intlFormatDistance(new Date(data.settingValues['data.approaches.lastSync'] * 1000), new Date());
-	$: lastSyncTime =
-		data.settingValues['data.approaches.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.approaches.lastSync'] * 1000, data.settings['general.timezone']);
+			: intlFormatDistance(new Date(data.settingValues['data.approaches.lastSync'] * 1000), new Date()));
+	let lastSyncTime =
+		$derived(data.settingValues['data.approaches.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.approaches.lastSync'] * 1000, data.settings['general.timezone']));
 
 
-	$: lastSyncReg =
-		data.settingValues['data.aircraftReg.lastSync'] === -1
+	let lastSyncReg =
+		$derived(data.settingValues['data.aircraftReg.lastSync'] === -1
 			? 'Never'
-			: intlFormatDistance(new Date(data.settingValues['data.aircraftReg.lastSync'] * 1000), new Date());
-	$: lastSyncTimeReg =
-		data.settingValues['data.aircraftReg.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.aircraftReg.lastSync'] * 1000, data.settings['general.timezone']);
+			: intlFormatDistance(new Date(data.settingValues['data.aircraftReg.lastSync'] * 1000), new Date()));
+	let lastSyncTimeReg =
+		$derived(data.settingValues['data.aircraftReg.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.aircraftReg.lastSync'] * 1000, data.settings['general.timezone']));
 
-	$: lastSyncNav =
-		data.settingValues['data.navData.lastSync'] === -1
+	let lastSyncNav =
+		$derived(data.settingValues['data.navData.lastSync'] === -1
 			? 'Never'
-			: intlFormatDistance(new Date(data.settingValues['data.navData.lastSync'] * 1000), new Date());
-	$: lastSyncTimeNav =
-		data.settingValues['data.navData.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.navData.lastSync'] * 1000, data.settings['general.timezone']);
+			: intlFormatDistance(new Date(data.settingValues['data.navData.lastSync'] * 1000), new Date()));
+	let lastSyncTimeNav =
+		$derived(data.settingValues['data.navData.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.navData.lastSync'] * 1000, data.settings['general.timezone']));
+
+
+	let mxMode = $state(data.settingValues['entry.entryMXMode']);
 
 </script>
 
 <!-- Debug -->
-<Settings.List class="" {form} action="?/updateOptions" bind:unsavedChanges={optionsUnsavedChanges} bind:update={optionUpdate} >
-	<span slot="title">Data Entry</span>
-	<span slot="description">Alter how data is entered into Contour.</span>
+<Settings.List bind:this={optionList} class=""  {form} action="?/updateOptions" bind:unsavedChanges={optionsUnsavedChanges} >
+	{#snippet title()}
+		<span >Data Entry</span>
+	{/snippet}
+	{#snippet description()}
+		<span >Alter how data is entered into Contour.</span>
+	{/snippet}
 
-	<Settings.Switch name="entry.entryMXMode" {form} bind:value={data.settingValues['entry.entryMXMode']} title="Enable data entry maintenance mode" update={optionUpdate} hoverTitle={'Whether or not to allow FlightAware data to be deleted from leg and other maintenance features.'} />
+	<Settings.Switch name="entry.entryMXMode" {form} bind:value={mxMode} title="Enable data entry maintenance mode" update={() => optionList?.update()} hoverTitle={'Whether or not to allow FlightAware data to be deleted from leg and other maintenance features.'} />
 
-	{#if data.settingValues['entry.entryMXMode']}
-		<Settings.Switch {form} name="options.clear" title="Clear Options ({data.numFlightOptions} in DB)" value={false} update={optionUpdate}/>
-		<Settings.Switch {form} name="useBlock.migrate" title="Migrate 'UseBlock' to DB" value={false} update={optionUpdate}/>
+	{#if mxMode}
+		<Settings.Switch {form} name="options.clear" title="Clear Options ({data.numFlightOptions} in DB)" value={false} update={() => optionList?.update()}/>
+		<Settings.Switch {form} name="useBlock.migrate" title="Migrate 'UseBlock' to DB" value={false} update={() => optionList?.update()}/>
 	{/if}
 </Settings.List>
 
 
-<Settings.List class="" {form} action="?/updateApproaches" bind:unsavedChanges={approachUnsavedChanges} bind:update={approachUpdate} >
-	<span slot="title">Approach Database</span>
-	<span slot="description">Update the Approach Database source.</span>
+<Settings.List bind:this={approachList} class="" {form} action="?/updateApproaches" bind:unsavedChanges={approachUnsavedChanges} >
+	{#snippet title()}
+		<span >Approach Database</span>
+	{/snippet}
+	{#snippet description()}
+		<span >Update the Approach Database source.</span>
+	{/snippet}
 
 	<!-- <Settings.Switch name="system.debug.switch" {form} title="Enable Debug" update={debugUpdate} bind:value={debugEnabled} hoverTitle={'Whether or not to enable general debugging features and logs'} /> -->
 
 
-	<Settings.Select {form} name="approach.option" title="Update To" update={approachUpdate} bind:value={source}
+	<Settings.Select {form} name="approach.option" title="Update To" update={() => approachList?.update()} bind:value={source}
 		options={data.options}
 	/>
 
@@ -102,11 +117,15 @@
 
 </Settings.List>
 
-<Settings.List class="" {form} action="?/updateRegLookup" bind:unsavedChanges={regUnsavedChanges} bind:update={regUpdate} >
-	<span slot="title">Aircraft Registration Database</span>
-	<span slot="description">Update the Aircraft Registration Database source.</span>
+<Settings.List bind:this={regList} class="" {form} action="?/updateRegLookup" bind:unsavedChanges={regUnsavedChanges} >
+	{#snippet title()}
+		<span >Aircraft Registration Database</span>
+	{/snippet}
+	{#snippet description()}
+		<span >Update the Aircraft Registration Database source.</span>
+	{/snippet}
 
-	<Settings.Switch {form} name="update.switch" title="Update" value={false} update={regUpdate}/>
+	<Settings.Switch {form} name="update.switch" title="Update" value={false} update={() => regList?.update()}/>
 
 	<DataContainer>
 		<DataEntry title={'Aircraft'} data={data.numRegs.toFixed(0)}/>
@@ -121,11 +140,15 @@
 
 </Settings.List>
 
-<Settings.List class="" {form} action="?/updateNavData" bind:unsavedChanges={navUnsavedChanges} bind:update={navUpdate} >
-	<span slot="title">FAA Navigation Database</span>
-	<span slot="description">Update the FAA Navigation Database source.</span>
+<Settings.List bind:this={navList} class="" {form} action="?/updateNavData" bind:unsavedChanges={navUnsavedChanges} >
+	{#snippet title()}
+		<span >FAA Navigation Database</span>
+	{/snippet}
+	{#snippet description()}
+		<span >Update the FAA Navigation Database source.</span>
+	{/snippet}
 
-	<Settings.Select {form} name="nav.option" title="Update To" update={navUpdate} bind:value={navSource}
+	<Settings.Select {form} name="nav.option" title="Update To" update={() => navList?.update()} bind:value={navSource}
 		options={data.navDataOptions}
 	/>
 

@@ -4,24 +4,28 @@
 	import * as Settings from '$lib/components/routeSpecific/settings';
 	import { timeZonesNames } from '@vvo/tzdb';
 
-	export let data: import('./$types').PageData;
-	export let form: import('./$types').ActionData;
+	interface Props {
+		data: import('./$types').PageData;
+		form: import('./$types').ActionData;
+	}
+
+	let { data, form }: Props = $props();
 
 	// AeroAPI
-	let aeroAPIUpdate: () => {};
-	let aeroAPIUnsavedChanges = false;
-	let aeroAPI = data.settingValues['general.aeroAPI'];
+	let aeroAPIList: Settings.List | null = $state(null);
+	let aeroAPIUnsavedChanges = $state(false);
+	let aeroAPI = $state(data.settingValues['general.aeroAPI']);
 
 	// Email
-	let emailUpdate: () => {};
-	let emailUnsavedChanges = false;
-	let name = data.settingValues['general.name'];
-	let email = data.settingValues['general.email'];
+	let emailList: Settings.List | null = $state(null);
+	let emailUnsavedChanges = $state(false);
+	let name = $state(data.settingValues['general.name']);
+	let email = $state(data.settingValues['general.email']);
 
 	// Localization
-	let localizationUpdate: () => {};
-	let localizationUnsavedChanges = false;
-	let timezone = data.settingValues['general.timezone'];
+	let localizationList: Settings.List | null = $state(null);
+	let localizationUnsavedChanges = $state(false);
+	let timezone = $state(data.settingValues['general.timezone']);
 
 	// Utilities
 	beforeNavigate(({ cancel }) => {
@@ -34,11 +38,15 @@
 </script>
 
 <!-- AeroAPI -->
-<Settings.List class="" {form} action="?/updateAeroAPI" bind:unsavedChanges={aeroAPIUnsavedChanges} bind:update={aeroAPIUpdate} >
-	<span slot="title">FlightAware AeroAPI</span>
-	<span slot="description">Configure AeroAPI details.</span>
+<Settings.List bind:this={aeroAPIList} class="" {form} action="?/updateAeroAPI" bind:unsavedChanges={aeroAPIUnsavedChanges} >
+	{#snippet title()}
+		<span >FlightAware AeroAPI</span>
+	{/snippet}
+	{#snippet description()}
+		<span >Configure AeroAPI details.</span>
+	{/snippet}
 
-	<Settings.Password name="general.aeroAPI" {form} title="Aero API Key" update={aeroAPIUpdate} bind:value={aeroAPI} hoverTitle="Aero API Key">
+	<Settings.Password name="general.aeroAPI" {form} title="Aero API Key" update={() => aeroAPIList?.update()} bind:value={aeroAPI} hoverTitle="Aero API Key">
 	<a href="https://www.flightaware.com/aeroapi/portal/overview" target="_blank" title="Click to sign into Plex to generate a Plex Token for Unabridged to use." class="select-none w-full sm:w-auto flex justify-center items-center whitespace-nowrap px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-200 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500">
 		View AeroAPI Settings
 		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ml-1 w-4 h-4">
@@ -47,27 +55,35 @@
 	</a>
 	</Settings.Password>
 
-	<!-- <Settings.Select {form} name="general.aeroAPI" title="Aero API Key" update={aeroAPIUpdate} bind:value={aeroAPI} options={timeZonesNames.concat('UTC')} /> -->
+	<!-- <Settings.Select {form} name="general.aeroAPI" title="Aero API Key" update={() => aeroAPIList?.update()} bind:value={aeroAPI} options={timeZonesNames.concat('UTC')} /> -->
 </Settings.List>
 
 
 <!-- Personalization -->
-<Settings.List class="" {form} action="?/updateEmail" bind:unsavedChanges={emailUnsavedChanges} bind:update={emailUpdate} >
-	<span slot="title">Personalization</span>
-	<span slot="description">Configure a name and email address for Contour to use.</span>
+<Settings.List bind:this={emailList} class="" {form} action="?/updateEmail" bind:unsavedChanges={emailUnsavedChanges} >
+	{#snippet title()}
+		<span >Personalization</span>
+	{/snippet}
+	{#snippet description()}
+		<span >Configure a name and email address for Contour to use.</span>
+	{/snippet}
 
-	<Settings.Input {form} name="general.name" title="Name" update={emailUpdate} bind:value={name} />
-	<Settings.Input {form} name="general.email" title="Email" update={emailUpdate} bind:value={email} />
+	<Settings.Input {form} name="general.name" title="Name" update={() => emailList?.update()} bind:value={name} />
+	<Settings.Input {form} name="general.email" title="Email" update={() => emailList?.update()} bind:value={email} />
 
 </Settings.List>
 
 
 <!-- Localization -->
-<Settings.List class="" {form} action="?/updateLocalization" bind:unsavedChanges={localizationUnsavedChanges} bind:update={localizationUpdate} >
-	<span slot="title">Localization</span>
-	<span slot="description">Configure localization info for Contour.</span>
+<Settings.List bind:this={localizationList} class="" {form} action="?/updateLocalization" bind:unsavedChanges={localizationUnsavedChanges} >
+	{#snippet title()}
+		<span >Localization</span>
+	{/snippet}
+	{#snippet description()}
+		<span >Configure localization info for Contour.</span>
+	{/snippet}
 
-	<Settings.Select {form} name="general.timezone" title="Local Timezone" update={localizationUpdate} bind:value={timezone} options={timeZonesNames.concat('UTC')} />
+	<Settings.Select {form} name="general.timezone" title="Local Timezone" update={() => localizationList?.update()} bind:value={timezone} options={timeZonesNames.concat('UTC')} />
 </Settings.List>
 
 <div>

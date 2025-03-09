@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {Plane, Plus, Table2, Timer, Route, Gauge, TowerControl, BedDouble } from "lucide-svelte";
-	import { Button } from "$lib/components/ui/button";
+	import { Button, buttonVariants } from "$lib/components/ui/button";
 	import * as Card from "$lib/components/ui/card";
 	import * as Tabs from "$lib/components/ui/tabs";
   import * as Map from '$lib/components/map';
@@ -11,16 +11,20 @@
   import { v4 as uuidv4 } from 'uuid';
   import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
 	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
+  import { RangeCalendar } from "$lib/components/ui/range-calendar";
   import { CalendarDate } from "@internationalized/date";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { afterNavigate, goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   import * as Popover from "$lib/components/ui/popover";
-  import { RangeCalendar } from "$lib/components/ui/range-calendar";
   import AircraftHoverCard from "$lib/components/decorations/AircraftHoverCard.svelte";
 
-  export let data: import('./$types').PageData;
+  interface Props {
+    data: import('./$types').PageData;
+  }
+
+  let { data = $bindable() }: Props = $props();
 
   // Calculate some details about the last tour
   const lastTourStart = (data.lastTour?.startTime_utc !== undefined ? new Date((data.lastTour.startTime_utc - 86400) * 1000) : new Date());
@@ -28,10 +32,11 @@
   const lastTourEnd = (data.lastTour?.endTime_utc !== undefined && data.lastTour?.endTime_utc !== null ? new Date((data.lastTour.endTime_utc + 86400) * 1000) : new Date((new Date()).getTime() + 86400 * 1000));
   const lastTourEndStr = lastTourEnd === null ? null : lastTourEnd.getFullYear() + '-' + pad(lastTourEnd.getMonth() + 1, 2) + '-' + pad(lastTourEnd.getDate() + 1, 2);
 
-  let dateRange: { start: CalendarDate | undefined, end: CalendarDate | undefined } | undefined = undefined;
+  let dateRange: { start: CalendarDate | undefined, end: CalendarDate | undefined } | undefined = $state(undefined);
+  let dateRangePlaceholder: CalendarDate | undefined = $state(undefined);
 
-  let currentPreset: string | null = 'lastTour'
-  let presetOpen = false;
+  let currentPreset: string | null = $state('lastTour')
+  let presetOpen = $state(false);
 
   let skipReact = false;
 
@@ -55,29 +60,29 @@
     } 
   }
 
-  $: presetAsString = presetToString(currentPreset);
+  let presetAsString = $derived(presetToString(currentPreset));
 
   afterNavigate(() => {
 
     // Get the start and end params
-    let start: CalendarDate | null = null; // = $page.url.searchParams.get('start') === null ? lastTourStart : new Date(Date.UTC(($page.url.searchParams.get('start') as string).substring));
-    let end: CalendarDate | null = null; // = $page.url.searchParams.get('end') === null ? lastTourEnd : new Date(Date.UTC(($page.url.searchParams.get('end') as string).substring));
+    let start: CalendarDate | null = null; // = page.url.searchParams.get('start') === null ? lastTourStart : new Date(Date.UTC((page.url.searchParams.get('start') as string).substring));
+    let end: CalendarDate | null = null; // = page.url.searchParams.get('end') === null ? lastTourEnd : new Date(Date.UTC((page.url.searchParams.get('end') as string).substring));
 
-    if ($page.url.searchParams.get('start') === null) {
+    if (page.url.searchParams.get('start') === null) {
       if (lastTourStart !== null) start = new CalendarDate(lastTourStart.getFullYear(), lastTourStart.getMonth() + 1, lastTourStart.getDate());
     } else {
-      const s = $page.url.searchParams.get('start') as string;  // Eg: 2024-04-10
+      const s = page.url.searchParams.get('start') as string;  // Eg: 2024-04-10
       start = new CalendarDate(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7)), parseInt(s.substring(8, 10)));
     }
 
-    if ($page.url.searchParams.get('end') === null) {
+    if (page.url.searchParams.get('end') === null) {
       if (lastTourEnd !== null) end = new CalendarDate(lastTourEnd.getFullYear(), lastTourEnd.getMonth() + 1, lastTourEnd.getDate());
     } else {
-      const s = $page.url.searchParams.get('end') as string;  // Eg: 2024-04-10
+      const s = page.url.searchParams.get('end') as string;  // Eg: 2024-04-10
       end = new CalendarDate(parseInt(s.substring(0, 4)), parseInt(s.substring(5, 7)), parseInt(s.substring(8, 10)));
     }
 
-    if ($page.url.searchParams.get('end') !== null && $page.url.searchParams.get('start') !== null) currentPreset = $page.url.searchParams.get('preset');
+    if (page.url.searchParams.get('end') !== null && page.url.searchParams.get('start') !== null) currentPreset = page.url.searchParams.get('preset');
     else currentPreset = 'lastTour';
 
 
@@ -89,6 +94,7 @@
     if (start !== null && end !== null) {
       skipReact = true;
       dateRange = { start, end };
+      dateRangePlaceholder = start;
     }
 
     setTimeout(resetMap, 1);
@@ -99,30 +105,30 @@
   const updateRange = () => {
     // Only goto if in the browser, not skipped, and the data range is valid
     if (browser && !skipReact && dateRange !== undefined && dateRange.start !== undefined && dateRange.end !== undefined && !(dateRange.start.toString() === lastTourStartStr && dateRange.end.toString() === lastTourEndStr)) {
-      $page.url.searchParams.set('start', dateRange.start.toString());
-      $page.url.searchParams.set('end', dateRange.end.toString());
-      $page.url.searchParams.delete('preset');
-      console.log('range', $page.url.pathname + '?' + $page.url.searchParams.toString());
-      goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: false, noScroll: false, invalidateAll: true  });
+      page.url.searchParams.set('start', dateRange.start.toString());
+      page.url.searchParams.set('end', dateRange.end.toString());
+      page.url.searchParams.delete('preset');
+      console.log('range', page.url.pathname + '?' + page.url.searchParams.toString());
+      goto(page.url.pathname + '?' + page.url.searchParams.toString(), { replaceState: false, noScroll: false, invalidateAll: true  });
     } else  if(dateRange !== undefined && dateRange.start !== undefined && dateRange.end !== undefined) {
       console.log(dateRange.start.toString(), dateRange.end.toString())
     }
     // Reset skip if it was active
     if (skipReact) skipReact = false;
   }
-  $: {
+  $effect(() => {
     dateRange;
     // console.log('new Range', dateRange);
     updateRange();
-  }
+  });
 
   const navigateNoRange = () => {
     skipReact = true;
-    $page.url.searchParams.delete('start');
-    $page.url.searchParams.delete('end');
-    $page.url.searchParams.delete('preset');
+    page.url.searchParams.delete('start');
+    page.url.searchParams.delete('end');
+    page.url.searchParams.delete('preset');
     presetOpen = false;
-    goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: false, noScroll: false, invalidateAll: true });
+    goto(page.url.pathname + '?' + page.url.searchParams.toString(), { replaceState: false, noScroll: false, invalidateAll: true });
   }
 
  const setRange = (range: 'currentMonth' | 'lastMonth' | 'ytd' | 'lastYear' | '12months') => {
@@ -164,11 +170,11 @@
     }
 
     skipReact = true;
-    $page.url.searchParams.set('start', startStr);
-    $page.url.searchParams.set('end', endStr);
-    $page.url.searchParams.set('preset', range);
+    page.url.searchParams.set('start', startStr);
+    page.url.searchParams.set('end', endStr);
+    page.url.searchParams.set('preset', range);
     presetOpen = false;
-    goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: false, noScroll: false, invalidateAll: true });
+    goto(page.url.pathname + '?' + page.url.searchParams.toString(), { replaceState: false, noScroll: false, invalidateAll: true });
   }
 
   type DayStat = { id: number | null, index: number, dateString: string, onTour: boolean, startTime: number, endTime: number, flight: number | null, sim: number | null, extendedDay: boolean, distance: number | null, duty: number | null };
@@ -205,7 +211,7 @@
 
   const crosshairColor = (d: DayStat, i: number) => [color()(),color({ secondary: true })()][i]
 
-  let tooltipContainer: HTMLElement | undefined = undefined;
+  let tooltipContainer: HTMLElement | undefined = $state(undefined);
   if (browser) tooltipContainer = document.body;
 
 
@@ -217,24 +223,24 @@
   //   },
   // }
 
-  let mapKey: string;
+  let mapKey: string = $state();
   const resetMap = () => {
     mapKey = uuidv4();
   }
 
-  $: {
+  $effect(() => {
     data;
     resetMap();
-  }
+  });
 
-  let map: Map.Bulk;
+  let map: Map.Bulk = $state();
 
   const NUM_AC_VIS = 5;
 
-  $: flownAircraftKeys = data.acList.slice(-NUM_AC_VIS);
-  $: extraAircraftKeys = data.acList.slice(0, -NUM_AC_VIS);
+  let flownAircraftKeys = $derived(data.acList.slice(-NUM_AC_VIS));
+  let extraAircraftKeys = $derived(data.acList.slice(0, -NUM_AC_VIS));
 
-  $: moreAircraft = extraAircraftKeys.length > 0;
+  let moreAircraft = $derived(extraAircraftKeys.length > 0);
 
 </script>
 
@@ -248,11 +254,13 @@
         <div class="relative flex flex-col md:flex-row items-start sm:items-center gap-4">
           <div class="hidden md:inline-flex gap-1 items-center h-12">
             {#if moreAircraft}
-            <HoverCard.Root>
+              <HoverCard.Root>
                 <HoverCard.Trigger class="-ml-4">
-                  <div class="w-12 h-12 bg-primary border-4 border-gray-100 dark:border-zinc-900 rounded-full flex justify-center items-center text-background">
-                    <Plus class="h-4 w-4" />
-                  </div>
+                  {#snippet child()}
+                    <div class="w-12 h-12 bg-primary border-4 border-gray-100 dark:border-zinc-900 rounded-full flex justify-center items-center text-background">
+                      <Plus class="h-4 w-4" />
+                    </div>
+                  {/snippet}
                 </HoverCard.Trigger>
                 <HoverCard.Content class="w-auto p-0 inline-flex bg-transparent border-0 -mt-0 pl-2">
                   {#each extraAircraftKeys as ac (ac.id)}
@@ -267,44 +275,44 @@
           </div>
           <DateRangePicker bind:value={dateRange} highlights={data.dutyDays.highlightDates} class="w-full sm:w-[300px]" />
           <div class="w-full sm:w-auto sm:absolute -bottom-14 right-0 ">
-            <Popover.Root portal={null} bind:open={presetOpen}>
-              <Popover.Trigger asChild let:builder>
-                <div class="flex flex-row items-center gap-2">
-                  <div class="hidden sm:block whitespace-nowrap">
-                    {pluralize('duty day', data.dutyDays.num, true)} <span class="text-sm text-muted-foreground">selected</span> 
+            <div class="flex flex-row items-center gap-2">
+              <div class="hidden sm:block whitespace-nowrap">
+                {pluralize('duty day', data.dutyDays.num, true)} <span class="text-sm text-muted-foreground">selected</span> 
+              </div>
+              <Popover.Root bind:open={presetOpen}>
+                <Popover.Trigger class={buttonVariants({ variant: currentPreset === null ? 'outline' : 'default' })}>   
+                  {presetAsString}
+                </Popover.Trigger>
+                <Popover.Content class="w-64 mt-2 animate-in animate-out" collisionPadding={0} align="end">
+                  <div class="grid gap-4">
+                    <div class="space-y-2">
+                      <h4 class="font-medium leading-none">Duration Presets</h4>
+                      <p class="text-sm text-muted-foreground">
+                        Select some common date ranges
+                      </p>
+                    </div>
+                    <Button variant={currentPreset === 'lastTour' ? 'default' : 'outline'}  onclick={navigateNoRange} size="sm">
+                      Last Tour
+                    </Button>
+                    <Button variant={currentPreset === 'currentMonth' ? 'default' : 'outline'} onclick={() => setRange('currentMonth')} size="sm">
+                      Current Month
+                    </Button>
+                    <Button variant={currentPreset === 'lastMonth' ? 'default' : 'outline'} onclick={() => setRange('lastMonth')} size="sm">
+                      Last Month
+                    </Button>
+                    <Button variant={currentPreset === 'ytd' ? 'default' : 'outline'} onclick={() => setRange('ytd')} size="sm">
+                      Year to Date
+                    </Button>
+                    <Button variant={currentPreset === 'lastYear' ? 'default' : 'outline'} onclick={() => setRange('lastYear')} size="sm">
+                      Last Year
+                    </Button>
+                    <Button variant={currentPreset === '12months' ? 'default' : 'outline'} onclick={() => setRange('12months')} size="sm">
+                      Last 12 Months
+                    </Button>
                   </div>
-                  <Button builders={[builder]} variant={currentPreset === null ? 'outline' : 'default'} class="w-full">{presetAsString}</Button>
-                </div>
-              </Popover.Trigger>
-              <Popover.Content class="w-64 mt-2" collisionPadding={0} align="start">
-                <div class="grid gap-4">
-                  <div class="space-y-2">
-                    <h4 class="font-medium leading-none">Duration Presets</h4>
-                    <p class="text-sm text-muted-foreground">
-                      Select some common date ranges
-                    </p>
-                  </div>
-                  <Button variant={currentPreset === 'lastTour' ? 'default' : 'outline'}  on:click={navigateNoRange} size="sm">
-                    Last Tour
-                  </Button>
-                  <Button variant={currentPreset === 'currentMonth' ? 'default' : 'outline'} on:click={() => setRange('currentMonth')} size="sm">
-                    Current Month
-                  </Button>
-                  <Button variant={currentPreset === 'lastMonth' ? 'default' : 'outline'} on:click={() => setRange('lastMonth')} size="sm">
-                    Last Month
-                  </Button>
-                  <Button variant={currentPreset === 'ytd' ? 'default' : 'outline'} on:click={() => setRange('ytd')} size="sm">
-                    Year to Date
-                  </Button>
-                  <Button variant={currentPreset === 'lastYear' ? 'default' : 'outline'} on:click={() => setRange('lastYear')} size="sm">
-                    Last Year
-                  </Button>
-                  <Button variant={currentPreset === '12months' ? 'default' : 'outline'} on:click={() => setRange('12months')} size="sm">
-                    Last 12 Months
-                  </Button>
-                </div>
-              </Popover.Content>
-            </Popover.Root>
+                </Popover.Content>
+              </Popover.Root>
+            </div>
           </div>
         </div>
       </div>
@@ -326,9 +334,9 @@
               <Card.Content class="p-0 border-0 ring-0">
                 <RangeCalendar
                   bind:value={dateRange}
-                  bind:highlights={data.dutyDays.highlightDates}
+                  highlights={data.dutyDays.highlightDates}
                   numberOfMonths={1}
-                  placeholder={dateRange?.start}
+                  placeholder={dateRangePlaceholder}
                 />
               </Card.Content>
             </Card.Root>

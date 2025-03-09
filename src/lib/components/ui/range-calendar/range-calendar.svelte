@@ -1,66 +1,62 @@
 <script lang="ts">
-	import { RangeCalendar as RangeCalendarPrimitive } from "bits-ui";
-	import * as RangeCalendar from ".";
-	import { cn } from "$lib/utils";
+	import { RangeCalendar as RangeCalendarPrimitive, type WithoutChildrenOrChild } from "bits-ui";
+	import * as RangeCalendar from "./index.js";
+	import { cn } from "$lib/utils.js";
+    import type { DateValue } from "@internationalized/date";
 
-	type Highlights = string[];
 
-	type $$Props = RangeCalendarPrimitive.Props & { highlights: Highlights };
-	type $$Events = RangeCalendarPrimitive.Events;
-
-	export let value: $$Props["value"] = undefined;
-	export let placeholder: $$Props["placeholder"] = undefined;
-	export let weekdayFormat: $$Props["weekdayFormat"] = "short";
-	export let startValue: $$Props["startValue"] = undefined;
-	export let highlights: Highlights = [];
-
-	export let numberOfMonths: $$Props["numberOfMonths"] = 1;
-
-	let className: $$Props["class"] = undefined;
-	export { className as class };
+	let {
+		ref = $bindable(null),
+		value = $bindable(),
+		placeholder = $bindable(),
+		weekdayFormat = "short",
+		class: className,
+		highlights = $bindable(),
+		startValue = $bindable(),
+		...restProps
+	}: WithoutChildrenOrChild<RangeCalendarPrimitive.RootProps> & { highlights: string[], startValue?: DateValue | undefined} = $props();
 </script>
 
 <RangeCalendarPrimitive.Root
-	on:keydown
+	bind:ref
 	bind:value
 	bind:placeholder
-	bind:startValue
+	onStartValueChange={(sv) => startValue = sv }
 	{weekdayFormat}
-	{numberOfMonths}
 	class={cn("p-3", className)}
-	{...$$restProps}
-	let:months
-	let:weekdays
+	{...restProps}
 >
-	<RangeCalendar.Header>
-		<RangeCalendar.PrevButton />
-		<RangeCalendar.Heading />
-		<RangeCalendar.NextButton />
-	</RangeCalendar.Header>
-	<RangeCalendar.Months class="justify-center" numberOfMonths={numberOfMonths ?? 1}>
-		{#each months as month}
-			<RangeCalendar.Grid>
-				<RangeCalendar.GridHead>
-					<RangeCalendar.GridRow class="flex">
-						{#each weekdays as weekday}
-							<RangeCalendar.HeadCell>
-								{weekday.slice(0, 2)}
-							</RangeCalendar.HeadCell>
-						{/each}
-					</RangeCalendar.GridRow>
-				</RangeCalendar.GridHead>
-				<RangeCalendar.GridBody>
-					{#each month.weeks as weekDates}
-						<RangeCalendar.GridRow class="mt-2 w-full">
-							{#each weekDates as date}
-								<RangeCalendar.Cell {date}>
-									<RangeCalendar.Day {date} month={month.value} highlight={highlights.includes(date.toString())} />
-								</RangeCalendar.Cell>
+	{#snippet children({ months, weekdays })}
+		<RangeCalendar.Header>
+			<RangeCalendar.PrevButton />
+			<RangeCalendar.Heading />
+			<RangeCalendar.NextButton />
+		</RangeCalendar.Header>
+		<RangeCalendar.Months>
+			{#each months as month}
+				<RangeCalendar.Grid>
+					<RangeCalendar.GridHead>
+						<RangeCalendar.GridRow class="flex">
+							{#each weekdays as weekday}
+								<RangeCalendar.HeadCell>
+									{weekday.slice(0, 2)}
+								</RangeCalendar.HeadCell>
 							{/each}
 						</RangeCalendar.GridRow>
-					{/each}
-				</RangeCalendar.GridBody>
-			</RangeCalendar.Grid>
-		{/each}
-	</RangeCalendar.Months>
+					</RangeCalendar.GridHead>
+					<RangeCalendar.GridBody>
+						{#each month.weeks as weekDates}
+							<RangeCalendar.GridRow class="mt-2 w-full">
+								{#each weekDates as date}
+									<RangeCalendar.Cell {date} month={month.value}>
+										<RangeCalendar.Day day={date.day} highlight={highlights.includes(date.toString())} />
+									</RangeCalendar.Cell>
+								{/each}
+							</RangeCalendar.GridRow>
+						{/each}
+					</RangeCalendar.GridBody>
+				</RangeCalendar.Grid>
+			{/each}
+		</RangeCalendar.Months>
+	{/snippet}
 </RangeCalendarPrimitive.Root>

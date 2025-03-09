@@ -18,6 +18,7 @@
 	export let failed: boolean = false;
 	export let progress: number = 0;
 	export let hoverTitle = '';
+	export let remoteForm: string | undefined = undefined;
 
 	export let disabled: boolean = false;
 	export let actionText = 'Save';
@@ -162,7 +163,7 @@
 	// stroke-dasharray="{circumference}" stroke-dashoffset="{offset}"
 </script>
 
-<button title={submitting && progress != 0 ? `${Math.round(progress * 100)}%` : hoverTitle} bind:this={button} {disabled} type="submit" class="{clazz} touch-manipulation select-none transition-colors flex justify-center px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed {done ? '' : themeClassesStatic} {themeClasses}">
+<button form={remoteForm} title={submitting && progress != 0 ? `${Math.round(progress * 100)}%` : hoverTitle} bind:this={button} {disabled} type="submit" class="{clazz} touch-manipulation select-none transition-colors flex justify-center px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed {done ? '' : themeClassesStatic} {themeClasses}">
 	<span class="flex-none">{done ? failed ? failedText : doneText : submitting ? actionTextInProgress : actionText}</span>
 	{#if submitting || done}
 		<div transition:reveal role="status" class="relative flex-none ml-2 w-5 h-5 align-middle overflow-hidden">

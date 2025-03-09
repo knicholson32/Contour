@@ -2,7 +2,6 @@
   import { CalendarIcon } from 'lucide-svelte';
   import type { DateRange } from "bits-ui";
   import {
-    CalendarDate,
     DateFormatter,
     getLocalTimeZone,
     type DateValue
@@ -16,24 +15,25 @@
     dateStyle: "medium"
   });
  
-  export let value: DateRange | undefined = undefined;
-  export let highlights: string[] = [];
 
-  let className = '';
-  export { className as class };
+  interface Props {
+    value?: DateRange | undefined;
+    highlights?: string[];
+    class?: string;
+  }
+
+  let { value = $bindable(undefined), highlights = $bindable([]), class: className = '' }: Props = $props();
+
+  let placeholder = $state(value?.start);
  
-  let startValue: DateValue | undefined = undefined;
+  let button: HTMLButtonElement | null = $state(null);
+
+  let startValue: DateValue | undefined = $state(undefined);
 </script>
 
-<Popover.Root openFocus>
-  <Popover.Trigger asChild let:builder>
-    <Button
-      variant="outline"
-      class={cn(
-        "w-[300px] justify-start text-left font-normal",
-        !value && "text-muted-foreground",
-        className
-      )} builders={[builder]}>
+<Popover.Root>
+  <Popover.Trigger>
+    <Button bind:ref={button} variant="outline" visual={true} class={cn("w-[300px] justify-start text-left font-normal", !value && "text-muted-foreground", className)}>
       <CalendarIcon class="mr-2 h-4 w-4" />
       {#if value && value.start}
         {#if value.end}
@@ -50,14 +50,14 @@
       {/if}
     </Button>
   </Popover.Trigger>
-  <Popover.Content class="w-auto p-0" align="start">
+  <Popover.Content class="w-auto p-0" align="end">
     <RangeCalendar
       bind:value
       bind:startValue
       bind:highlights
-      initialFocus
       numberOfMonths={2}
-      placeholder={value?.start}
+      placeholder={placeholder}
     />
+    <!-- initialFocus -->
   </Popover.Content>
 </Popover.Root>
