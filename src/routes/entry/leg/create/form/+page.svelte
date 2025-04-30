@@ -12,7 +12,7 @@
 
   import { dateToDateStringForm, getInlineDateUTC, timeStrAndTimeZoneToUTC, validateURL } from '$lib/helpers';
   import { Title } from '$lib/components/menuForm';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { goto } from '$app/navigation';
   import type { API } from '$lib/types';
   export let data: import('./$types').PageData;
@@ -103,9 +103,9 @@
 
   onMount(() => {
     mounted = true;
-    if ($page.url.searchParams.get('clearChanges') !== null) {
+    if (page.url.searchParams.get('clearChanges') !== null) {
       formManager.clearUID(true);
-      const u = new URLSearchParams($page.url.search);
+      const u = new URLSearchParams(page.url.search);
       u.delete('clearChanges');
       setTimeout(() => {
         goto(`/entry/leg/create/form?${u.toString()}`, { replaceState: true, invalidateAll: true });
@@ -237,7 +237,7 @@
       </Section>
 
       <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
-        {#if data.dayId !== null && data.dayId !== undefined}
+        {#if data.dayId !== null && data.dayId !== undefined && data.selection !== undefined}
           <a href={data.changeSourceURL} class="flex-grow w-full text-center md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-yellow-500 bg-yellow-400 text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Change Source</a>
         {/if}
         {#if $unsavedChanges}

@@ -1,24 +1,28 @@
 <script lang="ts">
   import * as Map from '$lib/components/map';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import * as Card from "$lib/components/ui/card";
-  import { afterNavigate, beforeNavigate, goto} from '$app/navigation';
+  import { afterNavigate, beforeNavigate} from '$app/navigation';
   import type * as Types from '@prisma/client';
-  import { API, DB, type GXTrack, type KML } from '$lib/types';
-  import { dateToDateStringForm, dateToDateStringFormMonthDayYear, dateToDateStringFormSimple, dateToTimeStringZulu, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
+  import { DB } from '$lib/types';
+  import { pad } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
-  import { AlertCircle, Briefcase, CalendarDays, ChevronRight, Dot, FileIcon, Gauge, Link, Menu, Minimize, Minimize2, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
-  import { VisXYContainer, VisLine, VisScatter, VisAxis, VisCrosshair, VisTooltip, VisArea, VisBulletLegend } from "@unovis/svelte";
-	import { color, scatterPointColors, scatterPointStrokeColors } from "$lib/components/ui/helpers";
+  import { Minimize, Route, Table2 } from 'lucide-svelte';
+  import { VisXYContainer, VisLine, VisAxis, VisCrosshair, VisTooltip, VisBulletLegend } from "@unovis/svelte";
+	import { color } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
   import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
   import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
   import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
   import LegEntry from '$lib/components/routeSpecific/leg/LegEntry.svelte';
 
-  export let form: import('./$types').ActionData;
-  export let data: import('./$types').PageData;
+  interface Props {
+    form: import('./$types').ActionData;
+    data: import('./$types').PageData;
+  }
+
+  let { form: formData, data }: Props = $props();
 
 
   let mapKey = uuidv4();
@@ -27,20 +31,20 @@
     // latLong = null;
   }
 
-  $: {
-    form;
+  $effect(() => {
+    formData;
     data;
     resetMap();
-  }
+  });
 
-  let menuElements: { [key: string]: HTMLAnchorElement } = {};
+  let menuElements: { [key: string]: HTMLAnchorElement } = $state({});
 
   beforeNavigate(() => {
     menuElements = {};
   });
 
 
-  let scrollToDiv: HTMLAnchorElement | null = null;
+  let scrollToDiv: HTMLAnchorElement | null = $state(null);
 
   afterNavigate(() => {
     if (data.leg === null) scrollToDiv = null;
@@ -75,7 +79,10 @@
       });
     }
   }
-  $: scrollTo(scrollToDiv);
+
+  $effect(() => {
+    scrollTo(scrollToDiv);
+  });
 
 
   const tickFormat = (timestamp: number) => {
@@ -96,39 +103,44 @@
   }
   const crosshairColor = (d: Types.Position, i: number) => [color()(),color({ secondary: true })()][i]
 
-  let tooltip: HTMLElement;
-  let position: Types.Position;
-  let latLong: [number, number] | null = null;
+  let tooltip: HTMLElement | undefined = $state();
+  let position: Types.Position | undefined = $state();
+  let latLong: [number, number] | null = $state(null);
   const template = (d: Types.Position) => {
     position = d;
     latLong = [d.latitude, d.longitude];
     return tooltip;
   }
 
-  let tooltipContainer: HTMLElement | undefined = undefined;
+  let tooltipContainer: HTMLElement | undefined = $state(undefined);
   if (browser) tooltipContainer = document.body;
 
-  let tourDayInfo = '';
+  let tourDayInfo = $state('');
   const updateTourDayInfo = (params: {dayId: number | null, tourId: number | null}) => {
     // $: tourDayInfo = data.searchParams.dayId === null ;
     if (params.dayId === null && params.tourId === null) tourDayInfo = '';
     else if (params.dayId !== null && params.tourId !== null) tourDayInfo = `day=${params.dayId}&tour=${params.tourId}`;
     else if (params.dayId !== null) tourDayInfo = `day=${params.dayId}`;
     else tourDayInfo = `tour=${params.tourId}`;
-    const search = $page.url.searchParams.get('search');
+    const search = page.url.searchParams.get('search');
     if (search !== null && search !== '') {
       if (tourDayInfo === '') tourDayInfo = 'search=' + search;
       else tourDayInfo = tourDayInfo + '&search=' + search;
     }
   }
-  $: updateTourDayInfo(data.searchParams);
 
-  let center = (animate?: boolean) => {};
+  $effect(() => {
+    updateTourDayInfo(data.searchParams);
+  });
 
-  let innerWidth: number;
-  let paddingTopLeft: [number, number] = [40, 40];
-  let paddingBottomRight: [number, number] = [40, 40];
-  $: {
+  let center = $state((animate?: boolean) => {});
+
+  let innerWidth: number = $state(0);
+  let paddingTopLeft: [number, number] = $state([40, 40]);
+  let paddingBottomRight: [number, number] = $state([40, 40]);
+
+
+  $effect(() => {
     if (innerWidth < 768) {
       paddingTopLeft = [40, 40];
       paddingBottomRight = [40, 40];
@@ -137,7 +149,7 @@
       paddingBottomRight = [50, 225];
     }
     center();
-  }
+  });
 
 </script>
 
@@ -156,7 +168,7 @@
           <a title="Exit full screen" href="/entry/leg/{data.leg.id}?active=form&{tourDayInfo}" class="absolute group top-2 right-2 z-50 w-5 h-5 inline-flex items-center justify-center">
             <Minimize class="w-5 h-5 dark:text-white group-hover:w-4 group-hover:h-4 transition-all" />
           </a>
-          <button on:click={() => { center(true); }} title="Center on route" type="button" class="absolute group top-9 right-2 z-50 w-5 h-5 inline-flex items-center justify-center">
+          <button onclick={() => { center(true); }} title="Center on route" type="button" class="absolute group top-9 right-2 z-50 w-5 h-5 inline-flex items-center justify-center">
             <Route class="w-5 h-5 dark:text-white group-hover:w-4 group-hover:h-4 transition-all" />
           </button>
         </Map.Fullscreen>
@@ -167,7 +179,7 @@
           <div class="overflow-y-scroll overflow-x-hidden -mr-[1px] w-[240px]" style="scrollbar-width:none">
             <div class="-mt-[2px]">
               {#each data.legs as group,i (group.text)}
-                <MenuSection title="{group.text}">
+                <MenuSection title={group.text}>
                   {#each group.entries as leg, i (leg.id)}
                     <MenuElement bind:element={menuElements[leg.id]} href="/entry/leg/{leg.id}/fullscreen?{tourDayInfo}" selected={leg.id === data.params.id}>
                       <LegEntry leg={leg} unsaved={false} />
@@ -185,7 +197,7 @@
             <Table2 class="h-4 w-4 text-muted-foreground" />
           </Card.Header>
           <Card.Content class="p-4 pt-0">
-            <div on:mouseleave={() => latLong=[0, 0]} role="presentation">
+            <div onmouseleave={() => latLong=[0, 0]} role="presentation">
               <VisXYContainer class="" data={data.leg.positions} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
                 <VisAxis gridLine={false} type="x" tickValues={data.tickValues} minMaxTicksOnly={false} {tickFormat} />
                 <VisCrosshair {template} color={crosshairColor} />

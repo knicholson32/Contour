@@ -166,6 +166,6 @@
 </style>
 
 <div class="absolute top-0 bottom-0 right-0 left-0 bg-[#FBF8F4] dark:bg-zinc-950">
-  <div bind:this={element} style="height:100%;width:100%;position:relative;" {...$$restProps} />
+  <div bind:this={element} style="height:100%;width:100%;position:relative;" {...$$restProps}></div>
   <slot />
 </div>

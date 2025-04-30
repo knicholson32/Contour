@@ -2,27 +2,38 @@
   import icons from '$lib/components/icons';
 	import Frame from '$lib/components/routeSpecific/settings/Frame.svelte';
   import type { API } from '$lib/types';
-  import { onMount } from 'svelte';
-  
-  export let value: API.Types.Airport | null = null;
-  export let tz: string | null = null;
-  export let airports: API.Types.Airport[];
 
 
-	export let name: string;
-	export let title: string;
-	export let hoverTitle: string = '';
-	export let disabled: boolean = false;
-	export let badge: boolean | null = null;
+  interface Props {
+    value?: API.Types.Airport | null;
+    tz?: string | null;
+    airports: API.Types.Airport[];
+    name: string;
+    title: string;
+    hoverTitle?: string;
+    disabled?: boolean;
+    badge?: boolean | null;
+  }
+
+  let {
+    value = $bindable(null),
+    tz = $bindable(null),
+    airports = $bindable(),
+    name,
+    title,
+    hoverTitle = '',
+    disabled = false,
+    badge = null
+  }: Props = $props();
 
 
   // Variables to hold various pieces of info
-  let hiddenValue = '';
-  let warningMessage = '';
+  let hiddenValue = $state('');
+  let warningMessage = $state('');
 
 
   // The selection input element
-  let select: HTMLInputElement;
+  let select: HTMLInputElement | null = $state(null);
 
   /**
    * This function assigns the hidden input element so this component works in a form
@@ -50,6 +61,7 @@
    * This function runs every time the input is changed
    */
 	let update = async () => {
+    if (select === null) return;
     // Get the value input by the user
     const v = select.value.toLocaleUpperCase().trim();
     // Assign it back so the airport is capital and trimmed
@@ -93,39 +105,40 @@
 
 <input type="hidden" name={name} bind:value={hiddenValue} />
 
+<!-- TODO: This had to be removed with Svelte5 because nested forms are not allowed. Check that this works as intended. -->
 <!-- Utilize a form wrapper with no submit to allow the enter key to trigger an airport search, but not submit the form -->
-<form on:submit|preventDefault={() => {}} class="">
-  <Frame {title} {hoverTitle} {badge} error={warningMessage !== '' ? warningMessage : null}>
-      <button type="button" title="{value !== null ? `${value.id} - ${value.name} (${value.timezone})` : ''}" on:click={() => select.focus()} class="-my-2 px-2 h-10 gap-2 flex-grow xs:flex-grow-0 max-w-full inline-flex items-center rounded-md shadow-sm ring-1 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500 ring-gray-200' : 'ring-gray-300'} focus-within:ring-2 focus-within:ring-indigo-600 sm:max-w-md">
-        <input bind:this={select} disabled={disabled} maxlength="4" on:change={update} type="text" style="text-transform:uppercase" value={value?.id ?? ''} placeholder="----" name="airport-visible" list="airport"
-          class="px-0 text-sm font-mono text-left flex-shrink border-0 w-16 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
-        <datalist id="airport">
-          {#each airports as airport (airport.id)}
-            <option selected={airport.id.toLocaleUpperCase() === value?.id.toLocaleUpperCase()} value="{airport.id.toLocaleUpperCase()}">{airport.name} - ({airport.timezone})</option>
-          {/each}
-        </datalist>
-        <div class="flex-grow xs:flex-grow-0"></div>
-        {#if value !== null}
-          <div class="flex flex-col flex-grow items-end overflow-hidden">
-            <span class="text-xs text-gray-400 whitespace-nowrap inline-flex items-center gap-1">
-              {value.name}
-              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
-                {@html icons.globe}
-              </svg>
-            </span>
-            <span class="text-xs text-gray-400 whitespace-nowrap inline-flex items-center gap-1">
-              {value.timezone}
-              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
-                {@html icons.clock}
-              </svg>
-            </span>
-          </div>
-        {:else}
-          <span class="text-xs text-gray-400 whitespace-nowrap">No Selection</span>
-        {/if}
-      </button>
-  </Frame>
-</form>
+<!-- <form onsubmit={preventDefault(() => {})} class=""> -->
+<Frame {title} {hoverTitle} {badge} error={warningMessage !== '' ? warningMessage : null}>
+  <button type="button" title="{value !== null ? `${value.id} - ${value.name} (${value.timezone})` : ''}" onclick={() => select?.focus()} class="-my-2 px-2 h-10 gap-2 flex-grow xs:flex-grow-0 max-w-full inline-flex items-center rounded-md shadow-sm ring-1 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500 ring-gray-200' : 'ring-gray-300'} focus-within:ring-2 focus-within:ring-indigo-600 sm:max-w-md">
+    <input bind:this={select} disabled={disabled} maxlength="4" onchange={update} type="text" style="text-transform:uppercase" value={value?.id ?? ''} placeholder="----" name="airport-visible" list="airport"
+      class="px-0 text-sm font-mono text-left flex-shrink border-0 w-16 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
+    <datalist id="airport">
+      {#each airports as airport (airport.id)}
+        <option selected={airport.id.toLocaleUpperCase() === value?.id.toLocaleUpperCase()} value="{airport.id.toLocaleUpperCase()}">{airport.name} - ({airport.timezone})</option>
+      {/each}
+    </datalist>
+    <div class="flex-grow xs:flex-grow-0"></div>
+    {#if value !== null}
+      <div class="flex flex-col flex-grow items-end overflow-hidden">
+        <span class="text-xs text-gray-400 whitespace-nowrap inline-flex items-center gap-1">
+          {value.name}
+          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+            {@html icons.globe}
+          </svg>
+        </span>
+        <span class="text-xs text-gray-400 whitespace-nowrap inline-flex items-center gap-1">
+          {value.timezone}
+          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
+            {@html icons.clock}
+          </svg>
+        </span>
+      </div>
+    {:else}
+      <span class="text-xs text-gray-400 whitespace-nowrap">No Selection</span>
+    {/if}
+  </button>
+</Frame>
+<!-- </form> -->
 
 <style>
   /* Make sure the datalist arrow always shows */

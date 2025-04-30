@@ -22,7 +22,7 @@
     urlActiveParam?: string;
     urlFormParam?: string;
 
-    scrollToDiv?: HTMLDivElement | HTMLAnchorElement | null;
+    scrollToDiv?: HTMLDivElement | HTMLAnchorElement | undefined;
 
     isMobileSize?: boolean;
 
@@ -54,8 +54,8 @@
     menu,
     form,
     urlActiveParam = $bindable(),
-    urlFormParam = _altURLParamsObj.toString(),
-    scrollToDiv = null,
+    urlFormParam = $bindable(),
+    scrollToDiv = $bindable(),
     isMobileSize = $bindable(),
     resizable = true,
     minSizes = { menu: 250, form: 475 },
@@ -71,6 +71,11 @@
   if (urlActiveParam === undefined) urlActiveParam = _altURLParamsObj.toString();
   $effect.pre(() => {
     if (urlActiveParam === undefined) urlActiveParam = _altURLParamsObj.toString();
+  });
+  
+  if (urlFormParam === undefined) urlFormParam = _altURLParamsObj.toString();
+  $effect.pre(() => {
+    if (urlFormParam === undefined) urlFormParam = _altURLParamsObj.toString();
   });
 
   if (isMobileSize === undefined) isMobileSize = true;
@@ -150,6 +155,7 @@
   }
 
   $effect(() => {
+    if (scrollToDiv === undefined) return;
     scrollTo(scrollToDiv);
   });
 

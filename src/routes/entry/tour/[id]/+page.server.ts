@@ -3,10 +3,9 @@ import * as settings from '$lib/server/settings';
 import * as helpers from '$lib/helpers';
 import prisma from '$lib/server/prisma';
 import { API } from '$lib/types';
-import { timeStrAndTimeZoneToUTC } from '$lib/helpers';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
-import { generateDeadheads } from '$lib/server/db/deadhead';
-import { filterOutliers, generateAirportList, getDistanceFromLatLonInKm } from '$lib/server/helpers';
+import { filterOutliers } from '$lib/server/helpers';
+import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type { Prisma } from '@prisma/client';
 import type * as Types from '@prisma/client';
 
@@ -16,8 +15,10 @@ const AVG_FILTER_NUM = 2;
 export const load = async ({ fetch, params, url }) => {
 
   if (url.searchParams.get('tour') !== null) {
-    url.searchParams.delete('tour');
-    redirect(302, `/entry/tour/${params.id}?${url.searchParams.toString()}`);
+    console.log(url.searchParams)
+    const newSearchParams = new URLSearchParams(url.searchParams.toString());
+    newSearchParams.delete('tour');
+    redirect(302, `/entry/tour/${params.id}?${newSearchParams.toString()}`);
   }
 
   const entrySettings = await settings.getSet('entry');
@@ -28,14 +29,17 @@ export const load = async ({ fetch, params, url }) => {
     include: { days: true }
   }> | null = null;
 
-  if (params.id !== 'new') {
-    if (!isNaN(parseInt(params.id))) tour = await prisma.tour.findUnique({ where: { id: parseInt(params.id) }, include: { days: true } });
+
+  let id: 'new' | number = params.id === 'new' || isNaN(parseInt(params.id)) ? 'new' : parseInt(params.id);
+
+  if (id !== 'new') {
+    tour = await prisma.tour.findUnique({ where: { id: id }, include: { days: true } });
     if (tour === null) {
       if (tours.length === 0) redirect(301, '/entry/tour/new');
       else redirect(302, '/entry/tour/' + tours[0].id);
     }
   }
-  
+
   const aeroAPIKey = await settings.get('general.aeroAPI');
   if (aeroAPIKey === '') redirect(302, '/settings');
 
@@ -67,7 +71,7 @@ export const load = async ({ fetch, params, url }) => {
   if (tour !== null) {
     const tourExtended = await prisma.tour.findUnique({ 
       where: { 
-        id: parseInt(params.id)
+        id: id === 'new' ? -1 : id
       }, 
       include: { 
         days: { 
@@ -169,7 +173,7 @@ export const load = async ({ fetch, params, url }) => {
   }
 
   return {
-    params,
+    id: id,
     entrySettings,
     currentTour: tour,
     tourMap,

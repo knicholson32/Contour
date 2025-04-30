@@ -3,17 +3,32 @@
 	import Frame from './Frame.svelte';
 	import type { API } from '$lib/types';
 
-	export let value: boolean;
-	export let name: string;
-	export let title: string;
-	export let disabled: boolean = false;
-	export let hoverTitle: string = '';
-	export let form: API.Form.Type | null = null;
-	export let indent = false;
-	export let titleImg: string | null = null;
-	export let titleLink: string | null = null;
 
-	export let update = () => {};
+	interface Props {
+		value: boolean;
+		name: string;
+		title: string;
+		disabled?: boolean;
+		hoverTitle?: string;
+		form?: API.Form.Type | null;
+		indent?: boolean;
+		titleImg?: string | null;
+		titleLink?: string | null;
+		update?: any;
+	}
+
+	let {
+		value = $bindable(),
+		name,
+		title,
+		disabled = false,
+		hoverTitle = '',
+		form = null,
+		indent = false,
+		titleImg = null,
+		titleLink = null,
+		update = () => {}
+	}: Props = $props();
 </script>
 
 <Frame {title} {hoverTitle} {indent} {titleImg} {titleLink} error={form?.ok === false && form?.name === name ? form.message ?? null : null}>

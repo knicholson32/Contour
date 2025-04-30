@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { API } from "$lib/types";
-    import icons from "../icons";
+  import icons from "../icons";
   export let title: string;
 	export let disabled: boolean = false;
   export let action: string = '?/default';

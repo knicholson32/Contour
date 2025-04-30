@@ -5,8 +5,12 @@
     import { Waypoints, Server, Briefcase } from "lucide-svelte";
     import Tag from "$lib/components/decorations/Tag.svelte";
 
-    export let unsaved: boolean;
-    export let leg: Entry;
+    interface Props {
+      unsaved: boolean;
+      leg: Entry;
+    }
+
+    let { unsaved, leg }: Props = $props();
 
 
 </script>

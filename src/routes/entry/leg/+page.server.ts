@@ -3,7 +3,6 @@ import type { Prisma } from '@prisma/client';
 import { redirect } from "@sveltejs/kit";
 import Fuse from "fuse.js";
 
-/** @type {import('./$types').PageServerLoad} */
 export const load = async ({ params, fetch , url}) => {
 
   // Get the tour that we are searching under, if it exists

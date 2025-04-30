@@ -4,7 +4,8 @@ import { API, type NavAirway, type NavDPRoute, type NavFix, type NavNav, type Na
 import { unzip } from 'unzipit';
 import type * as Types from '@prisma/client';
 import neatCsv from "neat-csv";
-import { getDistanceFromLatLonInKm, lookupSIDOrSTAR } from '$lib/server/helpers';
+import { lookupSIDOrSTAR } from '$lib/server/helpers';
+import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import { pad } from '$lib/helpers';
 import { v4 as uuidv4 } from 'uuid';
 

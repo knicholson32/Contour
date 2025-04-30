@@ -114,7 +114,7 @@
     </div>
   </div>
   {#each Array(data.length + 4) as _, i}
-    <div class="absolute z-0 h-1 left-0 right-0 border-t border-zinc-800/5 dark:border-gray-200/5" style="top: {(i - 2) * spacing + 1.85}rem"/>
+    <div class="absolute z-0 h-1 left-0 right-0 border-t border-zinc-800/5 dark:border-gray-200/5" style="top: {(i - 2) * spacing + 1.85}rem"></div>
   {/each}
   <div class="absolute bottom-1 text-xxs text-gray-600 dark:text-gray-300 w-full flex flex-row px-1">
     <span>{helpers.getHoursMinutesUTC(new Date(day.startTime_utc * 1000))}</span>

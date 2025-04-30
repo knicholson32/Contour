@@ -1,29 +1,37 @@
 <script lang="ts">
+
   import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
   import * as Entry from '$lib/components/entry';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
   import { enhance } from '$app/forms';
-  import { page } from '$app/stores';
-  export let data: import('./$types').PageData;
-	export let form: import('./$types').ActionData;
   import { v4 as uuidv4 } from 'uuid';
-    import { browser } from '$app/environment';
-    import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
+  import { browser } from '$app/environment';
+  import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
+  interface Props {
+    data: import('./$types').PageData;
+    form: import('./$types').ActionData;
+  }
 
-  let submitting = false;
+  let { data, form }: Props = $props();
+
+  let submitting = $state(false);
 
   const formManager = new FormManager();
   const unsavedChanges = formManager.getUnsavedChangesStore();
   // const unsavedUIDs = formManager.getUnsavedUIDsStore();
-  $: formManager.updateUID('new-day');
-  $: formManager.updateForm(form);
+  $effect(() => {
+    formManager.updateUID('new-day');
+  });
+  $effect(() => {
+    formManager.updateForm(form);
+  });
 
-  let startAirportTZ: string | null;
-  let endAirportTZ: string | null;
+  let startAirportTZ: string | null = $state(null);
+  let endAirportTZ: string | null = $state(null);
 
-  let flightIDs: {id: string, value: string | null}[] = [];
+  let flightIDsInitial: {id: string, value: string | null}[] = [];
 
   if (browser) {
     // Loop through the keys
@@ -36,13 +44,15 @@
         const v = localStorage.getItem(key);
         const id = key.substring(key.indexOf('-id-') + 4);
         console.log(key, id, v);
-        flightIDs.push({
+        flightIDsInitial.push({
           id: id,
           value: v
         });
       }
     }
   }
+
+  let flightIDs: {id: string, value: string | null}[] = $state(flightIDsInitial);
 
   const addIfNoEmpty = () => {
     let emptyEntryExists = false;
@@ -113,7 +123,7 @@
 
       <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
         {#if $unsavedChanges}
-          <button type="button" on:click={() => clearUID(true)} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
+          <button type="button" onclick={() => clearUID(true)} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
         {/if}
         <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Next" actionTextInProgress="Creating" />
       </div>

@@ -1,13 +1,29 @@
 <script lang="ts">
-	export let title: string;
-	export let hoverTitle: string;
-	export let error: string | null = null;
-	export let success: string | null = null;
-	export let link: { href: string; title: string; icon?: string } | null = null;
-	export let titleLink: string | null = null;
-	export let titleImg: string | null = null;
-	export let badge: boolean | null = null;
-	export let indent = false;
+	interface Props {
+		title: string;
+		hoverTitle: string;
+		error?: string | null;
+		success?: string | null;
+		link?: { href: string; title: string; icon?: string } | null;
+		titleLink?: string | null;
+		titleImg?: string | null;
+		badge?: boolean | null;
+		indent?: boolean;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		title,
+		hoverTitle,
+		error = null,
+		success = null,
+		link = null,
+		titleLink = null,
+		titleImg = null,
+		badge = null,
+		indent = false,
+		children
+	}: Props = $props();
 </script>
 
 <div class="sm:mr-3 mt-0 mb-10 xs:mb-0">
@@ -41,8 +57,8 @@
 				{/if}
 				{#if badge !== null && badge === true}
 					<span class="absolute flex h-3 w-3 -right-4 sm:right-auto sm:-left-4" title="">
-						<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"/>
-						<span class="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+						<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+						<span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
 					</span>
 				{/if}
 			</div>
@@ -54,7 +70,7 @@
 			{/if}
 		</dt>
 		<dd class="flex flex-auto items-center justify-end relative">
-				<slot />
+				{@render children?.()}
 		</dd>
 	</div>
 </div>

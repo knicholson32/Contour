@@ -1,18 +1,34 @@
 <script lang="ts">
 	import Frame from './Frame.svelte';
 
-	export let value: number;
-	export let name: string;
-	export let title: string;
-	export let showWrapper: { start?: string; end?: string } | null = null;
-	export let placeholder: number = 0;
-	export let hoverTitle: string = '';
-	export let disabled: boolean = false;
-	export let min: number | undefined = undefined;
-	export let max: number | undefined = undefined;
-	export let form: { success: boolean; name: string; message: string | undefined } | null = null;
 
-	export let update = () => {};
+	interface Props {
+		value: number;
+		name: string;
+		title: string;
+		showWrapper?: { start?: string; end?: string } | null;
+		placeholder?: number;
+		hoverTitle?: string;
+		disabled?: boolean;
+		min?: number | undefined;
+		max?: number | undefined;
+		form?: { success: boolean; name: string; message: string | undefined } | null;
+		update?: any;
+	}
+
+	let {
+		value = $bindable(),
+		name,
+		title,
+		showWrapper = null,
+		placeholder = 0,
+		hoverTitle = '',
+		disabled = false,
+		min = undefined,
+		max = undefined,
+		form = null,
+		update = () => {}
+	}: Props = $props();
 </script>
 
 <Frame {title} {hoverTitle} error={form?.success === false && form?.name === name ? form.message ?? null : null}>
@@ -36,7 +52,7 @@
 		{#if showWrapper !== null && showWrapper.start !== undefined}
 			<span class="flex select-none items-center pl-3 text-gray-500 sm:text-sm">{showWrapper.start}</span>
 		{/if}
-		<input {disabled} title={hoverTitle} on:input={update} type="number" {min} {max} {name} bind:value class="block flex-1 border-0 {showWrapper !== null ? 'w-[5em] text-center px-1' : ''} disabled:cursor-not-allowed disabled:text-gray-500 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder={placeholder.toLocaleString()}/>
+		<input {disabled} title={hoverTitle} oninput={update} type="number" {min} {max} {name} bind:value class="block flex-1 border-0 {showWrapper !== null ? 'w-[5em] text-center px-1' : ''} disabled:cursor-not-allowed disabled:text-gray-500 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder={placeholder.toLocaleString()}/>
 		{#if showWrapper !== null && showWrapper.end !== undefined}
 			<span class="flex select-none items-center pr-3 text-gray-500 sm:text-sm">{showWrapper.end}</span>
 		{/if}

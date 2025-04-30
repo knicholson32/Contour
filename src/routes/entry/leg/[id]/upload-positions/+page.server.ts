@@ -10,7 +10,8 @@ import type { Prisma } from '@prisma/client';
 import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { XMLParser } from 'fast-xml-parser';
-import { filterOutliers, generateAirportList, getDistanceFromLatLonInKm } from '$lib/server/helpers';
+import { filterOutliers, generateAirportList } from '$lib/server/helpers';
+import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type * as Types from '@prisma/client';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
@@ -118,69 +119,8 @@ export const load = async ({ fetch, params, url }) => {
     tickValues.push(last);
   }
 
-  // let speedScaler = 1;
-  // let maxSpeed = 0;
-  // let maxAlt = 0;
-
-  // if (leg !== null) {
-  //   for (const p of leg.positions) {
-  //     if (p.altitude * 100 > maxAlt) maxAlt = p.altitude * 100;
-  //     if (p.groundspeed > maxSpeed) maxSpeed = p.groundspeed;
-  //   }
-  //   speedScaler = maxAlt / maxSpeed * 1;
-  // }
-
-
-  // let flight = 0;
-  // let distance = 0;
-  // let speed = 0;
-  // let numPositions = 0;
-
-  // let speeds: number[] = [];
-
-  // flight += leg?.totalTime ?? 0;
-  // if (leg !== null && leg.positions.length > 1) {
-  //   let lastPos = leg.positions[0];
-  //   let lastValidPos = lastPos;
-  //   numPositions += leg.positions.length;
-  //   speed = speed + lastPos.groundspeed;
-  //   speeds.push(lastPos.groundspeed);
-  //   for (let i = 1; i < leg.positions.length; i++) {
-  //     const pos = leg.positions[i];
-  //     if (pos.updateType !== null && (pos.updateType as DB.UpdateType) !== DB.UpdateType.PROJECTED) {
-  //       lastValidPos = pos;
-  //     } else {
-  //       pos.groundspeed = lastValidPos.groundspeed;
-  //       pos.altitude = lastValidPos.altitude;
-  //     }
-  //     distance = distance + getDistanceFromLatLonInKm(lastPos.latitude, lastPos.longitude, pos.latitude, pos.longitude);
-  //     speed = speed + pos.groundspeed;
-  //     speeds.push(pos.groundspeed);
-  //     lastPos = pos;
-  //   }
-  // }
-
-  // speeds = filterOutliers(speeds);
-  // speeds.sort((a, b) => b - a);
-
-  // let fastestSpeed = 0;
-  // if (speeds.length > 0) {
-  //   let filteredCount = 0;
-  //   for (let i = 0; i < AVG_FILTER_NUM && i < speeds.length; i++) {
-  //     filteredCount++;
-  //     fastestSpeed = fastestSpeed + speeds[i];
-  //   }
-  //   fastestSpeed = fastestSpeed / filteredCount;
-  // }
-
-  // distance = distance * 0.54;
-  // if (numPositions > 0) speed = speed / numPositions;
-
-  // let selectedAircraftAPI: API.Types.Aircraft | null = null;
-  // if (leg !== null) selectedAircraftAPI = leg.aircraft;
 
   return {
-    params,
     entrySettings,
     leg,
     // stats: {
@@ -229,25 +169,64 @@ export const actions = {
       let altitude: number[] | null = null;
       let speed: number[] | null = null;
       let course: number[] | null = null;
-
-      for (const placemark of jObj.kml.Document.Placemark) {
-        if (placemark.name === '' && (placemark as GXTrack)['gx:Track'] !== undefined) {
-          gxTrack = placemark as GXTrack;
-          break;
+  
+      try {
+        // Assume that it is the format that ForeFlight uses
+        for (const placemark of jObj.kml.Document.Placemark) {
+          if (placemark.name === '' && (placemark as GXTrack)['gx:Track'] !== undefined) {
+            gxTrack = placemark as GXTrack;
+            break;
+          }
+        }
+  
+        for (const data of jObj.kml.Document.ExtendedData.SchemaData['gx:SimpleArrayData']) {
+          if (data['@_name'] === 'course') course = data['gx:value'];
+          else if (data['@_name'] === 'speed_kts') speed = data['gx:value'];
+          else if (data['@_name'] === 'altitude') altitude = data['gx:value'];
+        }
+      } catch (e) {
+        // It wasn't the format that ForeFlight uses. Try to parse it as a FlightAware KML
+        try {
+          // Assume that it is the format that ForeFlight uses
+          for (const placemark of jObj.kml.Document.Placemark) {
+            if ((placemark as GXTrack)['gx:Track'] !== undefined) {
+              gxTrack = placemark as GXTrack;
+              break;
+            }
+          }
+  
+          if (gxTrack !== null && gxTrack['gx:Track']['gx:coord'].length > 1) {
+            // Extract timestamps
+            const timestamps = gxTrack['gx:Track'].when.map((t: string) => Math.floor(new Date(t).getTime() / 1000));
+            // Calculate the speed and altitude from the coordinates
+            let pastPosition: [number, number] = [gxTrack['gx:Track']['gx:coord'][0].split(' ').flatMap((v) => parseFloat(v))[0], gxTrack['gx:Track']['gx:coord'][0].split(' ').flatMap((v) => parseFloat(v))[1]];
+  
+            altitude = [gxTrack['gx:Track']['gx:coord'][0].split(' ').flatMap((v) => parseFloat(v))[3] * 3.28084];
+            speed = [];
+            course = [];
+            for (let i = 1; i < gxTrack['gx:Track']['gx:coord'].length; i++) {
+              const coord = gxTrack['gx:Track']['gx:coord'][i].split(' ').flatMap((v) => parseFloat(v));
+              const timeDiff = timestamps[i] - timestamps[i - 1];
+              const pos = [coord[0], coord[1]];
+              const distanceKM = getDistanceFromLatLonInKm(pastPosition[1], pastPosition[0], pos[1], pos[0]);
+              speed.push(((distanceKM / timeDiff) * 3600) * 0.539957); // Convert to knots
+              if (speed[i - 1] === 0) speed[i - 1] = speed[i];
+              if (speed[i] === 0) speed[i] = speed[i - 1];
+              course.push(Math.atan2(pos[1] - pastPosition[1], pos[0] - pastPosition[0]) * (180 / Math.PI));
+              altitude.push(coord[2] * 3.28084);
+              pastPosition = [coord[0], coord[1]];
+            }
+          }
+        } catch (e) {
+          // Unknown format
         }
       }
 
-      for (const data of jObj.kml.Document.ExtendedData.SchemaData['gx:SimpleArrayData']) {
-        if (data['@_name'] === 'course') course = data['gx:value'];
-        else if (data['@_name'] === 'speed_kts') speed = data['gx:value'];
-        else if (data['@_name'] === 'altitude') altitude = data['gx:value'];
-      }
-
-      if (gxTrack === null || altitude === null || speed === null || course === null) {
+      if (gxTrack === null || altitude === null || speed === null || course === null || altitude.length === 0 || speed.length === 0 || course.length === 0) {
         // TODO: Throw an error
         return;
       }
-
+  
       if (gxTrack['gx:Track']['gx:coord'].length !== gxTrack['gx:Track'].when.length) {
         // TODO: Throw an error
         return;
@@ -262,14 +241,14 @@ export const actions = {
         const time = Math.floor(new Date(gxTrack['gx:Track']['when'][i]).getTime() / 1000);
         if (lastTime !== -1 && time - lastTime > 120) break;
         lastTime = time;
-        if (speed[i] === 0) continue;
+        if (speed !== null && speed[i] === 0) continue;
 
         inserts.push(prisma.position.create({ data: {
           legId: id,
-          altitude: (altitude[i] / 100),
+          altitude: altitude === null ? 0 : isNaN(altitude[i]) ? 0 : (altitude[i] / 100),
           altitudeChange: '',
-          groundspeed: speed[i],
-          heading: course[i],
+          groundspeed: speed === null ? 0 : isNaN(speed[i]) ? 0 : speed[i],
+          heading: course === null ? 0 : isNaN(course[i]) ? 0 : course[i],
           latitude: coord[1],
           longitude: coord[0],
           timestamp: time,

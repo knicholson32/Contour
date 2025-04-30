@@ -1,24 +1,43 @@
 <script lang="ts">
 	import Frame from './Frame.svelte';
 
-	export let value: string;
-	export let name: string;
-	export let title: string;
-	export let placeholder: string = title;
-	export let hoverTitle: string = '';
-	export let small = false;
-	export let uppercase = false;
-	export let leadingText: { t: string; error: boolean } | null = null;
-	export let link: { href: string; title: string; icon?: string } | null = null;
-	export let disabled: boolean = false;
-	export let mono: boolean = false;
-	export let error: boolean = false;
-	export let form: { success: boolean; name: string; message: string | undefined } | null = null;
+	interface Props {
+		value: string;
+		name: string;
+		title: string;
+		placeholder?: string;
+		hoverTitle?: string;
+		small?: boolean;
+		uppercase?: boolean;
+		leadingText?: { t: string; error: boolean } | null;
+		link?: { href: string; title: string; icon?: string } | null;
+		disabled?: boolean;
+		mono?: boolean;
+		error?: boolean;
+		form?: { success: boolean; name: string; message: string | undefined } | null;
+		update?: any;
+		updatedContents?: any; // const _update = (e: Event & { currentTarget: EventTarget & HTMLInputElement; }) => {
+	}
 
-	export let update = () => {};
-	export let updatedContents = (e: string) => {};
+	let {
+		value = $bindable(),
+		name,
+		title,
+		placeholder = title,
+		hoverTitle = '',
+		small = false,
+		uppercase = false,
+		leadingText = null,
+		link = null,
+		disabled = false,
+		mono = false,
+		error = false,
+		form = null,
+		update = () => {},
+		updatedContents = (e: string) => {}
+	}: Props = $props();
 
-	// const _update = (e: Event & { currentTarget: EventTarget & HTMLInputElement; }) => {
+	
 	//   update();
 	// }
 </script>
@@ -30,6 +49,6 @@
 				{leadingText.t}
 			</p>
 		{/if}
-		<input {disabled} title={hoverTitle} style="{uppercase ? 'text-transform:uppercase' : ''}" on:input={update} on:keyup={() => { updatedContents(value); }} type="text" {name} class="block {small ? 'w-[12em]' : 'min-w-[16em]'} {mono 	? 'font-mono' 	: ''} rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-200 dark:bg-transparent shadow-sm placeholder:text-gray-400 ring-1 ring-inset {error ? 'ring-red-300 focus:ring-red-600' : 'ring-gray-300 dark:ring-zinc-600 focus:ring-sky-500'}  focus:ring-2 focus:ring-inset disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 sm:text-sm sm:leading-6" {placeholder} bind:value />
+		<input {disabled} title={hoverTitle} style="{uppercase ? 'text-transform:uppercase' : ''}" oninput={update} onkeyup={() => { updatedContents(value); }} type="text" {name} class="block {small ? 'w-[12em]' : 'min-w-[16em]'} {mono 	? 'font-mono' 	: ''} rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-200 dark:bg-transparent shadow-sm placeholder:text-gray-400 ring-1 ring-inset {error ? 'ring-red-300 focus:ring-red-600' : 'ring-gray-300 dark:ring-zinc-600 focus:ring-sky-500'}  focus:ring-2 focus:ring-inset disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 sm:text-sm sm:leading-6" {placeholder} bind:value />
 	</div>
 </Frame>

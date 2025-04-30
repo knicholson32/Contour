@@ -37,6 +37,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +%s)"
       - name: Build and push
         id: build
         uses: docker/build-push-action@v5
@@ -46,6 +49,7 @@ jobs:
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             GIT_REF=${{ github.ref_name }}
+            BUILD_TIMESTAMP=${{ steps.date.outputs.date }}
             GIT_REF_PROTECTED=${{ github.ref_protected }}
             REGISTRY_IMAGE=${{ vars.REGISTRY_IMAGE }}
             CI=true

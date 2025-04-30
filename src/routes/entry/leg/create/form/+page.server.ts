@@ -144,6 +144,7 @@ export const load = async ({ params, fetch, url }) => {
     entrySettings,
     changeSourceURL,
     dayId,
+    selection,
     // totalTime,
     runwayOperations,
     xc: entry.diversionAirportId === null ? (entry.originAirportId === entry.destinationAirportId ? false : true) : (entry.originAirportId === entry.diversionAirportId ? false : true),
@@ -163,16 +164,17 @@ export const actions = {
 
 
     const aeroAPIKey = await settings.get('general.aeroAPI');
-    const fa = await settings.get('entry.day.entry.fa_id');
 
     const dayId = url.searchParams.get('day') === null ? null : parseInt(url.searchParams.get('day') ?? '-1');
     const day = dayId === -1 || dayId === null ? null : await prisma.dutyDay.findUnique({ where: { id: dayId }});
     const selection = url.searchParams.get('selection') === null ? null : url.searchParams.get('selection');
 
-    let entry = await options.getFlightOptionFaFlightID(fa);
-    if (entry === undefined && selection !== null) return API.Form.formFailure('?/default', '*', 'No FA Entry');
-
-    if (await prisma.flightAwareData.findUnique({ where: { faFlightId: fa } }) !== null) return API.Form.formFailure('?/default', '*', 'Entry with FA already exists');
+    let entry: Types.Option | undefined = undefined;
+    if (selection !== null) {
+      entry = await options.getFlightOptionFaFlightID(selection);
+      if (entry === undefined) return API.Form.formFailure('?/default', '*', 'FA Entry not found');
+      if (await prisma.flightAwareData.findUnique({ where: { faFlightId: selection } }) !== null) return API.Form.formFailure('?/default', '*', 'Entry with FA already exists');
+    }
 
     const id = uuidv4();
 
@@ -559,7 +561,12 @@ export const actions = {
             await prisma.flightAwareData.delete({ where: { faFlightId: faFlightId } });
           }
           await prisma.leg.delete({ where: { id: leg.id } });
-          return API.Form.formFailure('?/default', '*', 'Could not store positions');
+          const err = e as aero.AeroAPIError;
+          if ('apiErr' in err && err.apiErr !== null && err.apiErr.reason === 'INVALID_ARGUMENT' && 'detail' in err.apiErr && typeof err.apiErr.detail === 'string' && err.apiErr.detail.indexOf('fa_flight_id cannot be from more than 10 days ago') !== -1) {
+            return API.Form.formFailure('?/default', '*', 'This FlightAware leg is too old to save. Please enter this leg manually.');
+          } else {
+            return API.Form.formFailure('?/default', '*', 'Could not store positions');
+          }
         }
       } catch (e) {
         console.log(e);

@@ -47,7 +47,7 @@
 		"postcss": "^8.4.40",
 		"prettier": "^3.1.0",
 		"prettier-plugin-svelte": "^3.2.6",
-		"prisma": "^5.20.0",
+		"prisma": "^5.22.0",
 		"suncalc": "^1.9.0",
 		"svelte": "^5.22.5",
 		"svelte-check": "^4.0.0",
@@ -60,6 +60,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"prisma": "^5.22.0",
 		"@prisma/client": "^5.20.0",
 		"@unovis/svelte": "^1.5.1",
 		"@unovis/ts": "^1.5.1",

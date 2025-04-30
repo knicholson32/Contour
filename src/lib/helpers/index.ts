@@ -629,3 +629,36 @@ export const numBytesToString = (bytes: bigint | number): string => {
 		return sizeGB.toPrecision(3) + ' GB';
 	}
 };
+
+
+/**
+ * Measure distance between positions
+ * @see https://stackoverflow.com/questions/18883601/function-to-calculate-distance-between-two-coordinates
+ * @param lat1 
+ * @param lon1 
+ * @param lat2 
+ * @param lon2 
+ * @returns 
+ */
+export const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+	var R = 6371; // Radius of the earth in km
+	var dLat = deg2rad(lat2 - lat1);  // deg2rad below
+	var dLon = deg2rad(lon2 - lon1);
+	var a =
+		Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+		Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+		Math.sin(dLon / 2) * Math.sin(dLon / 2)
+		;
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+	var d = R * c; // Distance in km
+	return d;
+}
+
+/**
+ * Convert degrees to radians
+ * @param deg the degrees
+ * @returns radians
+ */
+export const deg2rad = (deg: number) => {
+	return deg * (Math.PI / 180)
+}

@@ -160,6 +160,6 @@
 </style>
 
 <div class="relative">
-  <div bind:this={element} style="height:400px;width:100%;position:relative;" {...$$restProps} />
+  <div bind:this={element} style="height:400px;width:100%;position:relative;" {...$$restProps}></div>
   <slot />
 </div>

@@ -1,6 +1,6 @@
 import prisma from '$lib/server/prisma';
 import type * as Types from '@prisma/client';
-import { getDistanceFromLatLonInKm } from '$lib/server/helpers';
+import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import { CalendarDate } from '@internationalized/date';
 import * as settings from '$lib/server/settings';
 import { redirect } from '@sveltejs/kit';

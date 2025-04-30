@@ -1,8 +1,12 @@
 <script lang="ts">
-  export let selected: null | {
-    currencyExpiry: number,
-    title: string
+  interface Props {
+    selected: null | {
+      currencyExpiry: number,
+      title: string
+    };
   }
+
+  let { selected }: Props = $props();
 
 </script>
 

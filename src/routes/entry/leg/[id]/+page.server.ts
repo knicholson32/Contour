@@ -1,22 +1,21 @@
 import { redirect } from '@sveltejs/kit';
 import * as settings from '$lib/server/settings';
 import prisma from '$lib/server/prisma';
-import { API, ImageUploadState, legSelector, type Entry } from '$lib/types';
-import { dateToDateStringForm, delay, getTimezoneObjectFromTimezone, timeStrAndTimeZoneToUTC } from '$lib/helpers/index.js';
+import { API, legSelector, type Entry } from '$lib/types';
+import { dateToDateStringForm, getTimezoneObjectFromTimezone, } from '$lib/helpers/index.js';
 import { DB } from '$lib/types';
-import { v4 as uuidv4 } from 'uuid';
 import * as helpers from '$lib/helpers';
 import type { Prisma } from '@prisma/client';
-import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
-import { filterOutliers, generateAirportList, getDistanceFromLatLonInKm } from '$lib/server/helpers';
+import { filterOutliers, generateAirportList } from '$lib/server/helpers';
+import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type * as Types from '@prisma/client';
 import { fetchLegsForSideMenu } from '$lib/server/lib/leg';
-import Fuse from 'fuse.js';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
+// Number of values to filter out for the average speed
 const AVG_FILTER_NUM = 2;
 
 export const load = async ({ fetch, params, url }) => {
@@ -214,7 +213,6 @@ export const load = async ({ fetch, params, url }) => {
   if (leg !== null) selectedAircraftAPI = leg.aircraft;
 
   return {
-    params,
     searchParams: {
       dayId,
       tourId

@@ -4,7 +4,6 @@ import * as helpers from '$lib/helpers';
 import prisma from '$lib/server/prisma';
 import { API } from '$lib/types';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
-import type { Prisma } from '@prisma/client';
 
 const MAX_MB = 10;
 
@@ -83,6 +82,9 @@ export const actions = {
 
     const endUtc = helpers.timeStrAndTimeZoneToUTC(endTime, endTimeTZ);
     if (endUtc === null) return API.Form.formFailure('?/default', 'end-time', 'Unknown Timezone');
+
+    // Make sure end time is after start time
+    if (endUtc.value < showUtc.value) return API.Form.formFailure('?/default', 'end-time', 'End time must be after start time');
 
     // Create airport if it does not exist
     try {

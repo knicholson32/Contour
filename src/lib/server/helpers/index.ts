@@ -3,6 +3,7 @@ import * as crypto from 'node:crypto';
 import sunCalc from 'suncalc';
 import zlib from 'node:zlib';
 import fs from 'node:fs';
+import path from 'node:path';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '$lib/server/prisma';
@@ -11,6 +12,27 @@ import type * as Types from '@prisma/client';
 import { MEDIA_FOLDER } from '$lib/server/env';
 
 const ENC_SALT = 'CONTOUR_SALT'
+
+
+
+export const getPackageVersion = (pkg: string) => {
+	const packageJsonPath = '/app/package.json';
+	try {
+		const file = fs.readFileSync(packageJsonPath, 'utf8');
+		const packageJson = JSON.parse(file);
+		if (pkg in packageJson.devDependencies) {
+			return packageJson.devDependencies[pkg].substring(1);
+		} else if (pkg in packageJson.dependencies) {
+			return packageJson.dependencies[pkg].substring(1);
+		} else{
+			console.error(`Error reading package.json: No package installed in package.json`);
+			return null;
+		}
+	} catch (error) {
+		console.error(`Error reading package.json: ${error}`);
+		return null;
+	}
+}
 
 
 export const isNightOperation = (now: Date, lat: number, lon: number): boolean => {
@@ -527,38 +549,6 @@ export const compressJSONResponse = (request: Request, data: any): Response => {
 	});
 };
 
-
-/**
- * Measure distance between positions
- * @see https://stackoverflow.com/questions/18883601/function-to-calculate-distance-between-two-coordinates
- * @param lat1 
- * @param lon1 
- * @param lat2 
- * @param lon2 
- * @returns 
- */
-export const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-	var R = 6371; // Radius of the earth in km
-	var dLat = deg2rad(lat2 - lat1);  // deg2rad below
-	var dLon = deg2rad(lon2 - lon1);
-	var a =
-		Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-		Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-		Math.sin(dLon / 2) * Math.sin(dLon / 2)
-		;
-	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-	var d = R * c; // Distance in km
-	return d;
-}
-
-/**
- * Convert degrees to radians
- * @param deg the degrees
- * @returns radians
- */
-export const deg2rad = (deg: number) => {
-	return deg * (Math.PI / 180)
-}
 
 
 export const lookupSIDOrSTAR = async (type: 'DP' | 'STAR', procedureIdentifier: string, transition: string, options: { airport?: string, runway?: string }) => {

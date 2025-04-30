@@ -6,15 +6,17 @@ import type { Prisma } from '@prisma/client';
 import { timeStrAndTimeZoneToUTC } from '$lib/helpers';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
-import { filterOutliers, generateAirportList, getDistanceFromLatLonInKm } from '$lib/server/helpers';
+import { filterOutliers, generateAirportList } from '$lib/server/helpers';
+import { getDistanceFromLatLonInKm } from '$lib/helpers';
 
 const AVG_FILTER_NUM = 2;
 
 export const load = async ({ fetch, params, parent, url }) => {
 
   if (url.searchParams.get('day') !== null) {
-    url.searchParams.delete('day');
-    redirect(302, `/entry/day/${params.id}?${url.searchParams.toString()}`);
+    const newSearchParams = new URLSearchParams(url.searchParams.toString());
+    newSearchParams.delete('day');
+    redirect(302, `/entry/day/${params.id}?${newSearchParams.toString()}`);
   }
 
   const entrySettings = await settings.getSet('entry');
@@ -309,8 +311,8 @@ export const actions = {
     const endUTC = timeStrAndTimeZoneToUTC(endTime, endTimeTZ);
     if (endUTC === null) return API.Form.formFailure('?/update', 'end-time', 'Unknown Timezone');
 
-    if (startUTC.value > endUTC.value) return API.Form.formFailure('?/update', 'start-time', 'Start time is after end time');
-    if (endUTC.value - startUTC.value > 86400 ) return API.Form.formFailure('?/update', 'start-time', 'Duty day is longer than 24 hours');
+    if (endUTC.value < startUTC.value) return API.Form.formFailure('?/update', 'end-time', 'End time must be after start time');
+    if (endUTC.value - startUTC.value > 129600) return API.Form.formFailure('?/default', 'end-time', 'Duty day is longer than 36 hours');
 
 
     // Create airport if it does not exist

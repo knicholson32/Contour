@@ -4,12 +4,16 @@
   import { dateToTimeStringForm } from "$lib/helpers";
   import { DB } from '$lib/types';
 
-  export let position: Types.Position | null = null;
-  export let el: HTMLElement;
+  interface Props {
+    position?: Types.Position | undefined;
+    el: HTMLElement | undefined;
+  }
+
+  let { position = $bindable(), el = $bindable() }: Props = $props();
 
 </script>
 
-{#if position !== null}
+{#if position !== undefined}
   <div bind:this={el} class="flex flex-col items-start justify-start min-w-48">
     <div class="flex items-center w-full">
       <Gauge class="mr-2 h-5 w-5 opacity-70" />{" "}
@@ -17,7 +21,7 @@
         {#if position.updateType === DB.UpdateType.PROJECTED || position.groundspeed === 0}
           Unknown
         {:else}
-          {(position.altitude * 100).toLocaleString({}, {maximumFractionDigits: 0})} ft
+          {(position.altitude * 100).toLocaleString([], {maximumFractionDigits: 0})} ft
         {/if}
         <div class="flex-grow"></div>
         <span class="uppercase text-xs opacity-70 ml-2">{position.altitudeChange}</span>

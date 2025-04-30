@@ -260,7 +260,7 @@
           <Switch bind:value={circleToLand} changed={(b) => _update()} title="Circle to Land"/>
         </div>
         <div class="flex flex-row gap-3 items-center relative">
-          <textarea bind:value={notes} on:input={_update} placeholder="Notes" class="m-0 p-2 text-sm font-medium w-full ring-1 ring-gray-300 dark:ring-zinc-600 ring-inset focus:outline-none outline-none bg-transparent border-0 rounded-md border-gray-100 placeholder:text-gray-400 placeholder:text-xs disabled:cursor-not-allowed disabled:text-gray-500" rows="5"/>
+          <textarea bind:value={notes} on:input={_update} placeholder="Notes" class="m-0 p-2 text-sm font-medium w-full ring-1 ring-gray-300 dark:ring-zinc-600 ring-inset focus:outline-none outline-none bg-transparent border-0 rounded-md border-gray-100 placeholder:text-gray-400 placeholder:text-xs disabled:cursor-not-allowed disabled:text-gray-500" rows="5"></textarea>
         </div>
         <button on:click={_delete} type="button" class="touch-manipulation select-none relative whitespace-nowrap text-xs transition-colors flex justify-center items-center px-3 py-2 rounded-md font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-red-500 dark:ring-red-600 bg-white dark:bg-transparent text-red-500 dark:text-red-100 betterhover:hover:bg-red-500 dark:betterhover:hover:bg-red-900 betterhover:hover:text-white dark:betterhover:hover:text-white">Delete Approach</button>
       </div>

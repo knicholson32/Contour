@@ -12,23 +12,40 @@
 	};
 
 	// Export props
-	let clazz: string = '';
-	export { clazz as class };
-	export let submitting: boolean;
-	export let failed: boolean = false;
-	export let progress: number = 0;
-	export let hoverTitle = '';
-	export let remoteForm: string | undefined = undefined;
 
-	export let disabled: boolean = false;
-	export let actionText = 'Save';
-	export let actionTextInProgress = 'Saving';
-	export let doneText = 'Done';
-	export let failedText = 'Failed';
-	export let skipDoneMessage = false;
-	export let skipLoadingSpinner = false;
+	interface Props {
+		class?: string;
+		submitting: boolean;
+		failed?: boolean;
+		progress?: number;
+		hoverTitle?: string;
+		remoteForm?: string | undefined;
+		disabled?: boolean;
+		actionText?: string;
+		actionTextInProgress?: string;
+		doneText?: string;
+		failedText?: string;
+		skipDoneMessage?: boolean;
+		skipLoadingSpinner?: boolean;
+		theme?: Theme;
+	}
 
-	export let theme: Theme = {};
+	let {
+		class: clazz = '',
+		submitting,
+		failed = false,
+		progress = 0,
+		hoverTitle = '',
+		remoteForm = undefined,
+		disabled = $bindable(false),
+		actionText = 'Save',
+		actionTextInProgress = 'Saving',
+		doneText = 'Done',
+		failedText = 'Failed',
+		skipDoneMessage = false,
+		skipLoadingSpinner = false,
+		theme = {}
+	}: Props = $props();
 
 	let themeDefault: ThemeDefault;
 	if (theme.primary === undefined) themeDefault = 'indigo';
@@ -42,13 +59,13 @@
 	if (theme.fail === undefined) themeFailed = 'red';
 	else themeFailed = theme.fail;
 
-	let themeClassesStatic = '';
+	let themeClassesStatic = $state('');
 	let themeClassesDefault = '';
-	let themeClassesSubmitting = '';
-	let themeClassesDone = '';
-	let themeClassesFailed = '';
-	let spinnerClasses = '';
-	let spinnerProgressClasses = '';
+	let themeClassesSubmitting = $state('');
+	let themeClassesDone = $state('');
+	let themeClassesFailed = $state('');
+	let spinnerClasses = $state('');
+	let spinnerProgressClasses = $state('');
 
 	// rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 betterhover:hover:bg-gray-50
 	switch (themeDefault) {
@@ -113,12 +130,12 @@
 			break;
 	}
 
-	let done = false;
-	let themeClasses = themeClassesDefault;
+	let done = $state(false);
+	let themeClasses = $state(themeClassesDefault);
 
-	let submittingLastState: boolean = false;
+	let submittingLastState: boolean = $state(false);
 
-	$: {
+	$effect(() => {
 		if (failed) {
 			themeClasses = themeClassesFailed;
 		}
@@ -138,11 +155,11 @@
 			themeClasses = themeClassesSubmitting;
 		}
 		submittingLastState = submitting;
-	}
+	});
 
-	let button: HTMLButtonElement;
+	let button: HTMLButtonElement | null = $state(null);
 	export const click = () => {
-		button.click();
+		button?.click();
 	};
 
 	export const disable = (shouldDisable: boolean) => (disabled = shouldDisable);
@@ -158,8 +175,8 @@
 		};
 	};
 
-	$: circumference = 70 * Math.PI;
-	$: offset = circumference - progress * circumference;
+	let circumference = $derived(70 * Math.PI);
+	let offset = $derived(circumference - progress * circumference);
 	// stroke-dasharray="{circumference}" stroke-dashoffset="{offset}"
 </script>
 

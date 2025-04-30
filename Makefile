@@ -4,7 +4,7 @@
 # 	docker build --file ./docker/Dockerfile --build-arg GIT_COMMIT=$(shell git rev-parse HEAD) --target prod -t keenanrnicholson/contour:latest .
 #	docker push keenanrnicholson/contour
 create-local:
-	docker build --file ./docker/Dockerfile --build-arg GIT_COMMIT=$(shell git rev-parse HEAD) --target prod -t keenanrnicholson/contour:local .
+	docker build --file ./docker/Dockerfile --build-arg GIT_COMMIT=$(shell git rev-parse HEAD) --build-arg BUILD_TIMESTAMP=$(shell date +%s) --target prod -t keenanrnicholson/contour:local .
 create-all:
 	docker buildx build --builder mybuilder --file ./docker/Dockerfile --push --build-arg GIT_COMMIT=$(shell git rev-parse HEAD) --target prod --platform linux/arm64,linux/amd64 --tag keenanrnicholson/contour:latest .
 dev:

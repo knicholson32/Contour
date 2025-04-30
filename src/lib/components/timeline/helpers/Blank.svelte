@@ -1,16 +1,24 @@
 <script lang="ts">
     import * as helpers from ".";
 
-    export let entry: {
-      type: 'blank',
-      startTime_utc: number,
-      endTime_utc: number,
+
+    interface Props {
+      entry: {
+        type: 'blank',
+        startTime_utc: number,
+        endTime_utc: number,
+      };
+      i: number;
+      dayStartTime: number;
+      dayEndTime: number;
     }
 
-    export let i: number;
-    export let spacing: number;
-    export let dayStartTime: number;
-    export let dayEndTime: number;
+    let {
+        entry,
+        i,
+        dayStartTime,
+        dayEndTime
+    }: Props = $props();
 
 
 </script>

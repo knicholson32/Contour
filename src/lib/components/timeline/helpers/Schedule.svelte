@@ -1,9 +1,11 @@
 <script lang="ts">
-    import { page } from "$app/stores";
+    import { page } from '$app/state';
     import { getHoursMinutesUTC } from "$lib/helpers";
     import * as helpers from ".";
 
-    export let entry: {
+
+  interface Props {
+    entry: {
       startTime_utc: number | null,
       endTime_utc: number | null,
       originAirportId: string | null,
@@ -12,16 +14,24 @@
       type: 'deadhead' | 'leg'
       id: string | null,
       dayId: number | null
-    }
+    };
+    i: number;
+    spacing: number;
+    dayStartTime: number;
+    dayEndTime: number;
+  }
 
-    export let i: number;
-    export let spacing: number;
-    export let dayStartTime: number;
-    export let dayEndTime: number;
+  let {
+    entry,
+    i,
+    spacing,
+    dayStartTime,
+    dayEndTime
+  }: Props = $props();
 
     const totalTime = ((entry.endTime_utc??0) - (entry.startTime_utc??0)) / 60 / 60;
 
-    const u = new URLSearchParams($page.url.search);
+    const u = new URLSearchParams(page.url.search);
     if (entry.dayId !== null) u.set('day', entry.dayId.toFixed(0));
     u.set('active', 'form');
     const legLink = `/entry/leg/${entry.id}?${u.toString()}`;

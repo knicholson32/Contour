@@ -8,12 +8,20 @@
   import { icons } from "$lib/components";
   import * as Popover from "$lib/components/ui/popover";
   import { ModeWatcher } from "mode-watcher";
-  import { Briefcase, ChevronRight, GitCommitVertical, Link, Plane, Send, Tag } from "lucide-svelte";
+  import { Briefcase, ChevronRight, GitCommitVertical, Link, Plane, Send, Tag, X } from "lucide-svelte";
   // import ProgressBar from "$lib/components/decorations/ProgressBar.svelte";
   import { afterNavigate, beforeNavigate } from "$app/navigation";
   import NProgress from 'nprogress';
+  import escapeOrClickOutside from "$lib/components/events/escapeOrClickOutside";
+  import type { GitCommit } from "$lib/server/api/git/schema";
+    import { timeConverter } from "$lib/helpers";
 
-  export let data: import('./$types').PageData;
+  interface Props {
+    data: import('./$types').PageData;
+    children?: import('svelte').Snippet;
+  }
+
+  let { data, children }: Props = $props();
 
   // -----------------------------------------------------------------------------------------------
 	// Navigation Menus
@@ -34,13 +42,13 @@
   }[];
 
   // Menu contents
-  const menu: Menu = [
+  const menu: Menu = $state([
     { title: 'Dashboard', popover: false,  href: '/' },
     { title: 'Entry', popover: false, href: `/entry`, submenu: [ { title: 'Tours', href: '/entry/tour', icon: 'briefcase', description: 'Enter flights that are associated with a work tour or duty day.'}, { title: 'Legs', href: '/entry/leg', icon: 'send', description: 'Enter generic flights that are not associated with a tour.'}] },
     { title: 'Aircraft', popover: false, href: '/aircraft', submenu: [ { title: 'Aircraft', href: '/aircraft/entry', icon: 'plane', description: 'Document specific aircraft flown in flight legs.'}, { title: 'Types', href: '/aircraft/type', icon: 'tag', description: 'Create and manage common aircraft types.'}] },
     { title: 'Logbook', popover: false, href: '/logbook' },
     { title: 'Airports', popover: false, href: '/airports' },
-  ];
+  ]);
 
   // const p: typeof Popover.Root;
 
@@ -49,8 +57,8 @@
   // }
 
   // Mobile menu controls
-  let mobileNavMenuVisible = false;
-  let menuHeaderBar: HTMLElement;
+  let mobileNavMenuVisible = $state(false);
+  let menuHeaderBar: HTMLElement | null = $state(null);
 	const closeMobileMenu = () => mobileNavMenuVisible = false;
   const toggleMobileMenu = () => mobileNavMenuVisible = !mobileNavMenuVisible;
 
@@ -58,16 +66,40 @@
 	// Profile Menus
 	// -----------------------------------------------------------------------------------------------
 
+  const loadCommitInfo = async () => {
+    const cData = await (await fetch(`https://api.github.com/repos/knicholson32/Contour/commits?per_page=1&sha=${data.lastCommit}`)).json() as GitCommit[];
+    if (cData.length > 0) {
+      const data = {
+        commitMessage: cData[0].commit.message,
+        commitDate: new Date(cData[0].commit.author.date),
+        commitAuthor: cData[0].commit.author.name,
+        commitSHA: cData[0].sha
+      }
+      return data;
+    } else return null
+  }
+
+  let aboutOverlay = $state(false);
+  let commitInfo: Awaited<ReturnType<typeof loadCommitInfo>> | null = $state(null);
+  const openAboutOverlay = async () => {
+    commitInfo = await loadCommitInfo();
+    aboutOverlay = true;
+  }
+  const hideAboutOverlay = () => {
+    aboutOverlay = false;
+  }
+
   // Menu contents
   const profileMenu = [
     { title: 'Profile', href: '/profile' },
     { title: 'Settings', href: '/settings' },
+    { title: 'About', button: openAboutOverlay },
     { title: 'Sign out', href: '/signout' },
   ];
 
 	// Primary profile menu
-  let profileBar: HTMLElement;
-	let profileMenuVisible = false;
+  let profileBar: HTMLElement | null = $state(null);
+	let profileMenuVisible = $state(false);
 	const toggleAccountDropdown = () => profileMenuVisible = !profileMenuVisible;
 	const closeAccountDropdown = () => profileMenuVisible = false;
 
@@ -152,7 +184,7 @@
       <div class="flex">
         {#if $backArrow}
           <div class="flex items-center gap-2 justify-center">
-            <button on:click={$backButtonClicked} type="button" class="touch-manipulation text-center flex-grow select-none inline-flex items-center gap-1 transition-colors pl-1 pr-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+            <button onclick={$backButtonClicked} type="button" class="touch-manipulation text-center flex-grow select-none inline-flex items-center gap-1 transition-colors pl-1 pr-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
               ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-900 text-gray-800 dark:text-gray-100 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white">
               <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
                 {@html icons.chevronLeft}
@@ -208,7 +240,7 @@
                           {/if}
                         </div>
                         <div class="mt-1">
-                          <a href="{item.href}" on:click={() => m.popover = false} class="font-semibold text-gray-900 dark:text-gray-100">
+                          <a href="{item.href}" onclick={() => m.popover = false} class="font-semibold text-gray-900 dark:text-gray-100">
                             {item.title}
                             <span class="absolute inset-0"></span>
                           </a>
@@ -241,7 +273,7 @@
         <!-- Profile dropdown -->
         <div bind:this={profileBar} use:EscapeOrClickOutside={{ callback: closeAccountDropdown, except: profileBar }} class="relative ml-3">
           <div>
-            <button type="button" on:click={toggleAccountDropdown} class="touch-manipulation relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+            <button type="button" onclick={toggleAccountDropdown} class="touch-manipulation relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
               <span class="absolute -inset-1.5"></span>
               <span class="sr-only">Open user menu</span>
               <img class="h-8 w-8 rounded-full" src="https://www.gravatar.com/avatar/{data.settings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
@@ -270,14 +302,18 @@
                 <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-zinc-900 py-1 shadow-lg ring-1 ring-black dark:ring-zinc-800 ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                   <!-- Active: "bg-gray-100", Not Active: "" -->
                   {#each profileMenu as m}
-                    {#if page.url.pathname.startsWith(m.href)}
-                      <a href="{m.href}" on:click={closeAccountDropdown} class="bg-gray-100 dark:bg-zinc-800 block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
+                    {#if m.button !== undefined}
+                      <button onclick={() => { closeAccountDropdown(); m.button() }} class="w-full text-left hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</button>
                     {:else}
-                      <a href="{m.href}" on:click={closeAccountDropdown} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
+                      {#if page.url.pathname.startsWith(m.href)}
+                        <a href="{m.href}" onclick={closeAccountDropdown} class="bg-gray-100 dark:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-200" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
+                      {:else}
+                        <a href="{m.href}" onclick={closeAccountDropdown} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</a>
+                      {/if}
                     {/if}
                   {/each}
                   <div class="w-full border-t"></div>
-                  <a href="/changelog?lastCommit={data.lastCommit}" data-sveltekit-reload on:click={closeAccountDropdown} class="w-full text-left inline-flex items-center relative hover:bg-gray-50 dark:hover:bg-zinc-800 px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white">
+                  <a href="/changelog?lastCommit={data.lastCommit}" data-sveltekit-reload onclick={closeAccountDropdown} class="w-full text-left inline-flex items-center relative hover:bg-gray-50 dark:hover:bg-zinc-800 px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white">
                     {#if data.contourUpdates}
                       <div class="absolute -left-0">
                         <GitCommitVertical class="w-4 h-4 text-sky-500" />
@@ -293,7 +329,7 @@
       </div>
       <div class="-mr-2 flex items-center sm:hidden">
         <!-- Mobile menu button -->
-        <button type="button" on:click={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md  p-2 text-gray-400 dark:text-gray-200 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-500 dark:betterhover:hover:text-white {mobileNavMenuVisible ? 'bg-gray-100 dark:bg-zinc-800' : 'bg-white dark:bg-zinc-900'} focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
+        <button type="button" onclick={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md  p-2 text-gray-400 dark:text-gray-200 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-500 dark:betterhover:hover:text-white {mobileNavMenuVisible ? 'bg-gray-100 dark:bg-zinc-800' : 'bg-white dark:bg-zinc-900'} focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
           <span class="absolute -inset-0.5"></span>
           <span class="sr-only">Open main menu</span>
           <!-- Menu open: "hidden", Menu closed: "block" -->
@@ -319,13 +355,13 @@
         {#each menu as m}
           <!-- Current: "border-sky-500 bg-sky-50 text-sky-700", Default: "border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800" -->
             {#if (page.url.pathname === '/' && m.href === '/') || (m.href !== '/' && page.url.pathname.startsWith('/' + m.href.split('/')[1]))}
-              <a href="{m.href}" on:click={closeMobileMenu} class="border-sky-500 bg-sky-50/50 dark:bg-slate-800/25 text-sky-500 block border-l-4 py-2 pl-3 pr-4 text-base font-medium" aria-current="page">{m.title}</a>  
+              <a href="{m.href}" onclick={closeMobileMenu} class="border-sky-500 bg-sky-50/50 dark:bg-slate-800/25 text-sky-500 block border-l-4 py-2 pl-3 pr-4 text-base font-medium" aria-current="page">{m.title}</a>  
             {:else}
-              <a href="{m.href}" on:click={closeMobileMenu} class="border-transparent text-gray-600 dark:text-gray-400 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">{m.title}</a>  
+              <a href="{m.href}" onclick={closeMobileMenu} class="border-transparent text-gray-600 dark:text-gray-400 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200 block border-l-4 py-2 pl-3 pr-4 text-base font-medium">{m.title}</a>  
             {/if}
           {#if m.submenu !== undefined}
             {#each m.submenu as item}
-              <a href="{item.href}" on:click={closeMobileMenu} class="flex gap-3 items-center py-2 pl-3 pr-4 text-base font-medium" aria-current="page">
+              <a href="{item.href}" onclick={closeMobileMenu} class="flex gap-3 items-center py-2 pl-3 pr-4 text-base font-medium" aria-current="page">
                 <ChevronRight class="w-5 h-5"/>
                 <span>{item.title}</span>
               </a>  
@@ -352,20 +388,25 @@
         </div>
         <div class="mt-3 space-y-1">
           {#each profileMenu as m}
-            {#if page.url.pathname.startsWith(m.href)}
-              <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium border-sky-500 bg-sky-50 dark:bg-slate-800/25 text-sky-700 dark:text-sky-400">{m.title}</a>
+            {#if m.button !== undefined}
+              <button onclick={() => { closeMobileMenu(); m.button() }} class="w-full text-left block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200" role="menuitem" tabindex="-1" id="user-menu-item-1">{m.title}</button>
             {:else}
-              <a href="{m.href}" on:click={closeMobileMenu} class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200">{m.title}</a>
+              {#if m.href !== undefined && page.url.pathname.startsWith(m.href)}
+                <a href="{m.href}" onclick={closeMobileMenu} class="block px-4 py-2 text-base font-medium border-sky-500 bg-sky-50 dark:bg-slate-800/25 text-sky-700 dark:text-sky-400">{m.title}</a>
+              {:else}
+                <a href="{m.href}" onclick={closeMobileMenu} class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200">{m.title}</a>
+              {/if}
             {/if}
           {/each}
           <div class="w-full border-t"></div>
-          <a href="/changelog?lastCommit={data.lastCommit}" data-sveltekit-reload on:click={closeMobileMenu} class="inline-flex w-full items-center px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200"> 
+          <a href="/changelog?lastCommit={data.lastCommit}" data-sveltekit-reload onclick={closeMobileMenu} class="inline-flex w-full items-center px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-800 dark:hover:text-gray-200"> 
             {#if data.contourUpdates}
               <div class="absolute -left-0">
                 <GitCommitVertical class="w-4 h-4 text-sky-500" />
               </div>
             {/if}
             See What's New
+
           </a>
         </div>
       </div>
@@ -377,5 +418,103 @@
   <div class="fixed top-[4rem] left-0 right-0 z-[101] h-[2px] overflow-hidden">
     <!-- <ProgressBar bind:this={progress} minimum={0} bind:width={width} /> -->
   </div>
-  <slot/>
+  {@render children?.()}
 </div>
+
+
+{#if aboutOverlay}
+  <div use:escapeOrClickOutside={{except: undefined, callback: hideAboutOverlay}} in:fade={{ duration: 200, easing: cubicOut }} out:fade={{ duration: 75, easing: cubicIn }} class="fixed z-50 top-0 right-0 bottom-0 left-0 flex flex-col items-center transition-colors justify-center bg-black/30">
+    <div class="relative">
+    
+      <!--
+        Flyout menu, show/hide based on flyout menu state.
+    
+        Entering: "transition ease-out duration-200"
+          From: "opacity-0 translate-y-1"
+          To: "opacity-100 translate-y-0"
+        Leaving: "transition ease-in duration-150"
+          From: "opacity-100 translate-y-0"
+          To: "opacity-0 translate-y-1"
+      -->
+      <div class="z-10 flex w-screen max-w-max px-4" >
+        <div class="relative w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm/6 shadow-lg ring-1 ring-gray-900/5">
+          <div class="p-4 relative overflow-hidden">
+            <img class="absolute top-0 right-0 bottom-0 left-0 opacity-15" src="/contour.svg" alt="">
+            <div class="mb-2 flex flex-row gap-2">
+              <img class="block h-8" src="/logo-inverted.png" alt="Contour">
+              <span class="font-semibold text-gray-900 text-2xl">CONTOUR</span>
+              <button onclick={hideAboutOverlay} class="z-50 absolute top-4 right-4 hover:text-sky-500"><X class="w-6 h-6"></X></button>
+            </div>
+            <div class="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+              <div class="mt-1 flex size-11 flex-none items-center justify-center rounded-lg bg-gray-50">
+                <img class="h-7 my-0 aspect-square" src='/Github-Light.svg' alt="GitHub Logo"/>
+              </div>
+              <div>
+                <a target="_blank" href="https://github.com/knicholson32/Contour" class="font-semibold text-gray-900 group-hover:text-sky-700">
+                  GitHub
+                  <span class="absolute inset-0"></span>
+                </a>
+                <p class="mt-1 text-gray-600">View source code and report bugs</p>
+              </div>
+            </div>
+            <div class="group relative flex gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+              <div class="mt-1 flex size-11 flex-none items-center justify-center rounded-lg overflow-hidden bg-gray-50">
+                <img class="h-full my-0 aspect-square inline-flex" src='https://www.flightaware.com/images/apple-touch-icon-240x240.png' alt="FlightAware Logo"/>
+              </div>
+              <div>
+                <a target="_blank" href="https://www.flightaware.com/aeroapi/portal/overview" class="font-semibold text-gray-900 group-hover:text-sky-700">
+                  FlightAware
+                  <span class="absolute inset-0"></span>
+                </a>
+                <p class="mt-1 text-gray-600">Create an API token for Contour to use</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 p-8">
+            <div class="flex justify-between">
+              <h3 class="text-sm/6 font-semibold text-gray-500">Version & Build Information</h3>
+              <a onclick={hideAboutOverlay} href="/settings" class="text-sm/6 font-semibold text-indigo-600">Settings <span aria-hidden="true">&rarr;</span></a>
+            </div>
+            <ul role="list" class="mt-6 space-y-6">
+              <li class="relative text-gray-800">
+                <div class="flex flex-row justify-between text-xs/6 text-gray-600">
+                  <span>Runtime Versions</span>
+                  {#if data.buildTime !== null && data.buildTime !== undefined && data.buildTime !== '' && data.buildTime !== 0}
+                    <span>built on <time datetime={new Date(data.buildTime * 1000).toISOString()} class="">{timeConverter(data.buildTime, {dateOnly: true})}</time></span>
+                  {/if}
+                </div>
+                <div class="grid grid-cols-3 gap-x-4">
+                  <div class="flex-grow text-right">Parent Image</div>
+                  <a href="https://hub.docker.com/_/node" target="_blank" class="hover:underline flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.parentImage}</code></a>
+                  
+                  <a href="https://nodejs.org/" target="_blank" class="hover:underline flex-grow text-right">Node</a>
+                  <a href="https://nodejs.org/docs/v{data.nodeVersion}/api/" target="_blank" class="hover:underline flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">v{data.nodeVersion}</code></a>
+
+                  <a href="https://svelte.dev/" target="_blank" class="hover:underline flex-grow text-right">Svelte</a>
+                  <div class="flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.svelteVersion}</code></div>
+
+                  <a href="https://www.prisma.io/" target="_blank" class="hover:underline flex-grow text-right">Prisma</a>
+                  <div class="flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.prismaVersion}</code></div>
+
+                </div>
+              </li>
+              {#if commitInfo !== null}
+                <li class="relative">
+                  <span class="block text-xs/6 text-gray-600">
+                    Last Commit on 
+                    <time datetime={commitInfo.commitDate.toISOString()} class="text-xs/6 text-gray-600">{timeConverter(commitInfo.commitDate.getTime()/1000, {dateOnly: true})}</time>
+                  </span>
+                  <a href="https://github.com/knicholson32/Contour/commit/{commitInfo.commitSHA}" target="_blank" class="hover:underline block truncate text-sm/6 font-semibold text-gray-900">
+                    <code class="bg-gray-100 p-1 rounded-md font-light">@{commitInfo.commitSHA.substring(0, 7)}</code> {commitInfo.commitMessage}
+                    <span class="absolute inset-0"></span>
+                  </a>
+                </li>
+              {/if}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+{/if}

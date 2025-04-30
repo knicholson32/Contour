@@ -2,18 +2,29 @@
     import { dateToDateStringFormMonthDayYear } from "$lib/helpers";
   import { Check, X } from "lucide-svelte";
 
-  export let isCurrent: boolean;
-  export let catClass: string;
-  export let type: 'General' | 'Night' | 'IFR' | 'FAA';
-  export let currencyExpiry: number;
-  export let nowSeconds: number
 
-  export let selected: null | {
-    currencyExpiry: number,
-    title: string
-  };
+  interface Props {
+    isCurrent: boolean;
+    catClass: string;
+    type: 'General' | 'Night' | 'IFR' | 'FAA';
+    currencyExpiry: number;
+    nowSeconds: number;
+    selected: null | {
+      currencyExpiry: number,
+      title: string
+    };
+  }
 
-  $: isSelected = selected !== null && selected.title.startsWith(catClass);
+  let {
+    isCurrent,
+    catClass,
+    type,
+    currencyExpiry,
+    nowSeconds,
+    selected = $bindable()
+  }: Props = $props();
+
+  let isSelected = $derived(selected !== null && selected.title.startsWith(catClass));
 
   const onClick: (() => void) = () => {
     selected = {
@@ -24,7 +35,7 @@
 
 </script>
 
-<button on:click={onClick} class="col-span-1 flex flex-col justify-center items-center p-1 rounded-lg bg-zinc-925 w-full xs:w-24 border transition-colors {isSelected ? 'border-sky-500' : ''} overflow-hidden select-none" title="{currencyExpiry - nowSeconds > 0 ? `Expires on ${dateToDateStringFormMonthDayYear(currencyExpiry)}` : 'Currency expired'}">
+<button onclick={onClick} class="col-span-1 flex flex-col justify-center items-center p-1 rounded-lg bg-zinc-925 w-full xs:w-24 border transition-colors {isSelected ? 'border-sky-500' : ''} overflow-hidden select-none" title="{currencyExpiry - nowSeconds > 0 ? `Expires on ${dateToDateStringFormMonthDayYear(currencyExpiry)}` : 'Currency expired'}">
   <div class="relative">
     <div class="text-xs font-mono tracking-widest text-center">{catClass}</div>
     <div class="text-xxs font-mono text-center uppercase transition-colors {isSelected ? 'text-sky-500' : 'text-gray-500'}">{type}</div>
