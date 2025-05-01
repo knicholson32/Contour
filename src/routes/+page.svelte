@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {Plane, Plus, Table2, Timer, Route, Gauge, TowerControl, BedDouble } from "lucide-svelte";
+	import {Plane, Plus, Table2, Timer, Route, Gauge, TowerControl, BedDouble, ChevronUp } from "lucide-svelte";
 	import { Button, buttonVariants } from "$lib/components/ui/button";
 	import * as Card from "$lib/components/ui/card";
 	import * as Tabs from "$lib/components/ui/tabs";
@@ -475,7 +475,12 @@
               </Card.Content>
             </Card.Root> -->
           </div>
-          <Card.Root class="h-[calc(100vh-720px-1.5rem)] min-h-[400px]">
+          <!-- <div class="w-full flex items-center justify-center relative h-4 z-0">
+            <button class="relative -bottom-5 hover:-bottom-4 transition-all group w-12 h-12 flex justify-center rounded-full bg-white border border-gray-200 overflow-hidden">
+              <ChevronUp class="relative top-0.5 w-5 h-5 group-hover:text-sky-500 transition-colors"></ChevronUp>
+            </button>
+          </div> -->
+          <Card.Root class="h-[calc(100vh-720px-1.5rem)] min-h-[calc(100vh-90px)] md:min-h-[calc(100vh-110px)] relative z-[1] transition-all">
             <Card.Content class="p-0 relative h-full">
               {#key mapKey}
                 <Map.Bulk bind:this={map} class="!h-full rounded-md bg-transparent border-red-500 ring-0" pos={data.positions} legIDs={data.legIDs} airports={data.airports} />

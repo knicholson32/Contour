@@ -25,6 +25,7 @@
 {:else}
   
   <div style="-webkit-transform: translateZ(0);" class="h-full w-full {white === true ? 'bg-white' : 'bg-gray-100'} dark:bg-zinc-950 flex flex-col relative overflow-y-auto pb-[env(safe-area-inset-bottom)]">
+    <img class="absolute h-full w-full opacity-5 -z-10 object-cover dark:invert" src="/contour.svg" alt="">
     {@render children?.()}    
   </div>
 {/if}

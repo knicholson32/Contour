@@ -5,6 +5,7 @@
   import type * as Types from '@prisma/client';
   import * as helpers from './helpers';
   import './helpers/leaflet.css';
+    import { browser } from '$app/environment';
 
   export let positions: Types.Position[];
   export let fixes: Types.Fix[];
@@ -25,7 +26,7 @@
   let map: L.Map;
 
   let fixLayer: L.Polyline<any, any> | null = null;
-  let posLayer: L.Polyline<any, any> | null = null;
+  let posLayer: L.LayerGroup | null = null;
   let markerLayer: L.LayerGroup<any> | null = null;
   let targetLayer: L.LayerGroup<any> | null = null;
 
@@ -33,11 +34,12 @@
     if (map === undefined) return;
     try {
       if (posLayer === null) throw new Error();
+      throw new Error();
       // .zoomOut(1, { animate: false });
-      const bounds = posLayer.getBounds();
-      if (fixLayer !== null) bounds.extend(fixLayer.getBounds());
-      for(const airport of airports) bounds.extend([airport.latitude, airport.longitude]);
-      map.fitBounds(bounds, { animate, paddingTopLeft, paddingBottomRight });
+      // const bounds = posLayer.getBounds();
+      // if (fixLayer !== null) bounds.extend(fixLayer.getBounds());
+      // for(const airport of airports) bounds.extend([airport.latitude, airport.longitude]);
+      // map.fitBounds(bounds, { animate, paddingTopLeft, paddingBottomRight });
 
     } catch (e) {
       let smallestLat = airports[0].latitude;
@@ -96,16 +98,22 @@
 
     pos = [];
     fix = [];
-    for (const p of positions) pos.push([ p.latitude, p.longitude ]);
+    const points: helpers.Point[] = [];
+    for (const p of positions) {
+      pos.push([ p.latitude, p.longitude ]);
+      points.push([ p.latitude, p.longitude ]);
+    }
     for (const f of fixes) {
       if (f.latitude === null || f.longitude === null) continue;
       fix.push([ f.latitude, f.longitude ]);
     }
 
-    fixLayer = L.polyline(fix, { color: '#00F', opacity: 1, weight: 1 });
+    if (browser && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) fixLayer = L.polyline(fix, { color: '#28F', opacity: 0.25, weight: 1 });
+    else fixLayer = L.polyline(fix, { color: '#15F', opacity: 0.25, weight: 1 });
+    
     fixLayer.addTo(map);
-
-    posLayer = L.polyline(pos, { color: '#E4E', opacity: 1, smoothFactor: 1 });
+    posLayer = L.layerGroup();
+    helpers.drawLegData(L, posLayer, points, airports);
     posLayer.addTo(map);
 
     markerLayer = L.layerGroup();
@@ -128,6 +136,7 @@
   onMount(async () => {
     // import * as L from 'leaflet';
     L = (await import('leaflet')).default
+    await import('@elfalem/leaflet-curve');
     mounted = true;
 
 

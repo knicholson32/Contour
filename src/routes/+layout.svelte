@@ -422,6 +422,7 @@
 </div>
 
 
+
 {#if aboutOverlay}
   <div use:escapeOrClickOutside={{except: undefined, callback: hideAboutOverlay}} in:fade={{ duration: 200, easing: cubicOut }} out:fade={{ duration: 75, easing: cubicIn }} class="fixed z-50 top-0 right-0 bottom-0 left-0 flex flex-col items-center transition-colors justify-center bg-black/30">
     <div class="relative">

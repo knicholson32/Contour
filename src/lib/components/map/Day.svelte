@@ -52,13 +52,25 @@
     
     let bound: L.LatLngExpression[] = [];
     posLayer = L.layerGroup();
+    let index = 0;
     for (const leg of legs) {
-      const pos: L.LatLngExpression[] = [];;
+      const pos: L.LatLngExpression[] = [];
+      const points: helpers.Point[] = [];
       for (const p of leg.positions) {
         pos.push([ p.latitude, p.longitude ]);
+        points.push([ p.latitude, p.longitude ]);
         bound.push([ p.latitude, p.longitude ]);
       }
-      posLayer.addLayer(L.polyline(pos, { color: '#E4E', opacity: 1 }));
+      // posLayer.addLayer(L.polyline(pos, { color: '#E4E', opacity: 1 }));
+      const originAirport: Types.Airport | undefined = airports.find(a => a.id === leg.originAirportId);
+      const destAirport: Types.Airport | undefined = airports.find(a => a.id === leg.destinationAirportId);
+      const diversionAirport: Types.Airport | undefined = airports.find(a => a.id === leg.diversionAirportId);
+      let legAirports: Types.Airport[] = [];
+      if (originAirport) legAirports.push(originAirport);
+      if (diversionAirport) legAirports.push(diversionAirport);
+      else if (destAirport) legAirports.push(destAirport);
+      helpers.drawLegData(L, posLayer, points, legAirports);
+      index ++;
     }
     posLayer.addTo(map);
 
@@ -71,7 +83,7 @@
       pos.push(dest);
       bound.push(origin);
       bound.push(dest);
-      deadLayer.addLayer(L.polyline(pos, { color: '#060', opacity: 1 }));
+      deadLayer.addLayer(L.polyline(pos, { color: '#060', opacity: 1, dashArray: [5, 5] }));
     }
     deadLayer.addTo(map);
 
@@ -96,6 +108,7 @@
     if (!browser) return;
 
     L = (await import('leaflet')).default
+    await import('@elfalem/leaflet-curve');
     mounted = true;
 
 
@@ -127,4 +140,4 @@
 
 <style>
 </style>
-<div bind:this={element} style="height:400px;width:100%;position:relative;" {...$$restProps}></div>
+<div bind:this={element} style="height:400px;width:100%;position:relative;" {...$$restProps}></div>sssss

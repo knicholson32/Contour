@@ -5,6 +5,10 @@
   import type * as Types from '@prisma/client';
   import * as helpers from './helpers';
   import './helpers/leaflet.css';
+    import type { Curve } from 'leaflet';
+    import type { CurvePathData } from '@elfalem/leaflet-curve';
+    import { getDistanceFromLatLonInKm } from '$lib/helpers';
+    import { browser } from '$app/environment';
 
   export let positions: Types.Position[];
   export let fixes: Types.Fix[];
@@ -17,14 +21,13 @@
   let element: HTMLDivElement;
 
   
-  let pos: L.LatLngExpression[] = [];
   let fix: L.LatLngExpression[] = [];
 
   let L: typeof import('leaflet');
   let map: L.Map;
 
   let fixLayer: L.Polyline<any, any> | null = null;
-  let posLayer: L.Polyline<any, any> | null = null;
+  let posLayer: Curve | null = null;
   let markerLayer: L.LayerGroup<any> | null = null;
   let targetLayer: L.LayerGroup<any> | null = null;
 
@@ -66,20 +69,20 @@
     if (posLayer !== null) map.removeLayer(posLayer);
     if (markerLayer !== null) map.removeLayer(markerLayer);
     if (targetLayer !== null) map.removeLayer(targetLayer);
+    if (positions.length === 0) return;
 
-    pos = [];
-    fix = [];
-    for (const p of positions) pos.push([ p.latitude, p.longitude ]);
     for (const f of fixes) {
       if (f.latitude === null || f.longitude === null) continue;
       fix.push([ f.latitude, f.longitude ]);
     }
 
-    fixLayer = L.polyline(fix, { color: '#00F', opacity: 1, weight: 1 });
+    if (browser && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) fixLayer = L.polyline(fix, { color: '#28F', opacity: 0.25, weight: 1 });
+    else fixLayer = L.polyline(fix, { color: '#15F', opacity: 0.25, weight: 1 });
+    
     fixLayer.addTo(map);
 
-    posLayer = L.polyline(pos, { color: '#E4E', opacity: 1, smoothFactor: 1 });
-    posLayer.addTo(map);
+    helpers.drawLegData(L, map, positions.map((p) => [p.latitude, p.longitude]), airports);
+
 
     markerLayer = L.layerGroup();
  		for(let i = 0; i < airports.length; i++) markerLayer.addLayer(markerIcon(airports[i], i));
@@ -95,11 +98,12 @@
 
     try {
       if (posLayer === null) throw new Error();
+      throw new Error();
 
-      const bounds = posLayer.getBounds();
-      if (fixLayer !== null) bounds.extend(fixLayer.getBounds());
-      for(const airport of airports) bounds.extend([airport.latitude, airport.longitude]);
-      map.fitBounds(bounds, { animate: false, paddingTopLeft, paddingBottomRight });
+      // const bounds = posLayer.getBounds();
+      // if (fixLayer !== null) bounds.extend(fixLayer.getBounds());
+      // for(const airport of airports) bounds.extend([airport.latitude, airport.longitude]);
+      // map.fitBounds(bounds, { animate: false, paddingTopLeft, paddingBottomRight });
       // map.fitBounds(posLayer.getBounds(), { animate: false, paddingBottomRight, paddingTopLeft});
     } catch (e) {
       // if (bound.length > 0) map.fitBounds(L.polyline(bound).getBounds(), { animate: false }).zoomOut(1, { animate: false });
@@ -122,6 +126,7 @@
   onMount(async () => {
     // import * as L from 'leaflet';
     L = (await import('leaflet')).default
+    await import('@elfalem/leaflet-curve');
     mounted = true;
 
 
