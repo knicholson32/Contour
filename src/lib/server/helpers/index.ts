@@ -16,7 +16,7 @@ const ENC_SALT = 'CONTOUR_SALT'
 
 
 export const getPackageVersion = (pkg: string) => {
-	const packageJsonPath = '/app/package.json';
+	const packageJsonPath = process.env.NODE_ENV === 'development' ? process.env.PWD + '/package.json' : '/app/package.json';
 	try {
 		const file = fs.readFileSync(packageJsonPath, 'utf8');
 		const packageJson = JSON.parse(file);

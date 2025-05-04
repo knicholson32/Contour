@@ -8,7 +8,10 @@
   import { enhance } from '$app/forms';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
-  import { dateToDateStringForm, getInlineDateUTC } from '$lib/helpers';
+  import { dateToDateStringForm, getHoursMinutesUTC, getInlineDateUTC, getInlineDateUTCFA, getInlineDateUTCPretty, getWeekdayUTC } from '$lib/helpers';
+    import TourPreview from '$lib/components/tourPreview/TourPreview.svelte';
+    import { Title } from '$lib/components/menuForm';
+    import { ChevronRight } from 'lucide-svelte';
   interface Props {
     data: import('./$types').PageData;
     form: import('./$types').ActionData;
@@ -81,6 +84,10 @@
 
   addIfNoEmpty();
 
+  let startTimeValue: string | null = $state(null);
+  let endTimeValue: string | null = $state(null);
+
+
 </script>
 
 <OneColumn>
@@ -97,18 +104,38 @@
       };
     }}>
 
-      <div class="p-3">
+      <!-- <div class="p-3">
         <a href="/tour/{data.currentTour.id}">NOTE: Assigning to current tour that started {getInlineDateUTC(data.currentTour.startTime_utc)}</a>
-      </div>
+      </div> -->
 
+      <!-- <div class="w-fill h-48 flex flex-row gap-3 py-3 px-2">
+        {#each data.currentTour.days as day (day.id)}
+          <div class="aspect-1 bg-zinc-50 flex flex-col items-center">
+            <div>{getWeekdayUTC(day.startTime_utc)}</div>
+            <div class="text-xxs">{getInlineDateUTCFA(day.startTime_utc)}
+              <span class="italic">{getHoursMinutesUTC(new Date((day.endTime_utc - day.startTime_utc) * 1000), false)}</span>
+            </div>
+          </div>
+        {/each}
+      </div> -->
+
+      <Title title="Add Duty Day to Tour" floatLeft={true}>
+        <div class="hidden sm:inline-flex text-xs flex-row items-center justify-around">
+          <span class=""> - April 25th, 2025</span>
+          <a href="/entry/tour/{data.currentTour.id}" class="absolute right-0 group hover:underline inline-flex gap-1">Go To Tour <ChevronRight class="w-4 h-4"></ChevronRight></a>
+        </div>
+      </Title>
+
+      <TourPreview tour={data.currentTour} startTimeValue={startTimeValue} endTimeValue={endTimeValue} addDays={2} />
+      
       <Section title="Start" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.AirportPicker required={true} title="Airport" name="start-airport" airports={data.airports} bind:tz={startAirportTZ} defaultValue={data.lastDay?.endAirportId ?? data.currentTour.startAirportId} />
-        <Entry.TimePicker required={true} title="Time" name="start-time" dateOnly={false} tz="UTC" bind:autoTZ={startAirportTZ} defaultValue={data.lastDay === null ? dateToDateStringForm(data.currentTour.startTime_utc, false, 'UTC') : null} />
+        <Entry.TimePicker required={true} title="Time" name="start-time" dateOnly={false} tz="UTC" bind:autoTZ={startAirportTZ} defaultValue={data.lastDay === null ? dateToDateStringForm(data.currentTour.startTime_utc, false, 'UTC') : null} bind:value={startTimeValue} />
       </Section>
 
       <Section title="End" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.AirportPicker required={true} title="Airport" name="end-airport" airports={data.airports}  bind:tz={endAirportTZ} defaultValue={null} />
-        <Entry.TimePicker required={true} title="Time" name="end-time" dateOnly={false} tz="UTC" bind:autoTZ={endAirportTZ} defaultValue={null} />
+        <Entry.TimePicker required={true} title="Time" name="end-time" dateOnly={false} tz="UTC" bind:autoTZ={endAirportTZ} defaultValue={null} bind:value={endTimeValue} />
       </Section>
 
       <Section title="Flight IDs (API Caching)">

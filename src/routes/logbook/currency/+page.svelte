@@ -1,18 +1,22 @@
 <script lang="ts">
-    import CalendarBar from "$lib/components/routeSpecific/currency/CalendarBar.svelte";
+  import CalendarBar from "$lib/components/routeSpecific/currency/CalendarBar.svelte";
   import CurrencyChip from "$lib/components/routeSpecific/currency/CurrencyChip.svelte";
-    import CurrencyChipGenNight from "$lib/components/routeSpecific/currency/CurrencyChipGenNight.svelte";
-import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
+  import CurrencyChipGenNight from "$lib/components/routeSpecific/currency/CurrencyChipGenNight.svelte";
+  import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   import * as Card from "$lib/components/ui/card";
-    import { dateToDateStringFormMonthDayYear } from "$lib/helpers";
-    import { BookCheck, Check, X } from "lucide-svelte";
+  import { dateToDateStringFormMonthDayYear } from "$lib/helpers";
+  import { BookCheck, Check, X } from "lucide-svelte";
 
-  export let data: import('./$types').PageData;
+  interface Props {
+    data: import('./$types').PageData;
+  }
+
+  let { data }: Props = $props();
 
   let selected: null | {
     currencyExpiry: number,
     title: string
-  } = null;
+  } = $state(null);
   // {
   //   currencyExpiry: data.currency.asel.general.currencyExpiry,
   //   title: 'ASEL General'
@@ -25,12 +29,12 @@ import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   <div class="flex flex-col gap-4 p-4">
       <h2 class="text-3xl font-thin tracking-wide">Currency</h2>
       <div class="flex flex-row gap-4">
-        <div class="grow border rounded-2xl bg-zinc-900 flex flex-col gap-6 p-3 relative overflow-hidden">
+        <div class="grow border rounded-2xl bg-zinc-50 dark:bg-zinc-900 flex flex-col gap-6 p-3 relative overflow-hidden">
           <div class="absolute left-0 right-0 top-0 h-16 border-b">
-            <div class="w-full h-full bg-hashThickLight dark:bg-hashThickDark opacity-25"></div>
+            <div class="w-full h-full bg-hashThickLight dark:bg-hashThickDark opacity-10 dark:opacity-25"></div>
           </div>
           <div class="flex flex-row items-center relative">
-            <button on:click={() => selected = null} class="bg-zinc-800 group rounded-lg p-2 border border-zinc-700/30">
+            <button onclick={() => selected = null} class="bg-white dark:bg-zinc-800 group rounded-lg p-2 border dark:border-zinc-700/30">
               {#if selected === null}
                 <BookCheck class="w-5 h-5"/>
               {:else}

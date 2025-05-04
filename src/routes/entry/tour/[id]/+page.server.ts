@@ -26,14 +26,14 @@ export const load = async ({ fetch, params, url }) => {
   const tours = await prisma.tour.findMany({ select: { id: true, startTime_utc: true, endTime_utc: true, _count: true }, orderBy: { startTime_utc: 'desc' } });
 
   let tour: Prisma.TourGetPayload<{
-    include: { days: true }
+    include: { days: { include: { legs: { include: { positions: true } } } } }
   }> | null = null;
 
 
   let id: 'new' | number = params.id === 'new' || isNaN(parseInt(params.id)) ? 'new' : parseInt(params.id);
 
   if (id !== 'new') {
-    tour = await prisma.tour.findUnique({ where: { id: id }, include: { days: true } });
+    tour = await prisma.tour.findUnique({ where: { id: id }, include: { days: { include: { legs: { include: { positions: true } } } } } });
     if (tour === null) {
       if (tours.length === 0) redirect(301, '/entry/tour/new');
       else redirect(302, '/entry/tour/' + tours[0].id);

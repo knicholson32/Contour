@@ -48,7 +48,7 @@
   let isSelectedNight = $derived(selected !== null && selected.title === `${title} Night`);
 </script>
 
-<div class="col-span-2 flex flex-col justify-center items-center p-1 w-full xs:w-48 rounded-lg bg-zinc-925 transition-colors border {isSelectedGeneral || isSelectedNight ? 'border-sky-500' : ''} overflow-hidden select-none">
+<div class="col-span-2 flex flex-col justify-center items-center p-1 w-full xs:w-48 rounded-lg bg-zinc-100 dark:bg-zinc-925 transition-colors border {isSelectedGeneral || isSelectedNight ? 'border-sky-500' : ''} overflow-hidden select-none">
   <div class="text-xs font-mono tracking-widest text-center">{title}</div>
   <div class="grid grid-cols-2 w-full">
     <button onclick={onClickGeneral} class="flex flex-col text-center items-center" title="{data.general.currencyExpiry - nowSeconds > 0 ? `Expires on ${dateToDateStringFormMonthDayYear(data.general.currencyExpiry)}` : 'Currency expired'}">
@@ -67,7 +67,7 @@
       {#if data.general.currencyExpiry - nowSeconds < 0}
         <div class="font-mono text-xxs text-center text-gray-500">not current</div>
       {:else}
-        <div class="font-mono text-xxs text-center text-gray-500"><span class="text-gray-300">{Math.floor((data.general.currencyExpiry - nowSeconds) / (60 * 60 * 24))}</span> days rem</div>
+        <div class="font-mono text-xxs text-center text-gray-500"><span class="text-gray-600 dark:text-gray-300">{Math.floor((data.general.currencyExpiry - nowSeconds) / (60 * 60 * 24))}</span> days rem</div>
       {/if}
     </button>
     <button onclick={onClickNight} class="flex flex-col text-center items-center" title="{data.night.currencyExpiry - nowSeconds > 0 ? `Expires on ${dateToDateStringFormMonthDayYear(data.night.currencyExpiry)}` : 'Currency expired'}">
@@ -86,7 +86,7 @@
       {#if data.night.currencyExpiry - nowSeconds < 0}
         <div class="font-mono text-xxs text-center text-gray-500">not current</div>
       {:else}
-        <div class="font-mono text-xxs text-center text-gray-500"><span class="text-gray-300">{Math.floor((data.night.currencyExpiry - nowSeconds) / (60 * 60 * 24))}</span> days rem</div>
+        <div class="font-mono text-xxs text-center text-gray-500"><span class="text-gray-600 dark:text-gray-300">{Math.floor((data.night.currencyExpiry - nowSeconds) / (60 * 60 * 24))}</span> days rem</div>
       {/if}
     </button>
   </div>

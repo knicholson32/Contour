@@ -7,6 +7,7 @@ import type API from '$lib/types/api';
 
 const timeZonesWithUtc = getTimeZones({ includeUtc: true });
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /**
  * Get an airport from the ICAO identifier
@@ -69,6 +70,31 @@ export const getWeekdayUTC = (unix: number) => {
 	const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 	const now = new Date(unix * 1000);
 	return days[now.getUTCDay()];
+}
+
+/**
+ * Get a one-line short representation of a date string in March 1st format
+ * @param unix the date
+ * @returns the string
+ */
+export const getInlineDateUTCPretty = (unix: number) => {
+	const now = new Date(unix * 1000);
+	return `${monthsFull[now.getUTCMonth()]} ${ordinalSuffix(now.getUTCDate())}`;
+}
+
+export const ordinalSuffix = (i: number) => {
+	let j = i % 10,
+			k = i % 100;
+	if (j === 1 && k !== 11) {
+			return i + "st";
+	}
+	if (j === 2 && k !== 12) {
+			return i + "nd";
+	}
+	if (j === 3 && k !== 13) {
+			return i + "rd";
+	}
+	return i + "th";
 }
 
 /**

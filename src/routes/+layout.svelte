@@ -489,7 +489,7 @@
                   <a href="https://hub.docker.com/_/node" target="_blank" class="hover:underline flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.parentImage}</code></a>
                   
                   <a href="https://nodejs.org/" target="_blank" class="hover:underline flex-grow text-right">Node</a>
-                  <a href="https://nodejs.org/docs/v{data.nodeVersion}/api/" target="_blank" class="hover:underline flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">v{data.nodeVersion}</code></a>
+                  <a href="https://nodejs.org/docs/v{data.nodeVersion}/api/" target="_blank" class="hover:underline flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.nodeVersion}</code></a>
 
                   <a href="https://svelte.dev/" target="_blank" class="hover:underline flex-grow text-right">Svelte</a>
                   <div class="flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.svelteVersion}</code></div>

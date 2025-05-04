@@ -5,8 +5,13 @@
   import Schedule from './helpers/Schedule.svelte';
   import Blank from './helpers/Blank.svelte';
 
-  export let data: ((Types.Deadhead | (Types.Leg & { aircraft: { simulator: boolean } })) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[];
-  export let day: Types.DutyDay;
+  interface Props {
+    data: ((Types.Deadhead | (Types.Leg & { aircraft: { simulator: boolean } })) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[];
+    day: Types.DutyDay;
+    [key: string]: any
+  }
+
+  let { data, day, ...rest }: Props = $props();
 
   // Sort the data so deadheads come before flights if they start at the same time
   data.sort((a, b) => a.startTime_utc === b.startTime_utc ? (a.type === 'deadhead' ? -1 : 1) : 0);
@@ -103,7 +108,7 @@
 
 <div class="w-full relative bg-gray-50 dark:bg-zinc-900 border-t border-b border-gray-200 dark:border-zinc-700">
   <div class="w-full relative z-10 overflow-y-hidden overflow-x-auto pb-3">
-    <div class="{$$restProps.class} w-full relative flex flex-row items-start text-zinc-800 dark:text-white pt-3 pb-[1.25rem] px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
+    <div class="{rest.class} w-full relative flex flex-row items-start text-zinc-800 dark:text-white pt-3 pb-[1.25rem] px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
       {#each dataFormatted as entry}
         {#if entry.entity.type === 'blank'}
           <Blank entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc}/>

@@ -19,8 +19,8 @@ export const load = async ({ params, fetch, url }) => {
   const entrySettings = await settings.getSet('entry');
 
   const tourId = url.searchParams.get('tour') === null ? null : parseInt(url.searchParams.get('tour') ?? '-1');
-  let currentTour: Prisma.TourGetPayload<{}> | null = null;
-  if (tourId !== null) currentTour = await prisma.tour.findUnique({ where: { id: tourId } });
+  let currentTour: Prisma.TourGetPayload<{include: { days: { include: { legs: true } } }}> | null = null;
+  if (tourId !== null) currentTour = await prisma.tour.findUnique({ where: { id: tourId }, include: { days: { include: { legs: true } } } });
   if (currentTour === null) redirect(302, '/tour/new');
 
   // const currentDay = await prisma.dutyDay.findUnique({
@@ -35,6 +35,8 @@ export const load = async ({ params, fetch, url }) => {
   const airports = await ((await fetch('/api/airports')).json()) as API.Airports;
 
   const lastDay = await prisma.dutyDay.findFirst({ where: { tourId: currentTour.id }, orderBy: { endTime_utc: 'desc'} });
+
+
 
   // Reset the last used flight ID
   await settings.set('entry.flight_id.last', '');

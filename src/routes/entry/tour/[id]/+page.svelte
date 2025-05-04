@@ -2,15 +2,12 @@
   import { enhance } from '$app/forms';
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
-  import { Timeline } from '$lib/components/timeline';
   import * as Card from "$lib/components/ui/card";
-  import Image from '$lib/components/Image.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte'
   import { v4 as uuidv4 } from 'uuid';
   import { icons } from '$lib/components';
   import { page } from '$app/state';
   import { afterNavigate, goto, invalidateAll} from '$app/navigation';
-  import Badge from '$lib/components/decorations/Badge.svelte';
   import * as MenuForm from '$lib/components/menuForm';
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
@@ -20,6 +17,7 @@
   import { Timer, TowerControl } from 'lucide-svelte';
   import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
   import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
+  import { TourPreview } from '$lib/components/tourPreview';
 
   interface Props {
     form: import('./$types').ActionData;
@@ -67,8 +65,19 @@
   });
 
 
-
+  let hoveringLeg: string | null = $state(null);
   const ref = page.url.searchParams.get('ref');
+
+  let highlight: number | null = $state(null);
+
+  $effect(() => {
+    if (hoveringLeg === null) {
+      highlight = null;
+    } else {
+      highlight = data.tourMap?.ids.findIndex((leg) => leg === hoveringLeg) ?? -1;
+      if (highlight === -1) highlight = null;
+    }
+  });
 
 </script>
 
@@ -130,7 +139,7 @@
 
       {#if data.tourMap !== null}
         {#key mapKey}
-          <Map.Bulk class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" legIDs={data.tourMap.ids} pos={data.tourMap.positions} airports={data.tourMap.airports} />
+          <Map.Bulk class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" legIDs={data.tourMap.ids} highlight={highlight} pos={data.tourMap.positions} airports={data.tourMap.airports} />
         {/key}
       {/if}
 
@@ -181,6 +190,12 @@
               <p class="text-xs text-muted-foreground">Max {data.stats.fastestSpeed.toFixed(0)} kts</p>
             </Card.Content>
           </Card.Root>
+        </div>
+      {/if}
+
+      {#if data.currentTour !== null}
+        <div class="mx-4 mb-4 bg-card text-card-foreground rounded-lg border shadow-sm overflow-hidden">
+          <TourPreview tour={data.currentTour} bind:hoveringLeg={hoveringLeg} />
         </div>
       {/if}
 

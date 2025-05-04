@@ -148,7 +148,6 @@ export const load = async ({ fetch, params, parent, url }) => {
 
   if (currentDay === null) {
     return {
-      params,
       entrySettings,
       currentDay,
       currentTour,
@@ -232,7 +231,6 @@ export const load = async ({ fetch, params, parent, url }) => {
   if (numPositions > 0) speed = speed / numPositions;
 
   return {
-    params,
     entrySettings,
     currentDay,
     currentTour,

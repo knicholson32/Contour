@@ -88,7 +88,7 @@
       <!-- Existing Aircraft -->
       <MenuSection title="Days">
         {#each data.days as day,i (day.id)}
-          <MenuElement href="/entry/day/{day.id}?{urlActiveParam}" selected={day.id === parseInt(data.params.id) && !isMobileSize}>
+          <MenuElement href="/entry/day/{day.id}?{urlActiveParam}" selected={day.id === parseInt(page.params.id) && !isMobileSize}>
             <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
               <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
                 <span class="font-mono">

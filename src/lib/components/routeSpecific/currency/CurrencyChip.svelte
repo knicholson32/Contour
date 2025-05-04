@@ -35,7 +35,7 @@
 
 </script>
 
-<button onclick={onClick} class="col-span-1 flex flex-col justify-center items-center p-1 rounded-lg bg-zinc-925 w-full xs:w-24 border transition-colors {isSelected ? 'border-sky-500' : ''} overflow-hidden select-none" title="{currencyExpiry - nowSeconds > 0 ? `Expires on ${dateToDateStringFormMonthDayYear(currencyExpiry)}` : 'Currency expired'}">
+<button onclick={onClick} class="col-span-1 flex flex-col justify-center items-center p-1 rounded-lg bg-zinc-100 dark:bg-zinc-925 w-full xs:w-24 border transition-colors {isSelected ? 'border-sky-500' : ''} overflow-hidden select-none" title="{currencyExpiry - nowSeconds > 0 ? `Expires on ${dateToDateStringFormMonthDayYear(currencyExpiry)}` : 'Currency expired'}">
   <div class="relative">
     <div class="text-xs font-mono tracking-widest text-center">{catClass}</div>
     <div class="text-xxs font-mono text-center uppercase transition-colors {isSelected ? 'text-sky-500' : 'text-gray-500'}">{type}</div>
@@ -52,6 +52,6 @@
   {#if currencyExpiry - nowSeconds < 0}
     <div class="font-mono text-xxs">not current</div>
   {:else}
-    <div class="font-mono text-xxs text-gray-500"><span class="text-gray-300">{Math.floor((currencyExpiry - nowSeconds) / (60 * 60 * 24))}</span> days rem</div>
+    <div class="font-mono text-xxs text-gray-500"><span class="text-gray-600 dark:text-gray-300">{Math.floor((currencyExpiry - nowSeconds) / (60 * 60 * 24))}</span> days rem</div>
   {/if}
   </button>

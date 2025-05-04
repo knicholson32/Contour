@@ -23,7 +23,7 @@
       <div class="absolute top-2 left-1">Date 2</div>
     </div>
   {:else}
-    <div class="rounded-full h-2 w-full font-mono text-xxs bg-gray-400 relative overflow-visible">
+    <div class="rounded-full h-2 w-full font-mono text-xxs bg-gray-300 dark:bg-gray-400 relative overflow-visible">
       <div class="absolute top-2 left-1 hidden xs:block">No Currency Selected</div>
     </div>
   {/if}

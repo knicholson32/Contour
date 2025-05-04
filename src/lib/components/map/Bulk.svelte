@@ -7,6 +7,7 @@
   import { browser } from '$app/environment';
   import './helpers/leaflet.css';
   import { goto } from '$app/navigation';
+    import type { PolylineOptions } from 'leaflet';
 
   type T = [number, number][];
   type A = Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>;
@@ -15,6 +16,7 @@
   export let pos: T[];
   export let legIDs: string[];
   export let airports: A[];
+  export let highlight: number | null = null;
 
   export let paddingTopLeft: [number, number] = [30, 30];
   export let paddingBottomRight: [number, number] = [30, 30];
@@ -64,7 +66,18 @@
         pos.push([ p[0], p[1] ]);
         bound.push([ p[0], p[1] ]);
       }
-      const pl = L.polyline(pos, { color: '#E4E', opacity: 1 });
+      let options: PolylineOptions = {color: '#E4E', opacity: 1};
+      if (highlight !== null) {
+        if (index === highlight) {
+          // options.color = "#08F";
+          options.weight = 5;
+        } else {
+          options.weight = 2;
+          options.opacity = 0.6;
+          options.dashArray = [2, 5];
+        }
+      }
+      const pl = L.polyline(pos, options);
       const i = index;
       pl.on('click', () => goto(`/entry/leg/${legIDs[i]}?resolve=true`));
       posLayer.addLayer(pl);
@@ -96,7 +109,10 @@
     if (map.getZoom() > 13) map.setZoom(13);
   }
 
-  $: updateMapContents(pos);
+  $: {
+    highlight;
+    updateMapContents(pos);
+  }
 
   onMount(async () => {
     // import * as L from 'leaflet';
