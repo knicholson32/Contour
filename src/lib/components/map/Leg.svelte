@@ -1,14 +1,16 @@
 <script lang="ts">
   
-  import 'leaflet/dist/leaflet.css';
+  // import 'leaflet/dist/leaflet.css';
   import { onMount } from 'svelte';
   import type * as Types from '@prisma/client';
   import * as helpers from './helpers';
-  import './helpers/leaflet.css';
-    import type { Curve } from 'leaflet';
-    import type { CurvePathData } from '@elfalem/leaflet-curve';
-    import { getDistanceFromLatLonInKm } from '$lib/helpers';
-    import { browser } from '$app/environment';
+  // import './helpers/leaflet.css';
+  import type { Curve } from 'leaflet';
+  // import type { CurvePathData } from '@elfalem/leaflet-curve';
+  // import { getDistanceFromLatLonInKm } from '$lib/helpers';
+  import { browser } from '$app/environment';
+    import { ZoomHandler } from './helpers/zoomHandler';
+    import { LegData } from './helpers/LegData';
 
   export let positions: Types.Position[];
   export let fixes: Types.Fix[];
@@ -27,7 +29,7 @@
   let map: L.Map;
 
   let fixLayer: L.Polyline<any, any> | null = null;
-  let posLayer: Curve | null = null;
+  let posLayer: L.LayerGroup<any> | null = null;
   let markerLayer: L.LayerGroup<any> | null = null;
   let targetLayer: L.LayerGroup<any> | null = null;
 
@@ -80,9 +82,11 @@
     else fixLayer = L.polyline(fix, { color: '#15F', opacity: 0.25, weight: 1 });
     
     fixLayer.addTo(map);
-
-    helpers.drawLegData(L, map, positions.map((p) => [p.latitude, p.longitude]), airports);
-
+    posLayer = L.layerGroup();
+    const legData = new LegData(L, map, positions.map((p) => [p.latitude, p.longitude]), airports);
+    legData.addTo(posLayer);
+    posLayer?.addTo(map);
+    // helpers.applyLegData(L, map, map, legData);
 
     markerLayer = L.layerGroup();
  		for(let i = 0; i < airports.length; i++) markerLayer.addLayer(markerIcon(airports[i], i));
@@ -123,10 +127,12 @@
 
   $: updateMapContents(positions, fixes);
 
+
   onMount(async () => {
     // import * as L from 'leaflet';
     L = (await import('leaflet')).default
     await import('@elfalem/leaflet-curve');
+    LegData.initialize();
     mounted = true;
 
 

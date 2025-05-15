@@ -5,7 +5,8 @@
   import type * as Types from '@prisma/client';
   import * as helpers from './helpers';
   import './helpers/leaflet.css';
-    import { browser } from '$app/environment';
+  import { browser } from '$app/environment';
+    import { LegData } from './helpers/LegData';
 
   export let positions: Types.Position[];
   export let fixes: Types.Fix[];
@@ -113,7 +114,8 @@
     
     fixLayer.addTo(map);
     posLayer = L.layerGroup();
-    helpers.drawLegData(L, posLayer, points, airports);
+    const legData = new LegData(L, map, points, airports);
+    legData.addTo(posLayer)
     posLayer.addTo(map);
 
     markerLayer = L.layerGroup();
@@ -137,6 +139,7 @@
     // import * as L from 'leaflet';
     L = (await import('leaflet')).default
     await import('@elfalem/leaflet-curve');
+    LegData.initialize();
     mounted = true;
 
 

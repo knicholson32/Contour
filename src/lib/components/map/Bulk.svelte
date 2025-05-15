@@ -8,6 +8,7 @@
   import './helpers/leaflet.css';
   import { goto } from '$app/navigation';
     import type { PolylineOptions } from 'leaflet';
+    import { LegData } from './helpers/LegData';
 
   type T = [number, number][];
   type A = Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>;
@@ -29,6 +30,7 @@
   let posLayer: L.LayerGroup<any> | null = null;
   // let deadLayer: L.LayerGroup<any> | null = null;
   let markerLayer: L.LayerGroup<any> | null = null;
+  let legData: LegData[] = [];
 
   let mounted = false;
 
@@ -49,8 +51,23 @@
     return L.marker([airport.latitude, airport.longitude], { icon });
   }
 
+  const updateHighlight = (highlight: number | null) => {
+    if (highlight !== null) {
+      for (let i = 0; i < legData.length; i++) {
+        const leg = legData[i];
+        if (highlight === i) {
+          leg.highlight();
+        } else {
+          leg.muted();
+        }
+      }
+    } else {
+      for (const leg of legData) leg.default();
+    }
+  }
 
-  const updateMapContents = (legs: T[]) => {
+
+  const updateMapContents = () => {
     if (!mounted) return;
 
     if (posLayer !== null) map.removeLayer(posLayer);
@@ -60,29 +77,14 @@
     let bound: L.LatLngExpression[] = [];
     posLayer = L.layerGroup();
     let index = 0;
-    for (const pGroup of pos) {
-      const pos: L.LatLngExpression[] = [];;
-      for (const p of pGroup) {
-        pos.push([ p[0], p[1] ]);
-        bound.push([ p[0], p[1] ]);
-      }
-      let options: PolylineOptions = {color: '#E4E', opacity: 1};
-      if (highlight !== null) {
-        if (index === highlight) {
-          // options.color = "#08F";
-          options.weight = 5;
-        } else {
-          options.weight = 2;
-          options.opacity = 0.6;
-          options.dashArray = [2, 5];
-        }
-      }
-      const pl = L.polyline(pos, options);
-      const i = index;
-      pl.on('click', () => goto(`/entry/leg/${legIDs[i]}?resolve=true`));
-      posLayer.addLayer(pl);
-      index++;
-    }
+
+    LegData.initialize();
+    legData = [];
+
+    for (const pGroup of pos) legData.push(new LegData(L, map, pGroup, [], { link: `/entry/leg/${legIDs[index++]}?resolve=true` }));
+    for (const data of legData) data.addTo(posLayer);
+
+
     posLayer.addTo(map);
 
     // deadLayer = L.layerGroup();
@@ -110,8 +112,12 @@
   }
 
   $: {
-    highlight;
-    updateMapContents(pos);
+    updateHighlight(highlight);
+  }
+
+  $: {
+    pos;
+    updateMapContents();
   }
 
   onMount(async () => {
@@ -120,6 +126,8 @@
     if (!browser) return;
 
     L = (await import('leaflet')).default
+    await import('@elfalem/leaflet-curve');
+    LegData.initialize();
     mounted = true;
 
 
@@ -129,7 +137,7 @@
 
       map = helpers.createMap(L, container);
 
-      updateMapContents(pos);
+      updateMapContents();
 
       return {
         destroy: () => {

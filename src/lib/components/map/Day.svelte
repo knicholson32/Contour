@@ -6,6 +6,7 @@
   import type * as Types from '@prisma/client';
   import { browser } from '$app/environment';
   import './helpers/leaflet.css';
+    import { LegData } from './helpers/LegData';
 
   export let paddingTopLeft: [number, number] = [30, 20];
   export let paddingBottomRight: [number, number] = [50, 30];
@@ -25,6 +26,8 @@
   let posLayer: L.LayerGroup<any> | null = null;
   let deadLayer: L.LayerGroup<any> | null = null;
   let markerLayer: L.LayerGroup<any> | null = null;
+
+  let legData: LegData[] = [];
 
   let mounted = false;
 
@@ -53,6 +56,8 @@
     let bound: L.LatLngExpression[] = [];
     posLayer = L.layerGroup();
     let index = 0;
+    legData = [];
+    LegData.initialize();
     for (const leg of legs) {
       const pos: L.LatLngExpression[] = [];
       const points: helpers.Point[] = [];
@@ -69,9 +74,11 @@
       if (originAirport) legAirports.push(originAirport);
       if (diversionAirport) legAirports.push(diversionAirport);
       else if (destAirport) legAirports.push(destAirport);
-      helpers.drawLegData(L, posLayer, points, legAirports);
+      legData.push(new LegData(L, map, points, legAirports, { link: `/entry/leg/${leg.id}?day=${leg.dayId}` }));
       index ++;
     }
+    for (const data of legData) data.addTo(posLayer);
+
     posLayer.addTo(map);
 
     deadLayer = L.layerGroup();
@@ -109,9 +116,8 @@
 
     L = (await import('leaflet')).default
     await import('@elfalem/leaflet-curve');
+    LegData.initialize();
     mounted = true;
-
-
 
     const implementMap = (container: HTMLDivElement) => {
       if (container === null) return;

@@ -3,7 +3,10 @@ import { goto } from '$app/navigation';
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type { CurvePathData } from '@elfalem/leaflet-curve';
 import type * as Types from '@prisma/client';
-import type { LayerGroup } from 'leaflet';
+import type { Curve, LayerGroup } from 'leaflet';
+import { ZoomHandler } from './zoomHandler';
+
+export const ZOOM_CUTOFF = 8;
 
 export type CreateMapOptions = { 
   noLegal?: boolean, 
@@ -19,6 +22,7 @@ export interface BezierCurve {
   control2: Point;
   end: Point;
   distance: number;
+  curvature: number;
 }
 export const lerp = (p1: Point, p2: Point, t: number): Point => {
   return [
@@ -27,6 +31,72 @@ export const lerp = (p1: Point, p2: Point, t: number): Point => {
   ];
 }
 
+const distToLine = (p: Point, a: Point, b: Point): number => {
+  const ab = { x: b[0] - a[0], y: b[1] - a[1] };
+  const ap = { x: p[0] - a[0], y: p[1] - a[1] };
+  const abLength = Math.hypot(ab.x, ab.y);
+  const projected = (ap.x * ab.x + ap.y * ab.y) / abLength;
+  const closest = {
+    x: a[0] + (ab.x * projected) / abLength,
+    y: a[1] + (ab.y * projected) / abLength,
+  };
+  return Math.hypot(p[0] - closest.x, p[1] - closest.y);
+};
+
+const calculateCurvatureValue = (start: Point, control1: Point, control2: Point, end: Point): number => {
+  const d1 = distToLine(control1, start, end);
+  const d2 = distToLine(control2, start, end);
+  const maxDist = Math.max(d1, d2);
+  const chordLength = Math.hypot(end[0] - start[0], end[1] - start[1]);
+  return maxDist / chordLength;
+}
+
+const averageVector = (v: Point): Point => {
+  const mag = Math.hypot(v[0], v[1]);
+  return [
+    v[0] / mag,
+    v[1] / mag,
+  ];
+}
+
+const fitBezierGroup = (curves: BezierCurve[]): BezierCurve => {
+  const first = curves[0];
+  const last = curves[curves.length - 1];
+  const start = first.start;
+  const end = last.end;
+
+  // Outgoing tangent from first
+  const tanOut: Point = [
+    first.control2[0] - first.start[0],
+    first.control2[1] - first.start[1],
+  ];
+
+  // Incoming tangent to last
+  const tanIn: Point = [
+    last.end[0] - last.control1[0],
+    last.end[1] - last.control1[1],
+  ];
+
+  const chordLength = Math.hypot(end[0] - start[0], end[1] - start[1]);
+  const scale = chordLength / 3;
+
+  const unitOut = averageVector(tanOut);
+  const unitIn = averageVector(tanIn);
+
+  const control1: Point = [
+    start[0] + unitOut[0] * scale,
+    start[1] + unitOut[1] * scale,
+  ];
+
+  const control2: Point = [
+    end[0] - unitIn[0] * scale,
+    end[1] - unitIn[1] * scale,
+  ];
+
+  const distance = chordLength;
+
+  return { start, control1, control2, end, distance, curvature: calculateCurvatureValue(start, control1, control2, end) };
+}
 
 export const computeBezierPath = (points: Point[]): BezierCurve[] => {
   const n = points.length - 1;
@@ -56,78 +126,42 @@ export const computeBezierPath = (points: Point[]): BezierCurve[] => {
       control2: cp2,
       end: p2,
       distance: getDistanceFromLatLonInKm(p1[0], p1[1], p2[0], p2[1]),
+      curvature: calculateCurvatureValue(p1, cp1, cp2, p2)
     });
   }
 
   return result;
 }
 
-export const drawLegData = (L: typeof import('leaflet'), map: L.Map | LayerGroup, points: Point[], airports: Types.Airport[], options?: { link?: string, noCurves?: boolean}) => {
-  let airportStartJoin = false;
-  let airportEndJoin = false;
-  if (options === undefined) options = {};
-  const noCurves = options.noCurves || false;
-  const link = options.link || undefined;
-  // Check that the first position is the airport
-  if (airports.length > 0 && (points[0][0] !== airports[0].latitude || points[0][1] !== airports[0].longitude)) airportStartJoin = true;
+export const simplifyBezierPaths = (curves: BezierCurve[], straightnessThreshold = 0.003): BezierCurve[] => {
+  const simplified: BezierCurve[] = [];
 
-  // Check that the last position is the airport
-  if (airports.length > 0 && (points[points.length - 1][0] !== airports[airports.length - 1].latitude || points[points.length - 1][1] !== airports[airports.length - 1].longitude)) airportEndJoin = true;
-
-  // Try to make curves work. If there are less than 3 points, just draw a line.
-  try {
-    if (noCurves) throw Error('No curves');
-    const curves = computeBezierPath(points);
-    const curveEntries: CurvePathData = [];
-    const uncertainCurves: BezierCurve[] = [];
-    for (let i = 0; i < curves.length; i++) {
-      const curve = curves[i];
-      // If this curve is too long, add it to the uncertain curves
-      if (curve.distance > 500 || (i > 0 && curves[i-1].distance > 500) || (i < curves.length - 1 && curves[i+1].distance > 500)) {
-        uncertainCurves.push(curve);
-        continue;
-      }
-      curveEntries.push('M');
-      curveEntries.push(curve.start);
-      curveEntries.push('C');
-      curveEntries.push(curve.control1);
-      curveEntries.push(curve.control2);
-      curveEntries.push(curve.end);
+  let i = 0;
+  while (i < curves.length) {
+    let j = i;
+    while (j + 1 < curves.length) {
+      if (curves[j].curvature > straightnessThreshold) break;
+      j++;
     }
 
-    const uncertainCurveEntries: CurvePathData = [];
-    for (const curve of uncertainCurves) {
-      uncertainCurveEntries.push('M');
-      uncertainCurveEntries.push(curve.start);
-      uncertainCurveEntries.push('L');
-      uncertainCurveEntries.push(curve.end);
+    if (i === j) {
+      simplified.push(curves[i]);
+      i++;
+    } else {
+      const group = curves.slice(i, j + 1);
+      const merged = fitBezierGroup(group);
+      simplified.push(merged);
+      i = j + 1;
     }
-
-    const mainCurve = L.curve(curveEntries, { color: '#E4E', opacity: 1 });
-    const uncertainPosCurves = L.curve(uncertainCurveEntries, { color: '#E4E', opacity: 1, dashArray: [5, 5], weight: 1 });
-    if (link) {
-      mainCurve.on('click', () => goto(link));
-      uncertainPosCurves.on('click', () => goto(link));
-    }
-    
-    mainCurve.addTo(map);
-    uncertainPosCurves.addTo(map);
-  } catch (e) {
-    // Fallback to straight lines if there was an error
-    // TODO: If there is a long distance between two points, draw a straight line between them in a different color, as is done in the curves
-    const line = L.polyline(points, { color: '#E4E', opacity: 1, smoothFactor: 1 });
-    if (link) line.on('click', () => goto(link));
-    line.addTo(map);
   }
 
-  if (airportStartJoin) {
-    L.polyline([points[0], [airports[0].latitude, airports[0].longitude]], { color: '#333', dashArray: [5, 5], opacity: 0.25, weight: 1}).addTo(map);
-  }
+  // console.log('Before', curves.length, 'After', simplified.length);
 
-  if(airportEndJoin) {
-    L.polyline([[airports[airports.length - 1].latitude, airports[airports.length - 1].longitude], points[points.length - 1]], { color: '#333', dashArray: [5, 5], opacity: 0.25, weight: 1 }).addTo(map);
-  }
+  return simplified;
+
 }
+
+
 
 export const createMap = (L: typeof import('leaflet'), container: HTMLDivElement, options: CreateMapOptions = defaultOptions): L.Map => {
 
