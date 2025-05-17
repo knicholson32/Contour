@@ -140,7 +140,6 @@ export const load = async ({ params, fetch, url }) => {
 
   return {
     entry,
-    params,
     entrySettings,
     changeSourceURL,
     dayId,
@@ -565,7 +564,7 @@ export const actions = {
           if ('apiErr' in err && err.apiErr !== null && err.apiErr.reason === 'INVALID_ARGUMENT' && 'detail' in err.apiErr && typeof err.apiErr.detail === 'string' && err.apiErr.detail.indexOf('fa_flight_id cannot be from more than 10 days ago') !== -1) {
             return API.Form.formFailure('?/default', '*', 'This FlightAware leg is too old to save. Please enter this leg manually.');
           } else {
-            return API.Form.formFailure('?/default', '*', 'Could not store positions');
+            return API.Form.formFailure('?/default', '*', 'Could not store positions: ' + err.message);
           }
         }
       } catch (e) {
