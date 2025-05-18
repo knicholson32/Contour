@@ -27,6 +27,7 @@
 	let localizationList: Settings.List | null = $state(null);
 	let localizationUnsavedChanges = $state(false);
 	let timezone = $state(data.settingValues['general.timezone']);
+	let prefers_utc = $state(data.settingValues['general.prefers_utc']);
 
 	// Utilities
 	beforeNavigate(({ cancel }) => {
@@ -90,4 +91,7 @@
 	{/snippet}
 
 	<Settings.Select {form} name="general.timezone" title="Local Timezone" update={() => localizationList?.update()} bind:value={timezone} options={timeZonesNames.concat('UTC')}/>
+
+	<Settings.Switch name="general.prefers_utc" {form} title="Prefer UTC" update={() => localizationList?.update()} bind:value={prefers_utc} hoverTitle={'Whether or not to prefer UTC time over local time when a choice between them exists'} />
+
 </Settings.List>

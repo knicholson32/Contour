@@ -1,6 +1,8 @@
 import * as c from 'chalk';
 import { sleep } from '$lib/helpers';
 import type * as schema from './schema'
+import * as settings from '$lib/server/settings';
+import { Debug } from '$lib/types/prisma';
 
 const chalk = new c.Chalk();
 
@@ -32,8 +34,10 @@ export class AeroAPIError extends Error {
 const callAPI = async <ResponseType>(uri: string, aeroAPIKey: string, depth?: number): Promise<ResponseType> => {
     // Assign depth if it is not assigned
     if (depth === undefined) depth = 0;
+    // Get debug info
+    const debug = await settings.get('system.debug');
     // Log this AeroAPI request
-    console.log(chalk.red('AeroAPI: ') + chalk.grey('Depth ' + depth) + ' ' + chalk.blue(uri));
+    if (debug >= Debug.DEBUG) console.log(chalk.red('AeroAPI: ') + chalk.grey('Depth ' + depth) + ' ' + chalk.blue(uri));
     // Make request to FlightAware API
     const response = await fetch(`https://aeroapi.flightaware.com/aeroapi${uri}`, { headers: { 'x-apikey': aeroAPIKey } });
     // Parse the response
@@ -45,7 +49,7 @@ const callAPI = async <ResponseType>(uri: string, aeroAPIKey: string, depth?: nu
             // We are. Check the recursion depth and throw an error if too deep
             if (depth > DEPTH_LIMIT) throw new Error('RATE LIMIT DEPTH EXCEEDED');
             // Log that we're waiting for rate limit reasons
-            console.log(`RATE LIMITED [${uri}]: Try ${depth}`);
+            if (debug >= Debug.VERBOSE) console.log(`RATE LIMITED [${uri}]: Try ${depth}`);
             // Increase the recursion depth
             depth = depth + 1;
             // Wait some time (increases the longer we have been waiting)
@@ -101,8 +105,10 @@ export const getFlights = async (callsign: string, aeroAPIKey: string, options: 
  */
 export type GetFlightBulkOptions = { ident_type?: schema.IdentType, times?: { startTime?: number, endTime?: number } }
 export const getFlightsBulk = async (callsign: string, aeroAPIKey: string, options: GetFlightBulkOptions): Promise<schema.Flight[]> => {
+    // Get debug info
+    const debug = await settings.get('system.debug');
     // Log the bulk request
-    console.log(chalk.red('AeroAPI: ') + chalk.grey(`getFlightsBulk(${callsign}, ####, ${JSON.stringify(options)})`) + ' -> Requested');
+    if (debug >= Debug.DEBUG) console.log(chalk.red('AeroAPI: ') + chalk.grey(`getFlightsBulk(${callsign}, ####, ${JSON.stringify(options)})`) + ' -> Requested');
     // Resolve the ident_type
     if (options.ident_type === undefined) options.ident_type = 'registration';
     // Declare the request
@@ -149,8 +155,10 @@ export const getFlightsBulk = async (callsign: string, aeroAPIKey: string, optio
     }
 
     // Log the results
-    console.log(chalk.red('AeroAPI: ') + chalk.grey(`getFlightsBulk(${callsign}, ####, ${JSON.stringify(options)})`));
-    console.log(chalk.blue(JSON.stringify(flights)));
+    if (debug >= Debug.DEBUG) {
+        console.log(chalk.red('AeroAPI: ') + chalk.grey(`getFlightsBulk(${callsign}, ####, ${JSON.stringify(options)})`));
+        console.log(chalk.blue(JSON.stringify(flights)));
+    }
 
     return flights;
 }

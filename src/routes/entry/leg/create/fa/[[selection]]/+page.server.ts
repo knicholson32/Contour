@@ -230,8 +230,7 @@ export const load = async ({ params, fetch, url }) => {
     airportList: selected === null ? null : await generateAirportList(selected.originAirportId, selected.destinationAirportId, selected.diversionAirportId),
     currentTour,
     currentDay,
-    airports,
-    params
+    airports
   };
 };
 

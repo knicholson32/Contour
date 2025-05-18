@@ -5,7 +5,8 @@ export const load = async ({ params }) => {
 	return {
 		settingValues: {
 			'system.debug': await settings.get('system.debug'),
-			'general.timezone': await settings.get('general.timezone')
+			'general.timezone': await settings.get('general.timezone'),
+			'general.prefers_utc': await settings.get('general.prefers_utc'),
 		},
 		tz: (await settings.get('general.timezone')) ?? 'UTC'
 	};
@@ -26,5 +27,8 @@ export const actions = {
 
 		const timezone = (data.get('general.timezone') ?? undefined) as undefined | string;
 		if (timezone !== undefined) await settings.set('general.timezone', timezone);
+
+		const prefers_utc = (data.get('general.prefers_utc') ?? undefined) as undefined | string;
+		if (prefers_utc !== undefined) await settings.set('general.prefers_utc', prefers_utc === 'true');
 	}
 };

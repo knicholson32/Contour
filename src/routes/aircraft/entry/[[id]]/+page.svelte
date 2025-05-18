@@ -112,7 +112,7 @@
         {#each data.orderGroups as group (group.typeCode)}
           <Section title={group.typeCode} subtitle={`${group.regs.length} Aircraft`} collapsable={true} >
             {#each group.regs as ac (ac.id)}
-              <MenuElement href="/aircraft/entry/{ac.registration}?{urlActiveParam}" selected={(ac.id === data.params.id || ac.registration === data.params.id) && !isMobileSize}>
+              <MenuElement href="/aircraft/entry/{ac.registration}?{urlActiveParam}" selected={(ac.id === page.params.id || ac.registration === page.params.id) && !isMobileSize}>
                 {#if ac.imageId !== null}
                   <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
                     <Badge class="h-full">{ac._count.legs}</Badge>
@@ -205,7 +205,7 @@
             <Submit remoteForm="form-delete" class="w-full" failed={formData?.ok === false && formData.action === '?/default'} submitting={deleting} theme={{primary: 'red'}} actionText={'Delete'} actionTextInProgress={'Deleting'} />
           </div>
         {/if}
-        {#if $unsavedChanges || data.params.id === 'new'}
+        {#if $unsavedChanges || page.params.id === 'new'}
           <button type="button" onclick={() => clearUID()} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
           <Submit remoteForm="form-create-or-mod" class="flex-grow w-full md:w-48 md:flex-grow-0" disabled={registrationExists} failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.aircraft !== null ? 'Update' : 'Create'} actionTextInProgress={data.aircraft !== null ? 'Updating' : 'Creating'} />
         {/if}

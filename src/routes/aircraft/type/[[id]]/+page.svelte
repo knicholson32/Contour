@@ -67,7 +67,7 @@
         {#each data.orderGroups as group (group.make)}
           <MenuSection title={group.make}>
             {#each group.types as type (type.id)}
-              <MenuElement href="/aircraft/type/{type.id}?{urlActiveParam}" selected={type.id === data.params.id && !isMobileSize} includePadding={false}>
+              <MenuElement href="/aircraft/type/{type.id}?{urlActiveParam}" selected={type.id === page.params.id && !isMobileSize} includePadding={false}>
                 {#if type.imageId !== null}
                   <div class="h-12 w-12 my-2 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
                     <Image id={type.imageId} size={48} class="aspect-1 object-cover w-full h-full" alt="Icon for the {type.make} {type.model}"/>

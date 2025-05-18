@@ -147,7 +147,6 @@ export const load = async ({ fetch, params, url }) => {
     diversionPercent,
     tails,
     types,
-    params,
     regDefault: url.searchParams.get('reg'),
     enums: {
       categoryClass: DB.categoryClassObj.map((v) => { return { value: v, title: `${DB.categoryClassToString(v as DB.CategoryClass)} (${v})` }; }),

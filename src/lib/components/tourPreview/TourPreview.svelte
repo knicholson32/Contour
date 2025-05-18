@@ -4,19 +4,24 @@
   import { Prisma } from "@prisma/client";
   import { SwitchSmall } from "$lib/components/ui/switchSmall";
   import { cn } from "$lib/utils.js";
+    import { onMount } from "svelte";
+    import type { API } from "$lib/types";
+    import { TicketX } from "lucide-svelte";
+    import type { TimeZone } from "@vvo/tzdb";
 
   const DAY_AND_WIDTH = 86400 / 6;
-
 
   interface Props {
     tour: Prisma.TourGetPayload<{include: { days: { include: { legs: true } } }}>;
     startTimeValue?: string | null,
     endTimeValue?: string | null,
     hoveringLeg?: string | null,
-    addDays?: number
+    addDays?: number,
+    tzData?: TimeZone,
+    prefersUTC?: boolean
   }
 
-  let { tour, startTimeValue = null, endTimeValue = null, hoveringLeg = $bindable(null), addDays = 0, ...rest }: Props = $props();
+  let { tour, startTimeValue = null, endTimeValue = null, hoveringLeg = $bindable(null), addDays = 0, tzData, prefersUTC, ...rest }: Props = $props();
 
   let selectedStartDate: number | null = $derived(startTimeValue === null ? null : ((new Date(startTimeValue)).getTime() / 1000));
   let selectedEndDate: number | null = $derived(endTimeValue === null ? null : ((new Date(endTimeValue)).getTime() / 1000));
@@ -24,20 +29,31 @@
   let days: Date[] = $state([]);
 
   // Whether or not to use the local timezone, or UTC time
-  let useLocal = $state(false);
+  let useLocal = $state(prefersUTC === undefined ? true : !prefersUTC);
 
   const calculateDays = () => {
     const newDays: Date[] = [];
     const tourDaysSorted = tour.days.sort((a, b) => a.startTime_utc - b.startTime_utc);
     if (tourDaysSorted.length > 0) {
       // Get the first duty day of the tour
-      const day1 = new Date(tourDaysSorted[0].startTime_utc * 1000);
+      let day1 = new Date(tourDaysSorted[0].startTime_utc * 1000);
       // Get the end of the last duty day
       const utcLast = tourDaysSorted[tourDaysSorted.length - 1].endTime_utc;
 
       // Back that day up so it is the first UTC day that the tour started on
-      if (useLocal) day1.setHours(0, 0, 0, 0);
-      else  day1.setUTCHours(0, 0, 0, 0);
+      if (useLocal) {
+        // Check if we are using computer local time or Home TZ time
+        if (tzData === undefined) {
+          // Using computer local time, which is the default for the Date object
+          day1.setHours(0, 0, 0, 0);
+        } else {
+          // Using Home TZ time. we need to set to UTC and then shift by whatever timezone offset
+          // the Home TZ uses. Start by setting it to UTC
+          day1.setUTCHours(0, 0, 0, 0);
+          // Reassign it with the required offset
+          day1 = new Date(day1.getTime() - tzData.currentTimeOffsetInMinutes * 60000);
+        }
+      } else  day1.setUTCHours(0, 0, 0, 0);
 
       // Add it as the first day
       newDays.push(day1);
@@ -59,6 +75,17 @@
   }
   calculateDays();
 
+  onMount(async () => {
+    // Try to assign TZ data if it doesn't exist.
+    if (tzData === undefined || prefersUTC === undefined) {
+      const tzRaw = await (await fetch('/api/timezone/home')).json() as API.Response;
+      if (tzRaw.ok === true && tzRaw.type === 'timezone-home') {
+        tzData = (tzRaw as API.HomeTimeZone).data;
+        prefersUTC = (tzRaw as API.HomeTimeZone).prefers_utc;
+      }
+    }
+  });
+
   let firstDayStartUTC = $derived(days.length === 0 ? 0 : Math.floor(days[0].getTime() / 1000))
 
   afterNavigate(calculateDays);
@@ -74,7 +101,13 @@
     <div class="absolute z-10 top-2 left-2 inline-flex items-center justify-center text-xxs gap-1">
       <span class={cn("transition-opacity select-none", useLocal ? "opacity-30" : "")}>UTC</span>
       <SwitchSmall bind:checked={useLocal} colorOnSwitched={false} />
-      <span class={cn("transition-opacity select-none", !useLocal ? "opacity-30" : "")}>Local</span>
+      <span class={cn("transition-opacity select-none", !useLocal ? "opacity-30" : "")}>
+        {#if tzData === undefined}
+          Local
+        {:else}
+          Home <span class="italic">({tzData.alternativeName})</span>
+        {/if}
+      </span>
     </div>
     <div class="w-full h-24 flex flex-row justify-center-safe gap-0 px-4 m-auto overflow-x-scroll relative" style="justify-content: safe center;">
       <!-- Tour Progress Bar -->

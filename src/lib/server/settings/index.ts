@@ -32,7 +32,8 @@ export const TypeNames = {
 	'general.email': '',
 	'general.name': '',
 	'general.gravatar.hash': '00000000000000000000000000000000',
-	'general.timezone': process.env.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone
+	'general.timezone': process.env.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+	'general.prefers_utc': false,
 };
 
 export type TypeName = keyof typeof TypeNames;
@@ -61,6 +62,7 @@ export type ObjectType<T extends TypeName> =
 	T extends 'general.name' ? string : 				  // String
 	T extends 'general.gravatar.hash' ? string : 	// String
 	T extends 'general.timezone' ? string : 			// String
+	T extends 'general.prefers_utc' ? boolean : 	// Boolean
 	string;
 
 // -------------------------------------------------------------------------------------------------
@@ -92,6 +94,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 		switch (setting) {
 			// Boolean Conversion ------------------------------------------------------------------------
 			case 'entry.entryMXMode':
+			case 'general.prefers_utc':
 				return (settingVal.value === 'true' ? true : false) as ObjectType<T>;
 
 			// Integer Conversion ------------------------------------------------------------------------

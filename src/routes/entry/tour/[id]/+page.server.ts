@@ -8,6 +8,7 @@ import { filterOutliers } from '$lib/server/helpers';
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type { Prisma } from '@prisma/client';
 import type * as Types from '@prisma/client';
+import type { TimeZone } from '@vvo/tzdb';
 
 const MAX_MB = 10;
 const AVG_FILTER_NUM = 2;
@@ -172,6 +173,18 @@ export const load = async ({ fetch, params, url }) => {
     }
   }
 
+  const fetchTZData = async (): Promise<{ data: TimeZone; prefersUTC: boolean; } | undefined> => {
+    const tzRaw = await (await fetch('/api/timezone/home')).json() as API.Response;
+    if (tzRaw.ok === true && tzRaw.type === 'timezone-home') {
+      const data = (tzRaw as API.HomeTimeZone).data;
+      const prefersUTC = (tzRaw as API.HomeTimeZone).prefers_utc;
+      return { data, prefersUTC };
+    }
+    return undefined;
+  }
+
+  const tzData = await fetchTZData();
+
   return {
     id: id,
     entrySettings,
@@ -180,7 +193,9 @@ export const load = async ({ fetch, params, url }) => {
     stats,
     tourSettings,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[],
-    tours: tours
+    tours: tours,
+    tzData: tzData?.data,
+    prefersUTC: tzData?.prefersUTC
   }
 }
 

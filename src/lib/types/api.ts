@@ -4,6 +4,7 @@ import type { ObjectType, SettingsSet, TypeName } from '$lib/server/settings';
 import * as _responses from './responses';
 import * as _form from './form';
 import * as validators from './prisma';
+import type { TimeZone } from '@vvo/tzdb';
 
 /**
  * API Namespace that defines the contents of every API payload
@@ -42,6 +43,7 @@ namespace API {
 		| Approach
 		| TourList
 		| FAAReg
+		| HomeTimeZone
 
 	// Create a basic API interface that all other APIs will extend
 	interface API {
@@ -103,6 +105,12 @@ namespace API {
 	export interface Approach extends Success {
 		type: 'approach';
 		options: Types.ApproachOption[]
+	}
+
+	export interface HomeTimeZone extends Success {
+		type: 'timezone-home';
+		data: TimeZone;
+		prefers_utc: boolean;
 	}
 
 	export interface TourList extends Success {

@@ -15,8 +15,6 @@ export const load = async ({ fetch, params, url }) => {
 
   const entrySettings = await settings.getSet('entry');
 
-  console.log(params);
-
   let types = await prisma.aircraftType.findMany({ select: { typeCode: true, make: true, model: true, catClass: true, id: true, imageId: true, _count: true }, orderBy: [{ make: 'asc' }, { model: 'asc' }] });
   if (params.id === undefined) {
     if (types.length > 0) redirect(301, '/aircraft/type/' + types[0].id + '?active=menu');
@@ -84,7 +82,6 @@ export const load = async ({ fetch, params, url }) => {
     numLegs: legs.length,
     numDiversions,
     totalTime,
-    params,
     enums: {
       categoryClass: Object.keys(DB.CategoryClass).map((v) => { return { value: v, title: `${DB.categoryClassToString(v as DB.CategoryClass)} (${v})` }; }),
       gearType: Object.keys(DB.GearType).map((v) => { return { value: v, title: `${DB.gearTypeToString(v as DB.GearType)} (${v})` }; }),

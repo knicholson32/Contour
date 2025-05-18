@@ -2,11 +2,14 @@ import * as settings from '$lib/server/settings';
 import prisma from '$lib/server/prisma';
 import { redirect } from '@sveltejs/kit';
 import { Prisma } from '@prisma/client';
+import { Debug } from '$lib/types/prisma.js';
 
 export const load = async ({ fetch, params, parent, url }) => {
 
   const now = new Date();
   const nowSeconds = Math.floor(now.getTime() / 1000);
+
+  const debug = await settings.get('system.debug');
 
   const legSelect = {
     aircraft: { select: { registration: true } },
@@ -246,7 +249,7 @@ export const load = async ({ fetch, params, parent, url }) => {
         IFRCurrency.isCurrent = IFRCurrency.approaches >= 6 && IFRCurrency.holds >= 1;
         // Check if this entry made the difference
         if (IFRCurrency.isCurrent) {
-          console.log(leg);
+          if (debug >= Debug.VERY_VERBOSE) console.log(leg);
           // It did. This is the limiting factor, so use it to calculate how many days of currency are left
           if (leg.startTime_utc !== null) {
             const sixMonthsAfter = monthsAgo(new Date(leg.startTime_utc * 1000), -6);
@@ -272,7 +275,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     }
   });
 
-  console.log(typeRatings);
+  if (debug >= Debug.DEBUG) console.log(typeRatings);
 
   const types: ({ type: Prisma.AircraftTypeGetPayload<{}>} & GeneralAndNightCurrency)[] = [];
   for (const typeRating of typeRatings) {

@@ -98,7 +98,6 @@ export const load = async ({ fetch, params, url }) => {
   const legs = await fetchLegsForSideMenu(dayId, tourId, { positionsOnly: true, search: url.searchParams.get('search') });
 
   return {
-    params,
     searchParams: {
       tourId,
       dayId

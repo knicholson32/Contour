@@ -181,7 +181,7 @@
               {#each data.legs as group,i (group.text)}
                 <MenuSection title={group.text}>
                   {#each group.entries as leg, i (leg.id)}
-                    <MenuElement bind:element={menuElements[leg.id]} href="/entry/leg/{leg.id}/fullscreen?{tourDayInfo}" selected={leg.id === data.params.id}>
+                    <MenuElement bind:element={menuElements[leg.id]} href="/entry/leg/{leg.id}/fullscreen?{tourDayInfo}" selected={leg.id === page.params.id}>
                       <LegEntry leg={leg} unsaved={false} />
                     </MenuElement>
                   {/each}

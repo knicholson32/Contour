@@ -21,7 +21,7 @@
     form: import('./$types').ActionData;
   }
 
-  let { data, form }: Props = $props();
+  let { data, form: formData }: Props = $props();
 
   let submitting = $state(false);
 
@@ -48,7 +48,7 @@
   }
 
   $effect(() => {
-    form;
+    formData;
     data;
     resetMap();
   });
@@ -111,7 +111,7 @@
         {#if data.currentDay !== null}
           <input type="hidden" name="day" value={data.currentDay.id}>
         {/if}
-        <Section title="Flight Aware Options" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
+        <Section title="Flight Aware Options" error={formData !== null && formData.ok === false && formData.action === '?/default' && formData.name === '*' ? formData.message : null}>
           <Entry.Switch title="Poll FlightAware" name="no-cache" bind:value={noCache} defaultValue={false} />
           
           {#if noCache === true}
@@ -157,7 +157,7 @@
             </thead>
             <tbody>
               {#each data.options as o}
-                <tr onclick={() => nav(`/entry/leg/create/fa/${o.fa_flight_id}?${urlFormParam}`)} class="{progress ? '' : 'cursor-pointer'} betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-950/40 {data.params.selection === o.fa_flight_id ? 'bg-gray-200 dark:bg-zinc-950' : 'even:bg-gray-50 dark:even:bg-zinc-800/40'} {o.exists ? 'opacity-40 dark:opacity-20' : ''}">
+                <tr onclick={() => nav(`/entry/leg/create/fa/${o.fa_flight_id}?${urlFormParam}`)} class="{progress ? '' : 'cursor-pointer'} betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-950/40 {page.params.selection === o.fa_flight_id ? 'bg-gray-200 dark:bg-zinc-950' : 'even:bg-gray-50 dark:even:bg-zinc-800/40'} {o.exists ? 'opacity-40 dark:opacity-20' : ''}">
                   <td class="pl-2 text-center hidden md:table-cell"><a class="text-sky-400 inline-flex gap-1" target="_blank" href="https://www.flightaware.com/live/flight/id/{o.fa_flight_id}:0">
                     {o.ident}
                   </a></td>
@@ -314,7 +314,7 @@
         
 
           <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
-          <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={form?.ok === false && (form.action === '?/default' || form?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Next" actionTextInProgress="Creating" />
+          <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Next" actionTextInProgress="Creating" />
           </div>
         </form>
       {/if}

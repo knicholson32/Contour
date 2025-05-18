@@ -3,6 +3,8 @@ import { API } from '$lib/types';
 import sharp from 'sharp';
 import * as fs from 'node:fs';
 import { MEDIA_FOLDER } from '$lib/server/env';
+import * as settings from '$lib/server/settings';
+import { Debug } from '$lib/types/prisma';
 
 // ------------------------------------------------------------------------------------------
 // Helpers
@@ -48,10 +50,12 @@ export const GET = async ({ setHeaders, params, }) => {
 	let size = params.size;
 	let format = params.format;
 
+
 	// Check that the ID was actually submitted
 	if (id === null || id === undefined) return API.response._400({ missingPaths: ['id'] });
 
-	console.log(id, 'size', size, 'format', format);
+	const debug = await settings.get('system.debug');
+	if (debug >= Debug.VERBOSE) console.log(id, 'size', size, 'format', format);
 	if (format === undefined) format = 'jpeg';
 
 	let exp: Buffer | null = null;

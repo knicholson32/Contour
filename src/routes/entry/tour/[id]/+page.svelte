@@ -195,7 +195,7 @@
 
       {#if data.currentTour !== null}
         <div class="mx-4 mb-4 bg-card text-card-foreground rounded-lg border shadow-sm overflow-hidden">
-          <TourPreview tour={data.currentTour} bind:hoveringLeg={hoveringLeg} />
+          <TourPreview tour={data.currentTour} bind:hoveringLeg={hoveringLeg} tzData={data.tzData} prefersUTC={data.prefersUTC} />
         </div>
       {/if}
 
