@@ -87,7 +87,7 @@
   $: name = $nameStore;
   // Initialize the local storage manager
   const local = new LocalStorageManager(nameStore, defaultValue, (v) => {
-    value = v ?? defaultValue;
+    value = (v ?? defaultValue);
     _update();
   });
   const unsaved = local.getUnsavedStore();
@@ -104,6 +104,8 @@
       valueFormatted = '';
     }
   }
+
+  $: console.log('V', value);
 
 </script>
 

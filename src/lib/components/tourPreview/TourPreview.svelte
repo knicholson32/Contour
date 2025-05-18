@@ -1,6 +1,6 @@
 <script lang="ts">
   import { afterNavigate } from "$app/navigation";
-  import { getInlineDateUTCPretty, getWeekdayUTC } from "$lib/helpers";
+  import { getInlineDateUTCPretty, getWeekdayUTC, timeStrAndTimeZoneToUTC } from "$lib/helpers";
   import { Prisma } from "@prisma/client";
   import { SwitchSmall } from "$lib/components/ui/switchSmall";
   import { cn } from "$lib/utils.js";
@@ -14,17 +14,28 @@
   interface Props {
     tour: Prisma.TourGetPayload<{include: { days: { include: { legs: true } } }}>;
     startTimeValue?: string | null,
+    startTimeValueTZ?: string | null,
     endTimeValue?: string | null,
+    endTimeValueTZ?: string | null,
     hoveringLeg?: string | null,
     addDays?: number,
     tzData?: TimeZone,
     prefersUTC?: boolean
   }
 
-  let { tour, startTimeValue = null, endTimeValue = null, hoveringLeg = $bindable(null), addDays = 0, tzData, prefersUTC, ...rest }: Props = $props();
+  let { tour, startTimeValue = null, endTimeValue = null, startTimeValueTZ = null, endTimeValueTZ = null, hoveringLeg = $bindable(null), addDays = 0, tzData, prefersUTC, ...rest }: Props = $props();
 
-  let selectedStartDate: number | null = $derived(startTimeValue === null ? null : ((new Date(startTimeValue)).getTime() / 1000));
-  let selectedEndDate: number | null = $derived(endTimeValue === null ? null : ((new Date(endTimeValue)).getTime() / 1000));
+  let selectedStartDate: number | null = $derived.by(() => {
+    if (startTimeValue === null) return null;
+    if (startTimeValueTZ === null) return ((new Date(startTimeValue + 'UTC')).getTime() / 1000);
+    return timeStrAndTimeZoneToUTC(startTimeValue, startTimeValueTZ)?.value ?? null;
+  });
+
+  let selectedEndDate: number | null = $derived.by(() => {
+    if (endTimeValue === null) return null;
+    if (endTimeValueTZ === null) return ((new Date(endTimeValue + 'UTC')).getTime() / 1000);
+    return timeStrAndTimeZoneToUTC(endTimeValue, endTimeValueTZ)?.value ?? null;
+  });
 
   let days: Date[] = $state([]);
 
@@ -69,6 +80,7 @@
     }
 
     if (JSON.stringify(days) !== JSON.stringify(newDays)) {
+      console.log(days);
       days = [...newDays]; // Only update if the value has changed
     }
 
@@ -114,7 +126,9 @@
       <div class="relative">
         <div class="absolute bottom-11 bg-zinc-500/20 h-4 rounded-full overflow-hidden" style="width: {(days.length * 6)}rem;">
           {#if selectedStartDate !== null && selectedEndDate !== null}
-            <div class="h-full bg-pink-400 absolute text-xxs transition-all animate-pulse" style="left: {(selectedStartDate - firstDayStartUTC) / DAY_AND_WIDTH}rem; width: {(selectedEndDate - selectedStartDate) / DAY_AND_WIDTH}rem"></div>
+          <!-- {(selectedStartDate - firstDayStartUTC) / DAY_AND_WIDTH} -->
+           <!-- selectedStartDateTZOffset -->
+            <div class="h-full bg-pink-400 absolute text-xxs transition-all animate-pulse z-50" style="left: {(selectedStartDate - firstDayStartUTC) / DAY_AND_WIDTH}rem; width: {(selectedEndDate - selectedStartDate) / DAY_AND_WIDTH}rem"></div>
           {/if}
           {#each tour.days as day (day.id)}
             <a href="/entry/day/{day.id}?tour={tour.id}" class="h-full bg-green-500 absolute text-xxs transition-all" style="left: {(day.startTime_utc - firstDayStartUTC) / DAY_AND_WIDTH}rem; width: {(day.endTime_utc - day.startTime_utc) / DAY_AND_WIDTH}rem" aria-label="Link to day">

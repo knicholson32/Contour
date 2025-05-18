@@ -8,6 +8,7 @@ import { API } from '$lib/types';
 import type { Prisma } from '@prisma/client';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
+import type { TimeZone } from '@vvo/tzdb';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -41,13 +42,27 @@ export const load = async ({ params, fetch, url }) => {
   // Reset the last used flight ID
   await settings.set('entry.flight_id.last', '');
 
+  const fetchTZData = async (): Promise<{ data: TimeZone; prefersUTC: boolean; } | undefined> => {
+    const tzRaw = await (await fetch('/api/timezone/home')).json() as API.Response;
+    if (tzRaw.ok === true && tzRaw.type === 'timezone-home') {
+      const data = (tzRaw as API.HomeTimeZone).data;
+      const prefersUTC = (tzRaw as API.HomeTimeZone).prefers_utc;
+      return { data, prefersUTC };
+    }
+    return undefined;
+  }
+
+  const tzData = await fetchTZData();
+
   return {
     entrySettings,
     // tourSettings,
     currentTour,
     // currentDay,
     lastDay,
-    airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[]
+    airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[],
+    tzData: tzData?.data,
+    prefersUTC: tzData?.prefersUTC
   };
 };
 
