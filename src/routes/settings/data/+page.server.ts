@@ -5,6 +5,7 @@ import { unzip } from 'unzipit';
 import type * as Types from '@prisma/client';
 import neatCsv from "neat-csv";
 import { lookupSIDOrSTAR } from '$lib/server/helpers';
+import readXlsxFile from 'read-excel-file/node'
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import { pad } from '$lib/helpers';
 import { v4 as uuidv4 } from 'uuid';
@@ -196,30 +197,43 @@ export const actions = {
 			// print all entries and their sizes
 			// console.log(entries);
 			let found = false;
+			let type: 'txt' | 'xlsx' = 'txt';
 			for (const entry of Object.entries(entries)) {
 				const [key, _] = entry;
 				if (key === 'IN_CIFP.txt') {
 					found = true;
+					type = 'txt';
+					break;
+				} else if (key === 'IN_CIFP.xlsx') {
+					found = true;
+					type = 'xlsx';
 					break;
 				}
 			}
 
-			if (found === false) throw Error('Could not find \'IN_CIFP.txt\' file in zip');
+			if (found === false) throw Error('Could not find \'IN_CIFP.txt\' or \'IN_CIFP.xlsx\' file in zip');
 
-			console.log(found);
 
 			// read an entry as text
-			const text = (await entries['IN_CIFP.txt'].text()).split('\n');
 
+			let rows: string[][] = [];
 
+			if (type === 'txt') rows = (await entries['IN_CIFP.txt'].text()).split('\n').map(r => r.split('\t'));
+			else if (type === 'xlsx') {
+				const xlRow = await readXlsxFile(Buffer.from(await entries['IN_CIFP.xlsx'].arrayBuffer()));
+				for (const r of xlRow) rows.push([ r[0].toString(), r[1].toString(), r[2].toString()]);
+			}
+			else throw Error(`Could not parse file: unimplemented format: '${type}'`);
+
+			
 
 			// Clear the current approach table (except the custom approach entries)
 			await prisma.approachOptions.deleteMany({ where: { custom: false } });
 
 			const inserts: Types.Prisma.PrismaPromise<any>[] = [];
+
 			// Loop through each position
-			for (const line of text) {
-				const fields = line.split('\t');
+			for (const fields of rows) {
 				const apt = fields[0];
 				const t = fields[1];
 				const app = fields[2];
