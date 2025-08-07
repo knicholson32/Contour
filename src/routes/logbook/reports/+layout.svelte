@@ -13,9 +13,9 @@
   let { children, test }: Props = $props();
 
   const reportOptions = [
+    { href: '/logbook/reports/8710', title: 'FAA 8710', subtitle: 'Guide for completing an FAA 8710', type: 'General'},
     { href: '/logbook/reports/full', title: 'Tabulated Logbook', subtitle: 'Logbook export / backup features', type: 'General'},
     { href: '/logbook/reports/experience', title: 'Experience', subtitle: 'Summary of your flight experience', type: 'General'},
-    { href: '/logbook/reports/8710', title: 'FAA 8710', subtitle: 'Guide for completing an FAA 8710', type: 'General'},
   ]
 
   let urlActiveParam: string | undefined = $state();
