@@ -7,15 +7,15 @@
   import { page } from "$app/state";
   interface Props {
     children?: import('svelte').Snippet;
+    test: import('svelte').Snippet;
   }
 
-  let { children }: Props = $props();
+  let { children, test }: Props = $props();
 
   const reportOptions = [
-    { href: '/logbook/reports/8710', title: 'FAA 8710', subtitle: 'Guide for completing an FAA 8710', type: 'General'},
+    { href: '/logbook/reports/full', title: 'Tabulated Logbook', subtitle: 'Logbook export / backup features', type: 'General'},
     { href: '/logbook/reports/experience', title: 'Experience', subtitle: 'Summary of your flight experience', type: 'General'},
-    { href: '/logbook/reports/condensed', title: 'Condensed Logbook', subtitle: 'All entries, certificates and endorsements', type: 'General'},
-    { href: '/logbook/reports/full', title: 'Full Logbook', subtitle: 'Logbook export / backup features', type: 'General'}
+    { href: '/logbook/reports/8710', title: 'FAA 8710', subtitle: 'Guide for completing an FAA 8710', type: 'General'},
   ]
 
   let urlActiveParam: string | undefined = $state();
@@ -38,12 +38,12 @@
           </MenuElement>
         {/each}
       </Section>
-      
+      {@render test?.()}
     </nav>
   {/snippet}
 
   {#snippet form()}
-    <div class="flex-shrink z-0">
+    <div class="flex-shrink z-0 pb-0">
       {@render children?.()}
     </div>
   {/snippet}

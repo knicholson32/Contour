@@ -71,7 +71,7 @@
     if (posLayer !== null) map.removeLayer(posLayer);
     if (markerLayer !== null) map.removeLayer(markerLayer);
     if (targetLayer !== null) map.removeLayer(targetLayer);
-    if (positions.length === 0) return;
+    // if (positions.length === 0) return;
 
     for (const f of fixes) {
       if (f.latitude === null || f.longitude === null) continue;

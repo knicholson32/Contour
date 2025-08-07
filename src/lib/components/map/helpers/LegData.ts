@@ -35,11 +35,12 @@ export class LegData {
     if (options === undefined) options = {};
     const noCurves = options.noCurves || false;
     const link = options.link || undefined;
+
     // Check that the first position is the airport
-    if (airports.length > 0 && (points[0][0] !== airports[0].latitude || points[0][1] !== airports[0].longitude)) airportStartJoin = true;
+    if (airports.length > 0 && points.length > 0 && (points[0][0] !== airports[0].latitude || points[0][1] !== airports[0].longitude)) airportStartJoin = true;
   
     // Check that the last position is the airport
-    if (airports.length > 0 && (points[points.length - 1][0] !== airports[airports.length - 1].latitude || points[points.length - 1][1] !== airports[airports.length - 1].longitude)) airportEndJoin = true;
+    if (airports.length > 0 && points.length > 0 && (points[points.length - 1][0] !== airports[airports.length - 1].latitude || points[points.length - 1][1] !== airports[airports.length - 1].longitude)) airportEndJoin = true;
   
     // Try to make curves work. If there are less than 3 points, just draw a line.
     try {
@@ -126,7 +127,7 @@ export class LegData {
       const line = L.polyline(points, { color: '#E4E', opacity: 1, smoothFactor: 1 });
       if (link) line.on('click', () => goto(link));
       lines.push(line);
-      console.error('FALLBACK', e);
+      console.log('FALLBACK', e);
     }
   
     const airportLines = [];

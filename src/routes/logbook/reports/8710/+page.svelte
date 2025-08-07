@@ -60,7 +60,7 @@
       </div>
       <div class="px-6 py-6">
         <button onclick={() => window.print()} class="text-sm font-semibold leading-6 text-gray-900 dark:text-zinc-50 group">
-          Print 8710 <span class="transition-padding group-hover:pl-1" aria-hidden="true">&rarr;</span>
+          Print 8710 (landscape only) <span class="transition-padding group-hover:pl-1" aria-hidden="true">&rarr;</span>
         </button>
       </div>
     </div>
@@ -118,16 +118,16 @@
       </div>
 
       <div class="print-color-adjust-exact col-span-12 col-start-2 row-span-8 grid grid-cols-12 grid-rows-subgrid text-xs text-center shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700 relative">
-        <div class="absolute -z-10 top-0 bottom-0 left-0 right-0 bg-hashLight dark:bg-hashDark dark:opacity-50"></div>
+        <div class="absolute z-[1] top-0 bottom-0 left-0 right-0 bg-hashLight dark:bg-hashDark dark:opacity-50"></div>
         <!-- Rows -->
         <FAA8710Row class="bg-zinc-50 dark:bg-zinc-900" data={data.airplane} title="Airplane" />
         <FAA8710Row class="bg-zinc-100 dark:bg-zinc-925" data={data.rc} title="R.C." />
         <FAA8710Row class="bg-zinc-50 dark:bg-zinc-900" data={data.pl} title="P.L." />
         <FAA8710Row class="bg-zinc-100 dark:bg-zinc-925" data={data.glider} title="Gliders" />
         <FAA8710Row class="bg-zinc-50 dark:bg-zinc-900" data={data.lta} title="L.T.A." />
-        <FAA8710RowSim class="bg-zinc-100 dark:bg-zinc-925" data={data.ffs} title="FFS" />
-        <FAA8710RowSim class="bg-zinc-50 dark:bg-zinc-900" data={data.ftd} title="FTD" />
-        <FAA8710RowSim class="bg-zinc-100 dark:bg-zinc-925" data={data.atd} title="ATD" last={true} />
+        <FAA8710RowSim class="bg-zinc-100 dark:bg-zinc-925" data={data.ffs} even={true} title="FFS" />
+        <FAA8710RowSim class="bg-zinc-50 dark:bg-zinc-900" data={data.ftd} even={false} title="FTD" />
+        <FAA8710RowSim class="bg-zinc-100 dark:bg-zinc-925" data={data.atd} even={true} title="ATD" last={true} />
 
       </div>
     </div>

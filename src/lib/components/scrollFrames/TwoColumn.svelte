@@ -284,11 +284,13 @@
 
   <!-- Form -->
   {#if formZone === 'safe'}
-    <div style="-webkit-transform: translateZ(0);" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-925 mb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
+    <!-- -webkit-transform: translateZ(0); -->
+    <div style="" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-925 mb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
       {@render form()}
     </div>
   {:else}
-    <div style="-webkit-transform: translateZ(0);" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-925 pb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
+    <!-- -webkit-transform: translateZ(0); -->
+    <div style="" bind:this={formDiv} class="box-border w-full bg-gray-100 dark:bg-zinc-925 pb-[env(safe-area-inset-bottom)] flex flex-col overflow-y-auto {activeOnSingleCol === 'form' ? '' : 'hidden md:block'}">
       {@render form()}
     </div>
   {/if}

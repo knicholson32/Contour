@@ -239,6 +239,7 @@ export const actions = {
 
     const showUtc = helpers.timeStrAndTimeZoneToUTC(showTime, showTimeTZ);
     if (showUtc === null) return API.Form.formFailure('?/default', 'show-time', 'Unknown Timezone');
+    if (showUtc.value < 0) return API.Form.formFailure('?/default', 'show-time', 'Invalid showtime');
 
     // Create airport if it does not exist
     try {
