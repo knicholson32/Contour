@@ -42,7 +42,7 @@
 </script>
 
 {#snippet EmptyCell(darker: boolean = true, noRight = false)}
-  <div class="{rest.class} {noRight ? '' : 'border-r'} border-b {darker ? 'bg-gray-100/50 dark:bg-zinc-925/50' : 'bg-gray-50/70 dark:bg-zinc-900/70'} z-[2]"></div>
+  <div class="{rest.class} {noRight ? '' : 'border-r'} border-b {darker ? '!bg-gray-100/50 dark:!bg-zinc-925/50' : '!bg-gray-50/70 dark:!bg-zinc-900/70'} z-[2]"></div>
 {/snippet}
 
 

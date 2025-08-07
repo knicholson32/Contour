@@ -33,7 +33,7 @@
 
 
 {#snippet EmptyCell(last = false, noRight = false)}
-  <div class="{rest.class} z-[2] {noRight ? '' : 'border-r'} {last === true ? '' : 'border-b'} {even ? 'bg-gray-100/50 dark:bg-zinc-925/50' : 'bg-gray-50/50 dark:bg-zinc-900/70'}"></div>
+  <div class="{rest.class} z-[2] {noRight ? '' : 'border-r'} {last === true ? '' : 'border-b'} {even ? '!bg-gray-100/50 dark:!bg-zinc-925/50' : '!bg-gray-50/50 dark:!bg-zinc-900/70'}"></div>
 {/snippet}
 
 
