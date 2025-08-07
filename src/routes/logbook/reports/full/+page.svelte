@@ -125,7 +125,10 @@
         {/if}
       </div>
     {/each}
-    <div class="hidden"></div>
+
+    {#if data.rows.length % 2 === 0}
+      <div class="hidden"></div>
+    {/if}
 
     <!-- Filler cells for the last page (where there may not be a full page of entries) -->
     {#each {length: data.select - data.rows.length} as _, i}
