@@ -1,7 +1,7 @@
 import prisma from '$lib/server/prisma';
 import * as settings from '$lib/server/settings';
 import { API, type NavAirway, type NavDPRoute, type NavFix, type NavNav, type NavSTARRoute } from '$lib/types';
-import { unzip } from 'unzipit';
+import { unzip, type ZipInfo } from 'unzipit';
 import type * as Types from '@prisma/client';
 import neatCsv from "neat-csv";
 import { lookupSIDOrSTAR } from '$lib/server/helpers';
@@ -11,6 +11,7 @@ import { pad } from '$lib/helpers';
 import { v4 as uuidv4 } from 'uuid';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monthsAlt = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Data Sources
 // Approach Data:			https://aeronav.faa.gov/Upload_313-d/cifp/
@@ -452,11 +453,29 @@ export const actions = {
 		const sourceKey = `${pad(optionDate.getUTCDate(), 2)}_${months[optionDate.getUTCMonth()]}_${optionDate.getUTCFullYear()}_CSV.zip`;
 		const source = `https://nfdc.faa.gov/webContent/28DaySub/extra/${sourceKey}`;
 
+		const sourceKeyAlt = `${pad(optionDate.getUTCDate(), 2)}_${monthsAlt[optionDate.getUTCMonth()]}_${optionDate.getUTCFullYear()}_CSV.zip`;
+		const sourceAlt = `https://nfdc.faa.gov/webContent/28DaySub/extra/${sourceKeyAlt}`;
+
 		// console.log(source);
 		// return;
 
 		try {
-			const { entries } = await unzip(source);
+			let zip: ZipInfo | null = null;
+
+			try {
+				console.log('Loading', source)
+				zip = await unzip(source);
+			} catch (e) {
+				try {
+					console.log('Loading', sourceAlt)
+					zip = await unzip(sourceAlt);
+				} catch (e) {
+					throw Error('Zip could not load: ' + e);
+				}
+			}
+
+			if (zip === null) throw Error('Zip could not load');
+			const entries = zip.entries;
 
 			// print all entries and their sizes
 			let found = {
@@ -585,6 +604,8 @@ export const actions = {
 			// Save airway and nav points
 			await prisma.$transaction(inserts) as Types.Prisma.NavDataAirwayGetPayload<{}>[];
 			inserts = [];
+
+			let ids: string[] = [];
 
 			// SID --------------------------------------------------------
 			{
@@ -715,16 +736,22 @@ export const actions = {
 
 					if (code !== 'NOT ASSIGNED') {
 						// Save the DP
-						inserts.push(prisma.navDataSIDSTAR.create({
-							data: {
-								id: code.substring(0, code.length - 1),
-								revision,
-								airportsServiced: airportsServiced.join(', '),
-								type: 'DP',
-								runwayLeads: { connect: runwayLeads },
-								transitions: { connect: transitions },
-							}
-						}));
+						const id = code.substring(0, code.length - 1);
+						if(!ids.includes(id)) {
+							ids.push(id);
+							inserts.push(prisma.navDataSIDSTAR.create({
+								data: {
+									id: code.substring(0, code.length - 1),
+									revision,
+									airportsServiced: airportsServiced.join(', '),
+									type: 'DP',
+									runwayLeads: { connect: runwayLeads },
+									transitions: { connect: transitions },
+								}
+							}));
+						} else {
+							console.log('DUPLICATE SID/STAR. SKIPPING:', id);
+						}
 					}
 					// If the row is undefined, we are at the end. Parsing is done
 					if (row === undefined) parsing = false;
@@ -745,6 +772,8 @@ export const actions = {
 				let runwaySets: string[] = [];
 				let transitionSets: string[] = [];
 				let airportsServiced: string[] = [];
+
+				
 
 				while (parsing) {
 					// Get the current row
@@ -859,17 +888,24 @@ export const actions = {
 					const revision = isNaN(codeParsed) ? 1 : codeParsed;
 
 					if (code !== 'NOT ASSIGNED') {
-						// Save the STAR
-						inserts.push(prisma.navDataSIDSTAR.create({
-							data: {
-								id: code.substring(0, code.length - 1),
-								revision,
-								airportsServiced: airportsServiced.join(', '),
-								type: 'STAR',
-								runwayLeads: { connect: runwayLeads },
-								transitions: { connect: transitions },
-							}
-						}));
+
+						const id = code.substring(0, code.length - 1);
+						if(!ids.includes(id)){
+							ids.push(id);
+							// Save the STAR
+							inserts.push(prisma.navDataSIDSTAR.create({
+								data: {
+									id: id,
+									revision,
+									airportsServiced: airportsServiced.join(', '),
+									type: 'STAR',
+									runwayLeads: { connect: runwayLeads },
+									transitions: { connect: transitions },
+								}
+							}));
+					  } else {
+							console.log('DUPLICATE SID/STAR. SKIPPING:', id);
+						}
 					}
 					// If the row is undefined, we are at the end. Parsing is done
 					if (row === undefined) parsing = false;
