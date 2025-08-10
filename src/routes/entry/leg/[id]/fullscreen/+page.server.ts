@@ -9,7 +9,6 @@ import * as helpers from '$lib/helpers';
 import type { Prisma } from '@prisma/client';
 import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
-import { XMLParser } from 'fast-xml-parser';
 import { filterOutliers, generateAirportList } from '$lib/server/helpers';
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type * as Types from '@prisma/client';

@@ -58,7 +58,7 @@ export const GET = async ({ setHeaders, params, }) => {
 	if (debug >= Debug.VERBOSE) console.log(id, 'size', size, 'format', format);
 	if (format === undefined) format = 'jpeg';
 
-	let exp: Buffer | null = null;
+	let exp: Uint8Array | null = null;
 	
 	// Switch based on pre-stored image size. We will try to use a pre-stored image before generating a new image size.
 	if (size === 'full') {
@@ -101,7 +101,7 @@ export const GET = async ({ setHeaders, params, }) => {
 		const modifiedSize = sizeInt;
 
 		// Get the proper source image
-		let source: Buffer | null;
+		let source: Uint8Array | null;
 		if (modifiedSize > 1024) {
 			// Get the profile from the database
 			const image = await prisma.image.findUnique({ where: { id }, select: { fullAvif: true, fullJpeg: true } });

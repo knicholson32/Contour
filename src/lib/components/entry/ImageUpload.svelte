@@ -1,7 +1,6 @@
 <script lang="ts">
   import Image from "$lib/components/Image.svelte";
   import { API, ImageUploadState } from "$lib/types";
-  import hi from "date-fns/locale/hi";
   import { writable } from "svelte/store";
   import { LocalStorageManager } from "./localStorage";
     import { form } from "./entryStore";

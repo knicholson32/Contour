@@ -88,10 +88,10 @@ export type Images = {
 	i768Avif: string;
 	i512Jpeg: string;
 	i512Avif: string;
-	i256Jpeg: Buffer;
-	i256Avif: Buffer;
-	i128Jpeg: Buffer;
-	i128Avif: Buffer;
+	i256Jpeg: Uint8Array;
+	i256Avif: Uint8Array;
+	i128Jpeg: Uint8Array;
+	i128Avif: Uint8Array;
 };
 
 export const cropImages = async (image: ArrayBuffer, id: string): Promise<Images | null> => {
@@ -216,7 +216,12 @@ export const cropImages = async (image: ArrayBuffer, id: string): Promise<Images
 
 	try {
 		const p = await Promise.allSettled(promiseList);
-		for (const res of p) if (res.status === 'rejected') return null
+		for (const res of p) {
+			if (res.status === 'rejected') {
+				console.log('Error cropping images', res.reason);
+				return null
+			}
+		}
 	} catch(e) {
 		console.log('Error cropping images', e);
 		return null;

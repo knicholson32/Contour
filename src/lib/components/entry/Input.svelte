@@ -1,9 +1,5 @@
 <script lang="ts">
-  import type { API } from "$lib/types";
-  import { onMount } from "svelte";
   import Frame from "./Frame.svelte";
-  import { browser } from "$app/environment";
-  import id from "date-fns/locale/id";
 
   import { LocalStorageManager } from "./localStorage";
   import { writable } from "svelte/store";
