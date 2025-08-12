@@ -109,17 +109,17 @@
 <!-- Utilize a form wrapper with no submit to allow the enter key to trigger an airport search, but not submit the form -->
 <!-- <form onsubmit={preventDefault(() => {})} class=""> -->
 <Frame {title} {hoverTitle} {badge} error={warningMessage !== '' ? warningMessage : null}>
-  <button type="button" title="{value !== null ? `${value.id} - ${value.name} (${value.timezone})` : ''}" onclick={() => select?.focus()} class="-my-2 px-2 h-10 gap-2 flex-grow xs:flex-grow-0 max-w-full inline-flex items-center rounded-md shadow-sm ring-1 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500 ring-gray-200' : 'ring-gray-300'} focus-within:ring-2 focus-within:ring-indigo-600 sm:max-w-md">
+  <button type="button" title="{value !== null ? `${value.id} - ${value.name} (${value.timezone})` : ''}" onclick={() => select?.focus()} class="-my-2 px-2 h-10 gap-2 grow xs:grow-0 max-w-full inline-flex items-center rounded-md shadow-xs ring-1 {disabled ? 'cursor-not-allowed bg-gray-50 text-gray-500 ring-gray-200' : 'ring-gray-300'} focus-within:ring-2 focus-within:ring-indigo-600 sm:max-w-md">
     <input bind:this={select} disabled={disabled} maxlength="4" onchange={update} type="text" style="text-transform:uppercase" value={value?.id ?? ''} placeholder="----" name="airport-visible" list="airport"
-      class="px-0 text-sm font-mono text-left flex-shrink border-0 w-16 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
+      class="px-0 text-sm font-mono text-left shrink border-0 w-16 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
     <datalist id="airport">
       {#each airports as airport (airport.id)}
         <option selected={airport.id.toLocaleUpperCase() === value?.id.toLocaleUpperCase()} value="{airport.id.toLocaleUpperCase()}">{airport.name} - ({airport.timezone})</option>
       {/each}
     </datalist>
-    <div class="flex-grow xs:flex-grow-0"></div>
+    <div class="grow xs:grow-0"></div>
     {#if value !== null}
-      <div class="flex flex-col flex-grow items-end overflow-hidden">
+      <div class="flex flex-col grow items-end overflow-hidden">
         <span class="text-xs text-gray-400 whitespace-nowrap inline-flex items-center gap-1">
           {value.name}
           <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >

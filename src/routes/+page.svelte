@@ -281,7 +281,7 @@
                 {pluralize('duty day', data.dutyDays.num, true)} <span class="text-sm text-muted-foreground">selected</span> 
               </div>
               <Popover.Root bind:open={presetOpen}>
-                <Popover.Trigger class={buttonVariants({ variant: currentPreset === null ? 'outline' : 'default' })}>   
+                <Popover.Trigger class={buttonVariants({ variant: currentPreset === null ? 'outline-solid' : 'default' })}>   
                   {presetAsString}
                 </Popover.Trigger>
                 <Popover.Content class="w-64 mt-2 animate-in animate-out" collisionPadding={0} align="end">
@@ -292,22 +292,22 @@
                         Select some common date ranges
                       </p>
                     </div>
-                    <Button variant={currentPreset === 'lastTour' ? 'default' : 'outline'}  onclick={navigateNoRange} size="sm">
+                    <Button variant={currentPreset === 'lastTour' ? 'default' : 'outline-solid'}  onclick={navigateNoRange} size="sm">
                       Last Tour
                     </Button>
-                    <Button variant={currentPreset === 'currentMonth' ? 'default' : 'outline'} onclick={() => setRange('currentMonth')} size="sm">
+                    <Button variant={currentPreset === 'currentMonth' ? 'default' : 'outline-solid'} onclick={() => setRange('currentMonth')} size="sm">
                       Current Month
                     </Button>
-                    <Button variant={currentPreset === 'lastMonth' ? 'default' : 'outline'} onclick={() => setRange('lastMonth')} size="sm">
+                    <Button variant={currentPreset === 'lastMonth' ? 'default' : 'outline-solid'} onclick={() => setRange('lastMonth')} size="sm">
                       Last Month
                     </Button>
-                    <Button variant={currentPreset === 'ytd' ? 'default' : 'outline'} onclick={() => setRange('ytd')} size="sm">
+                    <Button variant={currentPreset === 'ytd' ? 'default' : 'outline-solid'} onclick={() => setRange('ytd')} size="sm">
                       Year to Date
                     </Button>
-                    <Button variant={currentPreset === 'lastYear' ? 'default' : 'outline'} onclick={() => setRange('lastYear')} size="sm">
+                    <Button variant={currentPreset === 'lastYear' ? 'default' : 'outline-solid'} onclick={() => setRange('lastYear')} size="sm">
                       Last Year
                     </Button>
-                    <Button variant={currentPreset === '12months' ? 'default' : 'outline'} onclick={() => setRange('12months')} size="sm">
+                    <Button variant={currentPreset === '12months' ? 'default' : 'outline-solid'} onclick={() => setRange('12months')} size="sm">
                       Last 12 Months
                     </Button>
                   </div>
@@ -481,10 +481,10 @@
               <ChevronUp class="relative top-0.5 w-5 h-5 group-hover:text-sky-500 transition-colors"></ChevronUp>
             </button>
           </div> -->
-          <Card.Root class="h-[calc(100vh-720px-1.5rem)] min-h-[calc(100vh-90px)] md:min-h-[calc(100vh-110px)] relative z-[1] transition-all">
+          <Card.Root class="h-[calc(100vh-720px-1.5rem)] min-h-[calc(100vh-90px)] md:min-h-[calc(100vh-110px)] relative z-1 transition-all">
             <Card.Content class="p-0 relative h-full">
               {#key mapKey}
-                <Map.Bulk bind:this={map} class="!h-full rounded-md bg-transparent border-red-500 ring-0" pos={data.positions} legIDs={data.legIDs} airports={data.airports} />
+                <Map.Bulk bind:this={map} class="h-full! rounded-md bg-transparent border-red-500 ring-0" pos={data.positions} legIDs={data.legIDs} airports={data.airports} />
               {/key}
             </Card.Content>
           </Card.Root>

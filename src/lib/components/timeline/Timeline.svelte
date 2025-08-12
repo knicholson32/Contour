@@ -86,7 +86,7 @@
 
 <!-- <div class="w-full relative mb-3 bg-zinc-900">
   <div class="w-full relative overflow-y-hidden overflow-x-scroll backdrop-blur-lg pb-4">
-    <div class="{$$restProps.class} w-full relative flex flex-row items-start text-white pt-3 pb-[1.25rem] px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
+    <div class="{$$restProps.class} w-full relative flex flex-row items-start text-white pt-3 pb-5 px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
       {#each dataFormatted as entry}
         {#if entry.entity.type === 'blank'}
           <Blank entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc}/>
@@ -101,14 +101,14 @@
   {/each}
   <div class="absolute bottom-1 text-xxs text-gray-300 w-full flex flex-row px-1">
     <span>{helpers.getHoursMinutesUTC(new Date(day.startTime_utc * 1000))}</span>
-    <span class="flex-grow text-center">{dutyDayLength} hr</span>
+    <span class="grow text-center">{dutyDayLength} hr</span>
     <span>{helpers.getHoursMinutesUTC(new Date(day.endTime_utc * 1000))}</span>
   </div>
 </div> -->
 
 <div class="w-full relative bg-gray-50 dark:bg-zinc-900 border-t border-b border-gray-200 dark:border-zinc-700">
   <div class="w-full relative z-10 overflow-y-hidden overflow-x-auto pb-3">
-    <div class="{rest.class} w-full relative flex flex-row items-start text-zinc-800 dark:text-white pt-3 pb-[1.25rem] px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
+    <div class="{rest.class} w-full relative flex flex-row items-start text-zinc-800 dark:text-white pt-3 pb-5 px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
       {#each dataFormatted as entry}
         {#if entry.entity.type === 'blank'}
           <Blank entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc}/>
@@ -123,7 +123,7 @@
   {/each}
   <div class="absolute bottom-1 text-xxs text-gray-600 dark:text-gray-300 w-full flex flex-row px-1">
     <span>{helpers.getHoursMinutesUTC(new Date(day.startTime_utc * 1000))}</span>
-    <span class="flex-grow text-center">{dutyDayLength} hr</span>
+    <span class="grow text-center">{dutyDayLength} hr</span>
     <span>{helpers.getHoursMinutesUTC(new Date(day.endTime_utc * 1000))}</span>
   </div>
 </div>

@@ -1,30 +1,6 @@
 services:
-  # db:
-  #   image: mysql
-  #   command: --default-authentication-plugin=mysql_native_password
-  #   restart: always
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: contour-root-password
-  #     MYSQL_DATABASE: contour
-  #     MYSQL_USER: contour
-  #     MYSQL_PASSWORD: contour-password
-  #   ports:
-  #     - 3306:3306
-  #   volumes:
-  #     - ../library/db:/var/lib/mysql
-
-  # phpmyadmin:
-  #   image: phpmyadmin
-  #   restart: always
-  #   ports:
-  #     - 8080:80
-  #   environment:
-  #     PMA_ARBITRARY: 1
-  #   depends_on:
-  #     - db
-
   dev:
-    image: node:22.15.0-alpine3.20
+    image: contour-dev
     container_name: contour-dev
     volumes:
       - ../node_modules:/app/node_modules
@@ -35,15 +11,12 @@ services:
     environment:
       ORIGIN: 'http://localhost:5173'
       TZ: 'America/New_York'
-      # DATABASE_URL: 'mysql://contour:contour-password@db:/contour'
 
     stop_signal: SIGKILL
     working_dir: /app
-    command: sh -c "npm i && npx prisma generate && npm run dev -- --host"
+    command: sh -c "pnpm i && pnpm exec prisma generate && pnpm run dev --host"
     init: true
     ports:
       - 5173:5173
     tty: true
     stdin_open: true
-    # depends_on:
-    #   - db

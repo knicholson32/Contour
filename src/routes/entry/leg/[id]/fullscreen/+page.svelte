@@ -161,7 +161,7 @@
 
 <OneColumn>
   
-  <div class="flex-shrink relative">
+  <div class="shrink relative">
     <div class="fixed top-0 bottom-0 left-0 right-0 z-40">
       {#key mapKey}
         <Map.Fullscreen bind:center={center} bind:paddingBottomRight bind:paddingTopLeft positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong}>
@@ -174,9 +174,9 @@
         </Map.Fullscreen>
       {/key}
 
-      <!-- <div class="absolute z-[100] bottom-0 top-0 left-0 right-0 p-4 flex flex-row gap-2"> -->
-        <div class="absolute left-4 top-4 bottom-4 z-50 w-[240px] backdrop-blur-sm rounded-xl border bg-white/70 border-gray-200 dark:bg-zinc-900/70 dark:border-zinc-800 p-0 overflow-hidden hidden md:flex">
-          <div class="overflow-y-scroll overflow-x-hidden -mr-[1px] w-[240px]" style="scrollbar-width:none">
+      <!-- <div class="absolute z-100 bottom-0 top-0 left-0 right-0 p-4 flex flex-row gap-2"> -->
+        <div class="absolute left-4 top-4 bottom-4 z-50 w-[240px] backdrop-blur-xs rounded-xl border bg-white/70 border-gray-200 dark:bg-zinc-900/70 dark:border-zinc-800 p-0 overflow-hidden hidden md:flex">
+          <div class="overflow-y-scroll overflow-x-hidden -mr-px w-[240px]" style="scrollbar-width:none">
             <div class="-mt-[2px]">
               {#each data.legs as group,i (group.text)}
                 <MenuSection title={group.text}>
@@ -191,7 +191,7 @@
           </div>
         </div>
 
-        <Card.Root class="absolute right-4 bottom-4 w-[calc(100%-240px-1rem-1rem-1rem)] z-50 backdrop-blur-sm bg-white/70 dark:bg-zinc-900/70 hidden md:block">
+        <Card.Root class="absolute right-4 bottom-4 w-[calc(100%-240px-1rem-1rem-1rem)] z-50 backdrop-blur-xs bg-white/70 dark:bg-zinc-900/70 hidden md:block">
           <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
             <Card.Title class="text-sm font-semibold">Speed and Altitude</Card.Title>
             <Table2 class="h-4 w-4 text-muted-foreground" />

@@ -102,7 +102,7 @@
 
   <!-- Menu Side -->
   {#snippet menu()}
-    <nav class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
+    <nav class="shrink dark:divide-zinc-800" aria-label="Directory">
 
       <form method="get">
         {#if data.currentTour !== null}
@@ -218,7 +218,7 @@
                   {/if}
                   <td class="text-center">{o.duration}</td>
                   <!-- <td class="pr-2 text-center">
-                    <a type="button" href="/tour/{data.params.tour}/day/{data.params.id}/entry/new/link/{o.fa_flight_id}?flight-id={o.ident}&active=form" class="flex-grow text-center md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-1 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
+                    <a type="button" href="/tour/{data.params.tour}/day/{data.params.id}/entry/new/link/{o.fa_flight_id}?flight-id={o.ident}&active=form" class="grow text-center md:grow-0 touch-manipulation select-none transition-colors px-3 py-1 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 
                       ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900">
                         X
                     </a>
@@ -235,7 +235,7 @@
 
   <!-- Form Side -->
   {#snippet form()}
-    <div class="flex-shrink">
+    <div class="shrink">
 
       
       {#if data.selected === null}
@@ -308,13 +308,13 @@
           </Section>
 
           <!-- <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
-            <a href="/tour/{data.params.tour}/day/{data.id}/entry/new/link" class="flex-grow w-full text-center md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-yellow-500 bg-yellow-400 text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Change Link</a>
-            <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" {submitting} theme={{primary: 'green'}} actionText="Looks Good" actionTextInProgress="Creating" />
+            <a href="/tour/{data.params.tour}/day/{data.id}/entry/new/link" class="grow w-full text-center md:w-48 md:grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-yellow-500 bg-yellow-400 text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Change Link</a>
+            <Submit class="grow w-full md:w-48 md:grow-0" {submitting} theme={{primary: 'green'}} actionText="Looks Good" actionTextInProgress="Creating" />
           </div> -->
         
 
           <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
-          <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Next" actionTextInProgress="Creating" />
+          <Submit class="grow w-full md:w-48 md:grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Next" actionTextInProgress="Creating" />
           </div>
         </form>
       {/if}

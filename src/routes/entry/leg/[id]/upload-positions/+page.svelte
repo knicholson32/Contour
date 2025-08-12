@@ -251,9 +251,9 @@
 
 <OneColumn>
   
-  <div class="flex-shrink relative">
+  <div class="shrink relative">
     {#key mapKey}
-      <Map.Leg class="!h-[calc(100vh-4rem)] z-50" positions={positions} target={latLong} fixes={data.leg.fixes} airports={data.airportList} />
+      <Map.Leg class="h-[calc(100vh-4rem)]! z-50" positions={positions} target={latLong} fixes={data.leg.fixes} airports={data.airportList} />
     {/key}
 
     <form id="form-delete" action="?/delete" method="post" use:enhance={({ cancel }) => {
@@ -280,11 +280,11 @@
       <div class="absolute z-50 bottom-[0rem] left-0 right-0 grid grid-cols-12 gap-4 p-4">
         <div class="col-start-9 col-span-4 inline-flex -mt-[2px] w-full flex-row gap-3 justify-end">
           {#if data.leg !== null}
-            <div class="flex-grow md:w-48 md:flex-grow-0 flex items-start">
+            <div class="grow md:w-48 md:grow-0 flex items-start">
               <Submit remoteForm="form-delete" class="w-full" failed={formData?.ok === false && formData.action === '?/delete'} submitting={deleting} theme={{primary: 'red'}} actionText={'Delete'} actionTextInProgress={'Deleting'} />
             </div>
           {/if}
-          <Submit class="flex-grow w-full md:w-48 md:flex-grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Upload" actionTextInProgress="Uploading" />
+          <Submit class="grow w-full md:w-48 md:grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Upload" actionTextInProgress="Uploading" />
         </div>
 
         <Card.Root class="col-span-8">
@@ -317,7 +317,7 @@
           </Card.Header>
           <Card.Content class="p-4 pt-0">
             <!-- <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label> -->
-            <input bind:files type="file" name="file.upload" id="file-input" accept=".kml" onchange={fileUpdate} class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+            <input bind:files type="file" name="file.upload" id="file-input" accept=".kml" onchange={fileUpdate} class="block w-full border border-gray-200 shadow-xs rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
               cursor-pointer
               file:cursor-pointer
             file:bg-gray-50 file:border-0
@@ -326,7 +326,7 @@
             dark:file:bg-neutral-700 dark:file:text-neutral-400">
             <div class="inline-flex w-full mt-1 text-sm text-gray-500 dark:text-gray-300">
               <p>{size.toFixed(1)}MB</p>
-              <div class="flex-grow"></div>
+              <div class="grow"></div>
               <p>KML (max 10MB)</p>
             </div>
             {#if formData?.ok === false}

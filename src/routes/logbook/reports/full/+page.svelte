@@ -66,10 +66,10 @@
 </script>
 
 
-<div class="px-0 -ml-[0px] pb-6 w-full touch-auto relative">
+<div class="px-0 ml-[0px] pb-6 w-full touch-auto relative">
   <!-- Title Section -->
-  <div class="grid gap-[1px] bg-zinc-300 dark:bg-zinc-800 group test-group" style="min-width: {data.numCols * data.COL_WIDTH_REM}rem; grid-template-columns: repeat({data.numCols},minmax(0,1fr))">
-    <div class="row-span-3 gap-[1px] sticky top-0 grid grid-cols-subgrid bg-zinc-200 dark:bg-zinc-800 border-b -my-[1px] border-zinc-300 dark:border-zinc-800" style="grid-column: span {data.numCols} / span {data.numCols};">
+  <div class="grid gap-px bg-zinc-300 dark:bg-zinc-800 group test-group" style="min-width: {data.numCols * data.COL_WIDTH_REM}rem; grid-template-columns: repeat({data.numCols},minmax(0,1fr))">
+    <div class="row-span-3 gap-px sticky top-0 grid grid-cols-subgrid bg-zinc-200 dark:bg-zinc-800 border-b -my-px border-zinc-300 dark:border-zinc-800" style="grid-column: span {data.numCols} / span {data.numCols};">
       <!-- Column Titles -->
       {#each data.dataDescriptor as descriptor}
         <div class="sticky top-0 bg-zinc-100 dark:bg-zinc-900 font-bold py-0.5  text-xxs select-none content-end text-center uppercase flex items-center justify-center px-2" style="
@@ -104,11 +104,11 @@
 
     {#snippet Entry(d: {colSpan: number, text: string, hover?: string, link?: string, textLeft?: boolean}, bg=true, reverse=false)}
       {#if d.link === undefined}
-        <div class="text-xs {d.text === '' ? 'h-4' : ''} {bg ? (reverse ? 'even:bg-zinc-50 bg-zinc-100/80 dark:even:bg-zinc-950 dark:bg-zinc-950/85' : 'bg-zinc-50 even:bg-zinc-100/80 dark:bg-zinc-950 dark:even:bg-zinc-950/85') : 'bg-zinc-50 dark:bg-zinc-950'} align-middle whitespace-nowrap overflow-hidden overflow-ellipsis px-1 {d.textLeft !== true ? 'text-center' : ''} group-hover/row:bg-zinc-200 dark:group-hover/row:bg-zinc-800" style="grid-column: span {d.colSpan} / span {d.colSpan};" title="{d.hover ?? d.text}">
+        <div class="text-xs {d.text === '' ? 'h-4' : ''} {bg ? (reverse ? 'even:bg-zinc-50 bg-zinc-100/80 dark:even:bg-zinc-950 dark:bg-zinc-950/85' : 'bg-zinc-50 even:bg-zinc-100/80 dark:bg-zinc-950 dark:even:bg-zinc-950/85') : 'bg-zinc-50 dark:bg-zinc-950'} align-middle whitespace-nowrap overflow-hidden text-ellipsis px-1 {d.textLeft !== true ? 'text-center' : ''} dark:group-hover/row:!bg-zinc-800 group-hover/row:!bg-zinc-200" style="grid-column: span {d.colSpan} / span {d.colSpan};" title="{d.hover ?? d.text}">
           {d.text}
         </div>
       {:else}
-        <a href="{d.link}" class="text-xs{d.text === '' ? 'h-4' : ''} {bg ? (reverse ? 'even:bg-zinc-50 bg-zinc-100/80 dark:even:bg-zinc-950 dark:bg-zinc-950/85' : 'bg-zinc-50 even:bg-zinc-100/80 dark:bg-zinc-950 dark:even:bg-zinc-950/85') : 'bg-zinc-50 dark:bg-zinc-950'} align-middle whitespace-nowrap overflow-hidden overflow-ellipsis px-1 {d.textLeft !== true ? 'text-center' : ''} group-hover/row:bg-zinc-200 dark:group-hover/row:bg-zinc-800 hover:underline decoration-sky-500 decoration-2" style="grid-column: span {d.colSpan} / span {d.colSpan};" title="{d.hover ?? d.text}">
+        <a href="{d.link}" class="text-xs{d.text === '' ? 'h-4' : ''} {bg ? (reverse ? 'even:bg-zinc-50 bg-zinc-100/80 dark:even:bg-zinc-950 dark:bg-zinc-950/85' : 'bg-zinc-50 even:bg-zinc-100/80 dark:bg-zinc-950 dark:even:bg-zinc-950/85') : 'bg-zinc-50 dark:bg-zinc-950'} align-middle whitespace-nowrap overflow-hidden text-ellipsis px-1 {d.textLeft !== true ? 'text-center' : ''} group-hover/row:bg-zinc-200 dark:group-hover/row:bg-zinc-800 hover:underline decoration-sky-500 decoration-2" style="grid-column: span {d.colSpan} / span {d.colSpan};" title="{d.hover ?? d.text}">
           {d.text}
         </a>
       {/if}
@@ -144,10 +144,10 @@
 
 
 
-    <div class="row-span-3 gap-[1px] sticky bottom-[6.5rem] grid grid-cols-subgrid bg-zinc-300 dark:bg-zinc-700" style="grid-column: span {data.numCols} / span {data.numCols};">
+    <div class="row-span-3 gap-px sticky bottom-26 grid grid-cols-subgrid bg-zinc-300 dark:bg-zinc-700" style="grid-column: span {data.numCols} / span {data.numCols};">
       <div class="hidden"></div>
       <!-- Border for bottom section -->
-      <div class="h-[1px] bg-zinc-400 dark:bg-zinc-600" style="grid-column: span {data.numCols} / span {data.numCols};"></div>
+      <div class="h-px bg-zinc-400 dark:bg-zinc-600" style="grid-column: span {data.numCols} / span {data.numCols};"></div>
 
       <div class="row-span-3 bg-zinc-100 dark:bg-zinc-900 text-xs flex flex-col items-center justify-between py-1" style="grid-column: span {data.signatureSectionColSpan.heading} / span {data.signatureSectionColSpan.heading};">
         <div>I <span class="italic">({data.name})</span> certify that the entries in this log are true</div>

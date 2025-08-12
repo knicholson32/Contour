@@ -7,3 +7,4 @@
 vite.config.js.timestamp-*
 /library
 *.bak
+.pnpm-store

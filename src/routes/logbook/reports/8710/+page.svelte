@@ -19,7 +19,7 @@
 <div class="m-6 flex flex-col lg:flex-row gap-6 print:hidden">
   <div class="grow flex flex-col gap-0">
     <div class="uppercase text-center text-base md:text-xs font-normal mb-1">Summary</div>
-    <div class="grow flex flex-col divide-y gap-2 bg-gray-50 pb-[7px] dark:bg-zinc-900 shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700">
+    <div class="grow flex flex-col divide-y gap-2 bg-gray-50 pb-[7px] dark:bg-zinc-900 shadow-xs ring-1 ring-gray-900/5 dark:ring-zinc-700">
       <div class="flex flex-row gap-6 mt-4 pb-2">
         <div class="flex-auto pl-6">
           <dt class="text-sm font-semibold leading-6 text-gray-900 dark:text-zinc-50">Total Hours</dt>
@@ -31,14 +31,14 @@
         </div>
       </div>
       <div class="grow flex flex-col gap-4 mb-2">
-        <div class="flex w-full flex-grow gap-x-4 px-6 pt-6">
+        <div class="flex w-full grow gap-x-4 px-6 pt-6">
           <dt class="flex-none">
             <span class="sr-only">Client</span>
             <img class="h-5 w-5 rounded-full" src="https://www.gravatar.com/avatar/{data.settings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
           </dt>
           <dd class="text-sm font-medium leading-6 text-gray-900 dark:text-zinc-50">{data.name}</dd>
         </div>
-        <div class="flex w-full flex-grow gap-x-4 px-6">
+        <div class="flex w-full grow gap-x-4 px-6">
           <dt class="flex-none">
             <span class="sr-only">Date Generated</span>
             <svg class="h-6 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -50,7 +50,7 @@
             <time datetime="2023-01-31">{timeConverter(now.getTime() / 1000)}</time>
           </dd>
         </div>
-        <div class="flex w-full flex-grow gap-x-4 px-6">
+        <div class="flex w-full grow gap-x-4 px-6">
           <dt class="flex-none">
             <span class="sr-only">Status</span>
             <img class="w-5" src="/logo-inverted.png" alt="Contour">
@@ -65,7 +65,7 @@
       </div>
     </div>
   </div>
-  <div class="flex-grow">
+  <div class="grow">
     <div class="uppercase text-center text-base md:text-xs font-normal mb-1">Class Hours</div>
     <FAA8710ClassHours data={data.classHours} />
   </div>
@@ -117,8 +117,8 @@
         <div class="-rotate-45">ATD</div>
       </div>
 
-      <div class="print-color-adjust-exact col-span-12 col-start-2 row-span-8 grid grid-cols-12 grid-rows-subgrid text-xs text-center shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700 relative">
-        <div class="absolute z-[1] top-0 bottom-0 left-0 right-0 bg-hashLight dark:bg-hashDark dark:opacity-50"></div>
+      <div class="print-color-adjust-exact col-span-12 col-start-2 row-span-8 grid grid-cols-12 grid-rows-subgrid text-xs text-center shadow-xs ring-1 ring-gray-900/5 dark:ring-zinc-700 relative">
+        <div class="absolute z-1 top-0 bottom-0 left-0 right-0 bg-(image:--hash-light) dark:bg-(image:--hash-dark) dark:opacity-50"></div>
         <!-- Rows -->
         <FAA8710Row class="bg-zinc-50 dark:bg-zinc-900" data={data.airplane} title="Airplane" />
         <FAA8710Row class="bg-zinc-100 dark:bg-zinc-925" data={data.rc} title="R.C." />
@@ -135,14 +135,14 @@
 </div>
 
 <div class="hidden print:flex flex-r items-center justify-center gap-1">
-  <div class="flex flex-grow gap-x-4 justify-center">
+  <div class="flex grow gap-x-4 justify-center">
     <dt class="flex-none">
       <span class="sr-only">Client</span>
       <img class="h-5 w-5 rounded-full" src="https://www.gravatar.com/avatar/{data.settings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
     </dt>
     <dd class="text-sm font-medium leading-6 text-gray-900 dark:text-zinc-50">{data.name}</dd>
   </div>
-  <div class="flex flex-grow gap-x-4 justify-center">
+  <div class="flex grow gap-x-4 justify-center">
     <dt class="flex-none">
       <span class="sr-only">Date Generated</span>
       <svg class="h-6 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -154,7 +154,7 @@
       <time datetime="2023-01-31">{timeConverter(now.getTime() / 1000)}</time>
     </dd>
   </div>
-  <div class="flex flex-grow gap-x-4 justify-center">
+  <div class="flex grow gap-x-4 justify-center">
     <dt class="flex-none">
       <span class="sr-only">Status</span>
       <img class="w-5" src="/logo-inverted.png" alt="Contour">

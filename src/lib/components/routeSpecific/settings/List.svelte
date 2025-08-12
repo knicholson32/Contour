@@ -85,7 +85,7 @@
 					{@render description?.()}
 				</p>
 			</div>
-			<div class="flex-grow"></div>
+			<div class="grow"></div>
 			<div class="sm:mr-3 inline-flex gap-2 relative">
 				{@render button?.()}
 				<Submit

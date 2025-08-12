@@ -181,7 +181,7 @@
       <div>S</div>
     </div>
 
-    <div class="isolate mt-2 grid grid-cols-7 gap-px rounded-lg bg-gray-200 dark:bg-zinc-800 text-sm shadow ring-1 ring-gray-200 dark:ring-zinc-700">
+    <div class="isolate mt-2 grid grid-cols-7 gap-px rounded-lg bg-gray-200 dark:bg-zinc-800 text-sm shadow-sm ring-1 ring-gray-200 dark:ring-zinc-700">
 
       {#key cal}
         <!-- Previous Month -->
@@ -225,7 +225,7 @@
 
     </div>
 
-    <div class="hidden isolate mt-2 grid-cols-7 gap-px rounded-lg bg-gray-200 text-sm shadow ring-1 ring-gray-200">
+    <div class="hidden isolate mt-2 grid-cols-7 gap-px rounded-lg bg-gray-200 text-sm shadow-sm ring-1 ring-gray-200">
       <!--
         Always include: "py-1.5 betterhover:hover:bg-gray-100 focus:z-10"
         Is current month, include: "bg-white"

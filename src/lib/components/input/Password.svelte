@@ -30,7 +30,7 @@
 		{name}
 		class="block w-full rounded-md {mono ? 'font-mono' : ''} {allowShowPassword
 			? 'rounded-r-none border-r-0'
-			: ''} border-0 py-1.5 text-gray-900 shadow-sm dark:bg-transparent ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 dark:text-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 sm:text-sm sm:leading-6"
+			: ''} border-0 py-1.5 text-gray-900 shadow-xs dark:bg-transparent ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 dark:text-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 sm:text-sm sm:leading-6"
 		{placeholder}
 		bind:value
 	/>

@@ -252,7 +252,7 @@
 
   <!-- Menu Side -->
   {#snippet menu()}
-    <nav class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
+    <nav class="shrink dark:divide-zinc-800" aria-label="Directory">
       {#if data.currentDay !== null}
         <MenuForm.Title title="Duty Day Legs" />
         <MenuForm.Link href={`/entry/day/${data.currentDay.id}?${urlFormParam}`} type="left" text="Back to Day" />
@@ -261,7 +261,7 @@
           <Popover.Trigger class="w-full">
             <MenuForm.Link href="#" icon={icons.plus} text="Create a new leg" type="right"/>
           </Popover.Trigger>
-          <Popover.Content side={isMobileSize ? undefined : 'right'} class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-none w-auto">
+          <Popover.Content side={isMobileSize ? undefined : 'right'} class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-hidden w-auto">
             <!-- Active: "bg-gray-100", Not Active: "" -->
             <a href="/entry/leg/create/fa?{urlFormParam}" onclick={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From FlightAware</a>
             <a href="/entry/leg/create/form?{urlFormParam}" onclick={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From Scratch</a>
@@ -276,7 +276,7 @@
               <MenuForm.Link href={`/entry/day?tour=${page.url.searchParams.get('tour')}`} icon={icons.plus} text="Go back to Tour" type="left"/>
             {/if}
           </Popover.Trigger>
-          <Popover.Content side={isMobileSize ? undefined : 'right'} class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-none w-auto">
+          <Popover.Content side={isMobileSize ? undefined : 'right'} class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-hidden w-auto">
             <!-- Active: "bg-gray-100", Not Active: "" -->
             <a href="/entry/leg/create/fa" onclick={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From FlightAware</a>
             <a href="/entry/leg/create/form" onclick={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From Scratch</a>
@@ -310,7 +310,7 @@
                           {entry.entry.originAirportId} → {entry.entry.diversionAirportId === null ? entry.entry.destinationAirportId : entry.entry.diversionAirportId}
                         {/if}
                       </span>
-                      <span class="flex-grow ml-1">
+                      <span class="grow ml-1">
                         {#if $unsavedUIDs.includes(entry.entry.id)}
                           <Tag>UNSAVED</Tag>
                         {/if}
@@ -330,7 +330,7 @@
                       <span class="font-normal text-gray-400 dark:text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis">
                         {entry.entry.aircraft.registration} ({entry.entry.aircraft.type.typeCode})
                       </span>
-                      <span class="flex-grow"></span>
+                      <span class="grow"></span>
                       <span class="">{entry.entry.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
                     </div>
                   </div>
@@ -365,7 +365,7 @@
                         {entry.originAirportId} → {entry.diversionAirportId === null ? entry.destinationAirportId : entry.diversionAirportId}
                       {/if}
                     </span>
-                    <span class="flex-grow ml-1">
+                    <span class="grow ml-1">
                       {#if $unsavedUIDs.includes(entry.id)}
                         <Tag>UNSAVED</Tag>
                       {/if}
@@ -381,7 +381,7 @@
                     <span class="font-normal text-gray-400 dark:text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis">
                       {entry.aircraft.registration} ({entry.aircraft.type.typeCode})
                     </span>
-                    <span class="flex-grow"></span>
+                    <span class="grow"></span>
                     <span class="">{entry.totalTime.toFixed(1)}</span> <span class="font-light ml-1">Total</span>
                   </div>
                 </div>
@@ -400,7 +400,7 @@
   
   <!-- Form Side -->
   {#snippet form()}
-    <div class="flex-shrink">
+    <div class="shrink">
       {#if data.leg === null}
         <div class="absolute top-0 bottom-0 left-0 right-0 flex items-center justify-center">
           <div class="text-center">
@@ -415,18 +415,18 @@
               <div class="mt-6">
                 <Popover.Root>
                   <Popover.Trigger class="w-full">
-                    <div class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
+                    <div class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-sky-500 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
                       <Plus class="-ml-0.5 mr-1.5 h-5 w-5" />
                       Create A New Leg
                     </div>
                   </Popover.Trigger>
-                  <Popover.Content  class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-none w-auto">
+                  <Popover.Content  class="rounded-md bg-white dark:bg-zinc-900 py-1 px-0 focus:outline-hidden w-auto">
                     <!-- Active: "bg-gray-100", Not Active: "" -->
                     <a href="/entry/leg/create/fa?{urlFormParam}" onclick={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From FlightAware</a>
                     <a href="/entry/leg/create/form?{urlFormParam}" onclick={() => legsPopoverOpen = false} class="hover:bg-gray-50 dark:hover:bg-zinc-800 block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 dark:hover:text-white" role="menuitem" tabindex="-1" id="user-menu-item-1">From Scratch</a>
                   </Popover.Content>
                 </Popover.Root>
-                <!-- <a href="/entry/leg/create/fa?{urlFormParam}" class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
+                <!-- <a href="/entry/leg/create/fa?{urlFormParam}" class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-sky-500 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
                   <Plus class="-ml-0.5 mr-1.5 h-5 w-5" />
                   Create A New Leg
                 </a> -->
@@ -545,7 +545,7 @@
                   <CalendarDays class="w-4 h-4"/>
                 </div>
                 <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-sky-500">Go To Duty Day</div>
-                <div class="flex-grow"></div>
+                <div class="grow"></div>
                 <ChevronRight class="w-5 h-5" />
               </a>
             {/if}
@@ -558,7 +558,7 @@
                   <CalendarDays class="w-4 h-4"/>
                 </div>
                 <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-sky-500">Go To Duty Day</div>
-                <div class="flex-grow"></div>
+                <div class="grow"></div>
                 <ChevronRight class="w-5 h-5" />
               </a>
             </div>
@@ -576,7 +576,7 @@
                 </div>
                 <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-red-500">Erase FlightAware Data</div>
               </button>
-              <div class="flex-grow"></div>
+              <div class="grow"></div>
             </form>
             <form action="?/modifyDutyDay" method="post" enctype="multipart/form-data" class="flex flex-row gap-3 items-center">
               <Entry.Input title="Duty Day" name="dutyDayID" error={formData !== null && formData.ok === false && formData.action === '?/modifyDutyDay' ? formData.message : ''} uppercase={true} defaultValue={`${data.leg.dayId ?? ''}`} placeholder="Enter a Duty Day ID here" />
@@ -693,7 +693,7 @@
 
         <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
           {#if data.leg !== null}
-            <form class="flex-grow max-w-[33%] md:w-48 md:flex-grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
+            <form class="grow max-w-[33%] md:w-48 md:grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
               const answer = confirm('Are you sure you want to delete this leg? This action cannot be undone.');
               if (!answer) cancel();
               else {
@@ -718,8 +718,8 @@
             </form>
           {/if}
           {#if $unsavedChanges}
-            <button type="button" onclick={() => clearUID(true)} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
-            <Submit remoteForm="form-update" class="flex-grow w-full md:w-48 md:flex-grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Update" actionTextInProgress="Update" />
+            <button type="button" onclick={() => clearUID(true)} class="grow w-full md:w-48 md:grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
+            <Submit remoteForm="form-update" class="grow w-full md:w-48 md:grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Update" actionTextInProgress="Update" />
           {/if}
         </div>
       {/if}

@@ -84,7 +84,7 @@
 					{@render description?.()}
 				</p>
 			</div>
-			<div class="flex-grow"></div>
+			<div class="grow"></div>
 			<div class="sm:mr-3 inline-flex gap-2 relative">				
 				{#if id !== null}
 					<button onclick={() => remove(id ?? '')} class="text-gray-400 ring-1 ring-gray-300 rounded-md p-1 hover:text-gray-800 hover:ring-gray-600">

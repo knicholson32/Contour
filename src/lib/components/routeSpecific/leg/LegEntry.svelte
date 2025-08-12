@@ -31,7 +31,7 @@
         <span class="text-primary ml-2"><Waypoints class="w-3 h-3"/></span>
       {/if}
     </span>
-    <span class="flex-grow ml-1 leading-5">
+    <span class="grow ml-1 leading-5">
       {#if unsaved}
         <Tag class="h-[20px]">UNSAVED</Tag>
       {/if}
@@ -51,7 +51,7 @@
     <span class="font-normal text-gray-400 dark:text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis">
       {leg.aircraft.registration} ({leg.aircraft.type.typeCode})
     </span>
-    <span class="flex-grow"></span>
+    <span class="grow"></span>
     {#if leg._count.approaches > 0}
       <span class="mr-2">
         {leg._count.approaches + ' '}

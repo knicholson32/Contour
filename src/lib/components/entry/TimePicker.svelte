@@ -114,9 +114,9 @@
 
   {#if dateOnly}
     {#if disabled}
-      <input {required} tabindex="0" bind:this={input} type="text" bind:value={valueFormatted} {disabled} class="text-right min-w-10 p-0 disabled:cursor-not-allowed disabled:text-gray-500 border-0 bg-transparent focus:outline-none focus-within:ring-0">
+      <input {required} tabindex="0" bind:this={input} type="text" bind:value={valueFormatted} {disabled} class="text-right min-w-10 p-0 disabled:cursor-not-allowed disabled:text-gray-500 border-0 bg-transparent focus:outline-hidden focus-within:ring-0">
     {:else}
-      <input {required} tabindex="0" bind:this={input} type="date" name={name} {disabled} on:change={_update} bind:value class="text-right min-w-10 p-0 disabled:cursor-not-allowed disabled:text-gray-500 border-0 bg-transparent focus:outline-none focus-within:ring-0">
+      <input {required} tabindex="0" bind:this={input} type="date" name={name} {disabled} on:change={_update} bind:value class="text-right min-w-10 p-0 disabled:cursor-not-allowed disabled:text-gray-500 border-0 bg-transparent focus:outline-hidden focus-within:ring-0">
     {/if}
   {:else}
     <input type="hidden" name={name + '-tz'} bind:value={tz} />
@@ -126,11 +126,11 @@
 
   <div slot="outsideButton">
     {#if !dateOnly}
-      <button disabled={disabled} bind:this={button} on:click={openDialog} type="button" class="touch-manipulation select-none relative whitespace-nowrap text-xs transition-colors flex justify-center items-center px-3 py-2 rounded-md font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 {(autoTZSwitch && tz !== null) || tz === 'UTC' ? 'ring-gray-300 dark:ring-zinc-600 text-gray-800 dark:text-gray-100 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white' : 'ring-orange-700 text-orange-700 betterhover:hover:bg-orange-50 dark:betterhover:hover:bg-orange-900/10'} disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white dark:bg-transparent">
+      <button disabled={disabled} bind:this={button} on:click={openDialog} type="button" class="touch-manipulation select-none relative whitespace-nowrap text-xs transition-colors flex justify-center items-center px-3 py-2 rounded-md font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 {(autoTZSwitch && tz !== null) || tz === 'UTC' ? 'ring-gray-300 dark:ring-zinc-600 text-gray-800 dark:text-gray-100 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white' : 'ring-orange-700 text-orange-700 betterhover:hover:bg-orange-50 dark:betterhover:hover:bg-orange-900/10'} disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 bg-white dark:bg-transparent">
         {autoTZSwitch ? (tz === null ? 'No TZ' : 'Auto TZ') : (tz === 'UTC' ? 'UTC' : 'Custom TZ')}
       </button>
       {#if dialogOpen}
-        <div bind:this={dialog} use:EscapeOrClickOutside={{ callback: closeDialog }} class="absolute right-0 top-11 xs:top-10 xs:right-3 z-10 p-3 w-full xs:w-96 origin-top-right xs:rounded-md bg-white dark:bg-zinc-800 shadow-lg ring-1 ring-gray-300 dark:ring-zinc-600 ring-inset focus:outline-none flex flex-col gap-3" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+        <div bind:this={dialog} use:EscapeOrClickOutside={{ callback: closeDialog }} class="absolute right-0 top-11 xs:top-10 xs:right-3 z-10 p-3 w-full xs:w-96 origin-top-right xs:rounded-md bg-white dark:bg-zinc-800 shadow-lg ring-1 ring-gray-300 dark:ring-zinc-600 ring-inset focus:outline-hidden flex flex-col gap-3" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
           <button type="button" on:click={closeDialog} class="absolute top-2 right-2 betterhover:hover:text-gray-800 dark:betterhover:hover:text-white text-gray-400">
             <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
               {@html icons.x}
@@ -142,12 +142,12 @@
               <!-- TODO: Remove this force disable when I know this component works properly -->
               <Switch bind:value={autoTZSwitch} disabled title="Auto TZ"/>
               {#if tz !== 'UTC'}
-                <button disabled={disabled} on:click={convertToUTC} type="button" class="touch-manipulation select-none relative whitespace-nowrap text-xs transition-colors flex justify-center items-center px-3 py-2 rounded-md font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-100 betterhover:hover:bg-gray dark:betterhover:hover:bg-zinc-900 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200">Convert to UTC</button>
+                <button disabled={disabled} on:click={convertToUTC} type="button" class="touch-manipulation select-none relative whitespace-nowrap text-xs transition-colors flex justify-center items-center px-3 py-2 rounded-md font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-100 betterhover:hover:bg-gray dark:betterhover:hover:bg-zinc-900 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200">Convert to UTC</button>
               {/if}
             </div>
           <!-- TODO: Remove this force disable when I know this component works properly -->
           <select on:change={_update} disabled={disabled || autoTZSwitch || true} title={"Timezone"} bind:value={tz}
-            class="w-full xs:w-auto sm:max-w-md text-sm border-0 rounded-md text-gray-900 dark:text-gray-100 dark:bg-transparent shadow-sm ring-1 placeholder:text-gray-400 disabled:cursor-not-allowed select:disabled:text-red-500 disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:text-gray-500 dark:disabled:text-gray-600 disabled:ring-gray-200 ring-gray-300 dark:ring-zinc-500 focus:border-gray-900 focus-within:ring-2 focus-within:ring-sky-600 focus-within:border-0">
+            class="w-full xs:w-auto sm:max-w-md text-sm border-0 rounded-md text-gray-900 dark:text-gray-100 dark:bg-transparent shadow-xs ring-1 placeholder:text-gray-400 disabled:cursor-not-allowed select:disabled:text-red-500 disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:text-gray-500 dark:disabled:text-gray-600 disabled:ring-gray-200 ring-gray-300 dark:ring-zinc-500 focus:border-gray-900 focus-within:ring-2 focus-within:ring-sky-600 focus-within:border-0">
             <option selected={tz === null} disabled value={null}>Unset</option>
             {#each options as option}
               <option selected={tz === option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</option>

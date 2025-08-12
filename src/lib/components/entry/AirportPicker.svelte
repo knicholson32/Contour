@@ -157,7 +157,7 @@
   <input type="hidden" name={name+'-tz'} bind:value={tz} />
   <!-- <form on:submit|preventDefault={() => {}} class="w-full"> -->
     <input tabindex="0" bind:this={select} {required} disabled={disabled} maxlength="4" bind:value on:input={_updateContinuous} on:change={_update} type="text" style="text-transform:uppercase" placeholder="" name="airport-visible" list="airport"
-      class="w-full text-right px-0 text-sm font-mono text-sky-400 font-bold flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
+      class="w-full text-right px-0 text-sm font-mono text-sky-400 font-bold shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
     <datalist id="airport">
       {#each airports as airport (airport.id)}
         <option selected={airport.id.toLocaleUpperCase() === value?.toLocaleUpperCase()} value="{airport.id.toLocaleUpperCase()}">{airport.name} - ({airport.timezone})</option>

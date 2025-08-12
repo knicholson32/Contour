@@ -67,12 +67,12 @@
 	let spinnerClasses = $state('');
 	let spinnerProgressClasses = $state('');
 
-	// rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 betterhover:hover:bg-gray-50
+	// rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 betterhover:hover:bg-gray-50
 	switch (themeDefault) {
 		case 'green':
 			themeClassesStatic = '';
 			themeClassesDefault =
-				'bg-green-600 text-white betterhover:hover:bg-green-500 disabled:text-gray-200 disabled:bg-gray-800 disabled:betterhover:hover:bg-gray-800 focus-visible:outline-green-500';
+				'bg-green-600 text-white betterhover:hover:bg-green-500 disabled:text-gray-200 disabled:bg-gray-800 betterhover:disabled:hover:bg-gray-800 focus-visible:outline-green-500';
 			themeClassesSubmitting = 'bg-green-600 text-white cursor-default';
 			spinnerClasses = 'fill-white text-green-700';
 			spinnerProgressClasses = 'text-white';
@@ -80,7 +80,7 @@
 		case 'red':
 			themeClassesStatic = '';
 			themeClassesDefault =
-				'bg-red-600 text-white betterhover:hover:bg-red-500 disabled:text-gray-200 dark:disabled:text-gray-600 disabled:bg-gray-800 dark:disabled:bg-zinc-900 dark:disabled:ring-zinc-600 dark:disabled:ring-1 disabled:betterhover:hover:bg-gray-800 dark:disabled:betterhover:hover:bg-zinc-800 focus-visible:outline-red-500';
+				'bg-red-600 text-white betterhover:hover:bg-red-500 disabled:text-gray-200 dark:disabled:text-gray-600 disabled:bg-gray-800 dark:disabled:bg-zinc-900 dark:disabled:ring-zinc-600 dark:disabled:ring-1 betterhover:disabled:hover:bg-gray-800 dark:betterhover:disabled:hover:bg-zinc-800 focus-visible:outline-red-500';
 			themeClassesSubmitting = 'bg-red-600 text-white cursor-default';
 			spinnerClasses = 'fill-white text-red-700';
 			spinnerProgressClasses = 'text-white';
@@ -89,7 +89,7 @@
 			themeClassesStatic =
 				'ring-1 ring-inset ring-gray-300 dark:ring-zinc-600';
 			themeClassesDefault =
-				'bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 disabled:text-gray-500 dark:disabled:text-gray-600 disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:ring-gray-200 dark:disabled:ring-zinc-600 dark:disabled:ring-1 disabled:betterhover:hover:bg-gray-800 dark:disabled:betterhover:hover:bg-zinc-800';
+				'bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 disabled:text-gray-500 dark:disabled:text-gray-600 disabled:bg-gray-50 dark:disabled:bg-zinc-900 disabled:ring-gray-200 dark:disabled:ring-zinc-600 dark:disabled:ring-1 betterhover:disabled:hover:bg-gray-800 dark:betterhover:disabled:hover:bg-zinc-800';
 			themeClassesSubmitting = 'bg-white text-gray-800 cursor-default';
 			spinnerClasses = 'text-gray-100 fill-gray-800';
 			spinnerProgressClasses = 'text-gray-800';
@@ -97,7 +97,7 @@
 		default: // indigo
 			themeClassesStatic = '';
 			themeClassesDefault =
-				'bg-indigo-600 text-white betterhover:hover:bg-indigo-500 disabled:text-gray-200 disabled:bg-gray-800 disabled:betterhover:hover:bg-gray-800 focus-visible:outline-indigo-500';
+				'bg-indigo-600 text-white betterhover:hover:bg-indigo-500 disabled:text-gray-200 disabled:bg-gray-800 betterhover:disabled:hover:bg-gray-800 focus-visible:outline-indigo-500';
 			themeClassesSubmitting = 'bg-indigo-600 text-white cursor-default';
 			spinnerClasses = 'fill-white text-indigo-700';
 			spinnerProgressClasses = 'text-white';
@@ -180,7 +180,7 @@
 	// stroke-dasharray="{circumference}" stroke-dashoffset="{offset}"
 </script>
 
-<button form={remoteForm} title={submitting && progress != 0 ? `${Math.round(progress * 100)}%` : hoverTitle} bind:this={button} {disabled} type="submit" class="{clazz} touch-manipulation select-none transition-colors flex justify-center px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed {done ? '' : themeClassesStatic} {themeClasses}">
+<button form={remoteForm} title={submitting && progress != 0 ? `${Math.round(progress * 100)}%` : hoverTitle} bind:this={button} {disabled} type="submit" class="{clazz} touch-manipulation select-none transition-colors flex justify-center px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed {done ? '' : themeClassesStatic} {themeClasses}">
 	<span class="flex-none">{done ? failed ? failedText : doneText : submitting ? actionTextInProgress : actionText}</span>
 	{#if submitting || done}
 		<div transition:reveal role="status" class="relative flex-none ml-2 w-5 h-5 align-middle overflow-hidden">

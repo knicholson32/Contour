@@ -30,7 +30,7 @@
       </span>
     </div>
   </div>
-  <div class="flex-grow"></div>
+  <div class="grow"></div>
   <div class="inline-flex items-center gap-3">
     {#if commit.commit.verification.verified}
       <span class="text-green-500 border font-mono border-green-500 rounded-full text-xxs px-2 py-0.5 select-none">Verified</span>

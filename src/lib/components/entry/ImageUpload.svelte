@@ -280,7 +280,7 @@
             <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd" />
           </svg>
           <div class="mt-4 flex justify-center text-sm leading-6 text-gray-600">
-            <label for="file-upload" class="relative cursor-pointer rounded-md font-semibold text-sky-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-sky-600 focus-within:ring-offset-2 hover:text-sky-500">
+            <label for="file-upload" class="relative cursor-pointer rounded-md font-semibold text-sky-600 focus-within:outline-hidden focus-within:ring-2 focus-within:ring-sky-600 focus-within:ring-offset-2 hover:text-sky-500">
               <span>Upload an image</span>
               <input name={name + (isURL ? '-unused' : '')} id="file-upload" bind:this={imageInput} on:change={imageChanged} accept="image/*" type="file" class="sr-only">
             </label>
@@ -292,12 +292,12 @@
           <div class="relative w-full justify-center inline-flex">
             {#if previewString !== '' || _initialImageId !== null}
               {#if currentState === ImageUploadState.UPDATE}
-                <button class="text-sky-600 text-sm focus-within:outline-none font-semibold focus-within:ring-0 hover:text-sky-500" type="button" on:click={clearUpload}>Clear Upload</button>
+                <button class="text-sky-600 text-sm focus-within:outline-hidden font-semibold focus-within:ring-0 hover:text-sky-500" type="button" on:click={clearUpload}>Clear Upload</button>
               {:else if imageRequired === false}
                 {#if currentState === ImageUploadState.NO_CHANGE}
-                  <button class="text-sky-600 text-sm focus-within:outline-none font-semibold focus-within:ring-0 hover:text-sky-500" type="button" on:click={deleteImage}>Delete Image</button>
+                  <button class="text-sky-600 text-sm focus-within:outline-hidden font-semibold focus-within:ring-0 hover:text-sky-500" type="button" on:click={deleteImage}>Delete Image</button>
                 {:else if currentState === ImageUploadState.DELETE}
-                  <button class="text-sky-600 text-sm focus-within:outline-none font-semibold focus-within:ring-0 hover:text-sky-500" type="button" on:click={restoreImage}>Restore Default</button>
+                  <button class="text-sky-600 text-sm focus-within:outline-hidden font-semibold focus-within:ring-0 hover:text-sky-500" type="button" on:click={restoreImage}>Restore Default</button>
                 {/if}
               {/if}
             {/if}

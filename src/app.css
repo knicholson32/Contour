@@ -1,20 +1,57 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-@layer utilities {
-  .print-color-adjust-exact {
-    -webkit-print-color-adjust: exact;
-  }
+@config '../tailwind.config.js';
 
-  .print-color-adjust-economy {
-    -webkit-print-color-adjust: economy;
+@theme {
+
+  /* Colors */
+  --color-zinc-925: oklch(18.31% 0.004 285.99);
+
+  /* Breakpoints */
+  --breakpoint-xs: 475px;
+
+  /* Fonts */
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --text-xxs: 0.6rem;
+  --text-xxs--line-height: 1rem;
+
+  /* Custom Backgrounds */
+  --hash-light: repeating-linear-gradient(45deg,#D4D4D7 0px,#D4D4D7 1px,transparent 1px,transparent 6.83333px);
+  --hash-dark: repeating-linear-gradient(45deg,#3F3F45 0px,#3F3F45 1px,transparent 1px,transparent 6.83333px);
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
   }
 }
 
-@page {
-  size: auto;
-  margin: 0mm;
+@utility print-color-adjust-exact {
+  -webkit-print-color-adjust: exact;
+}
+
+@utility print-color-adjust-economy {
+  -webkit-print-color-adjust: economy;
+}
+
+@layer utilities {
+  @page {
+    size: auto;
+    margin: 0mm;
+  }
 }
 
 @layer base {

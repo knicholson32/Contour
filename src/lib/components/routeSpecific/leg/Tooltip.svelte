@@ -23,7 +23,7 @@
         {:else}
           {(position.altitude * 100).toLocaleString([], {maximumFractionDigits: 0})} ft
         {/if}
-        <div class="flex-grow"></div>
+        <div class="grow"></div>
         <span class="uppercase text-xs opacity-70 ml-2">{position.altitudeChange}</span>
       </div>
     </div>
@@ -34,7 +34,7 @@
           Unknown
         {:else}
           {position.groundspeed.toFixed(0)} kts
-          <div class="flex-grow"></div>
+          <div class="grow"></div>
           <span class="uppercase text-xs opacity-70 ml-2">{(position.groundspeed * 1.15).toFixed(0)} mph</span>
         {/if}
       </div>

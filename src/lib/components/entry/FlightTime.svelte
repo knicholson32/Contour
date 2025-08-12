@@ -141,15 +141,15 @@
 <Frame {name} {action} form={$form} unsaved={$unsaved} restore={() => local.clear(true)} {required} bind:title focus={focus} bind:disabled>
   <div slot="outsideButton">
     {#if autoFill !== null && autoFill !== undefined && autoFill !== '' && autoFill !== 'NaN'}
-      <button tabindex="-1" disabled={disabled} on:click={autoFillFunc} type="button" class="touch-manipulation absolute right-24 top-2 select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 w-[4.5rem] rounded-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-sky-300 dark:ring-sky-600 bg-white dark:bg-transparent betterhover:hover:bg-gray dark:betterhover:hover:bg-zinc-900 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200">
+      <button tabindex="-1" disabled={disabled} on:click={autoFillFunc} type="button" class="touch-manipulation absolute right-24 top-2 select-none font-mono whitespace-nowrap text-xs text-sky-400 h-7 w-18 rounded-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ring-1 ring-inset ring-sky-300 dark:ring-sky-600 bg-white dark:bg-transparent betterhover:hover:bg-gray dark:betterhover:hover:bg-zinc-900 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200">
         USE {autoFill}
       </button>
     {/if}
   </div>
   <!-- pattern="[0-9]*" -->
   <input {required} type="text" tabindex="0" maxlength="4" on:focus={enterFocus} bind:this={input} disabled={disabled} bind:value={value} on:change={_update} on:input={_updateContinuous} placeholder="0.0" name={name}
-    class="text-ellipsis px-0 w-14 text-sm font-mono font-bold text-right {_focus ? 'text-gray-500' : ''}  flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
+    class="text-ellipsis px-0 w-14 text-sm font-mono font-bold text-right {_focus ? 'text-gray-500' : ''}  shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
 
   <input type="text" disabled={disabled} bind:value={userValue} on:change={_update} on:blur={() => _focus = false} on:input={_updateContinuous} bind:this={userInput} pattern="[0-9]*"
-    class="opacity-0 absolute text-red-500 text-ellipsis px-0 w-14 text-sm font-mono font-bold text-right flex-shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
+    class="opacity-0 absolute text-red-500 text-ellipsis px-0 w-14 text-sm font-mono font-bold text-right shrink border-0 bg-transparent py-1.5 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 disabled:cursor-not-allowed disabled:text-gray-500">
 </Frame>

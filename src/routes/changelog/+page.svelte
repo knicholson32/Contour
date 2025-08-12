@@ -39,7 +39,7 @@
       <div class="w-full relaitve inline-flex items-center justify-center">
         <GitCommitIcon class="h-12 w-12 absolute mx-auto"/>
         <span class="">Current Commit</span>
-        <span class="flex-grow"></span>
+        <span class="grow"></span>
       </div>
       
       <GitCommit commit={data.currentCommit} isNewCommit={getIsNewCommit(data.currentCommit.sha)} />

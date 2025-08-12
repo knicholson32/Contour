@@ -184,7 +184,7 @@
       <div class="flex">
         {#if $backArrow}
           <div class="flex items-center gap-2 justify-center">
-            <button onclick={$backButtonClicked} type="button" class="touch-manipulation text-center flex-grow select-none inline-flex items-center gap-1 transition-colors pl-1 pr-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+            <button onclick={$backButtonClicked} type="button" class="touch-manipulation text-center grow select-none inline-flex items-center gap-1 transition-colors pl-1 pr-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2
               ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-900 text-gray-800 dark:text-gray-100 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-900 dark:betterhover:hover:text-white">
               <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
                 {@html icons.chevronLeft}
@@ -196,7 +196,7 @@
             {/if}
           </div>
         {:else}
-          <div class="flex flex-shrink-0 items-center">
+          <div class="flex shrink-0 items-center">
             <a href="/">
               <img class="block w-9 h-auto lg:hidden" src="/logo-inverted.png" alt="Contour">
               <img class="hidden w-9 h-auto lg:block" src="/logo-inverted.png" alt="Contour">
@@ -262,7 +262,7 @@
         </div>
       </div>
       <div class="hidden sm:ml-6 sm:flex sm:items-center">
-        <!-- <button type="button" class="relative rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+        <!-- <button type="button" class="relative rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-hidden focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
           <span class="absolute -inset-1.5"></span>
           <span class="sr-only">View notifications</span>
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -273,7 +273,7 @@
         <!-- Profile dropdown -->
         <div bind:this={profileBar} use:EscapeOrClickOutside={{ callback: closeAccountDropdown, except: profileBar }} class="relative ml-3">
           <div>
-            <button type="button" onclick={toggleAccountDropdown} class="touch-manipulation relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+            <button type="button" onclick={toggleAccountDropdown} class="touch-manipulation relative flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-hidden focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
               <span class="absolute -inset-1.5"></span>
               <span class="sr-only">Open user menu</span>
               <img class="h-8 w-8 rounded-full" src="https://www.gravatar.com/avatar/{data.settings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
@@ -299,7 +299,7 @@
           {#if profileMenuVisible}
             <div in:fade={{ duration: 200, easing: cubicOut }} out:fade={{ duration: 75, easing: cubicIn }}>
               <div in:scale={{ duration: 200, easing: cubicOut}} out:scale={{ duration: 75, easing: cubicIn }}>
-                <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-zinc-900 py-1 shadow-lg ring-1 ring-black dark:ring-zinc-800 ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-zinc-900 py-1 shadow-lg ring-1 ring-black/5 dark:ring-zinc-800 focus:outline-hidden" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                   <!-- Active: "bg-gray-100", Not Active: "" -->
                   {#each profileMenu as m}
                     {#if m.button !== undefined}
@@ -329,7 +329,7 @@
       </div>
       <div class="-mr-2 flex items-center sm:hidden">
         <!-- Mobile menu button -->
-        <button type="button" onclick={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md  p-2 text-gray-400 dark:text-gray-200 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-500 dark:betterhover:hover:text-white {mobileNavMenuVisible ? 'bg-gray-100 dark:bg-zinc-800' : 'bg-white dark:bg-zinc-900'} focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
+        <button type="button" onclick={toggleMobileMenu} class="touch-manipulation relative inline-flex items-center justify-center rounded-md  p-2 text-gray-400 dark:text-gray-200 betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-800 betterhover:hover:text-gray-500 dark:betterhover:hover:text-white {mobileNavMenuVisible ? 'bg-gray-100 dark:bg-zinc-800' : 'bg-white dark:bg-zinc-900'} focus:outline-hidden focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" aria-controls="mobile-menu" aria-expanded="false">
           <span class="absolute -inset-0.5"></span>
           <span class="sr-only">Open main menu</span>
           <!-- Menu open: "hidden", Menu closed: "block" -->
@@ -371,14 +371,14 @@
       </div>
       <div class="border-t bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 pb-3 pt-4">
         <div class="flex items-center px-4">
-          <div class="flex-shrink-0">
+          <div class="shrink-0">
             <img class="h-10 w-10 rounded-full" src="https://www.gravatar.com/avatar/{data.settings["general.gravatar.hash"]}?s=300&d=identicon" alt="">
           </div>
           <div class="ml-3">
             <div class="text-base font-medium text-gray-800 dark:text-gray-200">{data.settings["general.name"]}</div>
             <div class="text-sm font-medium text-gray-500">{data.settings["general.email"]}</div>
           </div>
-          <!-- <button type="button" class="relative ml-auto flex-shrink-0 rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+          <!-- <button type="button" class="relative ml-auto shrink-0 rounded-full p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-hidden focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
             <span class="absolute -inset-1.5"></span>
             <span class="sr-only">View notifications</span>
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -414,8 +414,8 @@
   {/if}
 </nav>
 
-<div class=" relative overflow-y-hidden -mt-[1px] pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem + 1px);">
-  <div class="fixed top-[4rem] left-0 right-0 z-[101] h-[2px] overflow-hidden">
+<div class=" relative overflow-y-hidden -mt-px pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem + 1px);">
+  <div class="fixed top-16 left-0 right-0 z-101 h-[2px] overflow-hidden">
     <!-- <ProgressBar bind:this={progress} minimum={0} bind:width={width} /> -->
   </div>
   {@render children?.()}
@@ -474,7 +474,7 @@
           <div class="bg-gray-50 p-8">
             <div class="flex justify-between">
               <h3 class="text-sm/6 font-semibold text-gray-500">Version & Build Information</h3>
-              <a onclick={hideAboutOverlay} href="/settings" class="text-sm/6 font-semibold text-indigo-600">Settings <span aria-hidden="true">&rarr;</span></a>
+              <a onclick={hideAboutOverlay} href="/settings" class="text-sm/6 font-semibold text-sky-600">Settings <span aria-hidden="true">&rarr;</span></a>
             </div>
             <ul role="list" class="mt-6 space-y-6">
               <li class="relative text-gray-800">
@@ -485,17 +485,17 @@
                   {/if}
                 </div>
                 <div class="grid grid-cols-3 gap-x-4">
-                  <div class="flex-grow text-right">Parent Image</div>
-                  <a href="https://hub.docker.com/_/node" target="_blank" class="hover:underline flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.parentImage}</code></a>
+                  <div class="grow text-right">Parent Image</div>
+                  <a href="https://hub.docker.com/_/node" target="_blank" class="hover:underline grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.parentImage}</code></a>
                   
-                  <a href="https://nodejs.org/" target="_blank" class="hover:underline flex-grow text-right">Node</a>
-                  <a href="https://nodejs.org/docs/v{data.nodeVersion}/api/" target="_blank" class="hover:underline flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.nodeVersion}</code></a>
+                  <a href="https://nodejs.org/" target="_blank" class="hover:underline grow text-right">Node</a>
+                  <a href="https://nodejs.org/docs/v{data.nodeVersion}/api/" target="_blank" class="hover:underline grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.nodeVersion}</code></a>
 
-                  <a href="https://svelte.dev/" target="_blank" class="hover:underline flex-grow text-right">Svelte</a>
-                  <div class="flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.svelteVersion}</code></div>
+                  <a href="https://svelte.dev/" target="_blank" class="hover:underline grow text-right">Svelte</a>
+                  <div class="grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.svelteVersion}</code></div>
 
-                  <a href="https://www.prisma.io/" target="_blank" class="hover:underline flex-grow text-right">Prisma</a>
-                  <div class="flex-grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.prismaVersion}</code></div>
+                  <a href="https://www.prisma.io/" target="_blank" class="hover:underline grow text-right">Prisma</a>
+                  <div class="grow text-left col-span-2"><code class="bg-gray-100 p-1 rounded-md">{data.prismaVersion}</code></div>
 
                 </div>
               </li>

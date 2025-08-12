@@ -48,7 +48,7 @@
 	{/snippet}
 
 	<Settings.Password name="general.aeroAPI" {form} title="Aero API Key" update={() => aeroAPIList?.update()} bind:value={aeroAPI} hoverTitle="Aero API Key">
-	<a href="https://www.flightaware.com/aeroapi/portal/overview" target="_blank" title="Click to sign into Plex to generate a Plex Token for Unabridged to use." class="select-none w-full sm:w-auto flex justify-center items-center whitespace-nowrap px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-200 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500">
+	<a href="https://www.flightaware.com/aeroapi/portal/overview" target="_blank" title="Click to sign into Plex to generate a Plex Token for Unabridged to use." class="select-none w-full sm:w-auto flex justify-center items-center whitespace-nowrap px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-200 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500">
 		View AeroAPI Settings
 		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ml-1 w-4 h-4">
 			{@html icons.arrowTopRightOnSquare}

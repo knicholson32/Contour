@@ -75,7 +75,7 @@
 
   <!-- Menu Side -->
    {#snippet menu()}
-    <nav class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
+    <nav class="shrink dark:divide-zinc-800" aria-label="Directory">
       <MenuForm.Title title="Duty Day" />
       {#if data.currentTour !== null}
         <MenuForm.Link href={`/entry/tour/${data.currentTour.id}?${urlFormParam}`} icon={icons.chevronLeft} text="Edit Tour" type="left"/>
@@ -94,7 +94,7 @@
                 <span class="font-mono">
                   {day.startAirportId} → {day.endAirportId}
                 </span>
-                <span class="flex-grow ml-1">
+                <span class="grow ml-1">
                   {#if $unsavedUIDs.includes('day-' + day.id)}
                     <Tag>UNSAVED</Tag>
                   {/if}
@@ -117,7 +117,7 @@
   
   <!-- Form Side -->
   {#snippet form()}
-    <div class="flex-shrink">
+    <div class="shrink">
 
       {#if data.currentDay === null}
         <div class="absolute top-0 bottom-0 left-0 right-0 flex items-center justify-center">
@@ -131,7 +131,7 @@
             {/if}
             {#if data.currentTour !== null}
               <div class="mt-6">
-                <a href="/entry/day/create?{urlFormParam}" class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
+                <a href="/entry/day/create?{urlFormParam}" class="inline-flex items-center rounded-md bg-sky-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-sky-500 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
                   <Plus class="-ml-0.5 mr-1.5 h-5 w-5" />
                   Create A New Day
                 </a>
@@ -251,7 +251,7 @@
 
         <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
           {#if data.currentDay !== null}
-            <form class="flex-grow max-w-[33%] md:w-48 md:flex-grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
+            <form class="grow max-w-[33%] md:w-48 md:grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
               const answer = confirm('Are you sure you want to delete this duty day? This action cannot be undone.');
               if (!answer) cancel();
               else {
@@ -270,13 +270,13 @@
               <Submit disabled={data.currentDay.legs.length > 0} hoverTitle={data.currentDay.legs.length > 0 ? 'Disabled because legs still exist' : 'Delete Day'} class="w-full" failed={formData?.ok === false && formData.action === '?/default'} submitting={deleting} theme={{primary: 'red'}} actionText={'Delete'} actionTextInProgress={'Deleting'} />
             </form>
           {/if}
-          <a href="/entry/leg?active=menu&day={data.currentDay.id}{data.currentTour === null ? '' : '&tour='+data.currentTour.id}" class="flex-grow w-full text-center md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900">
+          <a href="/entry/leg?active=menu&day={data.currentDay.id}{data.currentTour === null ? '' : '&tour='+data.currentTour.id}" class="grow w-full text-center md:w-48 md:grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900">
             Legs
           </a>
           {#if $unsavedChanges}
-            <button type="button" onclick={() => clearUID(true)} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
+            <button type="button" onclick={() => clearUID(true)} class="grow w-full md:w-48 md:grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 
               ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900">Clear</button>
-            <Submit remoteForm="form-update" class="flex-grow w-full md:w-48 md:flex-grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Update" actionTextInProgress="Update" />
+            <Submit remoteForm="form-update" class="grow w-full md:w-48 md:grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText="Update" actionTextInProgress="Update" />
           {/if}
         </div>
       {/if}

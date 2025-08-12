@@ -24,8 +24,8 @@
           <a href="{m.href}" class="hidden sm:inline-flex px-3 lg:px-10 py-3 w-1/4 lg:w-auto text-black dark:text-white bg-zinc-200 dark:bg-zinc-800 items-center justify-center text-center font-medium whitespace-nowrap" aria-current="page">{m.title}</a>
           <a href="{m.href}" class="inline-flex sm:hidden px-3 lg:px-10 py-3 w-1/4 lg:w-auto text-black dark:text-white bg-zinc-200 dark:bg-zinc-800 items-center justify-center text-center font-medium whitespace-nowrap" aria-current="page">{m.title.split(' ')[0]}</a>  
         {:else}
-          <a href="{m.href}" class="hidden sm:inline-flex px-3 lg:px-10 py-3 w-1/4 lg:w-auto text-zinc-700 dark:text-zinc-400  betterhover:hover:text-black betterhover:hover:dark:text-white items-center justify-center text-center font-medium whitespace-nowrap">{m.title}</a>
-          <a href="{m.href}" class="inline-flex sm:hidden px-3 lg:px-10 py-3 w-1/4 lg:w-auto text-zinc-700 dark:text-zinc-400  betterhover:hover:text-black betterhover:hover:dark:text-white items-center justify-center text-center font-medium whitespace-nowrap">{m.title.split(' ')[0]}</a>  
+          <a href="{m.href}" class="hidden sm:inline-flex px-3 lg:px-10 py-3 w-1/4 lg:w-auto text-zinc-700 dark:text-zinc-400  betterhover:hover:text-black betterhover:dark:hover:text-white items-center justify-center text-center font-medium whitespace-nowrap">{m.title}</a>
+          <a href="{m.href}" class="inline-flex sm:hidden px-3 lg:px-10 py-3 w-1/4 lg:w-auto text-zinc-700 dark:text-zinc-400  betterhover:hover:text-black betterhover:dark:hover:text-white items-center justify-center text-center font-medium whitespace-nowrap">{m.title.split(' ')[0]}</a>  
         {/if}
       {/each}
     </div>

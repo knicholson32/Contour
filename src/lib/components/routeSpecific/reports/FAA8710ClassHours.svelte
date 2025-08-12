@@ -54,11 +54,11 @@
 </script>
 
 {#snippet EmptyCell(darker: boolean = true)}
-  <div class="{darker ? 'bg-gray-100/50 dark:bg-zinc-925/50' : 'bg-gray-50/50 dark:bg-zinc-900/70'} z-[2] border-l border-b"></div>
+  <div class="{darker ? 'bg-gray-100/50 dark:bg-zinc-925/50' : 'bg-gray-50/50 dark:bg-zinc-900/70'} z-2 border-l border-b"></div>
 {/snippet}
 
-<div class="grid grid-cols-5 text-xs relative shadow-sm ring-1 ring-gray-900/5 dark:ring-zinc-700">
-  <div class="absolute z-[1] top-0 bottom-0 left-0 right-0 bg-hashLight dark:bg-hashDark dark:opacity-50"></div>
+<div class="grid grid-cols-5 text-xs relative shadow-xs ring-1 ring-gray-900/5 dark:ring-zinc-700">
+  <div class="absolute z-1 top-0 bottom-0 left-0 right-0 bg-(image:--hash-light) dark:bg-(image:--hash-dark) dark:opacity-50"></div>
   <!-- Airplane -->
   <div class="row-span-2 border-b z-10 content-center text-center font-bold select-none bg-gray-50 dark:bg-zinc-900">
     <div class="-rotate-90 sm:-rotate-45 md:rotate-0">Airplane</div>
@@ -102,5 +102,5 @@
   <FAA8710ClassHoursTile class="border-l" title="FFS HEL" value={data.sim.ffs.hel} striped={true} />
   <FAA8710ClassHoursTile class="border-l" title="FTD HEL" value={data.sim.ftd.hel} striped={true} />
   <FAA8710ClassHoursTile class="border-l" title="ATD HEL" value={data.sim.atd.hel} striped={true} />
-  <div class="bg-gray-100/50 dark:bg-zinc-925/50 z-[2] border-l"></div>
+  <div class="bg-gray-100/50 dark:bg-zinc-925/50 z-2 border-l"></div>
 </div>

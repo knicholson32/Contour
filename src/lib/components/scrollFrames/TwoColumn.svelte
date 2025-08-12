@@ -252,7 +252,7 @@
 <!-- Menu -->
 <div bind:this={wrapper} class="h-full w-full flex flex-row relative overflow-hidden" style="--column-width: {(ratio ?? 0.25) * 100}%; --menu-min-width: {minSizes.menu}px;" role="presentation">
   {#if menuZone === 'safe'}
-    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border mb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex print:hidden print:md:hidden">
+    <div bind:this={_menu} style="-webkit-transform: translateZ(0);" class="box-border mb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-(--column-width) md:min-w-(--menu-min-width) shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex print:hidden print:md:hidden">
       {@render menu()}
     </div>
     <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
@@ -261,7 +261,7 @@
       </slot>
     </div> -->
   {:else}
-    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-[--column-width] md:min-w-[--menu-min-width] flex-shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex print:hidden print:md:hidden">
+    <div bind:this={_menu}  style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] {dragging ? '' : 'transition-width'} w-full bg-white dark:bg-zinc-950 md:w-(--column-width) md:min-w-(--menu-min-width) shrink-0 flex-col overflow-y-auto {activeOnSingleCol === 'menu' ? 'flex' : 'hidden'} md:flex print:hidden print:md:hidden">
       {@render menu()}
     </div>
     <!-- <div style="-webkit-transform: translateZ(0);" class="box-border pb-[env(safe-area-inset-bottom)] w-full flex-col overflow-y-scroll {activeOnSingleCol === 'menu' ? 'flex md:hidden' : 'hidden'}">
@@ -273,13 +273,13 @@
 
   <!-- Separator -->
   {#if resizable}
-    <div class="h-full flex-shrink-0 bg-gray-100 dark:bg-zinc-800 relative select-none w-2 justify-center hidden md:flex print:md:hidden">
+    <div class="h-full shrink-0 bg-gray-100 dark:bg-zinc-800 relative select-none w-2 justify-center hidden md:flex print:md:hidden">
       <div onmousedown={dragStart} ontouchstart={dragStart} class="absolute z-30 w-6 border-l border-white dark:border-zinc-700 bg-transparant cursor-col-resize top-0 bottom-0 left-1 flex justify-center" role="presentation">
-        <!-- <div class="h-full w-[1px] bg-white dark:bg-zinc-700"></div> -->
+        <!-- <div class="h-full w-px bg-white dark:bg-zinc-700"></div> -->
       </div>
     </div>
   {:else}
-    <div class="h-full flex-shrink-0 bg-gray-200 dark:bg-zinc-800 relative select-none w-[1px] justify-center hidden md:block"></div>
+    <div class="h-full shrink-0 bg-gray-200 dark:bg-zinc-800 relative select-none w-px justify-center hidden md:block"></div>
   {/if}
 
   <!-- Form -->

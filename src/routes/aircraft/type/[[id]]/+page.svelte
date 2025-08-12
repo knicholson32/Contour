@@ -55,7 +55,7 @@
 
   <!-- Menu Side -->
   {#snippet menu()}
-    <nav class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
+    <nav class="shrink dark:divide-zinc-800" aria-label="Directory">
       <MenuForm.Title title="Aircraft Types" />
       <MenuForm.Link href={ref ?? '/aircraft'} type="left" text="Back to Aircraft" />
       {#if data.orderGroups.length === 0}
@@ -69,12 +69,12 @@
             {#each group.types as type (type.id)}
               <MenuElement href="/aircraft/type/{type.id}?{urlActiveParam}" selected={type.id === page.params.id && !isMobileSize} includePadding={false}>
                 {#if type.imageId !== null}
-                  <div class="h-12 w-12 my-2 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
+                  <div class="h-12 w-12 my-2 flex-none shrink-0 rounded-lg overflow-hidden bg-gray-50">
                     <Image id={type.imageId} size={48} class="aspect-1 object-cover w-full h-full" alt="Icon for the {type.make} {type.model}"/>
                     <Badge class="absolute top-[4px] left-[4px]">{type._count.aircraft}</Badge>
                   </div>
                 {:else}
-                  <div class="h-12 w-12 my-2 flex-shrink-0 rounded-lg bg-gray-300 text-black uppercase font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
+                  <div class="h-12 w-12 my-2 shrink-0 rounded-lg bg-gray-300 text-black uppercase font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
                     {type.typeCode.substring(0, (type.typeCode.length < 4 ? type.typeCode.length : 5))}
                     <Badge class="absolute top-[4px] left-[4px]">{type._count.aircraft}</Badge>
                   </div>
@@ -103,7 +103,7 @@
   
   <!-- Form Side -->
   {#snippet form()}
-    <div class="flex-shrink">
+    <div class="shrink">
       <form id="form-create-or-mod" action="?/createOrModify&{page.url.search}" method="post" enctype="multipart/form-data" use:enhance={() => {
         submitting = true;
         return async ({ update }) => {
@@ -158,7 +158,7 @@
 
       <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
         {#if data.type !== null}
-          <form class="flex-grow max-w-[33%] md:w-48 md:flex-grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
+          <form class="grow max-w-[33%] md:w-48 md:grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
             const answer = confirm('Are you sure you want to delete this Aircraft Type? This action cannot be undone.');
             if (!answer) cancel();
             else {
@@ -175,8 +175,8 @@
           </form>
         {/if}
         {#if $unsavedChanges}
-          <button type="button" onclick={() => clearUID(true)} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
-          <Submit remoteForm="form-create-or-mod" class="flex-grow w-full md:w-48 md:flex-grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.type !== null ? 'Update' : 'Create'} actionTextInProgress={data.type !== null ? 'Updating' : 'Creating'} />
+          <button type="button" onclick={() => clearUID(true)} class="grow w-full md:w-48 md:grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
+          <Submit remoteForm="form-create-or-mod" class="grow w-full md:w-48 md:grow-0" failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.type !== null ? 'Update' : 'Create'} actionTextInProgress={data.type !== null ? 'Updating' : 'Creating'} />
         {/if}
       </div>
 

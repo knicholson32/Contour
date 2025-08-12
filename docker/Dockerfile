@@ -10,6 +10,14 @@ ARG PARENT_IMAGE=node:${NODE_VERSION}-alpine3.22
 FROM ${PARENT_IMAGE} AS node_install
 
 
+FROM ${PARENT_IMAGE} AS dev
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# Install pnpm
+RUN pnpm fetch --prod
+
 ######### Node Modules & Build #####################################################################
 FROM ${PARENT_IMAGE} AS build
 ENV PNPM_HOME="/pnpm"

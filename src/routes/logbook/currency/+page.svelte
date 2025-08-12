@@ -31,7 +31,7 @@
       <div class="flex flex-row gap-4">
         <div class="grow border rounded-2xl bg-zinc-50 dark:bg-zinc-900 flex flex-col gap-6 p-3 relative overflow-hidden">
           <div class="absolute left-0 right-0 top-0 h-16 border-b">
-            <div class="w-full h-full bg-hashThickLight dark:bg-hashThickDark opacity-10 dark:opacity-25"></div>
+            <div class="w-full h-full bg-hash-thick-light dark:bg-hash-thick-dark opacity-10 dark:opacity-25"></div>
           </div>
           <div class="flex flex-row items-center relative">
             <button onclick={() => selected = null} class="bg-white dark:bg-zinc-800 group rounded-lg p-2 border dark:border-zinc-700/30">

@@ -26,7 +26,7 @@
 
   <!-- Menu Side -->
   {#snippet menu()}
-    <nav class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
+    <nav class="shrink dark:divide-zinc-800" aria-label="Directory">
       <!-- <MenuForm.Title title="Report Options" /> -->
       <Section title="GENERAL" collapsable={false} hideTopBorder={true} class="" >
         {#each reportOptions.filter((o) => o.type === 'General') as m}
@@ -43,7 +43,7 @@
   {/snippet}
 
   {#snippet form()}
-    <div class="flex-shrink z-0 pb-0">
+    <div class="shrink z-0 pb-0">
       {@render children?.()}
     </div>
   {/snippet}

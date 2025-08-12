@@ -35,7 +35,7 @@
 </script>
 
 {#if collapsable}
-  <button tabindex="-1" type="button" onclick={click} class="touch-manipulation select-none -mt-[1px] py-2 sticky top-0 z-[1] {hideTopBorder ? 'border-b' : 'border-y'} border-gray-200 dark:border-zinc-700 inline-flex gap-2 w-full items-center cursor-default text-left px-3 uppercase font-medium text-sm bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-gray-200">
+  <button tabindex="-1" type="button" onclick={click} class="touch-manipulation select-none -mt-px py-2 sticky top-0 z-1 {hideTopBorder ? 'border-b' : 'border-y'} border-gray-200 dark:border-zinc-700 inline-flex gap-2 w-full items-center cursor-default text-left px-3 uppercase font-medium text-sm bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-gray-200">
     <span class="inline-flex items-center gap-2">
       {title}
       {#if subtitle !== null}
@@ -43,11 +43,11 @@
       {/if}
     </span>
     {#if error !== null}
-      <span class="flex-grow"></span>
-      <span class="flex-grow text-red-500">{error}</span>
+      <span class="grow"></span>
+      <span class="grow text-red-500">{error}</span>
     {/if}
     {@render message?.()}
-    <span class="flex-grow"></span>
+    <span class="grow"></span>
     <span class="">
       <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
         {#if visible}
@@ -59,7 +59,7 @@
     </span>
   </button>
 {:else}
-  <div class="select-none -mt-[1px] py-2 sticky top-0 z-[1] {hideTopBorder ? 'border-b' : 'border-y'} border-gray-200 dark:border-zinc-700 inline-flex w-full gap-2 items-center cursor-default text-left px-3 uppercase font-medium text-sm bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-gray-200">
+  <div class="select-none -mt-px py-2 sticky top-0 z-1 {hideTopBorder ? 'border-b' : 'border-y'} border-gray-200 dark:border-zinc-700 inline-flex w-full gap-2 items-center cursor-default text-left px-3 uppercase font-medium text-sm bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-gray-200">
     <span class="inline-flex items-center gap-2">
       {title}
       {#if subtitle !== null}
@@ -67,10 +67,10 @@
       {/if}
     </span>
     {#if error !== null}
-      <span class="flex-grow text-red-500 ml-2">{error}</span>
+      <span class="grow text-red-500 ml-2">{error}</span>
     {/if}
     {#if messageRight}
-      <span class="flex-grow"></span>
+      <span class="grow"></span>
     {/if}
     {@render message?.()}
   </div>

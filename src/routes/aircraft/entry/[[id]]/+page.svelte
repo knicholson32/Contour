@@ -98,7 +98,7 @@
 
   <!-- Menu Side -->
   {#snippet menu()}
-    <nav class="flex-shrink dark:divide-zinc-800" aria-label="Directory">
+    <nav class="shrink dark:divide-zinc-800" aria-label="Directory">
       <MenuForm.Title title="Aircraft Definitions" />
       {#if ref !== null}
         <MenuForm.Link href={ref} icon={icons.chevronLeft} text="Go Back" type={'left'} />
@@ -114,15 +114,15 @@
             {#each group.regs as ac (ac.id)}
               <MenuElement href="/aircraft/entry/{ac.registration}?{urlActiveParam}" selected={(ac.id === page.params.id || ac.registration === page.params.id) && !isMobileSize}>
                 {#if ac.imageId !== null}
-                  <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
+                  <div class="h-6 w-6 flex-none shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
                     <Badge class="h-full">{ac._count.legs}</Badge>
                   </div>
                 {:else if ac.type.imageId !== null}
-                  <div class="h-6 w-6 flex-none flex-shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
+                  <div class="h-6 w-6 flex-none shrink-0 rounded-lg overflow-hidden bg-gray-50 dark:bg-transparent">
                     <Badge class="h-full">{ac._count.legs}</Badge>
                   </div>
                 {:else}
-                  <div class="h-6 w-6 flex-shrink-0 rounded-lg bg-gray-300 text-black uppercase font-mono text-xxs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
+                  <div class="h-6 w-6 shrink-0 rounded-lg bg-gray-300 text-black uppercase font-mono text-xxs overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center">
                     {ac.registration.substring(0, (ac.registration.length < 2 ? ac.registration.length : 3))}
                   </div>
                 {/if}
@@ -136,7 +136,7 @@
                     {/if}
                   </div>
                 </div>
-                <div class="flex-grow"></div>
+                <div class="grow"></div>
                 <span class="text-xxs text-gray-400">{data.aircraftTimes[ac.id]}hr</span>
                 <svg class="h-4 w-4 shrink-0 flex-nowrap" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" >
                   {@html icons.chevronRight}
@@ -151,7 +151,7 @@
   
   <!-- Form Side -->
   {#snippet form()}
-    <div class="flex-shrink">
+    <div class="shrink">
 
       <form id="form-create-or-mod" action="?/createOrModify&{page.url.search}" method="post" enctype="multipart/form-data" use:enhance={() => {
         submitting = true;
@@ -201,13 +201,13 @@
 
       <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
         {#if data.aircraft !== null}
-          <div class="flex-grow max-w-[33%] md:w-48 md:flex-grow-0 flex items-start">
+          <div class="grow max-w-[33%] md:w-48 md:grow-0 flex items-start">
             <Submit remoteForm="form-delete" class="w-full" failed={formData?.ok === false && formData.action === '?/default'} submitting={deleting} theme={{primary: 'red'}} actionText={'Delete'} actionTextInProgress={'Deleting'} />
           </div>
         {/if}
         {#if $unsavedChanges || page.params.id === 'new'}
-          <button type="button" onclick={() => clearUID()} class="flex-grow w-full md:w-48 md:flex-grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
-          <Submit remoteForm="form-create-or-mod" class="flex-grow w-full md:w-48 md:flex-grow-0" disabled={registrationExists} failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.aircraft !== null ? 'Update' : 'Create'} actionTextInProgress={data.aircraft !== null ? 'Updating' : 'Creating'} />
+          <button type="button" onclick={() => clearUID()} class="grow w-full md:w-48 md:grow-0 touch-manipulation select-none transition-colors px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 bg-white text-gray-800 betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900 focus-visible:outline-grey-500">Clear</button>
+          <Submit remoteForm="form-create-or-mod" class="grow w-full md:w-48 md:grow-0" disabled={registrationExists} failed={formData?.ok === false && (formData.action === '?/default' || formData?.action === '*')} {submitting} theme={{primary: 'white'}} actionText={data.aircraft !== null ? 'Update' : 'Create'} actionTextInProgress={data.aircraft !== null ? 'Updating' : 'Creating'} />
         {/if}
       </div>
     </div>
@@ -215,7 +215,7 @@
 
 </TwoColumn>
 
-<form id="form-delete" class="flex-grow max-w-[33%] md:w-48 md:flex-grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
+<form id="form-delete" class="grow max-w-[33%] md:w-48 md:grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
   const answer = confirm('Are you sure you want to delete this Aircraft Type? This action cannot be undone.');
   if (!answer) cancel();
   else {
