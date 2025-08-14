@@ -107,7 +107,7 @@ const config = {
   plugins: [
 		require('@tailwindcss/forms'),
 		require('@tailwindcss/aspect-ratio'),
-		require('tailwindcss-animate'),
+		// require('tailwindcss-animate'),
 		// require('tailwindcss/plugin')(function ({ addVariant }) {
 		// 	addVariant('dark', '@media not print { :is(:where(.dark) &) }')
 		// }),

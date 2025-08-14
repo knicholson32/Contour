@@ -16,7 +16,7 @@
   
 </script>
 
-<div class="print:hidden flex-col md:flex print:md:hidden">
+<div class="print:hidden flex-col md:flex print:md:hidden static h-[45px]">
   <div class="flex-1 space-y-4 p-0 bg-zinc-50 dark:bg-zinc-900">
     <div class="flex flex-row justify-center text-xs md:text-sm lg:justify-start divide-x dark:divide-zinc-800 border-b border-zinc-200 dark:border-zinc-700 lg:px-6 select-none text-zinc-500">
       {#each logbookLinks as m}
@@ -32,4 +32,6 @@
   </div>
 </div>
 
-{@render children?.()}
+<div class="h-[calc(100%_-_45px)]">
+  {@render children?.()}
+</div>

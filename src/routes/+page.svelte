@@ -281,7 +281,7 @@
                 {pluralize('duty day', data.dutyDays.num, true)} <span class="text-sm text-muted-foreground">selected</span> 
               </div>
               <Popover.Root bind:open={presetOpen}>
-                <Popover.Trigger class={buttonVariants({ variant: currentPreset === null ? 'outline-solid' : 'default' })}>   
+                <Popover.Trigger class={buttonVariants({ variant: currentPreset === null ? 'outline' : 'default' })}>   
                   {presetAsString}
                 </Popover.Trigger>
                 <Popover.Content class="w-64 mt-2 animate-in animate-out" collisionPadding={0} align="end">
@@ -292,22 +292,22 @@
                         Select some common date ranges
                       </p>
                     </div>
-                    <Button variant={currentPreset === 'lastTour' ? 'default' : 'outline-solid'}  onclick={navigateNoRange} size="sm">
+                    <Button variant={currentPreset === 'lastTour' ? 'default' : 'outline'}  onclick={navigateNoRange} size="sm">
                       Last Tour
                     </Button>
-                    <Button variant={currentPreset === 'currentMonth' ? 'default' : 'outline-solid'} onclick={() => setRange('currentMonth')} size="sm">
+                    <Button variant={currentPreset === 'currentMonth' ? 'default' : 'outline'} onclick={() => setRange('currentMonth')} size="sm">
                       Current Month
                     </Button>
-                    <Button variant={currentPreset === 'lastMonth' ? 'default' : 'outline-solid'} onclick={() => setRange('lastMonth')} size="sm">
+                    <Button variant={currentPreset === 'lastMonth' ? 'default' : 'outline'} onclick={() => setRange('lastMonth')} size="sm">
                       Last Month
                     </Button>
-                    <Button variant={currentPreset === 'ytd' ? 'default' : 'outline-solid'} onclick={() => setRange('ytd')} size="sm">
+                    <Button variant={currentPreset === 'ytd' ? 'default' : 'outline'} onclick={() => setRange('ytd')} size="sm">
                       Year to Date
                     </Button>
-                    <Button variant={currentPreset === 'lastYear' ? 'default' : 'outline-solid'} onclick={() => setRange('lastYear')} size="sm">
+                    <Button variant={currentPreset === 'lastYear' ? 'default' : 'outline'} onclick={() => setRange('lastYear')} size="sm">
                       Last Year
                     </Button>
-                    <Button variant={currentPreset === '12months' ? 'default' : 'outline-solid'} onclick={() => setRange('12months')} size="sm">
+                    <Button variant={currentPreset === '12months' ? 'default' : 'outline'} onclick={() => setRange('12months')} size="sm">
                       Last 12 Months
                     </Button>
                   </div>

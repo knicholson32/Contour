@@ -10,7 +10,9 @@ export class LegData {
   airportLines: L.Polyline[];
   uncertain: Curve | null;
   lines: L.Polyline[];
+  linesOutline: L.Polyline[];
   curves: Curve | null;
+  curvesOutline: Curve | null;
   defaultZoomLevel: number;
   showingCurves: boolean = false;
 
@@ -28,7 +30,9 @@ export class LegData {
 
     let uncertainPosCurves: Curve | null = null;
     let curves: Curve | null = null;
+    let curvesOutline: Curve | null = null;
     let lines: L.Polyline[] = [];
+    let linesOutline: L.Polyline[] = [];
   
     let airportStartJoin = false;
     let airportEndJoin = false;
@@ -105,12 +109,15 @@ export class LegData {
         }
       }
   
-      curves = L.curve(curveSegments, { color: '#E4E', opacity: 1 });
+      curves = L.curve(curveSegments, { color: 'var(--color-sky-400)', opacity: 1, weight: 3 });
+      curvesOutline = L.curve(curveSegments, { color: 'var(--color-sky-900)', opacity: 1, weight: 5 });
   
-      uncertainPosCurves = L.curve(uncertainSegments, { color: '#E4E', opacity: 1, dashArray: [5, 5], weight: 1 });
+      uncertainPosCurves = L.curve(uncertainSegments, { color: 'var(--color-sky-400)', opacity: 1, dashArray: [5, 5], weight: 1 });
+
       lines = [];
       for (const segment of continuousLineSegments) {
-        lines.push(L.polyline(segment, { color: '#E4E', opacity: 1 }));
+        lines.push(L.polyline(segment, { color: 'var(--color-sky-400)', opacity: 1, weight: 3 }));
+        linesOutline.push(L.polyline(segment, { color: 'var(--color-sky-900)', opacity: 1, weight: 5 }));
       }
       if (link) {
         curves.on('click', () => goto(link));
@@ -124,7 +131,7 @@ export class LegData {
       // Fallback to straight lines if there was an error
       // TODO: If there is a long distance between two points, draw a straight line between them in a different color, as is done in the curves
       lines = []
-      const line = L.polyline(points, { color: '#E4E', opacity: 1, smoothFactor: 1 });
+      const line = L.polyline(points, { color: 'var(--color-sky-400)', opacity: 1, smoothFactor: 1 });
       if (link) line.on('click', () => goto(link));
       lines.push(line);
       console.log('FALLBACK', e);
@@ -154,7 +161,9 @@ export class LegData {
     this.airportLines = airportLines;
     this.uncertain = uncertainPosCurves,
     this.curves = curves;
+    this.curvesOutline = curvesOutline;
     this.lines = lines;
+    this.linesOutline = linesOutline;
     this.defaultZoomLevel = defaultZoomLevel;
   }
 
@@ -164,16 +173,28 @@ export class LegData {
 
   default () {
     for (const line of this.lines) {
-      line.options.color = '#E4E';
-      line.options.weight = 2;
+      line.options.color = 'var(--color-sky-400)';
+      line.options.weight = 3
+      line.options.opacity = 1;
+      line.options.dashArray = [];
+    }
+    for (const line of this.linesOutline) {
+      line.options.color = 'var(--color-sky-900)';
+      line.options.weight = 5;
       line.options.opacity = 1;
       line.options.dashArray = [];
     }
     if (this.curves !== null) {
-      this.curves.options.color = '#E4E';
-      this.curves.options.weight = 2;
+      this.curves.options.color = 'var(--color-sky-400)';
+      this.curves.options.weight = 3;
       this.curves.options.opacity = 1;
       this.curves.options.dashArray = [];
+    }
+    if (this.curvesOutline !== null) {
+      this.curvesOutline.options.color = 'var(--color-sky-900)';
+      this.curvesOutline.options.weight = 5;
+      this.curvesOutline.options.opacity = 1;
+      this.curvesOutline.options.dashArray = [];
     }
 
     this.refresh();
@@ -181,16 +202,28 @@ export class LegData {
 
   highlight () { 
     for (const line of this.lines) {
-      line.options.color = '#E4E';
+      line.options.color = 'var(--color-pink-500)';
+      line.options.weight = 3;
+      line.options.opacity = 1;
+      line.options.dashArray = [];
+    }
+    for (const line of this.linesOutline) {
+      line.options.color = 'var(--color-pink-800)';
       line.options.weight = 5;
       line.options.opacity = 1;
       line.options.dashArray = [];
     }
     if (this.curves !== null) {
-      this.curves.options.color = '#E4E';
-      this.curves.options.weight = 5;
+      this.curves.options.color = 'var(--color-pink-500)';
+      this.curves.options.weight = 3;
       this.curves.options.opacity = 1;
       this.curves.options.dashArray = [];
+    }
+    if (this.curvesOutline !== null) {
+      this.curvesOutline.options.color = 'var(--color-pink-800)';
+      this.curvesOutline.options.weight = 5;
+      this.curvesOutline.options.opacity = 1;
+      this.curvesOutline.options.dashArray = [];
     }
 
     this.refresh();
@@ -198,16 +231,22 @@ export class LegData {
 
   muted () { 
     for (const line of this.lines) {
-      line.options.color = '#E4E';
-      line.options.weight = 2;
+      line.options.color = 'var(--color-zinc-500)';
+      line.options.weight = 1;
       line.options.opacity = 0.6;
       line.options.dashArray = [2, 5];
     }
+    for (const line of this.linesOutline) {
+      line.options.opacity = 0;
+    }
     if (this.curves !== null) {
-      this.curves.options.color = '#E4E';
-      this.curves.options.weight = 2;
+      this.curves.options.color = 'var(--color-zinc-500)';
+      this.curves.options.weight = 1;
       this.curves.options.opacity = 0.6;
       this.curves.options.dashArray = [2, 5];
+    }
+    if (this.curvesOutline !== null) {
+      this.curvesOutline.options.opacity = 0;
     }
 
     this.refresh();
@@ -215,13 +254,19 @@ export class LegData {
 
   zoomUpdate (currentZoom: number) {
     try {
-      if (currentZoom > ZOOM_CUTOFF && this.curves !== null) {
+      if (currentZoom > ZOOM_CUTOFF && this.curves !== null && this.curvesOutline !== null) {
         if (!this.showingCurves) {
           for (const line of this.lines) {
             try {
               line.removeFrom(this.map);
             } catch (e) {}
           }
+          for (const line of this.linesOutline) {
+            try {
+              line.removeFrom(this.map);
+            } catch (e) {}
+          }
+          this.curvesOutline.addTo(this.layer);
           this.curves.addTo(this.layer);
           this.showingCurves = true;
           // console.log('showingCurves', this.showingCurves);
@@ -229,7 +274,9 @@ export class LegData {
       } else if (this.showingCurves) {
         try {
           this.curves?.removeFrom(this.map);
+          this.curvesOutline?.removeFrom(this.map);
         } catch (e) {}
+        for (const line of this.linesOutline) line.addTo(this.layer);
         for (const line of this.lines) line.addTo(this.layer);
         this.showingCurves = false;
         // console.log('showingCurves', this.showingCurves);
@@ -274,11 +321,23 @@ export class LegData {
         line.remove();
       } catch (e) {}
     }
+    for (const line of this.linesOutline) {
+      try {
+        line.remove();
+      } catch (e) {}
+    }
 
     // Remove curves
     if (this.curves !== null) {
       try {
         this.curves.remove();
+      } catch (e) {
+
+      }
+    }
+    if (this.curvesOutline !== null) {
+      try {
+        this.curvesOutline.remove();
       } catch (e) {
 
       }
@@ -298,10 +357,12 @@ export class LegData {
     if (currentZoom === undefined) currentZoom = this.defaultZoomLevel;
 
     // Draw based on the current zoom
-    if (currentZoom > ZOOM_CUTOFF && this.curves !== null) {
+    if (currentZoom > ZOOM_CUTOFF && this.curves !== null && this.curvesOutline !== null) {
+      this.curvesOutline.addTo(this.layer);
       this.curves.addTo(this.layer);
       this.showingCurves = true;
     } else {
+      for (const line of this.linesOutline) line.addTo(this.layer);
       for (const line of this.lines) line.addTo(this.layer);
       this.showingCurves = false;
     }

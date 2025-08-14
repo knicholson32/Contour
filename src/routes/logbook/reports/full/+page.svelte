@@ -66,7 +66,7 @@
 </script>
 
 
-<div class="px-0 ml-[0px] pb-6 w-full touch-auto relative">
+<div class="px-0 ml-[0px] w-full touch-auto relative">
   <!-- Title Section -->
   <div class="grid gap-px bg-zinc-300 dark:bg-zinc-800 group test-group" style="min-width: {data.numCols * data.COL_WIDTH_REM}rem; grid-template-columns: repeat({data.numCols},minmax(0,1fr))">
     <div class="row-span-3 gap-px sticky top-0 grid grid-cols-subgrid bg-zinc-200 dark:bg-zinc-800 border-b -my-px border-zinc-300 dark:border-zinc-800" style="grid-column: span {data.numCols} / span {data.numCols};">
@@ -144,7 +144,7 @@
 
 
 
-    <div class="row-span-3 gap-px sticky bottom-26 grid grid-cols-subgrid bg-zinc-300 dark:bg-zinc-700" style="grid-column: span {data.numCols} / span {data.numCols};">
+    <div class="row-span-3 gap-px sticky bottom-16 grid grid-cols-subgrid bg-zinc-300 dark:bg-zinc-700" style="grid-column: span {data.numCols} / span {data.numCols};">
       <div class="hidden"></div>
       <!-- Border for bottom section -->
       <div class="h-px bg-zinc-400 dark:bg-zinc-600" style="grid-column: span {data.numCols} / span {data.numCols};"></div>
@@ -187,9 +187,9 @@
 </div>
 
 <!-- Make space for the pagination bar -->
-<div class="pb-[calc(5rem-1px)]"></div>
+<div class="pb-[calc(4rem-1px)]"></div>
 
-<div class="bg-zinc-100 dark:bg-zinc-900 absolute bottom-10 left-0 md:left-[206px] right-0 px-2 md:pb-2 h-16 border-t flex flex-row items-center justify-center">
+<div class="bg-zinc-100 dark:bg-zinc-900 absolute bottom-0 left-0 md:left-[206px] right-0 px-2 md:pb-2 h-16 border-t flex flex-row items-center justify-center">
 
   <Pagination.Root count={data.totalEntries} perPage={data.select} bind:page onPageChange={onPageChange} >
     {#snippet children({ pages, currentPage })}

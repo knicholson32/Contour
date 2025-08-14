@@ -34,15 +34,11 @@
 
   let mounted = false;
 
-  function markerIcon(airport: A, index: number) {
-    // <a href="/airports/${airport.id}">
+  function markerIcon(airport: A) {
     let html = `
-        <div class="group w-4 h-4 relative p-1">
-          <div class="w-2 h-2 relative rounded-full bg-slate-500 dark:bg-zinc-200 absolute"></div>
-          <div class="hidden absolute font-medium group-hover:block px-2 py-1 bg-slate-500 dark:bg-zinc-200 text-white dark:text-zinc-900 bottom-3 left-3 rounded-md">
-            ${airport.id}
-          </div>
-        </div>
+      <div class="left-1/2 -translate-x-[50%] top-1/2 -translate-y-[50%] w-2.5 h-2.5 rounded-full bg-sky-400 border-2 border-sky-900 group">
+        <div class="absolute left-3 top-1/2 -translate-y-[50%] font-bold text-white bg-zinc-900 px-2 rounded-full text-sm hidden group-hover:block">${airport.id}</div>
+      </div>
     `;
     const icon = L.divIcon({
       html,
@@ -50,6 +46,23 @@
     });
     return L.marker([airport.latitude, airport.longitude], { icon });
   }
+
+  // function markerIcon(airport: A, index: number) {
+  //   // <a href="/airports/${airport.id}">
+  //   let html = `
+  //       <div class="group w-4 h-4 relative p-1">
+  //         <div class="w-2 h-2 relative rounded-full bg-slate-500 dark:bg-zinc-200 absolute"></div>
+  //         <div class="hidden absolute font-medium group-hover:block px-2 py-1 bg-slate-500 dark:bg-zinc-200 text-white dark:text-zinc-900 bottom-3 left-3 rounded-md">
+  //           ${airport.id}
+  //         </div>
+  //       </div>
+  //   `;
+  //   const icon = L.divIcon({
+  //     html,
+  //     className: 'relative'
+  //   });
+  //   return L.marker([airport.latitude, airport.longitude], { icon });
+  // }
 
   const updateHighlight = (highlight: number | null) => {
     if (highlight !== null) {
@@ -102,7 +115,7 @@
 
     markerLayer = L.layerGroup();
  		for(let i = 0; i < airports.length; i++) {
-			markerLayer.addLayer(markerIcon(airports[i], i));
+			markerLayer.addLayer(markerIcon(airports[i]));
  		}
   	markerLayer.addTo(map);
 
