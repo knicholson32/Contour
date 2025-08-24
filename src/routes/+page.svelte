@@ -1,9 +1,9 @@
 <script lang="ts">
-	import {Plane, Plus, Table2, Timer, Route, Gauge, TowerControl, BedDouble, ChevronUp } from "lucide-svelte";
+	import {Plane, Plus, Table2, Timer, Route, Gauge, TowerControl, BedDouble, ChevronUp, ArrowRight } from "lucide-svelte";
 	import { Button, buttonVariants } from "$lib/components/ui/button";
 	import * as Card from "$lib/components/ui/card";
 	import * as Tabs from "$lib/components/ui/tabs";
-  import * as Map from '$lib/components/map';
+  import * as Deck from '$lib/components/map/deck';
   import * as HoverCard from "$lib/components/ui/hover-card";
   import pluralize from 'pluralize';
   import { pad, weekDaysShort } from '$lib/helpers';
@@ -19,6 +19,7 @@
   import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   import * as Popover from "$lib/components/ui/popover";
   import AircraftHoverCard from "$lib/components/decorations/AircraftHoverCard.svelte";
+  import type { MjolnirEvent } from "mjolnir.js";
 
   interface Props {
     data: import('./$types').PageData;
@@ -96,8 +97,6 @@
       dateRange = { start, end };
       dateRangePlaceholder = start;
     }
-
-    setTimeout(resetMap, 1);
 
   });
 
@@ -214,6 +213,10 @@
   let tooltipContainer: HTMLElement | undefined = $state(undefined);
   if (browser) tooltipContainer = document.body;
 
+  const get = {
+    to: (id: string) => data.legSummary[id].to,
+    from: (id: string) => data.legSummary[id].from,
+  }
 
   // const events = {
   //   [Scatter.selectors.point]: {
@@ -224,24 +227,19 @@
   // }
 
 
-  let mapKey: string = $state();
-  const resetMap = () => {
-    mapKey = uuidv4();
-  }
-
-  $effect(() => {
-    data;
-    resetMap();
-  });
-
-  let map: Map.Bulk = $state();
-
   const NUM_AC_VIS = 5;
 
   let flownAircraftKeys = $derived(data.acList.slice(-NUM_AC_VIS));
   let extraAircraftKeys = $derived(data.acList.slice(0, -NUM_AC_VIS));
 
   let moreAircraft = $derived(extraAircraftKeys.length > 0);
+
+  let airportHighlight: string[] = $state([]);
+
+  // setTimeout(() => {
+  //   console.log('clear');
+  //   airportHighlight = [];
+  // }, 5000)
 
 </script>
 
@@ -460,32 +458,28 @@
                 </p>
               </Card.Content>
             </Card.Root>
-            <!-- <Card.Root class="col-span-8 lg:col-span-4">
-              <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Card.Title class="text-sm font-semibold">Duty Hours</Card.Title>
-                <Timer class="h-4 w-4 text-muted-foreground" />
-              </Card.Header>
-              <Card.Content class="p-4 pt-0">
-                <VisXYContainer data={data.dutyDays.statistics} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}} yDomainMinConstraint={[0,0]}>
-                  <VisAxis gridLine={false} type="x" minMaxTicksOnly={true} {tickFormat} />
-                  <VisCrosshair template={dutyTemplate}/>
-                  <VisTooltip verticalPlacement={'top'}/>
-                  <VisLine {x} y={yDuty} color={color()} />
-                  <VisArea curveType="linear" {x} y={yTourAreaDuty} color={color({ opacity: '0.2'})} excludeFromDomainCalculation={true} />
-                </VisXYContainer>
-              </Card.Content>
-            </Card.Root> -->
           </div>
-          <!-- <div class="w-full flex items-center justify-center relative h-4 z-0">
-            <button class="relative -bottom-5 hover:-bottom-4 transition-all group w-12 h-12 flex justify-center rounded-full bg-white border border-gray-200 overflow-hidden">
-              <ChevronUp class="relative top-0.5 w-5 h-5 group-hover:text-sky-500 transition-colors"></ChevronUp>
-            </button>
-          </div> -->
-          <Card.Root class="h-[calc(100vh-720px-1.5rem)] min-h-[calc(100vh-90px)] md:min-h-[calc(100vh-110px)] relative z-1 transition-all">
-            <Card.Content class="p-0 relative h-full">
-              {#key mapKey}
-                <Map.Bulk bind:this={map} class="h-full! rounded-md bg-transparent border-red-500 ring-0" pos={data.positions} legIDs={data.legIDs} airports={data.airports} />
-              {/key}
+          <Card.Root class="-mb-3 h-[calc(100vh-var(--nav-height)-2rem)] md:h-[calc(100vh-var(--nav-height)-3rem)] relative z-1 transition-all overflow-hidden">
+            <Card.Content class="p-0 relative h-full flex">
+              <Deck.Core padding={50}  >
+                <Deck.Airports airports={data.airports} highlight={airportHighlight}/>
+                <Deck.Legs legs={data.deckSegments} autoHighlight={true} pickable={true} onclick={(id: string) => { goto(`/entry/leg/${id}?active=form`)}}  >
+                  <!-- onhover={(id) => {
+                  if (id === null) airportHighlight = [];
+                  else {
+                    const h = [get.from(id), get.to(id)];
+                    if (airportHighlight[0] !== h[0] || airportHighlight[1] !== h[1]) airportHighlight = [get.from(id), get.to(id)];
+                  }
+                }} -->
+                  {#snippet tooltip(id)}
+                    <div class="translate-x-3 translate-y-2 whitespace-nowrap flex flex-row gap-1 items-center py-1 px-2 rounded-lg bg-zinc-100/70 border border-zinc-200 dark:bg-zinc-900/70 dark:border-zinc-950/50 backdrop-blur-sm text-xxs">
+                      {get.from(id)}
+                      <ArrowRight class="w-3 h-3" />
+                      {get.to(id)}
+                    </div>
+                  {/snippet}
+                </Deck.Legs>
+              </Deck.Core>
             </Card.Content>
           </Card.Root>
         </Tabs.Content>

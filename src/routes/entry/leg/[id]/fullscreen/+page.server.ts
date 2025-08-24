@@ -11,8 +11,8 @@ import { getTimeZones } from '@vvo/tzdb';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { filterOutliers, generateAirportList } from '$lib/server/helpers';
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
-import type * as Types from '@prisma/client';
 import { fetchLegsForSideMenu } from '$lib/server/lib/leg';
+import type { Types } from '$lib/components/map/deck';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
@@ -94,15 +94,20 @@ export const load = async ({ fetch, params, url }) => {
   const tourId = (url.searchParams.get('tour') === null || url.searchParams.get('tour') === '') ? null : parseInt(url.searchParams.get('tour') ?? '-1');
 
   // Fetch all the legs for the side menu
-  const legs = await fetchLegsForSideMenu(dayId, tourId, { positionsOnly: true, search: url.searchParams.get('search') });
+  const search = url.searchParams.get('search');
+  const legs = await fetchLegsForSideMenu(dayId, tourId, { positionsOnly: true, search });
+
+  
 
   return {
     searchParams: {
       tourId,
-      dayId
+      dayId,
+      search
     },
     entrySettings,
     leg,
+    legData: (await (await fetch('/api/legs?id=' + leg.id + '&fixes=true&filterDuplicates=false')).json() as Types.Legs)[0],
     legs,
     // stats: {
     //   time: leg === null || leg.positions.length === 0 ? null : (leg.positions[leg.positions.length - 1].timestamp - leg.positions[0].timestamp) / 60 / 60,

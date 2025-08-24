@@ -105,8 +105,6 @@
     }
   }
 
-  $: console.log('V', value);
-
 </script>
 
 <Frame {name} unsaved={$unsaved} restore={() => local.clear(true)} {action} form={$form} {required} bind:title bind:disabled focus={focus}>

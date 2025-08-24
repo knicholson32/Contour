@@ -9,6 +9,7 @@ import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type { Prisma } from '@prisma/client';
 import type * as Types from '@prisma/client';
 import type { TimeZone } from '@vvo/tzdb';
+import type { Legs } from '$lib/components/map/deck/types';
 
 const MAX_MB = 10;
 const AVG_FILTER_NUM = 2;
@@ -190,6 +191,7 @@ export const load = async ({ fetch, params, url }) => {
     entrySettings,
     currentTour: tour,
     tourMap,
+    deckSegments: (await (await fetch('/api/legs?' + tourMap?.ids.map((id) => 'id=' + id).join('&') + '&filterDuplicates=false')).json() as Legs),
     stats,
     tourSettings,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[],

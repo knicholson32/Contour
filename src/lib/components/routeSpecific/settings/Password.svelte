@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Password } from '$lib/components/input';
+    import { API } from '$lib/types';
 	import Frame from './Frame.svelte';
 
 
@@ -13,8 +14,9 @@
 		hoverTitle?: string;
 		mono?: boolean;
 		disabled?: boolean;
-		form?: { success: boolean; name: string; message: string | undefined } | null;
+		form?: API.Form.Type | null;
 		update?: any;
+		autocomplete?: boolean;
 		children?: import('svelte').Snippet;
 	}
 
@@ -30,13 +32,14 @@
 		disabled = false,
 		form = null,
 		update = () => {},
+		autocomplete = true,
 		children
 	}: Props = $props();
 </script>
 
-<Frame {title} {hoverTitle} error={form?.success === false && form?.name === name ? form.message ?? null : errorMessage !== null ? errorMessage : null} success={successMessage}>
+<Frame {title} {hoverTitle} error={form?.ok === false && form?.name === name ? form.message ?? null : errorMessage !== null ? errorMessage : null} success={successMessage}>
 	<div class="-my-2 flex flex-col-reverse gap-2 w-full xs:w-auto sm:flex-row sm:inline-flex sm:items-center">
 		{@render children?.()}
-		<Password input={update} {disabled} title={hoverTitle} {mono} {name} {placeholder} bind:value />
+		<Password input={update} {disabled} title={hoverTitle} {autocomplete} {mono} {name} {placeholder} bind:value />
 	</div>
 </Frame>

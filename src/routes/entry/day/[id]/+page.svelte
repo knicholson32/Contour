@@ -9,16 +9,16 @@
   import { icons } from '$lib/components';
   import { page } from '$app/state';
   import { afterNavigate, goto} from '$app/navigation';
-  import * as Map from '$lib/components/map';
   import * as MenuForm from '$lib/components/menuForm';
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
   import { dateToDateStringForm, dateToDateStringFormMonthDayYear, getInlineDateUTC } from '$lib/helpers';
-  import { CalendarOff, ListOrdered, Plus, Timer, TowerControl } from 'lucide-svelte';
+  import { ArrowRight, CalendarOff, ListOrdered, Plus, Timer, TowerControl } from 'lucide-svelte';
   import Warning from '$lib/components/Warning.svelte';
   import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
   import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
+  import * as Deck from '$lib/components/map/deck';
 
   interface Props {
     form: import('./$types').ActionData;
@@ -55,6 +55,8 @@
     mapKey = uuidv4();
   }
 
+  let highlight: string | null = $state(null);
+
   $effect(() => {
     formData;
     data;
@@ -64,8 +66,6 @@
   afterNavigate(() => {
     setTimeout(resetMap, 1);
   })
-
-  let map: Map.Day | undefined = $state();
 
   const ref = page.url.searchParams.get('ref');
 
@@ -88,7 +88,7 @@
       <!-- Existing Aircraft -->
       <MenuSection title="Days">
         {#each data.days as day,i (day.id)}
-          <MenuElement href="/entry/day/{day.id}?{urlActiveParam}" selected={day.id === parseInt(page.params.id) && !isMobileSize}>
+          <MenuElement href="/entry/day/{day.id}?{urlActiveParam}" selected={day.id === parseInt(page.params.id ?? '-1') && !isMobileSize}>
             <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
               <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
                 <span class="font-mono">
@@ -140,13 +140,30 @@
           </div>
         </div>
       {:else}
-      
+         <!-- {(data.currentDay.legs.length + data.currentDay.deadheads.length) * 1.25} -->
+        <div style="--timeline-offset: {((data.currentDay.legs.filter((l) => l.aircraft.simulator === false)).length + data.currentDay.deadheads.length) * 1.25}rem" class="relative flex h-[calc(100vh_-_22rem_-_var(--nav-height)_-_4.75rem_-_var(--timeline-offset)_+_2px)] md:h-[calc(100vh_-_12.5rem_-_var(--nav-height)_-_4.75rem_-_var(--timeline-offset)_+_2px)] overflow-hidden">
+          <Deck.Core padding={50} >
+            <Deck.Legs legs={data.deckSegments} highlight={highlight} />
+            {#each data.airportList as airport, index (airport.id)}
+              <Deck.Widgets.GeoReferencedTooltip position={[airport.latitude, airport.longitude]}>
+                <div class="text-xs hover:opacity-10 transition-opacity rounded-full overflow-hidden inline-flex items-center justify-left {highlight !== null ? 'opacity-20' : ''}">
+                  <div class="rounded-l-full bg-green-500 text-white font-medium inline-flex items-center justify-center pl-1 w-6 h-6">{index + 1}</div>
+                  <div class="text-white inline-flex items-center whitespace-nowrap white bg-gray-800 h-6 px-2">{airport.id}</div>
+                </div>
+              </Deck.Widgets.GeoReferencedTooltip>
+            {/each}
+          </Deck.Core>
+          <a href="/entry/leg?active=menu&day={data.currentDay.id}{data.currentTour === null ? '' : '&tour='+data.currentTour.id}" class="absolute right-4 bottom-4 z-20 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 backdrop-blur-lg px-3 py-2 rounded-lg text-xxs uppercase group ">
+            Legs
+            <ArrowRight class="w-4 h-4 group-hover:-mr-1 group-hover:ml-1 transition-all group-hover:text-sky-500"/>
+          </a>
+        </div>
         {#key mapKey}
-          <Map.Day bind:this={map} class="" legs={data.currentDay.legs} airports={data.airportList} deadheads={data.currentDay.deadheads} />
-          <Timeline class="" data={data.legDeadheadCombo} day={data.currentDay} />
+          <!-- <Map.Day bind:this={map} class="" legs={data.currentDay.legs} airports={data.airportList} deadheads={data.currentDay.deadheads} /> -->
+          <Timeline bind:highlight={highlight} class="" data={data.legDeadheadCombo} day={data.currentDay} />
         {/key}
 
-        <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 p-4">
+        <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 p-4 h-auto xs:h-88 md:h-50">
           <Card.Root>
             <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
               <Card.Title class="text-sm font-medium">Flight Time</Card.Title>
@@ -249,7 +266,7 @@
           </Section>
         </form>
 
-        <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
+        <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end bottom-0 z-10">
           {#if data.currentDay !== null}
             <form class="grow max-w-[33%] md:w-48 md:grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
               const answer = confirm('Are you sure you want to delete this duty day? This action cannot be undone.');

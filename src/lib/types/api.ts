@@ -117,6 +117,13 @@ namespace API {
 		type: 'tours';
 		tours: Types.Tour[]
 	}
+
+	export interface SettingsPrefersGlobe extends Success {
+		type: 'settings-prefers-globe';
+		data: {
+			prefers_globe: boolean
+		};
+	}
 }
 
 // Export default

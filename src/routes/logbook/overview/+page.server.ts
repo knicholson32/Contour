@@ -1,61 +1,39 @@
 import * as settings from '$lib/server/settings';
 import prisma from '$lib/server/prisma';
-import { redirect } from '@sveltejs/kit';
-import { Overview } from '$lib/components/map/types.js';
+import * as DeckTypes from '$lib/components/map/deck/types.js';
+import { addIfDoesNotExist } from '$lib/server/db/airports.js';
 
 export const load = async ({ fetch, params, parent, url }) => {
   const legsRaw = await prisma.leg.findMany({ select: { id: true, originAirportId: true, destinationAirportId: true, diversionAirportId: true } });
-  const airports = await prisma.airport.findMany({ select: Overview.VisitedAirportSelect });
+  const airports = await prisma.airport.findMany({ select: { ...DeckTypes.AirportSelect, _count: { select: { legOrigin: true, legDestination: true, legDiversion: true } }} });
 
-  const visitedAirports: Overview.VisitedAirport[] = [];
-  const legs: Overview.Leg[] = [];
+  const visitedAirports: DeckTypes.Airport[] = [];
+  const legs: DeckTypes.Leg[] = [];
 
-  // Loop through all the legs
-  for (const leg of legsRaw) {
-    const originAirportId = leg.originAirportId;
-    const destinationAirportId = leg.diversionAirportId === null ? leg.destinationAirportId : leg.diversionAirportId;
-    if (destinationAirportId === null) {
-      console.error(`Data error: Airport is missing or invalid:`, leg)
-      continue;
-    }
-
-    const origin = airports.find((a) => a.id === originAirportId);
-    const destination = airports.find((a) => a.id === destinationAirportId);
-
-    if (origin === undefined || destination === undefined) {
-      console.error(`Data error: Airport is missing or invalid:`, leg)
-      continue;
-    }
-
-    // Add to the visited airports
-    if (visitedAirports.findIndex((a) => a.id === originAirportId) === -1) visitedAirports.push(origin);
-    if (visitedAirports.findIndex((a) => a.id === destinationAirportId) === -1) visitedAirports.push(destination);
-
-    const existingLeg = legs.findIndex((l) => l.apt.start === origin.id && l.apt.end === destination.id);
-
-    
-    if (existingLeg === -1) 
-      legs.push({ 
-        id: leg.id, 
-        start: [ origin.latitude, origin.longitude ], 
-        end: [ destination.latitude, destination.longitude ], 
-        apt: {
-          start: origin.id,
-          end: destination.id,
-        },
-        segments: 1 
-      });
-    else legs[existingLeg].segments = legs[existingLeg].segments + 1;
+  for (const airport of airports) {
+    const numLegs = airport._count.legDestination + airport._count.legOrigin + airport._count.legDiversion;
+    if (numLegs === 0) continue;
+    visitedAirports.push({
+      id: airport.id,
+      latitude: airport.latitude,
+      longitude: airport.longitude,
+      priority: numLegs,
+      // name: airport.name
+    });
   }
 
-  let largestSegment = 0;
-  for (const leg of legs) if (leg.segments > largestSegment) largestSegment = leg.segments;
+  const settingsGroup = await settings.getMany('general.prefers_globe', 'tour.defaultStartApt', 'general.aeroAPI');
+  await addIfDoesNotExist(settingsGroup['tour.defaultStartApt'], settingsGroup['general.aeroAPI']);
+  const startAirport = await prisma.airport.findUnique({ where: { id: settingsGroup['tour.defaultStartApt'] } });
+
+
 
 
   return {
     visitedAirports,
-    legs,
-    largestSegment
+    segments: await (await fetch('/api/legs')).json() as DeckTypes.Legs,
+    prefersGlobe: settingsGroup['general.prefers_globe'],
+    startAirport
   }
 
 

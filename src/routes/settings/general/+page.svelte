@@ -21,6 +21,8 @@
 	let emailUnsavedChanges = $state(false);
 	let name = $state(data.settingValues['general.name']);
 	let email = $state(data.settingValues['general.email']);
+	let showAirport = $state(data.settingValues['tour.defaultStartApt']);
+	let prefersGlobe = $state(data.settingValues['general.prefers_globe']);
 
 	// Localization
 	let localizationList: Settings.List | null = $state(null);
@@ -47,7 +49,7 @@
 		<span >Configure AeroAPI details.</span>
 	{/snippet}
 
-	<Settings.Password name="general.aeroAPI" {form} title="Aero API Key" update={() => aeroAPIList?.update()} bind:value={aeroAPI} hoverTitle="Aero API Key">
+	<Settings.Password name="general.aeroAPI" {form} autocomplete={false} title="Aero API Key" update={() => aeroAPIList?.update()} bind:value={aeroAPI} hoverTitle="Aero API Key">
 	<a href="https://www.flightaware.com/aeroapi/portal/overview" target="_blank" title="Click to sign into Plex to generate a Plex Token for Unabridged to use." class="select-none w-full sm:w-auto flex justify-center items-center whitespace-nowrap px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-200 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500">
 		View AeroAPI Settings
 		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ml-1 w-4 h-4">
@@ -71,6 +73,8 @@
 
 	<Settings.Input {form} name="general.name" title="Name" update={() => emailList?.update()} bind:value={name} />
 	<Settings.Input {form} name="general.email" title="Email" update={() => emailList?.update()} bind:value={email} />
+	<Settings.Input {form} name="tour.defaultStartApt" title="Base Airport" update={() => emailList?.update()} bind:value={showAirport} />
+	<Settings.Switch {form} name="general.prefers_globe" title="Prefer Globe" update={() => emailList?.update()} bind:value={prefersGlobe} />
 
 </Settings.List>
 

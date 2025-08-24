@@ -8,10 +8,11 @@
   interface Props {
     data: ((Types.Deadhead | (Types.Leg & { aircraft: { simulator: boolean } })) & { type: 'deadhead' | 'leg', diversionAirportId: string | null })[];
     day: Types.DutyDay;
-    [key: string]: any
+    [key: string]: any;
+    highlight?: string | null
   }
 
-  let { data, day, ...rest }: Props = $props();
+  let { data, day, highlight = $bindable(null), ...rest }: Props = $props();
 
   // Sort the data so deadheads come before flights if they start at the same time
   data.sort((a, b) => a.startTime_utc === b.startTime_utc ? (a.type === 'deadhead' ? -1 : 1) : 0);
@@ -106,14 +107,14 @@
   </div>
 </div> -->
 
-<div class="w-full relative bg-gray-50 dark:bg-zinc-900 border-t border-b border-gray-200 dark:border-zinc-700">
+<div class="w-full relative bg-gray-50 dark:bg-zinc-900 border-t border-b border-gray-200 dark:border-zinc-700 overflow-y-hidden">
   <div class="w-full relative z-10 overflow-y-hidden overflow-x-auto pb-3">
     <div class="{rest.class} w-full relative flex flex-row items-start text-zinc-800 dark:text-white pt-3 pb-5 px-2" style="min-width: {4.75 * dataFormatted.length}rem;">
       {#each dataFormatted as entry}
         {#if entry.entity.type === 'blank'}
-          <Blank entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc}/>
+          <Blank entry={entry.entity} i={entry.i} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc}/>
         {:else}
-          <Schedule entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc} />
+          <Schedule bind:highlight={highlight} entry={entry.entity} i={entry.i} spacing={spacing} dayStartTime={day.startTime_utc} dayEndTime={day.endTime_utc} />
         {/if}
       {/each}
     </div>

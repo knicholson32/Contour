@@ -80,7 +80,6 @@
     }
 
     if (JSON.stringify(days) !== JSON.stringify(newDays)) {
-      console.log(days);
       days = [...newDays]; // Only update if the value has changed
     }
 
@@ -150,5 +149,5 @@
     </div>
   </div>
 {:else}
-  No Days
+  No Days - TODO: Add something here?
 {/if}

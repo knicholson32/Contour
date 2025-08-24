@@ -5,6 +5,7 @@ import { CalendarDate } from '@internationalized/date';
 import * as settings from '$lib/server/settings';
 import { redirect } from '@sveltejs/kit';
 import { pad } from '$lib/helpers';
+import type { Legs } from '$lib/components/map/deck/types.js';
 // import type { PageServerLoad } from './$types';
 // import type { PageData } from './$types';
 
@@ -15,11 +16,13 @@ const TEN_DAYS = 10 * TWENTY_FOUR_HOURS;
 const THIRTY_DAYS = 30 * TWENTY_FOUR_HOURS;
 
 
-export const load = async ({ parent, url }) => {
+export const load = async ({ parent, url, fetch }) => {
 
-  const sets = await settings.getMany('general.timezone', 'system.debug');
+  const sets = await settings.getMany('general.timezone', 'system.debug', 'tour.defaultStartApt');
   const timeZone = sets['general.timezone'];
   const debug = sets['system.debug'];
+  
+  const baseAirport = await prisma.airport.findUnique({ where: { id: sets['tour.defaultStartApt'] } })
 
   const numTours = await prisma.tour.count();
   const lastTour = await prisma.tour.findFirst({ orderBy: { startTime_utc: 'desc' }});
@@ -114,7 +117,7 @@ export const load = async ({ parent, url }) => {
 
   const posGroups: [number, number][][] = [];
   const posGroupsIDs: string[] = [];
-  const airports: Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>[] = [];
+  const airports: Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>[] = baseAirport === null ? [] : [baseAirport];
   let operations = 0;
 
   const acTypeList: { [key: string]: number } = {};
@@ -159,6 +162,7 @@ export const load = async ({ parent, url }) => {
       ]
     }, orderBy: { startTime_utc: 'asc' }, include: { aircraft: true, positions: true, originAirport: true, destinationAirport: true, diversionAirport: true, _count: { select: { approaches: true } } }
   });
+
 
   for (const leg of legs) {
     if (leg.aircraft.aircraftTypeId in acTypeList) {
@@ -429,6 +433,21 @@ export const load = async ({ parent, url }) => {
     if (l.startTime_utc !== null && l.startTime_utc >= now - THIRTY_DAYS) thirty += l.totalTime;
   }
 
+  const deckSegments = posGroupsIDs.length === 0 ? [] : (await (await fetch('/api/legs?' + posGroupsIDs.map((id) => 'id=' + id).join('&') + '&filterDuplicates=false')).json()) as Legs;
+
+  const legSummary: {[key: string]: {
+    from: string,
+    to: string
+  }} = {};
+
+  const summaryLegs =  await prisma.leg.findMany({ where: { id: { in: posGroupsIDs } }, select: { originAirportId: true, destinationAirportId: true, diversionAirportId: true, id: true } });
+  for (const leg of summaryLegs) {
+    legSummary[leg.id] = {
+      from: leg.originAirportId ?? 'Unknown',
+      to: leg.diversionAirportId !== null ? leg.diversionAirportId : leg.destinationAirportId ?? 'Unknown'
+    }
+  }
+
   return {
     lastTour,
     groundSpeed,
@@ -437,8 +456,11 @@ export const load = async ({ parent, url }) => {
       avg: avgRest,
       shortest: shortestRest,
     },
+    legSummary,
     positions: posGroups,
     legIDs: posGroupsIDs,
+    deckSegments,
+    startAirport: await prisma.airport.findUnique({ where: { id: sets['tour.defaultStartApt'] } }),
     airports,
     operations,
     mostCommonAC: {

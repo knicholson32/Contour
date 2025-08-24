@@ -7,6 +7,7 @@
 	export let name: string;
 	export let placeholder: string;
 	export let mono: boolean = false;
+	export let autocomplete: boolean = true;
 
 	export let input = () => {};
 
@@ -27,6 +28,7 @@
 		{title}
 		on:input={input}
 		{...{ type }}
+		autocomplete={autocomplete === false ? 'off' : undefined}
 		{name}
 		class="block w-full rounded-md {mono ? 'font-mono' : ''} {allowShowPassword
 			? 'rounded-r-none border-r-0'

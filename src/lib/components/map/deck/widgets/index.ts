@@ -1,0 +1,1 @@
+export { default as GeoReferencedTooltip } from './GeoReferencedTooltip.svelte';

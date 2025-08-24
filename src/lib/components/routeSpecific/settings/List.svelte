@@ -72,7 +72,7 @@
 		};
 	}}
 >
-	<div class="{classExport} border-b pb-6">
+	<div class="{classExport} border-b">
 		<div class="flex items-center gap-x-2">
 			<div class="max-w-md">
 				<h2 class="text-lg font-semibold leading-7 text-gray-900 dark:text-white">

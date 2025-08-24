@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API } from '$lib/types';
 	import Frame from './Frame.svelte';
 
 	interface Props {
@@ -14,7 +15,7 @@
 		disabled?: boolean;
 		mono?: boolean;
 		error?: boolean;
-		form?: { success: boolean; name: string; message: string | undefined } | null;
+		form?: API.Form.Type | null;
 		update?: any;
 		updatedContents?: any; // const _update = (e: Event & { currentTarget: EventTarget & HTMLInputElement; }) => {
 	}
@@ -42,7 +43,7 @@
 	// }
 </script>
 
-<Frame {title} {hoverTitle} {link} error={form?.success === false && form?.name === name ? form.message ?? null : null}>
+<Frame {title} {hoverTitle} {link} error={form?.ok === false && form?.name === name ? form.message ?? null : null}>
 	<div class="-my-2 grow xs:grow-0 flex flex-col-reverse sm:flex-row sm:inline-flex sm:items-center">
 		{#if leadingText !== null}
 			<p class="mr-2 text-xxs font-mono select-none text-right {leadingText.error ? 'text-red-400' : 'text-gray-400'}">

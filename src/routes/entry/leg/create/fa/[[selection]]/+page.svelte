@@ -7,7 +7,7 @@
   import { enhance } from '$app/forms';
   import { dateToDateStringForm, deleteQueries, getAirportFromICAO, getHoursMinutesUTC, getInlineDateUTC, getInlineDateUTCFA, getWeekdayUTC, setActive } from '$lib/helpers';
   import Warning from '$lib/components/Warning.svelte';
-  import * as Map from '$lib/components/map';
+  // import * as Map from '$lib/components/map';
   import { v4 as uuidv4 } from 'uuid';
   import { afterNavigate, goto } from '$app/navigation';
   import { page } from '$app/state';
@@ -15,6 +15,7 @@
   import BlankMenu from '$lib/components/menuForm/BlankMenu.svelte';
   import icons from '$lib/components/icons';
   import Frame from '$lib/components/entry/Frame.svelte';
+  import * as Deck from '$lib/components/map/deck';
   
   interface Props {
     data: import('./$types').PageData;
@@ -257,10 +258,21 @@
 
           {#if data.airportList !== null}
             <Section title="Map">
-              {#key mapKey}
-                <Map.Airports class="z-0" airports={data.airportList} />
-              {/key}
+              <div class="relative flex h-[50vh]">
+                <Deck.Core>
+                  <Deck.Airports airports={data.airportList} highlight={data.airportList.map((a) => a.id)}/>
+                  <Deck.Leg leg={{
+                    id: 'preview',
+                    segments: [{
+                      style: 'highlight',
+                      positions: [[data.airportList[0].longitude, data.airportList[0].latitude], [data.airportList[1].longitude, data.airportList[1].latitude]]
+                    }]
+                  }}/>
+                </Deck.Core>
+              </div>
             </Section>
+          {:else}
+            NULL
           {/if}
         
 

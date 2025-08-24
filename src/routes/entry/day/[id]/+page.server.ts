@@ -8,6 +8,7 @@ import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
 import { filterOutliers, generateAirportList } from '$lib/server/helpers';
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
+import type { Types as DeckTypes } from '$lib/components/map/deck';
 
 const AVG_FILTER_NUM = 2;
 
@@ -230,9 +231,27 @@ export const load = async ({ fetch, params, parent, url }) => {
   distance = distance * 0.54;
   if (numPositions > 0) speed = speed / numPositions;
 
+  const deadheadSegments: DeckTypes.Legs = [];
+
+  for (const deadhead of currentDay.deadheads) {
+    deadheadSegments.push({
+      id: deadhead.id,
+      segments: [
+        {
+          style: 'deadhead',
+          positions: [[deadhead.originAirport.longitude, deadhead.originAirport.latitude], [deadhead.destinationAirport.longitude, deadhead.destinationAirport.latitude]]
+        }
+      ]
+    })
+  }
+
+  const legs = currentDay.legs.length === 0 ? [] : (await (await fetch('/api/legs?' + currentDay.legs.map((leg) => 'id=' + leg.id).join('&') + '&filterDuplicates=false')).json() as DeckTypes.Legs);
+
   return {
     entrySettings,
     currentDay,
+    deckSegments: [...legs, ...deadheadSegments],
+    deadheadSegments,
     currentTour,
     airportList: await generateAirportList(...airportsInOrder),
     legDeadheadCombo,

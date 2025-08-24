@@ -2,7 +2,6 @@
   import { enhance } from '$app/forms';
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
-  import * as Map from '$lib/components/map';
   import { page } from '$app/stores';
   import * as Card from "$lib/components/ui/card";
   import { afterNavigate, beforeNavigate, goto} from '$app/navigation';
@@ -19,6 +18,8 @@
   import OneColumn from '$lib/components/scrollFrames/OneColumn.svelte';
   import type { ChangeEventHandler } from 'svelte/elements';
   import { XMLParser } from 'fast-xml-parser';
+  import * as Deck from '$lib/components/map/deck';
+    import type { Position } from 'deck.gl';
 
   interface Props {
     form: import('./$types').ActionData;
@@ -103,7 +104,17 @@
 
   let tooltip: HTMLElement | undefined = $state();
   let position: Types.Position | undefined = $state();
-  let latLong: [number, number] | null = $state(null);
+
+  let positionsSegmented: Deck.Types.Leg | null = $derived({
+    id: 'kml',
+    segments: [{
+      style: 'norm',
+      positions: positions.map((p) => [p.longitude, p.latitude])
+    }]
+  });
+  
+
+  let latLong: [number, number] = $state([0, 0]);
   const template = (d: Types.Position) => {
     position = d;
     latLong = [d.latitude, d.longitude];
@@ -252,9 +263,20 @@
 <OneColumn>
   
   <div class="shrink relative">
-    {#key mapKey}
+    <!-- {#key mapKey}
       <Map.Leg class="h-[calc(100vh-4rem)]! z-50" positions={positions} target={latLong} fixes={data.leg.fixes} airports={data.airportList} />
-    {/key}
+    {/key} -->
+
+    <div class="relative flex w-full h-[calc(100vh-var(--nav-height))]">
+      <Deck.Core padding={{left: 100, right: 100, top: 100, bottom: 290}} customControlPositioning="left-4 bottom-52 z-100" >
+        <Deck.Airports airports={data.airportList} highlight={data.airportList.map((a) => a.id)}/>
+        <Deck.Leg leg={data.legData}/>
+        <Deck.Leg leg={positionsSegmented} triggerCameraMove={false}/>
+        <Deck.Widgets.GeoReferencedTooltip bind:position={latLong} hidden={latLong === null || (latLong[0] === 0 && latLong[1] === 0)} fade={false}>
+          <img src="/MapPin.svg" class="w-4 h-4"/>
+        </Deck.Widgets.GeoReferencedTooltip>
+      </Deck.Core>
+    </div>
 
     <form id="form-delete" action="?/delete" method="post" use:enhance={({ cancel }) => {
       const answer = confirm('Are you sure you want to delete this position data? This action cannot be undone.');
@@ -277,7 +299,7 @@
       };
     }}>
 
-      <div class="absolute z-50 bottom-[0rem] left-0 right-0 grid grid-cols-12 gap-4 p-4">
+      <div class="absolute z-50 bottom-0 left-0 right-0 grid grid-cols-12 gap-4 p-4">
         <div class="col-start-9 col-span-4 inline-flex -mt-[2px] w-full flex-row gap-3 justify-end">
           {#if data.leg !== null}
             <div class="grow md:w-48 md:grow-0 flex items-start">
@@ -292,7 +314,7 @@
             <Card.Title class="text-sm font-semibold">Speed and Altitude</Card.Title>
             <Table2 class="h-4 w-4 text-muted-foreground" />
           </Card.Header>
-          <Card.Content class="p-4 pt-0">
+          <Card.Content class="p-4 pt-0 h-30">
             <div onmouseleave={() => latLong=[0, 0]} role="presentation">
               {#key positions}
                 <VisXYContainer data={positions} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>

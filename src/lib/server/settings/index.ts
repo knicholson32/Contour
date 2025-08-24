@@ -27,6 +27,7 @@ export const TypeNames = {
 	'data.navData.validDate': -1,
 	'data.navData.source': '',
 	// General -------------------------------
+	'general.prefers_globe': false,
 	'general.encKey': 'UNSET',
 	'general.aeroAPI': '',
 	'general.email': '',
@@ -56,6 +57,7 @@ export type ObjectType<T extends TypeName> =
 	T extends 'data.navData.lastSync' ? number :  // Integer
 	T extends 'data.navData.validDate' ? number :	// Integer
 	T extends 'data.navData.source' ? string :	// String
+	T extends 'general.prefers_globe' ? boolean :		// Boolean
 	T extends 'general.encKey' ? string : 				// String
 	T extends 'general.aeroAPI' ? string : 				// String
 	T extends 'general.email' ? string : 				  // String
@@ -94,6 +96,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 		switch (setting) {
 			// Boolean Conversion ------------------------------------------------------------------------
 			case 'entry.entryMXMode':
+			case 'general.prefers_globe':
 			case 'general.prefers_utc':
 				return (settingVal.value === 'true' ? true : false) as ObjectType<T>;
 

@@ -13,8 +13,8 @@
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
   import { dateToDateStringForm, dateToDateStringFormMonthDayYear, getInlineDateUTC } from '$lib/helpers';
-  import * as Map from '$lib/components/map';
-  import { Timer, TowerControl } from 'lucide-svelte';
+  import * as Deck from '$lib/components/map/deck';
+  import { ArrowRight, Timer, TowerControl } from 'lucide-svelte';
   import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
   import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
   import { TourPreview } from '$lib/components/tourPreview';
@@ -68,16 +68,16 @@
   let hoveringLeg: string | null = $state(null);
   const ref = page.url.searchParams.get('ref');
 
-  let highlight: number | null = $state(null);
+  // let highlight: string | null = $state(null);
 
-  $effect(() => {
-    if (hoveringLeg === null) {
-      highlight = null;
-    } else {
-      highlight = data.tourMap?.ids.findIndex((leg) => leg === hoveringLeg) ?? -1;
-      if (highlight === -1) highlight = null;
-    }
-  });
+  // $effect(() => {
+  //   if (hoveringLeg === null) {
+  //     highlight = null;
+  //   } else {
+  //     highlight = data.tourMap?.ids.findIndex((leg) => leg === hoveringLeg) ?? -1;
+  //     if (highlight === -1) highlight = null;
+  //   }
+  // });
 
 </script>
 
@@ -138,14 +138,21 @@
       {/if}
 
       {#if data.tourMap !== null}
-        {#key mapKey}
-          <Map.Bulk class="rounded-md bg-transparent border-red-500 ring-0 bg-red-500" legIDs={data.tourMap.ids} highlight={highlight} pos={data.tourMap.positions} airports={data.tourMap.airports} />
-        {/key}
+        <div class="relative h-[calc(100vh_-_22rem_-_6rem_-_var(--nav-height)_-_1rem_+_2px)] md:h-[calc(100vh_-_12.5rem_-_6rem_-_var(--nav-height)_-_1rem_+_2px)] flex">
+          <Deck.Core padding={50} >
+            <Deck.Airports airports={data.tourMap.airports}/>
+            <Deck.Legs legs={data.deckSegments} highlight={hoveringLeg}/>
+          </Deck.Core>
+          <a href="/entry/day?tour={data.id}" class="absolute right-4 bottom-4 z-10 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 backdrop-blur-lg px-3 py-2 rounded-lg text-xxs uppercase group">
+            Days
+            <ArrowRight class="w-4 h-4 group-hover:-mr-1 group-hover:ml-1 transition-all group-hover:text-sky-500"/>
+          </a>
+        </div>
       {/if}
 
       {#if data.stats !== null}
 
-        <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 p-4 {data.tourMap !== null ? 'border-t' : ''}">
+        <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 p-4 h-auto xs:h-88 md:h-50 {data.tourMap !== null ? 'border-t' : ''}">
           <Card.Root>
             <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
               <Card.Title class="text-sm font-medium">Flight Time</Card.Title>
@@ -194,7 +201,7 @@
       {/if}
 
       {#if data.currentTour !== null}
-        <div class="mx-4 mb-4 bg-card text-card-foreground rounded-lg border shadow-xs overflow-hidden">
+        <div class="mx-4 mb-4 bg-card text-card-foreground rounded-lg border shadow-xs overflow-hidden h-24">
           <TourPreview tour={data.currentTour} bind:hoveringLeg={hoveringLeg} tzData={data.tzData} prefersUTC={data.prefersUTC} />
         </div>
       {/if}
@@ -233,7 +240,7 @@
           <Entry.TextField name="notes" placeholder="Enter Notes" defaultValue={data.currentTour?.notes ?? null} />
         </Section>
       </form>
-      <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
+      <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky top-[400px] z-10">
         {#if data.currentTour !== null}
           <form class="grow max-w-[33%] md:w-48 md:grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
             const answer = confirm('Are you sure you want to delete this duty day? This action cannot be undone.');

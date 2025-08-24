@@ -1,11 +1,13 @@
+import { addIfDoesNotExist } from '$lib/server/db/airports.js';
 import * as settings from '$lib/server/settings';
+import API from '$lib/types/api.js';
 import { error } from '@sveltejs/kit';
 import crypto from 'node:crypto';
 
 /** @type {import('./$types').PageServerLoad} */
 export const load = async ({ params }) => {
 
-	const settingValues = await settings.getSet('general');
+	const settingValues = { ...await settings.getSet('general'), ...await settings.getSet('tour')}
 
 	return {
 		settingValues,
@@ -29,8 +31,18 @@ export const actions = {
 		const email = (data.get('general.email') ?? undefined) as undefined | string;
 		if (email !== undefined) await settings.set('general.email', email);
 
+		const prefersGlobe = (data.get('general.prefers_globe') ?? undefined) as undefined | string;
+		if (prefersGlobe !== undefined) await settings.set('general.prefers_globe', prefersGlobe === 'true');
+
 		const hash = email === undefined ? '00000000000000000000000000000000' : crypto.createHash('md5').update(email.trim().toLocaleLowerCase()).digest('hex');
 		await settings.set('general.gravatar.hash', hash);
+
+		const showAirport = (data.get('tour.defaultStartApt') ?? undefined) as undefined | string;
+		if (showAirport !== undefined) {
+			const success = await addIfDoesNotExist(showAirport, await settings.get('general.aeroAPI'));
+			if (success) await settings.set('tour.defaultStartApt', showAirport);
+			else return API.Form.formFailure('?/updateEmail', 'tour.defaultStartApt', 'Airport does not exist');
+		}
 	},
 	updateLocalization: async ({ request }) => {
 		const data = await request.formData();

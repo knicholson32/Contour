@@ -689,3 +689,49 @@ export const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: numb
 export const deg2rad = (deg: number) => {
 	return deg * (Math.PI / 180)
 }
+
+
+export const hexToRgb = (hex: string): [number, number, number] => {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [
+    parseInt(result[1], 16),
+    parseInt(result[2], 16),
+    parseInt(result[3], 16)
+	] : [0, 0, 0];
+}
+
+export const componentToHex = (c: number) => {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+export const rgbToHex = (color: [number, number, number], includeHash = true) => {
+	if (includeHash) return "#" + componentToHex(color[0]) + componentToHex(color[1]) + componentToHex(color[2]);
+	else return componentToHex(color[0]) + componentToHex(color[1]) + componentToHex(color[2]);
+}
+
+export const numToColor = (num: number): [number, number, number] => {
+	const arr = new ArrayBuffer(4); // an Int32 takes 4 bytes
+	const view = new DataView(arr);
+	view.setUint32(0, num, true); // byteOffset = 0; litteEndian = true
+	return [view.getUint8(0), view.getUint8(1), view.getUint8(2)];
+}
+
+// Easing functions @see https://easings.net/
+export function easeInOutSine(x: number): number {
+	return -(Math.cos(Math.PI * x) - 1) / 2;
+}
+
+
+export function easeInOutCubic(x: number): number {
+	return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+
+export function easeOutCubic(x: number): number {
+	return 1 - Math.pow(1 - x, 3);
+}
+
+export function easeInOutQuad(x: number): number {
+	return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+}

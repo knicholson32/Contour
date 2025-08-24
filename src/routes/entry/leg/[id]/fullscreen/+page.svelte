@@ -1,5 +1,4 @@
 <script lang="ts">
-  import * as Map from '$lib/components/map';
   import { page } from '$app/state';
   import * as Card from "$lib/components/ui/card";
   import { afterNavigate, beforeNavigate} from '$app/navigation';
@@ -16,6 +15,7 @@
   import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
   import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
   import LegEntry from '$lib/components/routeSpecific/leg/LegEntry.svelte';
+  import * as Deck from '$lib/components/map/deck';
 
   interface Props {
     form: import('./$types').ActionData;
@@ -25,9 +25,9 @@
   let { form: formData, data }: Props = $props();
 
 
-  let mapKey = uuidv4();
+  let mapKey = $state(uuidv4());
   const resetMap = () => {
-    // mapKey = uuidv4();
+    mapKey = uuidv4();
     // latLong = null;
   }
 
@@ -52,6 +52,7 @@
       if (data.leg.id in menuElements) scrollToDiv = menuElements[data.leg.id];
       else scrollToDiv = null;
     }
+    updateTourDayInfo(data.searchParams);
   });
 
 
@@ -105,7 +106,7 @@
 
   let tooltip: HTMLElement | undefined = $state();
   let position: Types.Position | undefined = $state();
-  let latLong: [number, number] | null = $state(null);
+  let latLong: [number, number] = $state([0,0]);
   const template = (d: Types.Position) => {
     position = d;
     latLong = [d.latitude, d.longitude];
@@ -116,22 +117,18 @@
   if (browser) tooltipContainer = document.body;
 
   let tourDayInfo = $state('');
-  const updateTourDayInfo = (params: {dayId: number | null, tourId: number | null}) => {
+  const updateTourDayInfo = (params: {dayId: number | null, tourId: number | null, search: string | null}) => {
     // $: tourDayInfo = data.searchParams.dayId === null ;
     if (params.dayId === null && params.tourId === null) tourDayInfo = '';
     else if (params.dayId !== null && params.tourId !== null) tourDayInfo = `day=${params.dayId}&tour=${params.tourId}`;
     else if (params.dayId !== null) tourDayInfo = `day=${params.dayId}`;
     else tourDayInfo = `tour=${params.tourId}`;
-    const search = page.url.searchParams.get('search');
-    if (search !== null && search !== '') {
-      if (tourDayInfo === '') tourDayInfo = 'search=' + search;
-      else tourDayInfo = tourDayInfo + '&search=' + search;
+
+    if (params.search !== null && params.search !== '') {
+      if (tourDayInfo === '') tourDayInfo = 'search=' + params.search;
+      else tourDayInfo = tourDayInfo + '&search=' + params.search;
     }
   }
-
-  $effect(() => {
-    updateTourDayInfo(data.searchParams);
-  });
 
   let center = $state((animate?: boolean) => {});
 
@@ -151,6 +148,8 @@
     center();
   });
 
+  let legComponent: Deck.Leg
+
 </script>
 
 <svelte:window bind:innerWidth />
@@ -163,18 +162,22 @@
   
   <div class="shrink relative">
     <div class="fixed top-0 bottom-0 left-0 right-0 z-40">
-      {#key mapKey}
-        <Map.Fullscreen bind:center={center} bind:paddingBottomRight bind:paddingTopLeft positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong}>
-          <a title="Exit full screen" href="/entry/leg/{data.leg.id}?active=form&{tourDayInfo}" class="absolute group top-2 right-2 z-50 w-5 h-5 inline-flex items-center justify-center">
+      <div class="relative flex w-full h-full">
+        <Deck.Core padding={{left: 356, right: 100, top: 100, bottom: 290}} customControlPositioning="left-4 bottom-4 right-auto md:left-auto md:right-4 md:bottom-52" >
+          <Deck.Airports airports={data.airportList} highlight={data.airportList.map((a) => a.id)}/>
+          <Deck.Leg bind:this={legComponent} leg={data.legData}/>
+          <Deck.Widgets.GeoReferencedTooltip bind:position={latLong} hidden={latLong === null || (latLong[0] === 0 && latLong[1] === 0)} fade={false}>
+            <img src="/MapPin.svg" class="w-4 h-4"/>
+          </Deck.Widgets.GeoReferencedTooltip>
+        </Deck.Core>
+        <a title="Exit full screen" href="/entry/leg/{data.leg.id}?active=form&{tourDayInfo}" class="absolute group top-2 right-2 z-50 w-5 h-5 inline-flex items-center justify-center">
             <Minimize class="w-5 h-5 dark:text-white group-hover:w-4 group-hover:h-4 transition-all" />
-          </a>
-          <button onclick={() => { center(true); }} title="Center on route" type="button" class="absolute group top-9 right-2 z-50 w-5 h-5 inline-flex items-center justify-center">
-            <Route class="w-5 h-5 dark:text-white group-hover:w-4 group-hover:h-4 transition-all" />
-          </button>
-        </Map.Fullscreen>
-      {/key}
+        </a>
+        <button onclick={legComponent.center} title="Center on route" type="button" class="absolute group top-9 right-2 z-50 w-5 h-5 inline-flex items-center justify-center">
+          <Route class="w-5 h-5 dark:text-white group-hover:w-4 group-hover:h-4 transition-all" />
+        </button>
+      </div>
 
-      <!-- <div class="absolute z-100 bottom-0 top-0 left-0 right-0 p-4 flex flex-row gap-2"> -->
         <div class="absolute left-4 top-4 bottom-4 z-50 w-[240px] backdrop-blur-xs rounded-xl border bg-white/70 border-gray-200 dark:bg-zinc-900/70 dark:border-zinc-800 p-0 overflow-hidden hidden md:flex">
           <div class="overflow-y-scroll overflow-x-hidden -mr-px w-[240px]" style="scrollbar-width:none">
             <div class="-mt-[2px]">
@@ -197,19 +200,21 @@
             <Table2 class="h-4 w-4 text-muted-foreground" />
           </Card.Header>
           <Card.Content class="p-4 pt-0">
-            <div onmouseleave={() => latLong=[0, 0]} role="presentation">
-              <VisXYContainer class="" data={data.leg.positions} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
-                <VisAxis gridLine={false} type="x" tickValues={data.tickValues} minMaxTicksOnly={false} {tickFormat} />
-                <VisCrosshair {template} color={crosshairColor} />
-                <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer} /> 
-                <VisLine {x} y={yAltitude} color={color({secondary: false})} />
-                <VisLine {x} y={ySpeed} color={color({secondary: true})} />
-                <VisBulletLegend items={[
-                  { name: 'Altitude', color: color()() },
-                  { name: 'Speed', color: color({ secondary: true })() },
-                ]} />
-              </VisXYContainer>
-            </div>
+            {#key mapKey}
+              <div onmouseleave={() => latLong=[0, 0]} role="presentation" class="h-[104px]">
+                <VisXYContainer class="" data={data.leg.positions} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
+                  <VisAxis gridLine={false} type="x" tickValues={data.tickValues} minMaxTicksOnly={false} {tickFormat} />
+                  <VisCrosshair {template} color={crosshairColor} />
+                  <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer} /> 
+                  <VisLine {x} y={yAltitude} color={color({secondary: false})} />
+                  <VisLine {x} y={ySpeed} color={color({secondary: true})} />
+                  <VisBulletLegend items={[
+                    { name: 'Altitude', color: color()() },
+                    { name: 'Speed', color: color({ secondary: true })() },
+                  ]} />
+                </VisXYContainer>
+              </div>
+            {/key}
           </Card.Content>
         </Card.Root>
 

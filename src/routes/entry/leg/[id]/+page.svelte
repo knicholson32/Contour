@@ -3,7 +3,6 @@
   import Section from '$lib/components/Section.svelte';
   import Submit from '$lib/components/buttons/Submit.svelte';
   import TwoColumn from '$lib/components/scrollFrames/TwoColumn.svelte';
-  import * as Map from '$lib/components/map';
   import { icons } from '$lib/components';
   import { page } from '$app/state';
   import * as Card from "$lib/components/ui/card";
@@ -18,7 +17,7 @@
   import { dateToDateStringForm, dateToTimeStringZulu, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
-  import { AlertCircle, CalendarDays, ChevronRight, Server, Fullscreen, Gauge, Link, Maximize, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
+  import { CircleAlert, CalendarDays, ChevronRight, Server, Fullscreen, Gauge, Link, Maximize, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
   import { VisXYContainer, VisLine, VisAxis, VisCrosshair, VisTooltip, VisBulletLegend } from "@unovis/svelte";
 	import { color } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
@@ -26,6 +25,7 @@
   import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
   import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
   import LegEntry from '$lib/components/routeSpecific/leg/LegEntry.svelte';
+  import * as Deck from '$lib/components/map/deck';
 
   interface Props {
     form: import('./$types').ActionData;
@@ -182,7 +182,6 @@
   const refreshSelectedAC = async (selected: string) => {
     if (!mounted) return;
     const res = await (await fetch(`/api/aircraft/reg/${selected}`)).json() as API.Aircraft;
-    console.log(res);
     if (res.ok == true && res.type === 'aircraft') selectedAircraftAPI = res.aircraft;
   }
 
@@ -196,16 +195,16 @@
   // console.log(data.leg.positions);
 
   let tourDayInfo = $state('');
-  const updateTourDayInfo = (params: {dayId: number | null, tourId: number | null}) => {
+  const updateTourDayInfo = (params: {dayId: number | null, tourId: number | null, search: string | null}) => {
     // $: tourDayInfo = data.searchParams.dayId === null ;
     if (params.dayId === null && params.tourId === null) tourDayInfo = '';
     else if (params.dayId !== null && params.tourId !== null) tourDayInfo = `day=${params.dayId}&tour=${params.tourId}`;
     else if (params.dayId !== null) tourDayInfo = `day=${params.dayId}`;
     else tourDayInfo = `tour=${params.tourId}`;
-    const search = page.url.searchParams.get('search');
-    if (search !== null && search !== '') {
-      if (tourDayInfo === '') tourDayInfo = 'search=' + search;
-      else tourDayInfo = tourDayInfo + '&search=' + search;
+
+    if (params.search !== null && params.search !== '') {
+      if (tourDayInfo === '') tourDayInfo = 'search=' + params.search;
+      else tourDayInfo = tourDayInfo + '&search=' + params.search;
     }
   }
 
@@ -230,6 +229,7 @@
   });
   afterNavigate(() => {
     resetApproaches();
+    updateTourDayInfo(data.searchParams);
   });
   let useBlockRequired = $derived((data.leg?.dayId ?? null) !== null && (selectedAircraftAPI !== null && selectedAircraftAPI.simulator === false));
   $effect(() => {
@@ -238,9 +238,7 @@
   $effect(() => {
     if (selectedAircraft !== null) refreshSelectedAC(selectedAircraft);
   });
-  $effect(() => {
-    updateTourDayInfo(data.searchParams);
-  });
+  // $effect(() => updateTourDayInfo(data.searchParams));
 </script>
 
 <div class="hidden">
@@ -436,22 +434,29 @@
         </div>
       {:else}
 
-        {#if data.leg.originAirportId !== null && data.leg.destinationAirportId !== null}
-          {#key mapKey}
-            <Map.Leg positions={data.leg.positions} fixes={data.leg.fixes} airports={data.airportList} target={latLong}>
-              {#if data.leg.positions.length === 0}
-                <a href="/entry/leg/{data.leg.id}/upload-positions" class="absolute bottom-2 right-2 z-50 inline-flex items-center gap-1 text-xs font-mono uppercase border select-none border-gray-400 bg-gray-100 hover:bg-white dark:bg-zinc-900 py-1 px-2 rounded-full">
-                  <span>Upload KLM</span>
-                  <Waypoints class="w-4 h-4" />
-                </a>
-              {:else}
-                <a href="/entry/leg/{data.leg.id}/fullscreen?{tourDayInfo}" class="absolute group top-2 right-2 z-50">
-                  <Maximize class="w-5 h-5 dark:text-white group-hover:hidden" />
-                  <Fullscreen class="w-5 h-5 dark:text-white hidden group-hover:block" />
-                </a>
-              {/if}
-            </Map.Leg>
-          {/key}
+        {#if data.leg.originAirportId !== null && data.leg.destinationAirportId !== null && data.deckLeg !== null}
+          <div class="relative h-[calc(100vh_-_260px_-_6rem_-_var(--nav-height)_-_1rem_+_2px)] md:h-[calc(100vh_-_276px_-_6rem_-_var(--nav-height)_-_1rem_+_2px)] flex bg-black">
+            <Deck.Core padding={50} >
+              <Deck.Airports airports={data.airportList} highlight={data.airportList.map((a) => a.id)} />
+              <Deck.Leg leg={data.deckLeg}/>
+                {#if latLong !== null}
+                  <Deck.Widgets.GeoReferencedTooltip bind:position={latLong} hidden={latLong === null || (latLong[0] === 0 && latLong[1] === 0)} fade={false}>
+                    <img src="/MapPin.svg" alt="Highlighted location" class="w-4 h-4"/>
+                  </Deck.Widgets.GeoReferencedTooltip>
+                {/if}
+            </Deck.Core>
+            {#if data.leg.positions.length === 0}
+              <a href="/entry/leg/{data.leg.id}/upload-positions" class="absolute bottom-4 right-4 z-10 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 backdrop-blur-lg px-3 py-2 rounded-lg text-xxs uppercase">
+                <span>Upload KLM</span>
+                <Waypoints class="w-3 h-3" />
+              </a>
+            {:else}
+              <a href="/entry/leg/{data.leg.id}/fullscreen?{tourDayInfo}" class="absolute group top-2 right-2 z-50">
+                <Maximize class="w-5 h-5 dark:text-white group-hover:hidden" />
+                <Fullscreen class="w-5 h-5 dark:text-white hidden group-hover:block" />
+              </a>
+            {/if}
+          </div>
         {/if}
 
         {#if data.leg.flightAwareData !== null || data.leg.positions.length > 0}
@@ -462,19 +467,21 @@
                 <Table2 class="h-4 w-4 text-muted-foreground" />
               </Card.Header>
               <Card.Content class="p-4 pt-0">
-                <div onmouseleave={() => latLong=[0, 0]} role="presentation">
-                  <VisXYContainer data={data.leg.positions} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
-                    <VisAxis gridLine={false} type="x" tickValues={data.tickValues} minMaxTicksOnly={false} {tickFormat} />
-                    <VisCrosshair {template} color={crosshairColor} />
-                    <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer} /> 
-                    <VisLine {x} y={yAltitude} color={color({secondary: false})} />
-                    <VisLine {x} y={ySpeed} color={color({secondary: true})} />
-                    <VisBulletLegend items={[
-                      { name: 'Altitude', color: color()() },
-                      { name: 'Speed', color: color({ secondary: true })() },
-                    ]} />
-                  </VisXYContainer>
-                </div>
+                {#key mapKey}
+                  <div onmouseleave={() => latLong=[0, 0]} role="presentation" class="h-[104px]">
+                    <VisXYContainer data={data.leg.positions} height="80" padding={{left: 5, right: 5, top: 5, bottom: 5}}>
+                      <VisAxis gridLine={false} type="x" tickValues={data.tickValues} minMaxTicksOnly={false} {tickFormat} />
+                      <VisCrosshair {template} color={crosshairColor} />
+                      <VisTooltip verticalPlacement={'top'} horizontalPlacement={'right'} verticalShift={25} container={tooltipContainer} /> 
+                      <VisLine {x} y={yAltitude} color={color({secondary: false})} />
+                      <VisLine {x} y={ySpeed} color={color({secondary: true})} />
+                      <VisBulletLegend items={[
+                        { name: 'Altitude', color: color()() },
+                        { name: 'Speed', color: color({ secondary: true })() },
+                      ]} />
+                    </VisXYContainer>
+                  </div>
+                {/key}
               </Card.Content>
             </Card.Root>
 
@@ -572,7 +579,7 @@
               <button bind:this={submitFADelete} type="submit" class="hidden" aria-label="presentation"></button>
               <button onclick={faDelete} type="button" class="flex flex-row gap-3 items-center group">
                 <div class="p-0 rounded-full text-red-500">
-                  <AlertCircle class="w-7 h-7"/>
+                  <CircleAlert class="w-7 h-7"/>
                 </div>
                 <div class="uppercase text-xs group-hover:underline underline-offset-2 decoration-2 decoration-red-500">Erase FlightAware Data</div>
               </button>
@@ -691,7 +698,7 @@
           </Section>
         </form>
 
-        <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end sticky bottom-0 z-10">
+        <div class="inline-flex -mt-[2px] py-3 px-5 w-full flex-row gap-3 justify-end bottom-0 z-10">
           {#if data.leg !== null}
             <form class="grow max-w-[33%] md:w-48 md:grow-0 flex items-start" action="?/delete" method="post" use:enhance={({ cancel }) => {
               const answer = confirm('Are you sure you want to delete this leg? This action cannot be undone.');

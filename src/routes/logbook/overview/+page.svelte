@@ -1,7 +1,10 @@
 <script lang='ts'>
-    import { Overview } from "$lib/components/map";
+    import { goto } from '$app/navigation';
+    import * as Deck from '$lib/components/map/deck';
     import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
     import * as Card from "$lib/components/ui/card";
+    import { SwitchSmall } from "$lib/components/ui/switchSmall";
+    import type { Position } from "deck.gl";
     import { BedDouble, Gauge, Plane, Route, Table2, Timer, TowerControl } from "lucide-svelte";
 
     interface Props {
@@ -10,25 +13,24 @@
 
     let { data }: Props = $props();
 
+
 </script>
 
 <OneColumn>
 
-  <!-- <div class="flex-1 space-y-4 p-3 md:p-6 pt-6">
+  <Deck.Core startCenteredOn={[data.startAirport?.latitude ?? 0, data.startAirport?.longitude ?? 0]}>
 
-    <div class="grid gap-2 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-4">
+    <Deck.Airports airports={data.visitedAirports} />
+    <Deck.Legs legs={'/api/legs'} triggerCameraMove={false} pickable={true} onclick={(id: string) => { goto(`/entry/leg/${id}?active=form`)}} />
+  </Deck.Core>
 
-
-    </div>
-  </div> -->
   
-  <Overview visitedAirports={data.visitedAirports} legs={data.legs} largestSegment={data.largestSegment} />
 
-  <div class="absolute z-10 top-4 left-4 p-4 rounded-lg bg-black/40 backdrop-blur-xs">
+  <div class="absolute z-10 top-4 left-4 p-4 rounded-lg bg-zinc-100/70 dark:bg-black/40 backdrop-blur-xs flex flex-col gap-2">
     Logbook Overview
   </div>
 
-  <div class="absolute z-10 top-4 right-4 p-4 rounded-lg bg-black/40 backdrop-blur-x grid grid-cols-2 gap-4">
+  <!-- <div class="absolute z-10 top-4 right-4 p-4 rounded-lg bg-black/40 backdrop-blur-x grid grid-cols-2 gap-4">
     <div class="bg-amber-900/30 flex flex-col gap-4 items-center justify-center p-4 rounded-lg">
       Box 1
     </div>
@@ -41,6 +43,6 @@
     <div class="bg-sky-900/30 flex flex-col gap-4 items-center justify-center p-4 rounded-lg">
       Box 4
     </div>
-  </div>
+  </div> -->
 
 </OneColumn>

@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import zlib from 'node:zlib';
 import type { API } from '..';
 
 /**
@@ -99,3 +100,31 @@ export const serverError = (error: any, context?: string) => {
 			{ status: 500 }
 		);
 };
+
+
+
+export const jsonCompressed = (data: any, requestHeaders: Headers) => {
+	const body = JSON.stringify(data);
+	const headers = new Headers();
+	headers.set('content-type', 'application/json');
+	headers.set('cache-control', 'max-age=0');
+	let result: Buffer<ArrayBufferLike>;
+	
+	const compressionOptions = (requestHeaders.get('accept-encoding') ?? '').split(', ');
+
+	if (compressionOptions.includes('gzip')) {
+		result = zlib.gzipSync(body);
+		headers.set('content-length', result.length.toString());
+		headers.set('content-encoding', 'gzip');
+	} else if (compressionOptions.includes('deflate')) {
+		result = zlib.deflateSync(body);
+		headers.set('content-length', result.length.toString());
+		headers.set('content-encoding', 'deflate');
+	} else {
+		return json(data);
+	}
+	return new Response(result as BodyInit, {
+		status: 200,
+		headers
+	});
+}

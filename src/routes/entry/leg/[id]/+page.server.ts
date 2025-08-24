@@ -12,6 +12,7 @@ import { filterOutliers, generateAirportList } from '$lib/server/helpers';
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type * as Types from '@prisma/client';
 import { fetchLegsForSideMenu } from '$lib/server/lib/leg';
+import type { Types as DeckTypes } from '$lib/components/map/deck';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
@@ -65,7 +66,8 @@ export const load = async ({ fetch, params, url }) => {
   }
 
   // Fetch all the legs for the side menu
-  const legs = await fetchLegsForSideMenu(dayId, tourId, { search: url.searchParams.get('search')});
+  const search = url.searchParams.get('search');
+  const legs = await fetchLegsForSideMenu(dayId, tourId, { search });
 
 
   // if (day === null) throw redirect(301, '/tour/' + params.tour + '/day');
@@ -212,14 +214,19 @@ export const load = async ({ fetch, params, url }) => {
   let selectedAircraftAPI: API.Types.Aircraft | null = null;
   if (leg !== null) selectedAircraftAPI = leg.aircraft;
 
+  const deckLegs = leg === null ? [] : (await (await fetch('/api/legs?id=' + leg.id + '&fixes=true&filterDuplicates=false')).json()) as DeckTypes.Legs;
+  const deckLeg = deckLegs.length > 0 ? deckLegs[0] : null;
+
   return {
     searchParams: {
       dayId,
-      tourId
+      tourId,
+      search
     },
     entrySettings,
     leg,
     legs,
+    deckLeg,
     currentDay,
     selectedAircraftAPI,
     // positions: await prisma.position.findMany({ where: { legId: params.leg } }),

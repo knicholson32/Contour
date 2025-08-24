@@ -178,7 +178,6 @@
 
 
   $backButtonClicked = () => {
-    console.log('Back button')
     if (activeOnSingleCol === 'form') {
       if (ref === null) {
         page.url.searchParams.set('active', 'menu');

@@ -2,6 +2,7 @@
   import { page } from "$app/state";
   import { cubicIn, cubicInOut, cubicOut } from "svelte/easing";
   import "../app.css";
+  import { setContext } from 'svelte';
   import { EscapeOrClickOutside } from "$lib/components/events";
   import { fade, scale, slide } from "svelte/transition";
   import { backArrow, backButtonClicked, backText, unsaved } from "$lib/stores";
@@ -14,7 +15,7 @@
   import NProgress from 'nprogress';
   import escapeOrClickOutside from "$lib/components/events/escapeOrClickOutside";
   import type { GitCommit } from "$lib/server/api/git/schema";
-    import { timeConverter } from "$lib/helpers";
+  import { timeConverter } from "$lib/helpers";
 
   interface Props {
     data: import('./$types').PageData;
@@ -22,6 +23,9 @@
   }
 
   let { data, children }: Props = $props();
+
+  setContext('settings', data.settings);
+  setContext('startAirport', data.startAirport);
 
   // -----------------------------------------------------------------------------------------------
 	// Navigation Menus
@@ -223,7 +227,7 @@
                   {:else}
                     <Popover.Trigger class="border-transparent relative z-40 text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">{m.title}</Popover.Trigger>
                   {/if}
-                  <Popover.Content class="grid grid-cols-1 gap-x-4 gap-y-1 p-0 w-auto text-sm rounded-lg dark:bg-zinc-800 dark:border dark:border-zinc-900">
+                  <Popover.Content collisionPadding={20} class="grid grid-cols-1 gap-x-4 gap-y-1 p-0 w-auto text-sm rounded-lg dark:bg-zinc-800 dark:border dark:border-zinc-900">
                     {#each m.submenu as item}
                       <div class="group relative flex gap-x-6 first:rounded-b-none rounded-lg last:rounded-t-none p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 dark:bg-zinc-800">
                         <div class="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white dark:bg-zinc-900 dark:group-hover:bg-zinc-950">
@@ -414,7 +418,7 @@
   {/if}
 </nav>
 
-<div class=" relative overflow-y-hidden -mt-px pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem + 1px);">
+<div class=" relative overflow-y-hidden -mt-px pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]" style="height: calc(100% - 4rem + 1px); --nav-height: 4rem;">
   <div class="fixed top-16 left-0 right-0 z-101 h-[2px] overflow-hidden">
     <!-- <ProgressBar bind:this={progress} minimum={0} bind:width={width} /> -->
   </div>

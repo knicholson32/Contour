@@ -13,6 +13,7 @@ import { XMLParser } from 'fast-xml-parser';
 import { filterOutliers, generateAirportList } from '$lib/server/helpers';
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type * as Types from '@prisma/client';
+import type { Legs } from '$lib/components/map/deck/types';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
@@ -119,10 +120,15 @@ export const load = async ({ fetch, params, url }) => {
     tickValues.push(last);
   }
 
+  const legData = (await (await fetch('/api/legs?id=' + leg.id + '&fixes=true')).json() as Legs)[0];
+
+  console.log(legData);
+
 
   return {
     entrySettings,
     leg,
+    legData,
     // stats: {
     //   time: leg === null || leg.positions.length === 0 ? null : (leg.positions[leg.positions.length - 1].timestamp - leg.positions[0].timestamp) / 60 / 60,
     //   avgSpeed: speed,
