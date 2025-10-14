@@ -5,7 +5,7 @@ import { CalendarDate } from '@internationalized/date';
 import * as settings from '$lib/server/settings';
 import { redirect } from '@sveltejs/kit';
 import { pad } from '$lib/helpers';
-import type { Legs } from '$lib/components/map/deck/types.js';
+import { AirportSelect, type Airport, type Legs } from '$lib/components/map/deck/types.js';
 // import type { PageServerLoad } from './$types';
 // import type { PageData } from './$types';
 
@@ -448,6 +448,21 @@ export const load = async ({ parent, url, fetch }) => {
     }
   }
 
+  const airportsWithPriority = await prisma.airport.findMany({ where: { id: { in: airports.map((m) => m.id) }}, select: { ...AirportSelect, _count: { select: { legOrigin: true, legDestination: true, legDiversion: true } }} });
+
+  const visitedAirports: Airport[] = [];
+
+  for (const airport of airportsWithPriority) {
+    const numLegs = airport._count.legDestination + airport._count.legOrigin + airport._count.legDiversion;
+    if (numLegs === 0) continue;
+    visitedAirports.push({
+      id: airport.id,
+      latitude: airport.latitude,
+      longitude: airport.longitude,
+      priority: numLegs,
+    });
+  }
+
   return {
     lastTour,
     groundSpeed,
@@ -462,6 +477,7 @@ export const load = async ({ parent, url, fetch }) => {
     deckSegments,
     startAirport: await prisma.airport.findUnique({ where: { id: sets['tour.defaultStartApt'] } }),
     airports,
+    visitedAirports,
     operations,
     mostCommonAC: {
       time: maxTime,

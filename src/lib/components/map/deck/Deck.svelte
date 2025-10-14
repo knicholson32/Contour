@@ -11,6 +11,13 @@
   import type { Padding } from './types';
   import { useGlobeGlobal } from './components/states';
 
+
+  // TODO:
+  //  [ ] Consider using MabLibra (https://github.com/maplibre/maplibre-gl-js). Its vector based and may be able to
+  //      get us away from external map tile services
+  //  [ ] Use pathStyleExtension (https://deck.gl/docs/api-reference/extensions/path-style-extension) to add dashes
+  //      to certain lines (flight plan, uncertain, etc.)
+  //  [ ] Fix bug where hot-reload of data can disrupt picking layer stackup
   
   
   let element: HTMLDivElement | null = null;

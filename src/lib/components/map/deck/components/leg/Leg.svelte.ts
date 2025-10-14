@@ -3,6 +3,7 @@ import * as DeckTypes from "../../types";
 import { v4 as uuidv4 } from 'uuid';
 import { MapComponentContext, MapComponentRootState, type LayerModule } from "../../component.svelte";
 import { getDistanceFromLatLonInKm } from "$lib/helpers";
+import { PathStyleExtension } from "@deck.gl/extensions";
 
 export class LegLayer implements LayerModule {
   // Create a new map widget and assign context

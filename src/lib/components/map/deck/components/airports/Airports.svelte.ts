@@ -1,4 +1,4 @@
-import { IconLayer, Layer, TextLayer, type Color } from "deck.gl";
+import { GeoJsonLayer, IconLayer, Layer, TextLayer, type Color } from "deck.gl";
 import * as DeckTypes from "../../types";
 import { v4 as uuidv4 } from 'uuid';
 import { CollisionFilterExtension, type CollisionFilterExtensionProps } from "@deck.gl/extensions";
@@ -10,6 +10,7 @@ const HIGHLIGHT_TEXT: Color = [0, 0, 0, 255];
 
 const BG: Color = [0, 0, 0, 255];
 const TEXT: Color = [255, 255, 255, 255];
+const BORDER_COLOR: Color = [0, 0, 0];
 
 export class AirportLayer implements LayerModule {
   // Create a new map widget and assign context
@@ -148,7 +149,7 @@ export class AirportLayer implements LayerModule {
         id: this.id + '-icons-' + this.layerID,
         data: this.props.airports,
         visible: !this.props.hidden,
-        getColor: [255, 0, 255, 255],
+        // getColor: [255, 0, 255, 255],
         getIcon: (d) => 'marker',
         getPosition: (d) => [d.longitude, d.latitude],
         getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 20000], // TODO: This seems like a hack to get culling to work. @see https://deck.gl/docs/api-reference/core/layer#getpolygonoffset
@@ -174,7 +175,7 @@ export class AirportLayer implements LayerModule {
         getAlignmentBaseline: 'center',
         getTextAnchor: 'middle',
         background: true,
-        getCollisionPriority: this.getPriority,
+        getCollisionPriority: this.highlightSet.size === 0 ? (d) => d.priority ?? 0 : this.getPriority,
         updateTriggers: {
           // This tells deck.gl to recalculate radius when `year` changes
           getBackgroundColor: shallowUpdate,
@@ -183,8 +184,8 @@ export class AirportLayer implements LayerModule {
         },
         backgroundBorderRadius: 4,
         backgroundPadding: [3, 2],
-        getBackgroundColor: this.getBG,
-        getColor: this.getText,
+        getBackgroundColor: this.highlightSet.size === 0 ? BG : this.getBG,
+        getColor: this.highlightSet.size === 0 ? TEXT : this.getText,
         collisionTestProps: {
           sizeScale: 5,
           radiusScale: 1
@@ -193,11 +194,32 @@ export class AirportLayer implements LayerModule {
         fontFamily: 'Helvetica Neue, Arial, Helvetica, sans-serif',
         fontWeight: 'bold',
         getBorderWidth: this.root.usingDarkMode ? undefined : 1,
-        getBorderColor: this.root.usingDarkMode ? undefined : [0, 0, 0],
+        getBorderColor: this.root.usingDarkMode ? undefined : BORDER_COLOR,
         extensions: [new CollisionFilterExtension()],
       });
       this.layers.push(l);
     }
+
+    // this.layers.push(new GeoJsonLayer({
+    //   id: 'GeoJsonLayer',
+    //   data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson',
+
+    //   stroked: false,
+    //   filled: true,
+    //   pointType: 'circle+text',
+    //   pickable: true,
+
+    //   getFillColor: [160, 160, 180, 200],
+    //   // getLineColor: (f: Feature<Geometry, PropertiesType>) => {
+    //   //   const hex = f.properties.color;
+    //   //   // convert to RGB
+    //   //   return hex ? hex.match(/[0-9a-f]{2}/g).map(x => parseInt(x, 16)) : [0, 0, 0];
+    //   // },
+    //   getText: (f) => f.properties.iata_code,
+    //   getLineWidth: 20,
+    //   getPointRadius: 4,
+    //   getTextSize: 12
+    // }));
 
     this.root.updateLayer(this.id, this.layers);
   }

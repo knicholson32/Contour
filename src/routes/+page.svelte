@@ -462,7 +462,7 @@
           <Card.Root class="-mb-3 h-[calc(100vh-var(--nav-height)-2rem)] md:h-[calc(100vh-var(--nav-height)-3rem)] relative z-1 transition-all overflow-hidden">
             <Card.Content class="p-0 relative h-full flex">
               <Deck.Core padding={50}  >
-                <Deck.Airports airports={data.airports} highlight={airportHighlight}/>
+                <Deck.Airports airports={data.visitedAirports} highlight={airportHighlight}/>
                 <Deck.Legs legs={data.deckSegments} autoHighlight={true} pickable={true} onclick={(id: string) => { goto(`/entry/leg/${id}?active=form`)}}  >
                   <!-- onhover={(id) => {
                   if (id === null) airportHighlight = [];
