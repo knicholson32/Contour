@@ -471,6 +471,78 @@ export const load = async ({ fetch, params, parent, url }) => {
     return entry;
   }
 
+  const displayNewTotals = (id: string, colSpan: number): Entry => {
+    let entry: Entry = { colSpan: colSpan, text: '' };
+    if (id in summedData) {
+      switch (id) {
+        case 'asel':
+          entry.text = (summedData[id] + forwardedData_asel) === 0 ? '' : (summedData[id] + forwardedData_asel).toFixed(1);
+          return entry;
+        case 'amel':
+          entry.text = (summedData[id] + forwardedData_amel) === 0 ? '' : (summedData[id] + forwardedData_amel).toFixed(1);
+          return entry;
+        case 'sim-atd':
+          entry.text = (summedData[id] + forwardedData_sim_atd) === 0 ? '' : (summedData[id] + forwardedData_sim_atd).toFixed(1);
+          return entry;
+        case 'approaches':
+          entry.text = (summedData[id] + forwardedData_approaches) === 0 ? '' : (summedData[id] + forwardedData_approaches).toFixed(0);
+          return entry;
+        case 'holds':
+          entry.text = ((forwardedData._sum.holds ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.holds ?? 0) + summedData[id]).toFixed(0);
+          return entry;
+        case 'landings.all':
+          entry.text = ((forwardedData._sum.dayLandings ?? 0) + (forwardedData._sum.nightLandings ?? 0) + summedData[id]).toFixed(0);
+          if (entry.text === '0') entry.text = '';
+          return entry;
+        case 'landings.day':
+          entry.text = ((forwardedData._sum.dayLandings ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.dayLandings ?? 0) + summedData[id]).toFixed(0);
+          return entry;
+        case 'landings.night':
+          entry.text = ((forwardedData._sum.nightLandings ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.nightLandings ?? 0) + summedData[id]).toFixed(0);
+          return entry;
+        case 'total':
+          entry.text = ((forwardedData._sum.totalTime ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.totalTime ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'inst':
+          entry.text = ((forwardedData._sum.actualInstrument ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.actualInstrument ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'sim-inst':
+          entry.text = ((forwardedData._sum.simulatedInstrument ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.simulatedInstrument ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'xc':
+          entry.text = ((forwardedData._sum.xc ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.xc ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'xc-p2p':
+          entry.text = ((forwardedData._sum.xc ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.xc ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'night':
+          entry.text = ((forwardedData._sum.night ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.night ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'solo':
+          entry.text = ((forwardedData._sum.solo ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.solo ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'pic':
+          entry.text = ((forwardedData._sum.pic ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.pic ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'sic':
+          entry.text = ((forwardedData._sum.sic ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.sic ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'dual-recv':
+          entry.text = ((forwardedData._sum.dualReceived ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.dualReceived ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case 'dual-given':
+          entry.text = ((forwardedData._sum.dualGiven ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.dualGiven ?? 0) + summedData[id]).toFixed(1);
+          return entry;
+        case '':
+          return entry;
+        default:
+          throw new Error(`Unimplemented forwarded type: ${id}`)
+      }
+    }
+    return entry;
+  }
+
+
   const rows: Row[]  = [];
   let currentCol = 0;
   for (const entry of targetData) {
@@ -496,7 +568,8 @@ export const load = async ({ fetch, params, parent, url }) => {
   {
     // New total (forwarded + this page)
     let row: Row = [];
-    for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) row.push(displayTotals(dataColumnsOrdered[i], rawColSpans[i]));
+    for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) row.push(displayNewTotals(dataColumnsOrdered[i], rawColSpans[i])
+    );
     totalsRows.push(row);
   }
 
