@@ -18,6 +18,18 @@ RUN corepack enable
 # Install pnpm
 RUN pnpm fetch --prod
 
+# Install Google Chrome Stable and fonts
+# Note: this installs the necessary libs to make the browser work with Puppeteer.
+# RUN apt-get update && apt-get install curl gnupg -y \
+#   && curl --location --silent https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+#   && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+#   && apt-get update \
+#   && apt-get install google-chrome-stable -y --no-install-recommends \
+#   && rm -rf /var/lib/apt/lists/*
+RUN apk --update --upgrade add chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 ######### Node Modules & Build #####################################################################
 FROM ${PARENT_IMAGE} AS build
 ENV PNPM_HOME="/pnpm"
@@ -33,6 +45,8 @@ COPY ./ /app/
 # Install node modules
 RUN echo "---- INSTALL NODE MODULES ----" \
   && cd /app/ && pnpm i && pnpm exec prisma generate
+
+RUN apk --update --upgrade add chromium
 
 # Build the SvelteKit project
 RUN echo "---- BUILD SERVER ----" \
@@ -67,6 +81,8 @@ ENV ORIGIN="http://localhost:${SERVER_PORT}"
 # 11MB Max body size (for image uploads)
 ENV BODY_SIZE_LIMIT=11000000
 ENV PROC_SHELL='/bin/sh'
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Install pnpm
 RUN pnpm fetch --prod
@@ -74,6 +90,12 @@ RUN pnpm fetch --prod
 COPY --from=build "/app/prisma/" "/app/prisma"
 COPY --from=build "/app/package.json" "/app/package.json"
 COPY --from=build "/app/pnpm-lock.yaml" "/app/pnpm-lock.yaml"
+COPY --from=build "/app/pnpm-lock.yaml" "/app/pnpm-lock.yaml"
+# COPY --from=build "/usr/bin/chromium-browser" "/usr/bin/chromium-browser"
+# COPY --from=build "/usr/bin/chromium" "/usr/bin/chromium"
+
+# Install chromium
+RUN apk --update --upgrade add chromium
 
 # Install production node dependancies
 RUN echo "---- Install Production Dependancies ----" \

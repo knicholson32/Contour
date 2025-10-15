@@ -186,12 +186,13 @@ export const load = async ({ fetch, params, url }) => {
 
   const tzData = await fetchTZData();
 
+
   return {
     id: id,
     entrySettings,
     currentTour: tour,
     tourMap,
-    deckSegments: (await (await fetch('/api/legs?' + tourMap?.ids.map((id) => 'id=' + id).join('&') + '&filterDuplicates=false')).json() as Legs),
+    deckSegments: (tourMap === null || tourMap.ids.length) === 0 ? ([] as Legs) : (await (await fetch('/api/legs?' + tourMap?.ids.map((id) => 'id=' + id).join('&') + '&filterDuplicates=false')).json() as Legs),
     stats,
     tourSettings,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[],
