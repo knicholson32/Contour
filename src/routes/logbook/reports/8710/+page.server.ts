@@ -471,31 +471,6 @@ const getClassHours = async () => {
 }
 
 export const load = async ({ fetch, params, parent, url }) => {
-
-  // TODO: Remove this auto-mod after it has been ran for the databases in the field
-  const mx = await settings.get('entry.entryMXMode');
-  if (mx) {
-    const soloLegs = await prisma.leg.findMany({ where: { solo: { gt: 0 } }, select: { id: true, solo: true, totalTime: true } });
-    for (const leg of soloLegs) {
-      if (leg.solo > leg.totalTime) {
-        await prisma.leg.update({ where: { id: leg.id }, data: { solo: leg.totalTime }});
-      }
-    }
-
-    await prisma.aircraft.updateMany({
-      where: {
-        AND: [
-          { simulator: true },
-          { simulatorType: null }
-        ]
-      },
-      data: {
-        simulatorType: 'ATD'
-      }
-    });
-
-  }
-
   const name = await settings.get('general.name');
 
   return {

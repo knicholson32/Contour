@@ -148,18 +148,3 @@ export const getFlights = async (options: GetFlightsOptions): Promise<Types.Leg[
         }
     });
 }
-
-/**
- * Delete a leg based on the flight ID
- * @param id the leg to delete
- * @returns whether or not the leg was deleted
- */
-export const deleteFlight = async (id: string): Promise<boolean> => {
-    try {
-        await prisma.leg.delete({ where: { id } });
-        // await Groups.clean();
-        return true;
-    } catch (e) {
-        return false;
-    }
-}

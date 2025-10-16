@@ -13,6 +13,7 @@ import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type * as Types from '@prisma/client';
 import { fetchLegsForSideMenu } from '$lib/server/lib/leg';
 import type { Types as DeckTypes } from '$lib/components/map/deck';
+import { incrementDataVersion } from '$lib/server/pdf';
 
 // TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
@@ -557,6 +558,9 @@ export const actions = {
         console.log('ERROR: Failed to parse approach', e);
       }
 
+      // Increment the data version (don't await it, this takes a while);
+      incrementDataVersion();
+
       return API.Form.formSuccess('?/default');
 
     } catch (e) {
@@ -585,6 +589,9 @@ export const actions = {
       console.log(e);
       return API.Form.formFailure('?/delete', '*', 'Could not delete');
     }
+
+    // Increment the data version (don't await it, this takes a while);
+    incrementDataVersion();
 
     const u = new URLSearchParams(url.search);
     u.delete('/delete');
@@ -632,6 +639,9 @@ export const actions = {
 
       // If the leg was assigned to a day, update that day's deadheads
       if (currentLeg.dayId !== null) await generateDeadheads(currentLeg.dayId);
+
+      // Increment the data version (don't await it, this takes a while);
+      incrementDataVersion();
 
       // Done!
       return API.Form.formSuccess('?/modifyDutyDay');

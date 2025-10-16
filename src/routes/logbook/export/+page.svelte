@@ -1,6 +1,7 @@
 <script lang="ts">
   import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   import { Button } from "$lib/components/ui/button";
+    import { forceShow } from "@unovis/ts/components/sankey/style";
   import { Download, Funnel, FileText } from "lucide-svelte";
 
   interface Props {
@@ -9,8 +10,9 @@
 
   let { data }: Props = $props();
 
-  let startDate = $state(data.defaultRange.start ?? "");
-  let endDate = $state(data.defaultRange.end ?? "");
+  let startDate = $state("");
+  let endDate = $state("");
+  let forceGenerate = $state(false);
   let aircraftSearch = $state("");
   let airportSearch = $state("");
   let selectedAircraft = $state<string[]>([]);
@@ -42,6 +44,7 @@
     if (endDate && endDate.length > 0) params.set('end', endDate);
     for (const id of selectedAircraft) params.append('aircraft', id);
     for (const id of selectedAirports) params.append('airport', id);
+    if (forceGenerate) params.append('generate', 'true');
     const query = params.toString();
     return query.length > 0 ? `${path}?${query}` : path;
   };
@@ -264,14 +267,25 @@
         {/if}
       </div>
       <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 justify-end">
+        <label class="flex items-start gap-3 px-3 py-2 text-sm rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800/70">
+          <span class="leading-relaxed">
+            <span class="font-medium text-zinc-800 dark:text-zinc-100">Force Generate</span>
+          </span>
+          <input
+            type="checkbox"
+            name="forceGenerate"
+            bind:checked={forceGenerate}
+            class="mt-1 h-4 w-4 rounded border border-zinc-400 text-sky-600 focus:ring-sky-500"
+          />
+        </label>
         <Button variant="outline" onclick={resetFilters}>
           Clear all
         </Button>
-        <Button href={pdfUrl} target="_blank" rel="noopener noreferrer">
+        <Button href={pdfUrl} download="export" rel="noopener noreferrer">
           <FileText class="size-4" />
           Download PDF
         </Button>
-        <Button href={excelUrl} target="_blank" rel="noopener noreferrer">
+        <Button href={excelUrl} download="export"  rel="noopener noreferrer">
           <Download class="size-4" />
           Download Excel
         </Button>

@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
 import { generateAirportList, isNightOperation } from '$lib/server/helpers';
+import { incrementDataVersion } from '$lib/server/pdf';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -576,6 +577,9 @@ export const actions = {
       console.log(e);
       return API.Form.formFailure('?/default', '*', 'Could not create leg');
     }
+
+    // Increment the data version (don't await it, this takes a while);
+    incrementDataVersion();
 
     // return API.Form.formSuccess('?/default');
 

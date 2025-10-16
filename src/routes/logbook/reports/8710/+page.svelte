@@ -65,11 +65,11 @@
           Print 8710 (landscape only) <span class="transition-padding group-hover:pl-1" aria-hidden="true">&rarr;</span>
         </button> -->
         <div class="uppercase font-light text-xs hidden sm:block">Full Logbook:</div>
-        <Button href="/logbook/export/pdf" target="_blank" rel="noopener noreferrer">
+        <Button href="/logbook/export/pdf" rel="noopener noreferrer" download="export">
           <FileText class="size-4" />
           Download PDF
         </Button>
-        <Button href="/logbook/export/excel" target="_blank" rel="noopener noreferrer">
+        <Button href="/logbook/export/excel" rel="noopener noreferrer" download="export">
           <FileSpreadsheet class="size-4" />
           Download Excel
         </Button>

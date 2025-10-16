@@ -33,11 +33,11 @@ export type ExportFilters = {
   where: Prisma.LegWhereInput;
 };
 
-export const parseFiltersFromUrl = (url: URL): ExportFilters => {
-  const startParam = url.searchParams.get('start');
-  const endParam = url.searchParams.get('end');
-  const aircraftIds = url.searchParams.getAll('aircraft').filter(Boolean);
-  const airportIds = url.searchParams.getAll('airport').filter(Boolean);
+export const parseFiltersFromUrl = (params: URLSearchParams): ExportFilters => {
+  const startParam = params.get('start');
+  const endParam = params.get('end');
+  const aircraftIds = params.getAll('aircraft').filter(Boolean);
+  const airportIds = params.getAll('airport').filter(Boolean);
 
   const where: Prisma.LegWhereInput = {};
 

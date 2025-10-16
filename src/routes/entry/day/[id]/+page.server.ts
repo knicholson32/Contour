@@ -9,6 +9,7 @@ import { generateDeadheads } from '$lib/server/db/deadhead';
 import { filterOutliers, generateAirportList } from '$lib/server/helpers';
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type { Types as DeckTypes } from '$lib/components/map/deck';
+import { incrementDataVersion } from '$lib/server/pdf';
 
 const AVG_FILTER_NUM = 2;
 
@@ -408,6 +409,10 @@ export const actions = {
       console.log(e);
       return API.Form.formFailure('?/update', '*', 'Error updating duty day');
     }
+
+    // Increment the data version (don't await it, this takes a while);
+    incrementDataVersion();
+
     return API.Form.formSuccess('?/update');
   },
 

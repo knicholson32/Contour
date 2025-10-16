@@ -12,7 +12,7 @@ import {
 } from '../../../../lib/components/routeSpecific/pdf/utils.server.js';
 
 export const GET: RequestHandler = async ({ url }) => {
-  const filters = parseFiltersFromUrl(url);
+  const filters = parseFiltersFromUrl(url.searchParams);
   const legs = await fetchExportLegs(filters);
   const { aircraftMeta, airportMeta } = await fetchFilterMetadata(filters);
 
