@@ -108,7 +108,14 @@
                 </div>
               </td>
               <td>{formatAirport(leg.originAirport)}</td>
-              <td>{formatAirport(leg.destinationAirport)}</td>
+              {#if leg.diversionAirport === null}
+                <td>{formatAirport(leg.destinationAirport)}</td>
+              {:else}
+                <td>
+                  <span style="  text-decoration: line-through;">{formatAirport(leg.destinationAirport)}</span>
+                  <span>{formatAirport(leg.diversionAirport)}</span>
+                </td>
+              {/if}
               <td>{leg.totalTime.toFixed(1)}</td>
               <td>{leg.pic === 0 ? '' : leg.pic.toFixed(1)}</td>
               <td>{leg.sic === 0 ? '' : leg.sic.toFixed(1)}</td>

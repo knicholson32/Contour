@@ -86,20 +86,20 @@ Contour uses [`prisma`](https://www.prisma.io/) for database (`sqlite`) access a
 
 ```shell
 # Check the prisma format
-npx prisma format
+pnpm exec prisma format
 
 # Push the changes to the DB. This may delete DB data.
-npx prisma db push
+pnpm exec prisma db push
 ```
 
 ### Before committing / building the prod container
 
 ```shell
 # Check the prisma format
-npx prisma format
+pnpm exec prisma format
 
 # Create a migration & push the changes to the DB
-npx prisma migrate dev --name v0.0.0 # Changes this version
+pnpm exec prisma migrate dev --name v0.0.0 # Changes this version
 
 # Check the resulting migration file in `/prisma/migrations` to make sure it will do what is expected during the migration
 ```
