@@ -4,10 +4,12 @@
   import { Prisma } from "@prisma/client";
   import { SwitchSmall } from "$lib/components/ui/switchSmall";
   import { cn } from "$lib/utils.js";
-    import { onMount } from "svelte";
-    import type { API } from "$lib/types";
-    import { TicketX } from "lucide-svelte";
-    import type { TimeZone } from "@vvo/tzdb";
+  import { onMount } from "svelte";
+  import type { API } from "$lib/types";
+  import { TicketX } from "lucide-svelte";
+  import type { TimeZone } from "@vvo/tzdb";
+  import { Button } from "../ui/button";
+  import { ArrowUpRight } from "lucide-svelte";
 
   const DAY_AND_WIDTH = 86400 / 6;
 
@@ -149,5 +151,11 @@
     </div>
   </div>
 {:else}
-  No Days - TODO: Add something here?
+  <div class="w-full h-full flex flex-row gap-4 items-center justify-center relative">
+    <p class="font-thin">This tour has no days</p>
+    <Button href={`/entry/day/new?tour=${tour.id}`} rel="noopener noreferrer" class="absolute right-5">
+      Add days
+      <ArrowUpRight class="w-4 h-4"></ArrowUpRight>
+    </Button>
+  </div>
 {/if}

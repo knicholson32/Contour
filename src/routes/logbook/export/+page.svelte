@@ -1,7 +1,7 @@
 <script lang="ts">
   import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   import { Button } from "$lib/components/ui/button";
-  import { Download, Filter } from "lucide-svelte";
+  import { Download, Funnel, FileText } from "lucide-svelte";
 
   interface Props {
     data: import('./$types').PageData;
@@ -36,15 +36,18 @@
     data.airports.filter((entry) => selectedAirports.includes(entry.id))
   );
 
-  let downloadUrl = $derived.by(() => {
+  const buildExportUrl = (path: string) => {
     const params = new URLSearchParams();
     if (startDate && startDate.length > 0) params.set('start', startDate);
     if (endDate && endDate.length > 0) params.set('end', endDate);
     for (const id of selectedAircraft) params.append('aircraft', id);
     for (const id of selectedAirports) params.append('airport', id);
     const query = params.toString();
-    return query.length > 0 ? `/logbook/export/excel?${query}` : '/logbook/export/excel';
-  });
+    return query.length > 0 ? `${path}?${query}` : path;
+  };
+
+  let excelUrl = $derived.by(() => buildExportUrl('/logbook/export/excel'));
+  let pdfUrl = $derived.by(() => buildExportUrl('/logbook/export/pdf'));
 
   let hasFilters = $derived(
     (startDate && startDate !== (data.defaultRange.start ?? "")) ||
@@ -77,7 +80,7 @@
 
     <section class="flex flex-wrap items-center gap-3">
       <div class="inline-flex items-center gap-2 rounded-full bg-sky-50 dark:bg-sky-900/20 px-3 py-1 text-xs font-medium text-sky-700 dark:text-sky-200">
-        <Filter class="size-3.5" />
+        <Funnel class="size-3.5" />
         {#if hasFilters}
           <span>Custom filters active</span>
         {:else}
@@ -85,14 +88,14 @@
         {/if}
       </div>
       {#if hasFilters}
-        <Button variant="ghost" size="sm" onclick={resetFilters}>
+        <Button variant="ghost" size="sm" class="-my-2" onclick={resetFilters}>
           Reset filters
         </Button>
       {/if}
     </section>
 
     <section class="space-y-6">
-      <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 shadow-sm backdrop-blur">
+      <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur">
         <div class="p-5 space-y-4">
           <div>
             <h2 class="text-lg font-semibold">Date range</h2>
@@ -123,7 +126,7 @@
         </div>
       </div>
 
-      <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 shadow-sm backdrop-blur">
+      <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur">
         <div class="p-5 space-y-4">
           <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -174,7 +177,7 @@
                     <button
                       type="button"
                       class="ml-1 text-xs text-sky-600 hover:text-sky-800 dark:text-sky-200 dark:hover:text-sky-100"
-                      on:click={() => selectedAircraft = selectedAircraft.filter((id) => id !== aircraft.id)}
+                      onclick={() => selectedAircraft = selectedAircraft.filter((id) => id !== aircraft.id)}
                     >
                       ✕
                     </button>
@@ -186,7 +189,7 @@
         </div>
       </div>
 
-      <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 shadow-sm backdrop-blur">
+      <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur">
         <div class="p-5 space-y-4">
           <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -239,7 +242,7 @@
                     <button
                       type="button"
                       class="ml-1 text-xs text-amber-600 hover:text-amber-800 dark:text-amber-200 dark:hover:text-amber-100"
-                      on:click={() => selectedAirports = selectedAirports.filter((id) => id !== airport.id)}
+                      onclick={() => selectedAirports = selectedAirports.filter((id) => id !== airport.id)}
                     >
                       ✕
                     </button>
@@ -260,11 +263,15 @@
           Ready to export entire logbook.
         {/if}
       </div>
-      <div class="flex flex-wrap gap-2 justify-end">
+      <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 justify-end">
         <Button variant="outline" onclick={resetFilters}>
           Clear all
         </Button>
-        <Button href={downloadUrl} target="_blank" rel="noopener noreferrer">
+        <Button href={pdfUrl} target="_blank" rel="noopener noreferrer">
+          <FileText class="size-4" />
+          Download PDF
+        </Button>
+        <Button href={excelUrl} target="_blank" rel="noopener noreferrer">
           <Download class="size-4" />
           Download Excel
         </Button>

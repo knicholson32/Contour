@@ -16,7 +16,7 @@ services:
 
     stop_signal: SIGKILL
     working_dir: /app
-    command: sh -c "pnpm i && pnpx prisma generate && pnpm run build && pnpm run preview --host"
+    command: sh -c "pnpm i && pnpx prisma generate && pnpm exec puppeteer browsers install chrome && pnpm run build && pnpm run preview --host"
     init: true
     ports:
       - 5173:5173

@@ -22,6 +22,8 @@ export const load = async ({ parent, fetch, url }) => {
     parentImage: process.env.PARENT_IMAGE ?? 'None',
     svelteVersion: getPackageVersion('svelte'),
     prismaVersion: getPackageVersion('prisma'),
+    puppeteerVersion: getPackageVersion('puppeteer'),
+    chromiumVersion: process.env.CHROMIUM_VERSION ?? 'Unknown',
     buildTime: process.env.BUILD_TIMESTAMP,
     startAirport: await prisma.airport.findUnique({ where: { id: set['tour.defaultStartApt'] } })
   }

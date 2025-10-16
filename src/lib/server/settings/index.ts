@@ -11,6 +11,7 @@ export const TypeNames = {
 	'entry.day.entry.fa_id': '',
 	'entry.day.entry.fa_link': '',
 	'entry.flight_id.last': '',
+	'entry.dataVersion': 0,
 	'entry.day.current': -1,
 	'entry.defaultFlightID': 'EJA',
 	'entry.entryMXMode': false,
@@ -49,6 +50,7 @@ export type ObjectType<T extends TypeName> =
 	T extends 'entry.defaultFlightID' ? string : 	// String
 	T extends 'entry.defaultStartApt' ? string : 	// String
 	T extends 'entry.entryMXMode' ? boolean : // Boolean
+	T extends 'entry.dataVersion' ? number : 			// Integer
 	T extends 'system.debug' ? number : 					// Integer
 	T extends 'system.lastSeenCommit' ? string :  // String
 	T extends 'data.approaches.lastSync' ? number :	// Integer
@@ -103,6 +105,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			// Integer Conversion ------------------------------------------------------------------------
 			case 'entry.tour.current':
 			case 'entry.day.current':
+			case 'entry.dataVersion':
 			case 'system.debug':
 			case 'data.approaches.lastSync':
 			case 'data.aircraftReg.lastSync':

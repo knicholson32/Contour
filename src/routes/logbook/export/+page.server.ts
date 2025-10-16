@@ -1,12 +1,6 @@
+import { toDateString } from '$lib/components/routeSpecific/pdf/utils.format';
 import prisma from '$lib/server/prisma';
 import type { PageServerLoad } from './$types';
-
-const toDateString = (unixSeconds: number | null | undefined) => {
-  if (!unixSeconds) return null;
-  const date = new Date(unixSeconds * 1000);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString().slice(0, 10);
-};
 
 export const load = (async () => {
   const [dateAgg, totalLegs, aircraftRecords, originIds, destinationIds, diversionIds] = await Promise.all([

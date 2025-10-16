@@ -1,0 +1,123 @@
+.document {
+  width: 11in;
+  height: 8in;
+  padding-left: 0.25in;
+  padding-right: 0.25in;
+  margin: 0;
+}
+
+.document__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.document__timestamp {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: #52606d;
+}
+
+.document__name {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: #52606d;
+  font-weight: bold;
+}
+
+.document__filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(max-content, 1fr));
+  gap: 6px 16px;
+  font-size: 0.8rem;
+}
+
+.document__filters .label {
+  font-weight: 600;
+  color: #334155;
+  margin-right: 6px;
+}
+
+.logbook-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  table-layout: fixed;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+}
+
+.logbook-table th,
+.logbook-table td {
+  border: 1px solid #e2e8f0;
+  padding: 6px 8px;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.logbook-table thead th {
+  background: #f1f5f9;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.50rem;
+  color: #334155;
+}
+
+.logbook-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stacked .primary {
+  font-weight: 600;
+}
+
+.stacked .secondary {
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.notes-cell {
+  /* max-width: 220px; */
+  font-size: 0.55rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 32px 0;
+  color: #64748b;
+  font-style: italic;
+}
+
+.document__footer {
+  margin-top: 16px;
+  font-size: 0.7rem;
+  color: #64748b;
+  text-align: right;
+}
+
+body {
+  print-color-adjust: exact;
+  margin: 0;
+}
+
+@page {
+  size: 11in 8.5in;
+  margin-left: 0in;
+  margin-right: 0in;
+  margin-top: 0.25in;
+  margin-bottom: 0.25in;
+}

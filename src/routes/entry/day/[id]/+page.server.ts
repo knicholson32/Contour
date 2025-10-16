@@ -289,9 +289,6 @@ export const actions = {
     if (currentDay === null) redirect(302, `/entry/day/new?${url.searchParams.toString()}`);
 
     const data = await request.formData();
-    for (const key of data.keys()) {
-      console.log(key, data.getAll(key));
-    }
 
 
     let startAirport = data.get('start-airport') as null | string;

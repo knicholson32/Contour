@@ -1,144 +1,20 @@
 import ExcelJS from 'exceljs';
-import prisma from '$lib/server/prisma';
-import type { Prisma } from '@prisma/client';
 import type { RequestHandler } from './$types';
-
-const toUnixStart = (date: string) => {
-  const parsed = new Date(`${date}T00:00:00Z`);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return Math.floor(parsed.getTime() / 1000);
-};
-
-const toUnixEnd = (date: string) => {
-  const parsed = new Date(`${date}T23:59:59.999Z`);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return Math.floor(parsed.getTime() / 1000);
-};
-
-const toISODate = (unixSeconds: number | null | undefined) => {
-  if (!unixSeconds) return '';
-  const date = new Date(unixSeconds * 1000);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toISOString().slice(0, 10);
-};
-
-const formatAirport = (airport: { id: string; name: string | null } | null) => {
-  if (!airport) return '';
-  if (airport.name && airport.name.trim().length > 0) return `${airport.id} · ${airport.name}`;
-  return airport.id;
-};
-
-const formatApproaches = (approaches: { type: string; runway: string | null; airportId: string; notes: string | null }[]) => {
-  if (approaches.length === 0) return '';
-  return approaches
-    .map((approach) => {
-      const runway = approach.runway ? ` RWY ${approach.runway}` : '';
-      const notes = approach.notes ? ` (${approach.notes})` : '';
-      return `${approach.type} @ ${approach.airportId}${runway}${notes}`;
-    })
-    .join(' | ');
-};
-
-const hours = (value: number) => (value === null || value === undefined ? 0 : Number.parseFloat(value.toFixed(2)));
-
-const describeAircraft = (record: {
-  registration: string;
-  type: { make: string; model: string; typeCode: string } | null;
-}) => {
-  if (!record.type) return record.registration;
-  return `${record.registration} · ${record.type.make} ${record.type.model} (${record.type.typeCode})`;
-};
+import {
+  fetchExportLegs,
+  fetchFilterMetadata,
+  parseFiltersFromUrl,
+  describeAircraft,
+  formatAirport,
+  formatApproaches,
+  hours,
+  toISODate
+} from '../../../../lib/components/routeSpecific/pdf/utils.server.js';
 
 export const GET: RequestHandler = async ({ url }) => {
-  const startParam = url.searchParams.get('start');
-  const endParam = url.searchParams.get('end');
-  const aircraftFilters = url.searchParams.getAll('aircraft').filter(Boolean);
-  const airportFilters = url.searchParams.getAll('airport').filter(Boolean);
-
-  const where: Prisma.LegWhereInput = {};
-
-  if (startParam || endParam) {
-    const dateFilter: Prisma.IntFilter = {};
-    if (startParam) {
-      const unix = toUnixStart(startParam);
-      if (unix !== null) dateFilter.gte = unix;
-    }
-    if (endParam) {
-      const unix = toUnixEnd(endParam);
-      if (unix !== null) dateFilter.lte = unix;
-    }
-    if (Object.keys(dateFilter).length > 0) where.startTime_utc = dateFilter;
-  }
-
-  if (aircraftFilters.length > 0) {
-    where.aircraftId = { in: aircraftFilters };
-  }
-
-  if (airportFilters.length > 0) {
-    where.OR = [
-      { originAirportId: { in: airportFilters } },
-      { destinationAirportId: { in: airportFilters } },
-      { diversionAirportId: { in: airportFilters } }
-    ];
-  }
-
-  const aircraftMetaPromise =
-    aircraftFilters.length > 0
-      ? prisma.aircraft.findMany({
-          where: { id: { in: aircraftFilters } },
-          select: {
-            id: true,
-            registration: true,
-            type: {
-              select: {
-                make: true,
-                model: true,
-                typeCode: true
-              }
-            }
-          }
-        })
-      : Promise.resolve([] as {
-          id: string;
-          registration: string;
-          type: { make: string; model: string; typeCode: string } | null;
-        }[]);
-
-  const airportMetaPromise =
-    airportFilters.length > 0
-      ? prisma.airport.findMany({
-          where: { id: { in: airportFilters } },
-          select: { id: true, name: true }
-        })
-      : Promise.resolve([] as { id: string; name: string | null }[]);
-
-  const [aircraftMeta, airportMeta] = await Promise.all([aircraftMetaPromise, airportMetaPromise]);
-
-  const legs = await prisma.leg.findMany({
-    where,
-    orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
-    include: {
-      aircraft: {
-        select: {
-          registration: true,
-          simulator: true,
-          type: {
-            select: {
-              make: true,
-              model: true,
-              typeCode: true
-            }
-          }
-        }
-      },
-      originAirport: { select: { id: true, name: true } },
-      destinationAirport: { select: { id: true, name: true } },
-      diversionAirport: { select: { id: true, name: true } },
-      approaches: {
-        select: { type: true, runway: true, airportId: true, notes: true }
-      }
-    }
-  });
+  const filters = parseFiltersFromUrl(url);
+  const legs = await fetchExportLegs(filters);
+  const { aircraftMeta, airportMeta } = await fetchFilterMetadata(filters);
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'Contour';
@@ -214,12 +90,12 @@ export const GET: RequestHandler = async ({ url }) => {
 
   const infoRows: { setting: string; value: string }[] = [
     { setting: 'Generated At', value: new Date().toISOString() },
-    { setting: 'Start Date', value: startParam ?? 'Not limited' },
-    { setting: 'End Date', value: endParam ?? 'Not limited' },
+    { setting: 'Start Date', value: filters.start ?? 'Not limited' },
+    { setting: 'End Date', value: filters.end ?? 'Not limited' },
     {
       setting: 'Aircraft Filter',
       value:
-        aircraftFilters.length > 0
+        filters.aircraftIds.length > 0
           ? aircraftMeta.length > 0
             ? aircraftMeta.map(describeAircraft).join(', ')
             : 'No matching aircraft for provided IDs'
@@ -228,7 +104,7 @@ export const GET: RequestHandler = async ({ url }) => {
     {
       setting: 'Airport Filter',
       value:
-        airportFilters.length > 0
+        filters.airportIds.length > 0
           ? airportMeta.length > 0
             ? airportMeta.map((airport) => formatAirport(airport)).join(', ')
             : 'No matching airports for provided IDs'

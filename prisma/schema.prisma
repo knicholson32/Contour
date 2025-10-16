@@ -305,6 +305,19 @@ model Leg {
   @@map("legs")
 }
 
+model Export {
+  id String @id
+  dataSourceVersion Int
+  params String
+  file String
+  
+  generated_utc Int
+
+  @@unique([dataSourceVersion, params])
+
+  @@map("exports")
+}
+
 model LegImage {
   id    String @id
   image Image  @relation(fields: [id], references: [id])
