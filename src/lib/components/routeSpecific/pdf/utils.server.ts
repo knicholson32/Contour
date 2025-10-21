@@ -12,7 +12,8 @@ const legInclude = {
         select: {
           make: true,
           model: true,
-          typeCode: true
+          typeCode: true,
+          catClass: true
         }
       }
     }

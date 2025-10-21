@@ -1,4 +1,4 @@
-import ExcelJS from 'exceljs';
+import ExcelJS, { type Alignment } from 'exceljs';
 import type { RequestHandler } from './$types';
 import {
   fetchExportLegs,
@@ -9,7 +9,7 @@ import {
   formatApproaches,
   hours,
   toISODate
-} from '../../../../lib/components/routeSpecific/pdf/utils.server.js';
+} from '$lib/components/routeSpecific/pdf/utils.server.js';
 
 export const GET: RequestHandler = async ({ url }) => {
   const filters = parseFiltersFromUrl(url.searchParams);
@@ -21,49 +21,103 @@ export const GET: RequestHandler = async ({ url }) => {
   workbook.created = new Date();
 
   const sheet = workbook.addWorksheet('Logbook', {
-    views: [{ state: 'frozen', ySplit: 1 }]
+    views: [{ state: 'frozen', ySplit: 2 }]
   });
 
-  sheet.columns = [
+  const centerStyle = { alignment: { horizontal: 'center' } };
+
+  const columns = [
     { header: 'Date', key: 'date', width: 12 },
-    { header: 'Aircraft', key: 'aircraft', width: 14 },
-    { header: 'Aircraft Type', key: 'aircraftType', width: 24 },
-    { header: 'Simulator', key: 'simulator', width: 12 },
-    { header: 'From', key: 'from', width: 10 },
-    { header: 'To', key: 'to', width: 10 },
-    { header: 'Diversion', key: 'diversion', width: 12 },
-    { header: 'Route', key: 'route', width: 28 },
-    { header: 'Total Time', key: 'totalTime', width: 12, style: { numFmt: '0.00' } },
-    { header: 'PIC', key: 'pic', width: 10, style: { numFmt: '0.00' } },
-    { header: 'SIC', key: 'sic', width: 10, style: { numFmt: '0.00' } },
-    { header: 'Night', key: 'night', width: 10, style: { numFmt: '0.00' } },
-    { header: 'XC', key: 'xc', width: 10, style: { numFmt: '0.00' } },
-    { header: 'Solo', key: 'solo', width: 10, style: { numFmt: '0.00' } },
-    { header: 'Sim Instrument', key: 'simInstrument', width: 14, style: { numFmt: '0.00' } },
-    { header: 'Actual Instrument', key: 'actInstrument', width: 16, style: { numFmt: '0.00' } },
-    { header: 'Dual Given', key: 'dualGiven', width: 12, style: { numFmt: '0.00' } },
-    { header: 'Dual Received', key: 'dualReceived', width: 14, style: { numFmt: '0.00' } },
-    { header: 'Day Landings', key: 'dayLandings', width: 14, style: { numFmt: '0' } },
-    { header: 'Night Landings', key: 'nightLandings', width: 16, style: { numFmt: '0' } },
-    { header: 'Holds', key: 'holds', width: 10, style: { numFmt: '0' } },
-    { header: 'Approaches', key: 'approaches', width: 36 },
-    { header: 'Passengers', key: 'passengers', width: 12, style: { numFmt: '0' } },
-    { header: 'Notes', key: 'notes', width: 40 }
+    { header: 'Reg.', key: 'aircraft', width: 8 },
+    { header: 'Type Code', key: 'aircraftTypeCode', width: 12 },
+    { header: 'Type Name', key: 'aircraftTypeName', width: 20 },
+    { header: 'Sim', key: 'simulator', width: 6, style: centerStyle },
+    { header: 'From', key: 'from', width: 8 },
+    { header: 'Route', key: 'route', width: 10 },
+    { header: 'To', key: 'to', width: 8 },
+    { header: 'Diversion', key: 'diversion', width: 8 },
+    { header: 'Total Time', key: 'totalTime', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'ASEL', key: 'asel', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'AMEL', key: 'amel', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'PIC', key: 'pic', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'SIC', key: 'sic', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'Night', key: 'night', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'XC', key: 'xc', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'Solo', key: 'solo', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'Simulated', key: 'simInstrument', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'Actual', key: 'actInstrument', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'Holds', key: 'holds', width: 6, style: { numFmt: '0', alignment: { horizontal: 'center' } } },
+    { header: 'Approaches', key: 'approaches', width: 24 },
+    { header: 'Given', key: 'dualGiven', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'Received', key: 'dualReceived', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'Day', key: 'dayLandings', width: 6, style: { numFmt: '0', alignment: { horizontal: 'center' } } },
+    { header: 'Night', key: 'nightLandings', width: 6, style: { numFmt: '0', alignment: { horizontal: 'center' } } },
+    { header: 'Passengers', key: 'passengers', width: 10, style: { numFmt: '0' } },
+    { header: 'Notes', key: 'notes', width: 50 }
   ];
+
+  sheet.columns = columns;
+
+  sheet.insertRow(0, '');
+
+  const mergeGroups = [
+    { title: 'Aircraft', keys: ['aircraft', 'aircraftTypeCode', 'aircraftTypeName', 'simulator'] },
+    { title: 'Route of Flight', keys: ['from', 'route', 'to', 'diversion'] },
+    { title: 'Cat / Class', keys: ['asel', 'amel'] },
+    { title: 'Instrument', keys: ['simInstrument', 'actInstrument', 'approaches', 'holds'] },
+    { title: 'Dual', keys: ['dualGiven', 'dualReceived'] },
+    { title: 'Landings', keys: ['dayLandings', 'nightLandings'] },
+  ];
+
+  let columnKeys = columns.map((c) => c.key);
+  let mergedColumns: string[] = [];
+
+  for (const group of mergeGroups) {
+    if (group.keys.length === 0) throw new Error(`Invalid group designation: ${JSON.stringify(group)}: 'keys' cannot be empty.`)
+
+    const i = columns.findIndex((c) => c.key === group.keys[0]);
+    if (i === -1) throw new Error(`Invalid group designation: ${JSON.stringify(group)}: Cannot find '${group.keys[0]}'.`)
+    if (i + group.keys.length >= columns.length) throw new Error(`Invalid group designation: ${JSON.stringify(group)}: Column overrun would occur, based on location of '${group.keys[0]}'.`)
+    for (let j = i; j < group.keys.length + i; j++) if (!group.keys.includes(columns[j].key)) throw new Error(`Invalid group designation: ${JSON.stringify(group)}: All keys must be consecutive columns. Found: '${columns[j].key}'`);
+    const j = i + group.keys.length - 1;
+
+    // Created a merged title
+
+    console.log(group, i + 1, j + 1);
+
+    sheet.mergeCells(1, i + 1, 1, j + 1);
+    const cell = sheet.getCell(1, i+1);
+    cell.value = group.title;
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    for (const key of group.keys) mergedColumns.push(key);
+  }
+
+  for (const key of columnKeys) {
+    if (mergedColumns.includes(key)) continue;
+    const i = columns.findIndex((c) => c.key === key);
+    sheet.mergeCells(2, i+1, 1, i+1);
+    const cell = sheet.getCell(1, i+1);
+    cell.value = columns[i].header;
+    cell.alignment = { ...columns[i].style?.alignment, vertical: 'middle' } as Partial<Alignment>;
+  }
+  
+  // sheet.unMergeCells(7, 1, 10, 2);
 
   sheet.addRows(
     legs.map((leg) => ({
       date: toISODate(leg.startTime_utc),
       aircraft: leg.aircraft?.registration ?? '',
-      aircraftType: leg.aircraft?.type
-        ? `${leg.aircraft.type.make} ${leg.aircraft.type.model} (${leg.aircraft.type.typeCode})`
-        : '',
+      aircraftTypeCode: leg.aircraft?.type ? leg.aircraft.type.typeCode : '',
+      aircraftTypeName: leg.aircraft?.type ? `${leg.aircraft.type.make} ${leg.aircraft.type.model}` : '',
       simulator: leg.aircraft?.simulator ? 'Yes' : 'No',
       from: formatAirport(leg.originAirport),
       to: formatAirport(leg.destinationAirport),
       diversion: formatAirport(leg.diversionAirport),
       route: leg.route ?? '',
       totalTime: hours(leg.totalTime),
+      asel: hours(leg.aircraft.type.catClass === 'ASEL' ? leg.totalTime : 0),
+      amel: hours(leg.aircraft.type.catClass === 'AMEL' ? leg.totalTime : 0),
       pic: hours(leg.pic),
       sic: hours(leg.sic),
       night: hours(leg.night),
@@ -71,12 +125,12 @@ export const GET: RequestHandler = async ({ url }) => {
       solo: hours(leg.solo),
       simInstrument: hours(leg.simulatedInstrument),
       actInstrument: hours(leg.actualInstrument),
+      holds: leg.holds ?? 0,
+      approaches: formatApproaches(leg.approaches),
       dualGiven: hours(leg.dualGiven),
       dualReceived: hours(leg.dualReceived),
       dayLandings: leg.dayLandings ?? 0,
       nightLandings: leg.nightLandings ?? 0,
-      holds: leg.holds ?? 0,
-      approaches: formatApproaches(leg.approaches),
       passengers: leg.passengers ?? 0,
       notes: leg.notes ?? ''
     }))

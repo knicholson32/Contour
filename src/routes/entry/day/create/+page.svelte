@@ -126,7 +126,9 @@
         </div>
       </Title>
 
-      <TourPreview tour={data.currentTour} startTimeValue={startTimeValue} startTimeValueTZ="UTC" endTimeValue={endTimeValue} endTimeValueTZ="UTC" addDays={2} tzData={data.tzData} prefersUTC={data.prefersUTC} />
+      {#if data.currentTour.days.length !== 0}
+        <TourPreview tour={data.currentTour} startTimeValue={startTimeValue} startTimeValueTZ="UTC" endTimeValue={endTimeValue} endTimeValueTZ="UTC" addDays={2} tzData={data.tzData} prefersUTC={data.prefersUTC} />
+      {/if}
       
       <Section title="Start" error={form !== null && form.ok === false && form.action === '?/default' && form.name === '*' ? form.message : null}>
         <Entry.AirportPicker required={true} title="Airport" name="start-airport" airports={data.airports} bind:tz={startAirportTZ} defaultValue={data.lastDay?.endAirportId ?? data.currentTour.startAirportId} />

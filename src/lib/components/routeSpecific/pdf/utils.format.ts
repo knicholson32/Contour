@@ -24,8 +24,11 @@ export const toDateString = (unixSeconds: number | null | undefined) => {
   return date.toISOString().slice(0, 10);
 };
 
-export const hours = (value: number | null | undefined) =>
-  value === null || value === undefined ? 0 : Number.parseFloat(value.toFixed(2));
+export const hours = (value: number | null | undefined) => {
+  value = (value === null || value === undefined) ? 0 : Number.parseFloat(value.toFixed(2));
+  if (value === 0) return '';
+  return value;
+}
 
 export const describeAircraft = (record: {
   registration: string;

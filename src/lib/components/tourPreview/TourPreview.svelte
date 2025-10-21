@@ -151,7 +151,7 @@
     </div>
   </div>
 {:else}
-  <div class="w-full h-full flex flex-row gap-4 items-center justify-center relative">
+  <div class="w-full h-full flex flex-row gap-4 items-center justify-center relative min-h-16">
     <p class="font-thin">This tour has no days</p>
     <Button href={`/entry/day/new?tour=${tour.id}`} rel="noopener noreferrer" class="absolute right-5">
       Add days

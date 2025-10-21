@@ -41,7 +41,7 @@ const dataDescriptorDefault: Descriptor[] = [
     { id: 'landings.day', title: 'Day', colSpan: 2, rotate: true },
     { id: 'landings.night', title: 'Night', colSpan: 2, rotate: true }
   ]},
-  { id: 'detail', title: 'Type if Pilot Experience or Training', subCols: [
+  { id: 'detail', title: 'Type of Pilot Experience or Training', subCols: [
     { id: 'xc', title: 'XC', colSpan: 3  },
     { id: 'xc-p2p', title: 'XC P2P', colSpan: 3  },
     { id: 'night', title: 'Night', colSpan: 3  },
@@ -120,7 +120,7 @@ export const load = async ({ fetch, params, parent, url }) => {
   }))?.flatMap((v) => v._count.approaches))
   const forwardedData_approaches = forwardedData_approaches_arr.length === 0 ? 0 : forwardedData_approaches_arr.reduce((partialSum, v) => partialSum + v) ?? 0;
 
-  const forwardedData_asel = (await prisma.leg.aggregate({ orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }], skip: 0, take: page * select,
+  const forwardedData_asel = (await prisma.leg.aggregate({ take: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
     where: {
       aircraft: {
         type: {
@@ -133,7 +133,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     }
   }))._sum.totalTime ?? 0;
 
-  const forwardedData_amel = (await prisma.leg.aggregate({ orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }], skip: 0, take: page * select,
+  const forwardedData_amel = (await prisma.leg.aggregate({ take: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
     where: {
       aircraft: {
         type: {
@@ -473,6 +473,10 @@ export const load = async ({ fetch, params, parent, url }) => {
 
   const displayNewTotals = (id: string, colSpan: number): Entry => {
     let entry: Entry = { colSpan: colSpan, text: '' };
+    // console.log('displayNewTotals:! ' + id);
+    if (id === 'asel' || id === 'amel') {
+      if (!(id in summedData)) summedData[id] = 0;
+    }
     if (id in summedData) {
       switch (id) {
         case 'asel':
@@ -552,24 +556,33 @@ export const load = async ({ fetch, params, parent, url }) => {
     currentCol = 0;
   }
 
+
   const totalsRows: Row[]  = [];
   {
     // Amount forwarded
     let row: Row = [];
-    for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) row.push(displayForwarded(dataColumnsOrdered[i], rawColSpans[i]));
+    for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) {
+      row.push(displayForwarded(dataColumnsOrdered[i], rawColSpans[i]));
+      console.log('displayForwarded', dataColumnsOrdered[i])
+    }
     totalsRows.push(row);
   }
   {
     // Amount this page
     let row: Row = [];
-    for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) row.push(displayTotals(dataColumnsOrdered[i], rawColSpans[i]));
+    for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) {
+      row.push(displayTotals(dataColumnsOrdered[i], rawColSpans[i]));
+      console.log('displayTotals', dataColumnsOrdered[i])
+    }
     totalsRows.push(row);
   }
   {
     // New total (forwarded + this page)
     let row: Row = [];
-    for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) row.push(displayNewTotals(dataColumnsOrdered[i], rawColSpans[i])
-    );
+    for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) {
+      row.push(displayNewTotals(dataColumnsOrdered[i], rawColSpans[i]));
+      console.log('displayNewTotals', dataColumnsOrdered[i])
+    }
     totalsRows.push(row);
   }
 
