@@ -8,6 +8,7 @@ const legInclude = {
     select: {
       registration: true,
       simulator: true,
+      simulatorType: true,
       type: {
         select: {
           make: true,

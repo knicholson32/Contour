@@ -687,6 +687,7 @@
             <Entry.FlightTime title="Solo" name="solo-time" bind:autoFill={totalTime} defaultValue={data.leg.solo} />
             <Entry.FlightTime title="Dual Given" name="dual-given-time" bind:autoFill={totalTime} defaultValue={data.leg.dualGiven} />
             <Entry.FlightTime title="Dual Received" name="dual-received-time" bind:autoFill={totalTime} defaultValue={data.leg.dualReceived} />
+            <Entry.Switch title="Crossing" name="crossing" defaultValue={data.leg.crossing} />
             <Entry.Switch title="Flight Review" name="flight-review" defaultValue={data.leg.flightReview} />
             <Entry.Switch title="Checkride" name="checkride" defaultValue={data.leg.checkride} />
             <Entry.Switch title="IPC" name="ipc" defaultValue={data.leg.ipc} />

@@ -10,6 +10,7 @@ import {
   hours,
   toISODate
 } from '$lib/components/routeSpecific/pdf/utils.server.js';
+import { getP2P, getAirportIDList } from '$lib/server/helpers';
 
 export const GET: RequestHandler = async ({ url }) => {
   const filters = parseFiltersFromUrl(url.searchParams);
@@ -20,18 +21,18 @@ export const GET: RequestHandler = async ({ url }) => {
   workbook.creator = 'Contour';
   workbook.created = new Date();
 
+  const possibleAirports = await getAirportIDList();
+
   const sheet = workbook.addWorksheet('Logbook', {
     views: [{ state: 'frozen', ySplit: 2 }]
   });
 
-  const centerStyle = { alignment: { horizontal: 'center' } };
 
-  const columns = [
+  sheet.columns = [
     { header: 'Date', key: 'date', width: 12 },
     { header: 'Reg.', key: 'aircraft', width: 8 },
     { header: 'Type Code', key: 'aircraftTypeCode', width: 12 },
     { header: 'Type Name', key: 'aircraftTypeName', width: 20 },
-    { header: 'Sim', key: 'simulator', width: 6, style: centerStyle },
     { header: 'From', key: 'from', width: 8 },
     { header: 'Route', key: 'route', width: 10 },
     { header: 'To', key: 'to', width: 8 },
@@ -43,29 +44,37 @@ export const GET: RequestHandler = async ({ url }) => {
     { header: 'SIC', key: 'sic', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
     { header: 'Night', key: 'night', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
     { header: 'XC', key: 'xc', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'P2P', key: 'xc-p2p', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
+    { header: 'Xing', key: 'crossing', width: 6, style: { numFmt: '0', alignment: { horizontal: 'center' } } },
     { header: 'Solo', key: 'solo', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
     { header: 'Simulated', key: 'simInstrument', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
     { header: 'Actual', key: 'actInstrument', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
     { header: 'Holds', key: 'holds', width: 6, style: { numFmt: '0', alignment: { horizontal: 'center' } } },
     { header: 'Approaches', key: 'approaches', width: 24 },
+    { header: 'Total', key: 'simulator', width: 6, style: { numFmt: '0.0', alignment: { horizontal: 'center', wrapText: true } } },
+    { header: 'ATD', key: 'simulatorATD', width: 6, style: { numFmt: '0.0', alignment: { horizontal: 'center', wrapText: true } } },
+    { header: 'FTD', key: 'simulatorFTD', width: 6, style: { numFmt: '0.0', alignment: { horizontal: 'center', wrapText: true } } },
+    { header: 'FSS', key: 'simulatorFFS', width: 6, style: { numFmt: '0.0', alignment: { horizontal: 'center', wrapText: true } } },
     { header: 'Given', key: 'dualGiven', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
     { header: 'Received', key: 'dualReceived', width: 10, style: { numFmt: '0.0', alignment: { horizontal: 'center' } } },
     { header: 'Day', key: 'dayLandings', width: 6, style: { numFmt: '0', alignment: { horizontal: 'center' } } },
     { header: 'Night', key: 'nightLandings', width: 6, style: { numFmt: '0', alignment: { horizontal: 'center' } } },
-    { header: 'Passengers', key: 'passengers', width: 10, style: { numFmt: '0' } },
+    { header: 'Passengers', key: 'passengers', width: 10, style: { numFmt: '0', alignment: { horizontal: 'center' } } },
     { header: 'Notes', key: 'notes', width: 50 }
   ];
 
-  sheet.columns = columns;
+  const columns = sheet.columns;
 
   sheet.insertRow(0, '');
 
   const mergeGroups = [
-    { title: 'Aircraft', keys: ['aircraft', 'aircraftTypeCode', 'aircraftTypeName', 'simulator'] },
+    { title: 'Aircraft', keys: ['aircraft', 'aircraftTypeCode', 'aircraftTypeName'] },
     { title: 'Route of Flight', keys: ['from', 'route', 'to', 'diversion'] },
     { title: 'Cat / Class', keys: ['asel', 'amel'] },
     { title: 'Instrument', keys: ['simInstrument', 'actInstrument', 'approaches', 'holds'] },
     { title: 'Dual', keys: ['dualGiven', 'dualReceived'] },
+    { title: 'Cross Country', keys: ['xc', 'xc-p2p', 'crossing'] },
+    { title: 'Simulated Flight', keys: ['simulator', 'simulatorATD', 'simulatorFTD', 'simulatorFFS'] },
     { title: 'Landings', keys: ['dayLandings', 'nightLandings'] },
   ];
 
@@ -82,8 +91,6 @@ export const GET: RequestHandler = async ({ url }) => {
     const j = i + group.keys.length - 1;
 
     // Created a merged title
-
-    console.log(group, i + 1, j + 1);
 
     sheet.mergeCells(1, i + 1, 1, j + 1);
     const cell = sheet.getCell(1, i+1);
@@ -110,22 +117,27 @@ export const GET: RequestHandler = async ({ url }) => {
       aircraft: leg.aircraft?.registration ?? '',
       aircraftTypeCode: leg.aircraft?.type ? leg.aircraft.type.typeCode : '',
       aircraftTypeName: leg.aircraft?.type ? `${leg.aircraft.type.make} ${leg.aircraft.type.model}` : '',
-      simulator: leg.aircraft?.simulator ? 'Yes' : 'No',
       from: formatAirport(leg.originAirport),
       to: formatAirport(leg.destinationAirport),
       diversion: formatAirport(leg.diversionAirport),
       route: leg.route ?? '',
       totalTime: hours(leg.totalTime),
+      simulator: leg.aircraft.simulator ? leg.totalTime : '',
+      simulatorATD: leg.aircraft.simulator && leg.aircraft.simulatorType === 'ATD' ? leg.totalTime : '',
+      simulatorFTD: leg.aircraft.simulator && leg.aircraft.simulatorType === 'FTD' ? leg.totalTime : '',
+      simulatorFFS: leg.aircraft.simulator && leg.aircraft.simulatorType === 'FFS' ? leg.totalTime : '',
       asel: hours(leg.aircraft.type.catClass === 'ASEL' ? leg.totalTime : 0),
       amel: hours(leg.aircraft.type.catClass === 'AMEL' ? leg.totalTime : 0),
       pic: hours(leg.pic),
       sic: hours(leg.sic),
       night: hours(leg.night),
+      crossing: leg.crossing ? 1 : '',
       xc: hours(leg.xc),
+      'xc-p2p': hours(getP2P(leg.totalTime, leg.xc, leg.originAirportId, leg.destinationAirportId, leg.diversionAirportId, leg.route, possibleAirports)),
       solo: hours(leg.solo),
       simInstrument: hours(leg.simulatedInstrument),
       actInstrument: hours(leg.actualInstrument),
-      holds: leg.holds ?? 0,
+      holds: (leg.holds ?? 0) === 0 ? '' : (leg.holds ?? 0),
       approaches: formatApproaches(leg.approaches),
       dualGiven: hours(leg.dualGiven),
       dualReceived: hours(leg.dualReceived),

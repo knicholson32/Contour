@@ -288,10 +288,11 @@ model Leg {
   dualGiven    Float @default(0)
   dualReceived Float @default(0)
 
-  flightReview    Boolean @default(false)
-  checkride       Boolean @default(false)
-  ipc             Boolean @default(false)
-  faa6158         Boolean @default(false)
+  crossing     Boolean @default(false)
+  flightReview Boolean @default(false)
+  checkride    Boolean @default(false)
+  ipc          Boolean @default(false)
+  faa6158      Boolean @default(false)
 
   passengers Int @default(0)
 
@@ -306,15 +307,14 @@ model Leg {
 }
 
 model Export {
-  id String @id
+  id                String @id
   dataSourceVersion Int
-  params String
-  file String
-  
+  params            String
+  file              String
+
   generated_utc Int
 
   @@unique([dataSourceVersion, params])
-
   @@map("exports")
 }
 
@@ -544,6 +544,19 @@ model NavDataSIDSTAR {
   type             String
 
   @@map("navDataSIDSTAR")
+}
+
+model NavAirports {
+  id          String @id @default(uuid())
+  name        String
+  icao        String
+  iata        String
+  countryCode String
+  regionName  String
+  latitude    Float
+  longitude   Float
+
+  @@map("navDataAirport")
 }
 
 model Position {

@@ -385,6 +385,7 @@ export const actions = {
     let checkride = data.get('checkride') as string | null === 'true' ? true : false;
     let ipc = data.get('ipc') as string | null === 'true' ? true : false;
     let faa6158 = data.get('faa6158') as string | null === 'true' ? true : false;
+    let crossing = data.get('crossing') as string | null === 'true' ? true : false;
     let notes = data.get('comments') as string | null;
 
     try {
@@ -427,6 +428,7 @@ export const actions = {
         checkride: checkride,
         ipc: ipc,
         faa6158: faa6158,
+        crossing: crossing,
 
         useBlock: useBlock,
 

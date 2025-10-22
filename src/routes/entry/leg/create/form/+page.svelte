@@ -225,6 +225,7 @@
         <Entry.FlightTime title="Solo" name="solo-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Given" name="dual-given-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="Dual Received" name="dual-received-time" bind:autoFill={totalTime} defaultValue={null} />
+        <Entry.Switch title="Crossing" name="crossing" defaultValue={false} />
         <!-- <Entry.FlightTime title="Simulated Flight" name="sim-time" bind:autoFill={totalTime} defaultValue={selectedAircraftAPI !== null && selectedAircraftAPI.simulator === true ? (totalTime === null ? null : parseFloat(totalTime)) : null} /> -->
         <Entry.Switch title="Flight Review" name="flight-review" defaultValue={false} />
         <Entry.Switch title="Checkride" name="checkride" defaultValue={false} />

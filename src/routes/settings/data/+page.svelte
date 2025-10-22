@@ -31,6 +31,10 @@
 	let navUnsavedChanges = $state(false);
 	let navSource: string = $state('unset');
 
+	// Airports
+	let airportList: Settings.List | null = $state(null);
+	let airportUnsavedChanges = $state(false);
+
 	// Utilities
 	beforeNavigate(({ cancel }) => {
 		if (approachUnsavedChanges || optionsUnsavedChanges || regUnsavedChanges || navUnsavedChanges) {
@@ -61,6 +65,13 @@
 			: intlFormatDistance(new Date(data.settingValues['data.navData.lastSync'] * 1000), new Date()));
 	let lastSyncTimeNav =
 		$derived(data.settingValues['data.navData.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.navData.lastSync'] * 1000, data.settings['general.timezone']));
+
+	let lastSyncAirport =
+		$derived(data.settingValues['data.airportData.lastSync'] === -1
+			? 'Never'
+			: intlFormatDistance(new Date(data.settingValues['data.airportData.lastSync'] * 1000), new Date()));
+	let lastSyncTimeAirport =
+		$derived(data.settingValues['data.airportData.lastSync'] === -1 ? 'Never' : toISOStringTZ(data.settingValues['data.airportData.lastSync'] * 1000, data.settings['general.timezone']));
 
 
 	let mxMode = $state(data.settingValues['entry.entryMXMode']);
@@ -164,6 +175,28 @@
 		</DataEntry>
 		<DataEntry title={'Last Sync'}>
 			<span title={lastSyncTimeNav}>{lastSyncNav}</span>
+		</DataEntry>
+	</DataContainer>
+
+</Settings.List>
+
+<Settings.List bind:this={airportList} class="" {form} action="?/updateAirports" bind:unsavedChanges={airportUnsavedChanges} >
+	{#snippet title()}
+		<span >General Airport Database</span>
+	{/snippet}
+	{#snippet description()}
+		<span >Update the General Airport data.</span>
+	{/snippet}
+
+	<Settings.Switch {form} name="update.switch" title="Update" value={false} update={() => airportList?.update()}/>
+
+	<DataContainer useThree={true}>
+		<DataEntry title={'Airports'} data={data.numRegs.toFixed(0)}/>
+		<DataEntry title={'Data Source'}>
+			<a target="_blank" href="https://github.com/ip2location/ip2location-iata-icao">IP2Location ICAO</a>
+		</DataEntry>
+		<DataEntry title={'Last Sync'}>
+			<span title={lastSyncTimeAirport}>{lastSyncAirport}</span>
 		</DataEntry>
 	</DataContainer>
 

@@ -3,6 +3,7 @@ import prisma from '$lib/server/prisma';
 import { Prisma } from '@prisma/client';
 import { dateToDateStringFormSimple } from '$lib/helpers';
 import { redirect } from '@sveltejs/kit';
+import { getAirportIDList, getP2P } from '$lib/server/helpers/index.js';
 
 type SubCol = {
   id: string,
@@ -32,8 +33,8 @@ const dataDescriptorDefault: Descriptor[] = [
   { id: 'inst-title', title: 'Instrument', subCols: [
     { id: 'inst', title: 'Inst' },
     { id: 'sim-inst', title: 'Sim Inst' },
-    { id: 'approaches', title: '# A', colSpan: 1 },
-    { id: 'holds', title: '# H', colSpan: 1 },
+    { id: 'approaches', title: '# A', colSpan: 2 },
+    { id: 'holds', title: '# H', colSpan: 2 },
   ]},
   { id: 'sim-atd', title: 'Sim or ATD' },
   { id: 'landings', title: 'Landings', subCols: [
@@ -44,6 +45,7 @@ const dataDescriptorDefault: Descriptor[] = [
   { id: 'detail', title: 'Type of Pilot Experience or Training', subCols: [
     { id: 'xc', title: 'XC', colSpan: 3  },
     { id: 'xc-p2p', title: 'XC P2P', colSpan: 3  },
+    { id: 'crossings', title: 'Xing', colSpan: 1, rotate: true  },
     { id: 'night', title: 'Night', colSpan: 3  },
     { id: 'solo', title: 'Solo', colSpan: 3  },
     { id: 'pic', title: 'PIC', colSpan: 3  },
@@ -62,6 +64,7 @@ const DEFAULT_PER_PAGE = 100;
 
 export const load = async ({ fetch, params, parent, url }) => {
 
+  
   const name = await settings.get('general.name');
 
   // Get a copy of the descriptor that we can modify
@@ -76,6 +79,8 @@ export const load = async ({ fetch, params, parent, url }) => {
   const select = parseInt(s);
   const page = parseInt(p) - 1;
 
+  const possibleAirports = await getAirportIDList();
+
   if (page < 0) redirect(303, '/logbook/reports/full');
   if (select < 0) redirect(303, '/logbook/reports/full');
   if (page * select > count - 1) redirect(303, `/logbook/reports/full?page=${Math.ceil(count / select)}&select=${select}`);
@@ -88,7 +93,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     for (const d of dataDescriptor) d.subCols = d.subCols?.filter((d) => d.id !== h);
   }
 
-  const targetData = await prisma.leg.findMany({ take: select, skip: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }], include: {
+  const targetDataTask = prisma.leg.findMany({ take: select, skip: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }], include: {
     aircraft: { include: { type: true } },
     originAirport: true,
     destinationAirport: true,
@@ -97,7 +102,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     _count: { select: { approaches: true } }
   } });
 
-  const forwardedData = await prisma.leg.aggregate({ take: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
+  const forwardedSumsTask = prisma.leg.aggregate({ take: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
     _sum: {
       totalTime: true,
       actualInstrument: true,
@@ -115,50 +120,64 @@ export const load = async ({ fetch, params, parent, url }) => {
     }
   });
 
-  const forwardedData_approaches_arr = ((await prisma.leg.findMany({ take: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
+  const totalsDataTask = prisma.leg.aggregate({ take: page * select + select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
+    _sum: {
+      totalTime: true,
+      actualInstrument: true,
+      simulatedInstrument: true,
+      holds: true,
+      dayLandings: true,
+      nightLandings: true,
+      xc: true,
+      night: true,
+      solo: true,
+      pic: true,
+      sic: true,
+      dualReceived: true,
+      dualGiven: true,
+    }
+  });
+
+  const forwardedDataApproachesTask = prisma.leg.findMany({ skip: 0, take: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
     select: { _count: { select: { approaches: true } } }
-  }))?.flatMap((v) => v._count.approaches))
+  })
+
+  const forwardedDataSpecializedTask = prisma.leg.findMany({ skip: 0, take: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
+    select: {
+      totalTime: true,
+      xc: true,
+      crossing: true,
+      aircraft: { select: { type: { select: { catClass: true } }, simulator: true } },
+      originAirportId: true,
+      destinationAirportId: true,
+      diversionAirportId: true,
+      route: true
+    }
+  });
+
+  const totalEntriesTask = prisma.leg.count();
+
+  const [targetData, forwardedSums, totalsData, forwardedDataSpecialized, forwardedData_approaches_raw, totalEntries] 
+    = await prisma.$transaction([targetDataTask, forwardedSumsTask, totalsDataTask, forwardedDataSpecializedTask, forwardedDataApproachesTask, totalEntriesTask]);
+
+  const forwardedData_approaches_arr = forwardedData_approaches_raw?.flatMap((v) => v._count.approaches);
   const forwardedData_approaches = forwardedData_approaches_arr.length === 0 ? 0 : forwardedData_approaches_arr.reduce((partialSum, v) => partialSum + v) ?? 0;
 
-  const forwardedData_asel = (await prisma.leg.aggregate({ take: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
-    where: {
-      aircraft: {
-        type: {
-          catClass: 'ASEL'
-        }
-      }
-    },
-    _sum: {
-      totalTime: true
-    }
-  }))._sum.totalTime ?? 0;
+  const specialTotalsForwarded = {
+    asel: forwardedDataSpecialized.flatMap((d) => d.aircraft.type.catClass === 'ASEL' ? d.totalTime : 0).reduce((acc, cur) => acc+cur, 0),
+    amel: forwardedDataSpecialized.flatMap((d) => d.aircraft.type.catClass === 'AMEL' ? d.totalTime : 0).reduce((acc, cur) => acc+cur, 0),
+    simAtd: forwardedDataSpecialized.flatMap((d) => d.aircraft.simulator ? d.totalTime : 0).reduce((acc, cur) => acc+cur, 0),
+    xcP2P: forwardedDataSpecialized.flatMap((d) => getP2P(d.totalTime, d.xc, d.originAirportId, d.destinationAirportId, d.diversionAirportId, d.route, possibleAirports)).reduce((a, c) => a + c, 0),
+    crossings: forwardedDataSpecialized.flatMap((d) => d.crossing ? 1 : 0).reduce((a: number, c: number) => a + c, 0)
+  }
 
-  const forwardedData_amel = (await prisma.leg.aggregate({ take: page * select, orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }],
-    where: {
-      aircraft: {
-        type: {
-          catClass: 'AMEL'
-        }
-      }
-    },
-    _sum: {
-      totalTime: true
-    }
-  }))._sum.totalTime ?? 0;
-
-  const forwardedData_sim_atd = (await prisma.leg.aggregate({ orderBy: [{ startTime_utc: 'asc' }, { relativeOrder: 'asc' }], skip: 0, take: page * select,
-    where: {
-      aircraft: {
-        simulator: true
-      }
-    },
-    _sum: {
-      totalTime: true
-    }
-  }))._sum.totalTime ?? 0;
-
-
-  const totalEntries = await prisma.leg.count();
+  const specialTotalsCurrentPage = {
+    asel: targetData.flatMap((d) => d.aircraft.type.catClass === 'ASEL' ? d.totalTime : 0).reduce((acc, cur) => acc+cur, 0),
+    amel: targetData.flatMap((d) => d.aircraft.type.catClass === 'AMEL' ? d.totalTime : 0).reduce((acc, cur) => acc+cur, 0),
+    simAtd: targetData.flatMap((d) => d.aircraft.simulator ? d.totalTime : 0).reduce((acc, cur) => acc+cur, 0),
+    xcP2P: targetData.flatMap((d) => getP2P(d.totalTime, d.xc, d.originAirportId, d.destinationAirportId, d.diversionAirportId, d.route, possibleAirports)).reduce((a, c) => a + c, 0),
+    crossings: targetData.flatMap((d) => d.crossing ? 1 : 0).reduce((a: number, c: number) => a + c, 0)
+  }
 
   let signatureSectionWidthCols = SIGNATURE_SECTION_COLS;
   let signatureSectionColSpan: { heading: number, titles: number, skipCols: number, dataColSpans: number[] } = { heading: 0, titles: 0, skipCols: signatureSectionWidthCols + 0, dataColSpans: []};
@@ -231,6 +250,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     text: string,
     hover?: string,
     link?: string,
+    strike?: string,
     textLeft?: boolean
   }
 
@@ -261,8 +281,10 @@ export const load = async ({ fetch, params, parent, url }) => {
         entry.text = data.originAirport?.id ?? '';
         return entry;
       case 'to':
-        if (data.diversionAirport !== null) entry.text = (data.destinationAirport?.id ?? '') + ' -> ' + (data.diversionAirport?.id ?? '');
-        else entry.text = data.destinationAirport?.id ?? '';
+        if (data.diversionAirport !== null) {
+          entry.strike = (data.destinationAirport?.id ?? '');
+          entry.text = (data.destinationAirport?.id ?? '') + ' → ' + (data.diversionAirport?.id ?? '');
+        } else entry.text = data.destinationAirport?.id ?? '';
         return entry;
       case 'via':
         if (data.route !== null) {
@@ -277,7 +299,7 @@ export const load = async ({ fetch, params, parent, url }) => {
       case 'asel':
         if (data.aircraft.type.catClass === 'ASEL') {
           addTo(id, data.totalTime);
-          entry.text = data.totalTime.toFixed(1);
+          entry.text = data.totalTime === 0 ? '' : data.totalTime.toFixed(1);
         }
         return entry;
       case 'amel':
@@ -327,8 +349,17 @@ export const load = async ({ fetch, params, parent, url }) => {
         entry.text = data.xc === 0 ? '' : data.xc.toFixed(1);
         return entry;
       case 'xc-p2p':
-        addTo(id, data.xc);
-        entry.text = data.xc === 0 ? '' : data.xc.toFixed(1);
+        const p2p = getP2P(data.totalTime, data.xc, data.originAirportId, data.destinationAirportId, data.diversionAirportId, data.route, possibleAirports);
+        if (p2p > 0) {
+          entry.text = p2p.toFixed(1);
+          addTo(id, p2p);
+        }
+        return entry;
+      case 'crossings':
+        if (data.crossing === true) {
+          entry.text = '1';
+          addTo(id, 1);
+        }
         return entry;
       case 'night':
         addTo(id, data.night);
@@ -369,13 +400,6 @@ export const load = async ({ fetch, params, parent, url }) => {
     let entry: Entry = { colSpan: colSpan, text: '' };
     if (id in summedData) {
       switch (id) {
-        case 'approaches':
-        case 'holds':
-        case 'landings.all':
-        case 'landings.day':
-        case 'landings.night':
-          entry.text = summedData[id].toFixed(0);
-          return entry;
         case 'total':
         case 'asel':
         case 'amel':
@@ -390,7 +414,16 @@ export const load = async ({ fetch, params, parent, url }) => {
         case 'sic':
         case 'dual-recv':
         case 'dual-given':
-          entry.text = summedData[id].toFixed(1);
+          if (summedData[id] === 1) console.log(summedData);
+          entry.text = summedData[id] === 0 ? '' : summedData[id].toFixed(1);
+          return entry;
+        case 'approaches':
+        case 'holds':
+        case 'crossings':
+        case 'landings.all':
+        case 'landings.day':
+        case 'landings.night':
+          entry.text = summedData[id] === 0 ? '' : summedData[id].toFixed(0);
           return entry;
         case '':
           return entry;
@@ -403,145 +436,184 @@ export const load = async ({ fetch, params, parent, url }) => {
 
   const displayForwarded = (id: string, colSpan: number): Entry => {
     let entry: Entry = { colSpan: colSpan, text: '' };
-    if (id in summedData) {
-      switch (id) {
-        case 'asel':
-          entry.text = forwardedData_asel === 0 ? '' : forwardedData_asel.toFixed(1);
-          return entry;
-        case 'amel':
-          entry.text = forwardedData_amel === 0 ? '' : forwardedData_amel.toFixed(1);
-          return entry;
-        case 'sim-atd':
-          entry.text = forwardedData_sim_atd === 0 ? '' : forwardedData_sim_atd.toFixed(1);
-          return entry;
-        case 'approaches':
-          entry.text = forwardedData_approaches === 0 ? '' : forwardedData_approaches.toFixed(0);
-          return entry;
-        case 'holds':
-          entry.text = forwardedData._sum.holds?.toFixed(0) ?? '';
-          return entry;
-        case 'landings.all':
-          entry.text = forwardedData._sum.dayLandings === null || forwardedData._sum.nightLandings === null ? '' : (forwardedData._sum.dayLandings + forwardedData._sum.nightLandings).toFixed(0);
-          return entry;
-        case 'landings.day':
-          entry.text = forwardedData._sum.dayLandings?.toFixed(0) ?? '';
-          return entry;
-        case 'landings.night':
-          entry.text = forwardedData._sum.nightLandings?.toFixed(0) ?? '';
-          return entry;
-        case 'total':
-          entry.text = forwardedData._sum.totalTime?.toFixed(1) ?? '';
-          return entry;
-        case 'inst':
-          entry.text = forwardedData._sum.actualInstrument?.toFixed(1) ?? '';
-          return entry;
-        case 'sim-inst':
-          entry.text = forwardedData._sum.simulatedInstrument?.toFixed(1) ?? '';
-          return entry;
-        case 'xc':
-          entry.text = forwardedData._sum.xc?.toFixed(1) ?? '';
-          return entry;
-        case 'xc-p2p':
-          entry.text = forwardedData._sum.xc?.toFixed(1) ?? '';
-          return entry;
-        case 'night':
-          entry.text = forwardedData._sum.night?.toFixed(1) ?? '';
-          return entry;
-        case 'solo':
-          entry.text = forwardedData._sum.solo?.toFixed(1) ?? '';
-          return entry;
-        case 'pic':
-          entry.text = forwardedData._sum.pic?.toFixed(1) ?? '';
-          return entry;
-        case 'sic':
-          entry.text = forwardedData._sum.sic?.toFixed(1) ?? '';
-          return entry;
-        case 'dual-recv':
-          entry.text = forwardedData._sum.dualReceived?.toFixed(1) ?? '';
-          return entry;
-        case 'dual-given':
-          entry.text = forwardedData._sum.dualGiven?.toFixed(1) ?? '';
-          return entry;
-        case '':
-          return entry;
-        default:
-          throw new Error(`Unimplemented forwarded type: ${id}`)
-      }
+    switch (id) {
+      case 'asel':
+        entry.text = specialTotalsForwarded.asel.toFixed(1);
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'amel':
+        entry.text = specialTotalsForwarded.amel.toFixed(1);
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'sim-atd':
+        entry.text = specialTotalsForwarded.simAtd.toFixed(1);
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'approaches':
+        entry.text = forwardedData_approaches === 0 ? '' : forwardedData_approaches.toFixed(0);
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'holds':
+        entry.text = forwardedSums._sum.holds?.toFixed(0) ?? '';
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'landings.all':
+        entry.text = forwardedSums._sum.dayLandings === null || forwardedSums._sum.nightLandings === null ? '' : (forwardedSums._sum.dayLandings + forwardedSums._sum.nightLandings).toFixed(0);
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'landings.day':
+        entry.text = forwardedSums._sum.dayLandings?.toFixed(0) ?? '';
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'landings.night':
+        entry.text = forwardedSums._sum.nightLandings?.toFixed(0) ?? '';
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'total':
+        entry.text = forwardedSums._sum.totalTime?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'inst':
+        entry.text = forwardedSums._sum.actualInstrument?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'sim-inst':
+        entry.text = forwardedSums._sum.simulatedInstrument?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'xc':
+        entry.text = forwardedSums._sum.xc?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'xc-p2p':
+        entry.text = specialTotalsForwarded.xcP2P.toFixed(1);
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'crossings':
+        entry.text = specialTotalsForwarded.crossings.toFixed(0);
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'night':
+        entry.text = forwardedSums._sum.night?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'solo':
+        entry.text = forwardedSums._sum.solo?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'pic':
+        entry.text = forwardedSums._sum.pic?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'sic':
+        entry.text = forwardedSums._sum.sic?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'dual-recv':
+        entry.text = forwardedSums._sum.dualReceived?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'dual-given':
+        entry.text = forwardedSums._sum.dualGiven?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case '':
+      case 'notes':
+        return entry;
+      default:
+        throw new Error(`Unimplemented forwarded type: ${id}`)
     }
-    return entry;
   }
 
   const displayNewTotals = (id: string, colSpan: number): Entry => {
     let entry: Entry = { colSpan: colSpan, text: '' };
-    // console.log('displayNewTotals:! ' + id);
-    if (id === 'asel' || id === 'amel') {
-      if (!(id in summedData)) summedData[id] = 0;
-    }
-    if (id in summedData) {
-      switch (id) {
-        case 'asel':
-          entry.text = (summedData[id] + forwardedData_asel) === 0 ? '' : (summedData[id] + forwardedData_asel).toFixed(1);
-          return entry;
-        case 'amel':
-          entry.text = (summedData[id] + forwardedData_amel) === 0 ? '' : (summedData[id] + forwardedData_amel).toFixed(1);
-          return entry;
-        case 'sim-atd':
-          entry.text = (summedData[id] + forwardedData_sim_atd) === 0 ? '' : (summedData[id] + forwardedData_sim_atd).toFixed(1);
-          return entry;
-        case 'approaches':
-          entry.text = (summedData[id] + forwardedData_approaches) === 0 ? '' : (summedData[id] + forwardedData_approaches).toFixed(0);
-          return entry;
-        case 'holds':
-          entry.text = ((forwardedData._sum.holds ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.holds ?? 0) + summedData[id]).toFixed(0);
-          return entry;
-        case 'landings.all':
-          entry.text = ((forwardedData._sum.dayLandings ?? 0) + (forwardedData._sum.nightLandings ?? 0) + summedData[id]).toFixed(0);
-          if (entry.text === '0') entry.text = '';
-          return entry;
-        case 'landings.day':
-          entry.text = ((forwardedData._sum.dayLandings ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.dayLandings ?? 0) + summedData[id]).toFixed(0);
-          return entry;
-        case 'landings.night':
-          entry.text = ((forwardedData._sum.nightLandings ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.nightLandings ?? 0) + summedData[id]).toFixed(0);
-          return entry;
-        case 'total':
-          entry.text = ((forwardedData._sum.totalTime ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.totalTime ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'inst':
-          entry.text = ((forwardedData._sum.actualInstrument ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.actualInstrument ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'sim-inst':
-          entry.text = ((forwardedData._sum.simulatedInstrument ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.simulatedInstrument ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'xc':
-          entry.text = ((forwardedData._sum.xc ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.xc ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'xc-p2p':
-          entry.text = ((forwardedData._sum.xc ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.xc ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'night':
-          entry.text = ((forwardedData._sum.night ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.night ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'solo':
-          entry.text = ((forwardedData._sum.solo ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.solo ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'pic':
-          entry.text = ((forwardedData._sum.pic ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.pic ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'sic':
-          entry.text = ((forwardedData._sum.sic ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.sic ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'dual-recv':
-          entry.text = ((forwardedData._sum.dualReceived ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.dualReceived ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case 'dual-given':
-          entry.text = ((forwardedData._sum.dualGiven ?? 0) + summedData[id]) === 0 ? '' : ((forwardedData._sum.dualGiven ?? 0) + summedData[id]).toFixed(1);
-          return entry;
-        case '':
-          return entry;
-        default:
-          throw new Error(`Unimplemented forwarded type: ${id}`)
-      }
+
+    switch (id) {
+      case 'asel':
+        entry.text = (specialTotalsForwarded.asel + specialTotalsCurrentPage.asel).toFixed(1);
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'amel':
+        entry.text = (specialTotalsForwarded.amel + specialTotalsCurrentPage.amel).toFixed(1);
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'sim-atd':
+        entry.text = (specialTotalsForwarded.simAtd + specialTotalsCurrentPage.simAtd).toFixed(1);
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'approaches':
+        entry.text = (forwardedData_approaches + targetData.flatMap((d) => d._count.approaches).reduce((a, c) => a + c, 0)).toFixed(0);
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'holds':
+        entry.text = totalsData._sum.holds?.toFixed(0) ?? ''
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'landings.all':
+        entry.text = ((totalsData._sum.dayLandings ?? 0) + (totalsData._sum.nightLandings ?? 0)).toFixed(0);
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'landings.day':
+        entry.text = totalsData._sum.dayLandings?.toFixed(0) ?? '';
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'landings.night':
+        entry.text = totalsData._sum.nightLandings?.toFixed(0) ?? '';
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'total':
+        entry.text = totalsData._sum.totalTime?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'inst':
+        entry.text = totalsData._sum.actualInstrument?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'sim-inst':
+        entry.text = totalsData._sum.simulatedInstrument?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'xc':
+        entry.text = totalsData._sum.xc?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'xc-p2p':
+        entry.text = (specialTotalsForwarded.xcP2P + specialTotalsCurrentPage.xcP2P).toFixed(1);
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'crossings':
+        entry.text = (specialTotalsForwarded.crossings + specialTotalsCurrentPage.crossings).toFixed(0);
+        if (entry.text === '0') entry.text = '';
+        return entry;
+      case 'night':
+        entry.text = totalsData._sum.night?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'solo':
+        entry.text = totalsData._sum.solo?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'pic':
+        entry.text = totalsData._sum.pic?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'sic':
+        entry.text = totalsData._sum.sic?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'dual-recv':
+        entry.text = totalsData._sum.dualReceived?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'dual-given':
+        entry.text = totalsData._sum.dualGiven?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
+      case 'notes':
+      case '':
+        return entry;
+      default:
+        throw new Error(`Unimplemented forwarded type: ${id}`)
     }
     return entry;
   }
@@ -563,7 +635,6 @@ export const load = async ({ fetch, params, parent, url }) => {
     let row: Row = [];
     for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) {
       row.push(displayForwarded(dataColumnsOrdered[i], rawColSpans[i]));
-      console.log('displayForwarded', dataColumnsOrdered[i])
     }
     totalsRows.push(row);
   }
@@ -572,7 +643,6 @@ export const load = async ({ fetch, params, parent, url }) => {
     let row: Row = [];
     for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) {
       row.push(displayTotals(dataColumnsOrdered[i], rawColSpans[i]));
-      console.log('displayTotals', dataColumnsOrdered[i])
     }
     totalsRows.push(row);
   }
@@ -581,11 +651,9 @@ export const load = async ({ fetch, params, parent, url }) => {
     let row: Row = [];
     for (let i = signatureSectionColSpan.skipCols; i < dataColumnsOrdered.length; i++) {
       row.push(displayNewTotals(dataColumnsOrdered[i], rawColSpans[i]));
-      console.log('displayNewTotals', dataColumnsOrdered[i])
     }
     totalsRows.push(row);
   }
-
 
   return {
     name,
@@ -598,7 +666,6 @@ export const load = async ({ fetch, params, parent, url }) => {
     rawColSpans,
     totalEntries,
     signatureSectionColSpan,
-    forwardedData_amel,
     SIGNATURE_SECTION_COLS,
     DEFAULT_SPANS,
     COL_WIDTH_REM,

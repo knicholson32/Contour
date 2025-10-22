@@ -102,10 +102,14 @@
     </div>
 
 
-    {#snippet Entry(d: {colSpan: number, text: string, hover?: string, link?: string, textLeft?: boolean}, bg=true, reverse=false)}
+    {#snippet Entry(d: {colSpan: number, text: string, hover?: string, link?: string, textLeft?: boolean, strike?: string}, bg=true, reverse=false)}
       {#if d.link === undefined}
         <div class="text-xs {d.text === '' ? 'h-4' : ''} {bg ? (reverse ? 'even:bg-zinc-50 bg-zinc-100/80 dark:even:bg-zinc-950 dark:bg-zinc-950/85' : 'bg-zinc-50 even:bg-zinc-100/80 dark:bg-zinc-950 dark:even:bg-zinc-950/85') : 'bg-zinc-50 dark:bg-zinc-950'} align-middle whitespace-nowrap overflow-hidden text-ellipsis px-1 {d.textLeft !== true ? 'text-center' : ''} dark:group-hover/row:!bg-zinc-800 group-hover/row:!bg-zinc-200" style="grid-column: span {d.colSpan} / span {d.colSpan};" title="{d.hover ?? d.text}">
-          {d.text}
+          {#if d.strike}
+            <span class="line-through text-yellow-400 dark:text-yellow-600">{d.strike}</span>
+          {:else}
+            {d.text}
+          {/if}
         </div>
       {:else}
         <a href="{d.link}" class="text-xs{d.text === '' ? 'h-4' : ''} {bg ? (reverse ? 'even:bg-zinc-50 bg-zinc-100/80 dark:even:bg-zinc-950 dark:bg-zinc-950/85' : 'bg-zinc-50 even:bg-zinc-100/80 dark:bg-zinc-950 dark:even:bg-zinc-950/85') : 'bg-zinc-50 dark:bg-zinc-950'} align-middle whitespace-nowrap overflow-hidden text-ellipsis px-1 {d.textLeft !== true ? 'text-center' : ''} group-hover/row:bg-zinc-200 dark:group-hover/row:bg-zinc-800 hover:underline decoration-sky-500 decoration-2" style="grid-column: span {d.colSpan} / span {d.colSpan};" title="{d.hover ?? d.text}">
@@ -160,7 +164,7 @@
         <div class="hidden"></div>
       {/if}
 
-      <!-- <div class="text-xxs text-right align-middle font-bold pr-1 bg-zinc-100 dark:bg-zinc-900" style="grid-column: span {data.signatureSectionColSpan.titles} / span {data.signatureSectionColSpan.titles};">Forwarded</div>
+      <div class="text-xxs text-right align-middle font-bold pr-1 bg-zinc-100 dark:bg-zinc-900" style="grid-column: span {data.signatureSectionColSpan.titles} / span {data.signatureSectionColSpan.titles};">Forwarded</div>
       {#each data.totalsRows[0] as entry}
         {@render Entry(entry, true, true)}
       {/each}
@@ -180,7 +184,7 @@
         {/each}
       {#if data.signatureSectionColSpan.dataColSpans.length % 2 === 1}
         <div class="hidden"></div>
-      {/if} -->
+      {/if}
     </div>
   </div>
 

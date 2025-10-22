@@ -26,6 +26,7 @@ export const TypeNames = {
 	'data.aircraftReg.lastSync': -1,
 	'data.navData.lastSync': -1,
 	'data.navData.validDate': -1,
+	'data.airportData.lastSync': -1,
 	'data.navData.source': '',
 	// General -------------------------------
 	'general.prefers_globe': false,
@@ -59,6 +60,7 @@ export type ObjectType<T extends TypeName> =
 	T extends 'data.navData.lastSync' ? number :  // Integer
 	T extends 'data.navData.validDate' ? number :	// Integer
 	T extends 'data.navData.source' ? string :	// String
+	T extends 'data.airportData.lastSync' ? number :	// Integer
 	T extends 'general.prefers_globe' ? boolean :		// Boolean
 	T extends 'general.encKey' ? string : 				// String
 	T extends 'general.aeroAPI' ? string : 				// String
@@ -111,6 +113,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			case 'data.aircraftReg.lastSync':
 			case 'data.navData.lastSync':
 			case 'data.navData.validDate':
+			case 'data.airportData.lastSync':
 				return parseInt(settingVal.value) as ObjectType<T>;
 
 			// Float Conversion --------------------------------------------------------------------------

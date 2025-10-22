@@ -32,7 +32,8 @@ export const load = async ({ params }) => {
 		'data.navData.lastSync',
 		'data.navData.source',
 		'data.navData.validDate',
-		'entry.entryMXMode'
+		'entry.entryMXMode',
+		'data.airportData.lastSync'
 	);
 
 	const regex = /\/CIFP_[0-9]+.zip/gm;
@@ -121,6 +122,7 @@ export const load = async ({ params }) => {
 		numRegs: await prisma.aircraftRegistrationLookup.count(),
 		numFixes: await prisma.navDataNav.count(),
 		numAirways: await prisma.navDataAirway.count(),
+		numAirorts: await prisma.navAirports.count(),
 		years,
 		options,
 		navDataOptions
@@ -925,5 +927,94 @@ export const actions = {
 			return API.Form.formFailure('?/updateNavData', 'nav.option', 'Source error: ' + err.message);
 		}
 
-	}
+	},
+
+	updateAirports: async ({ request, fetch }) => {
+		const data = await request.formData();
+
+		const update = data.get('update.switch') === 'true';
+
+		if (update === false) return;
+
+		// https://github.com/ip2location/ip2location-iata-icao
+		const source = `https://raw.githubusercontent.com/ip2location/ip2location-iata-icao/refs/heads/master/iata-icao.csv`;
+
+		try {
+			const response = await fetch(source);
+			if (response.ok === false) {
+				throw new Error(`Unable to download airports: ${response.status} ${response.statusText}`);
+			}
+
+			type AirportCsvRow = {
+				country_code?: string;
+				region_name?: string;
+				iata?: string;
+				icao?: string;
+				airport?: string;
+				latitude?: string;
+				longitude?: string;
+			};
+
+			const rows = (await neatCsv(await response.text())) as AirportCsvRow[];
+
+			const sanitized: {
+				name: string;
+				icao: string;
+				iata: string;
+				countryCode: string;
+				regionName: string;
+				latitude: number;
+				longitude: number;
+			}[] = [];
+
+			for (const row of rows) {
+				if (row === undefined) continue;
+
+				const icao = (row.icao ?? '').trim();
+				const name = (row.airport ?? '').trim();
+				if (icao === '' || name === '') continue;
+
+				const latitude = parseFloat((row.latitude ?? '').trim());
+				const longitude = parseFloat((row.longitude ?? '').trim());
+				if (Number.isNaN(latitude) || Number.isNaN(longitude)) continue;
+
+				sanitized.push({
+					name,
+					icao,
+					iata: (row.iata ?? '').trim(),
+					countryCode: (row.country_code ?? '').trim(),
+					regionName: (row.region_name ?? '').trim(),
+					latitude,
+					longitude
+				});
+			}
+
+			const deduped = Array.from(
+				sanitized.reduce((acc, airport) => {
+					if (acc.has(airport.icao) === false) acc.set(airport.icao, airport);
+					return acc;
+				}, new Map<string, (typeof sanitized)[number]>()).values()
+			);
+
+			if (deduped.length === 0) throw new Error('No valid airport records found in CSV');
+
+			await prisma.$transaction(async (tx) => {
+				await tx.navAirports.deleteMany({});
+
+				const chunkSize = 1000;
+				for (let i = 0; i < deduped.length; i += chunkSize) {
+					await tx.navAirports.createMany({
+						data: deduped.slice(i, i + chunkSize)
+					});
+				}
+			});
+
+			await settings.set('data.airportData.lastSync', Math.floor(Date.now() / 1000));
+		} catch (e) {
+			const err = e as Error;
+			console.log('ERROR: Unable to update airports', source, err);
+			return API.Form.formFailure('?/updateAirports', 'update.switch', 'Source error: ' + err.message);
+		}
+
+	},
 };

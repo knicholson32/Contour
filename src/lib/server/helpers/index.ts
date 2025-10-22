@@ -13,7 +13,40 @@ import { MEDIA_FOLDER } from '$lib/server/env';
 
 const ENC_SALT = 'CONTOUR_SALT'
 
+export const getAirportIDList = async () => {
+	const possibleAirports = await prisma.navAirports.findMany({ select: { iata: true, icao: true } });
+	const visitedAirports = await prisma.airport.findMany({ select: { id: true } });
+	return [...visitedAirports.map((a) => a.id), ...possibleAirports.flatMap((a) => [a.iata, a.icao])];
+}
 
+export const determineIfP2P = (originAirportId: string | null, destinationAirportId: string | null, diversionAirportId: string | null, route: string | null, possibleAirports?: string[]) => {
+	// Unknown if origin or destination isn't defined
+	if (originAirportId === null || destinationAirportId === null) return false;
+	// If the origin and destination are different, this is P2P
+	if (originAirportId !== destinationAirportId) return true;
+	// If the diversion airport exists and it is different from the origin, this is P2P
+	if (diversionAirportId !== null && originAirportId !== diversionAirportId) return true;
+
+	// Try and use the route to determine P2P
+	if (route !== null && possibleAirports !== undefined && possibleAirports.length > 0) {
+		const routeSegments = route.split(' ');
+		for (const seg of routeSegments) {
+			if (seg.length !== 3 && seg.length !== 4) continue;
+			if (possibleAirports.includes(seg)) return true;
+		}
+	}
+
+	return false;
+}
+
+export const getP2P = (total: number, xc: number, originAirportId: string | null, destinationAirportId: string | null, diversionAirportId: string | null, route: string | null, possibleAirports?: string[]) => {
+	if (xc !== 0) return xc;
+	if (determineIfP2P(originAirportId, destinationAirportId, diversionAirportId, route, possibleAirports)) {
+		return total;
+	} else {
+		return xc;
+	}
+}
 
 export const getPackageVersion = (pkg: string) => {
 	const packageJsonPath = process.env.NODE_ENV === 'development' ? process.env.PWD + '/package.json' : '/app/package.json';
