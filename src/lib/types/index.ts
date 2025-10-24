@@ -283,3 +283,43 @@ export type NavSTARRoute = {
 	NEXT_POINT: string,
 	ARPT_RWY_ASSOC: string
 }
+
+export enum FixType {
+	NOT_VALID = 0, // 'Fix not valid'
+	GPS = 1, // 'GPS fix'
+	DGPS = 2, // 'Differential GPS fix (DGNSS), SBAS, OmniSTAR VBS, Beacon, RTX in GVBS mode'
+	NA = 3, // 'Not applicable'
+	RTK_FIXED = 4, // 'RTK Fixed, xFill'
+	RTK_FLOAT = 5, // 'RTK Float, OmniSTAR XP/HP, Location RTK, RTX'
+	DR = 6, // 'INS Dead reckoning'
+}
+
+export const FixTypeToString = (f: FixType) => {
+	switch (f) {
+		case FixType.NOT_VALID:
+			return 'Fix not valid';
+		case FixType.GPS:
+			return 'GPS fix';
+		case FixType.DGPS:
+			return 'Differential GPS fix (DGNSS), SBAS, OmniSTAR VBS, Beacon, RTX in GVBS mode';
+		case FixType.NA:
+			return 'Not applicable';
+		case FixType.RTK_FIXED:
+			return 'RTK Fixed, xFill';
+		case FixType.RTK_FLOAT:
+			return 'RTK Float, OmniSTAR XP/HP, Location RTK, RTX';
+		case FixType.DR:
+			return 'INS Dead reckoning';
+		default:
+			return 'Unknown fix type: ' + f;
+	}
+}
+
+// {"time":1761103215,"fix":2,"latitude": 29.9393746781,"longitude": -93.9828374365,"altitude": 23},
+export type TrackerPosition = {
+	time: number,				// unix seconds
+	fix: FixType,
+	latitude: number,		// degrees
+	longitude: number,	// degrees
+	altitude: number,		// meters
+}

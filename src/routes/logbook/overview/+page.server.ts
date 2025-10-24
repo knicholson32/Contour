@@ -68,7 +68,7 @@ export const load = async ({ fetch, params, parent, url }) => {
   await addIfDoesNotExist(settingsGroup['tour.defaultStartApt'], settingsGroup['general.aeroAPI']);
   const startAirport = await prisma.airport.findUnique({ where: { id: settingsGroup['tour.defaultStartApt'] } });
 
-  const segments = await (await fetch('/api/legs')).json() as DeckTypes.Legs;
+  // const segments = await (await fetch('/api/legs')).json() as DeckTypes.Legs;
 
   const airportVisits: {id: string, visits: number}[] = [];
   const aircraftTypes: {id: string, legs: number}[] = [];
@@ -130,7 +130,6 @@ export const load = async ({ fetch, params, parent, url }) => {
       topAirports: airportVisits.slice(0, 10),
       topAircraftTypes: aircraftTypes.slice(0, 10)
     },
-    segments,
     prefersGlobe: settingsGroup['general.prefers_globe'],
     startAirport
   }
