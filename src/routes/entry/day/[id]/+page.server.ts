@@ -246,7 +246,7 @@ export const load = async ({ fetch, params, parent, url }) => {
     })
   }
 
-  const legs = currentDay.legs.length === 0 ? [] : (await (await fetch('/api/legs?' + currentDay.legs.map((leg) => 'id=' + leg.id).join('&') + '&filterDuplicates=false')).json() as DeckTypes.Legs);
+  const legs = currentDay.legs.length === 0 ? [] : (await (await fetch('/api/legs?' + currentDay.legs.map((leg) => 'id=' + leg.id).join('&') + '&filterDuplicates=false' + '&v=' + entrySettings['entry.dataVersion'])).json() as DeckTypes.Legs);
 
   return {
     entrySettings,

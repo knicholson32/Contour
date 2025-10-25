@@ -8,12 +8,19 @@ import { getDistanceFromLatLonInKm } from '$lib/helpers/index.js';
 import { API } from '$lib/types';
 import { jsonCompressed } from '$lib/types/responses';
 
+// 14 days
+const CACHE_AGE = 1209600;
+
 export const GET = async ({ request, url }) => {
   try {
 
     const ids = url.searchParams.getAll('id');
     const includeFixes = url.searchParams.get('fixes') === 'true';
     const filterDuplicates = !(url.searchParams.get('filterDuplicates') === 'false');
+
+    // If 'v=' is supplied, allow for caching as this will be a versioned request. When the data
+    // changes, a new version param will be supplied.
+    const versioned = url.searchParams.get('v') !== null;
     
     const debug = await settings.get('system.debug');
 
@@ -158,7 +165,16 @@ export const GET = async ({ request, url }) => {
       });
     }
 
-    return jsonCompressed(legsPositions, request.headers);
+    if (versioned) {
+      const responseHeaders = new Headers();
+      responseHeaders.set('cache-control', `max-age=${CACHE_AGE}, stale-while-revalidate=${CACHE_AGE}`);
+      console.log(responseHeaders);
+      return jsonCompressed(legsPositions, request.headers, responseHeaders);
+    } else {
+      return jsonCompressed(legsPositions, request.headers);
+    }
+
+    
 
 
 

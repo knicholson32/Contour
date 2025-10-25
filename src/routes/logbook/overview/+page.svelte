@@ -32,7 +32,7 @@
   <Deck.Core corePadding={{left: 50, right: 450, top: 50, bottom: 50}} startCenteredOn={[data.startAirport?.latitude ?? 0, data.startAirport?.longitude ?? 0]} customControlPositioning="left-4 top-4 md:top-auto md:bottom-4">
 
     <Deck.Airports airports={data.visitedAirports} />
-    <Deck.Legs legs={'/api/legs'} triggerCameraMove={false} pickable={true} onclick={(id: string) => { goto(`/entry/leg/${id}?active=form`)}} />
+    <Deck.Legs legs={`/api/legs?v=${data.dataVersion}`} triggerCameraMove={false} pickable={true} onclick={(id: string) => { goto(`/entry/leg/${id}?active=form`)}} />
   </Deck.Core>
 
   

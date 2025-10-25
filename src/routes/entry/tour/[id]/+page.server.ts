@@ -192,7 +192,7 @@ export const load = async ({ fetch, params, url }) => {
     entrySettings,
     currentTour: tour,
     tourMap,
-    deckSegments: (tourMap === null || tourMap.ids.length) === 0 ? ([] as Legs) : (await (await fetch('/api/legs?' + tourMap?.ids.map((id) => 'id=' + id).join('&') + '&filterDuplicates=false')).json() as Legs),
+    deckSegments: (tourMap === null || tourMap.ids.length) === 0 ? ([] as Legs) : (await (await fetch('/api/legs?' + tourMap?.ids.map((id) => 'id=' + id).join('&') + '&filterDuplicates=false' + '&v=' + entrySettings['entry.dataVersion'])).json() as Legs),
     stats,
     tourSettings,
     airports: (airports.ok === true) ? airports.airports : [] as API.Types.Airport[],

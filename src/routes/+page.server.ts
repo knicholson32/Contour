@@ -18,7 +18,7 @@ const THIRTY_DAYS = 30 * TWENTY_FOUR_HOURS;
 
 export const load = async ({ parent, url, fetch }) => {
 
-  const sets = await settings.getMany('general.timezone', 'system.debug', 'tour.defaultStartApt');
+  const sets = await settings.getMany('general.timezone', 'system.debug', 'tour.defaultStartApt', 'entry.dataVersion');
   const timeZone = sets['general.timezone'];
   const debug = sets['system.debug'];
   
@@ -433,7 +433,7 @@ export const load = async ({ parent, url, fetch }) => {
     if (l.startTime_utc !== null && l.startTime_utc >= now - THIRTY_DAYS) thirty += l.totalTime;
   }
 
-  const deckSegments = posGroupsIDs.length === 0 ? [] : (await (await fetch('/api/legs?' + posGroupsIDs.map((id) => 'id=' + id).join('&') + '&filterDuplicates=false')).json()) as Legs;
+  const deckSegments = posGroupsIDs.length === 0 ? [] : (await (await fetch('/api/legs?' + posGroupsIDs.map((id) => 'id=' + id + '&v=' + sets['entry.dataVersion']).join('&') + '&filterDuplicates=false')).json()) as Legs;
 
   const legSummary: {[key: string]: {
     from: string,

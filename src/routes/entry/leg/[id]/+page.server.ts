@@ -215,7 +215,7 @@ export const load = async ({ fetch, params, url }) => {
   let selectedAircraftAPI: API.Types.Aircraft | null = null;
   if (leg !== null) selectedAircraftAPI = leg.aircraft;
 
-  const deckLegs = leg === null ? [] : (await (await fetch('/api/legs?id=' + leg.id + '&fixes=true&filterDuplicates=false')).json()) as DeckTypes.Legs;
+  const deckLegs = leg === null ? [] : (await (await fetch('/api/legs?id=' + leg.id + '&fixes=true&filterDuplicates=false' + '&v=' + entrySettings['entry.dataVersion'])).json()) as DeckTypes.Legs;
   const deckLeg = deckLegs.length > 0 ? deckLegs[0] : null;
 
   return {

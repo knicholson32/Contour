@@ -120,7 +120,7 @@ export const load = async ({ fetch, params, url }) => {
     tickValues.push(last);
   }
 
-  const legData = (await (await fetch('/api/legs?id=' + leg.id + '&fixes=true')).json() as Legs)[0];
+  const legData = (await (await fetch('/api/legs?id=' + leg.id + '&fixes=true' + '&v=' + entrySettings['entry.dataVersion'])).json() as Legs)[0];
 
   console.log(legData);
 

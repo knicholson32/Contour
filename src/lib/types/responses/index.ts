@@ -103,11 +103,12 @@ export const serverError = (error: any, context?: string) => {
 
 
 
-export const jsonCompressed = (data: any, requestHeaders: Headers) => {
+export const jsonCompressed = (data: any, requestHeaders: Headers, responseHeaders?: Headers) => {
 	const body = JSON.stringify(data);
-	const headers = new Headers();
+	const headers = responseHeaders === undefined ? new Headers() : responseHeaders;
 	headers.set('content-type', 'application/json');
-	headers.set('cache-control', 'max-age=0');
+	// Only set cache control if they weren't already set
+	if (!headers.has('cache-control')) headers.set('cache-control', 'max-age=0');
 	let result: Buffer<ArrayBufferLike>;
 	
 	const compressionOptions = (requestHeaders.get('accept-encoding') ?? '').split(', ');
@@ -123,6 +124,7 @@ export const jsonCompressed = (data: any, requestHeaders: Headers) => {
 	} else {
 		return json(data);
 	}
+	console.log(headers);
 	return new Response(result as BodyInit, {
 		status: 200,
 		headers
