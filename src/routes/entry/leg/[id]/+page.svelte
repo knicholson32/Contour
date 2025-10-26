@@ -14,7 +14,7 @@
   import * as Popover from "$lib/components/ui/popover";
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
-  import { dateToDateStringForm, dateToTimeStringZulu, pad, timeStrAndTimeZoneToUTC } from '$lib/helpers';
+  import { dateToDateStringForm, dateToTimeStringZulu, pad, preloadLegOverview, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
   import { CircleAlert, CalendarDays, ChevronRight, Server, Fullscreen, Gauge, Link, Maximize, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
@@ -608,6 +608,7 @@
           return async ({ update }) => {
             await update({ reset: false });
             submitting = false;
+            preloadLegOverview();
             setTimeout(() => {
               if (formData?.ok !== false) {
                 formManager.clearUID(false);
@@ -709,6 +710,7 @@
                 return async ({ update }) => {
                   await update({ invalidateAll: true });
                   deleting = false;
+                  preloadLegOverview();
                   setTimeout(() => {
                     if (formData?.ok !== false) formManager.clearUID(false);
                   }, 1);

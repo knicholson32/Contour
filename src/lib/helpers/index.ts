@@ -228,7 +228,7 @@ export const sleep = delay;
  * @param url the URL to fetch from
  * @returns the data
  */
-export const fetch = async (url: string): Promise<string> => {
+export const fetchString = async (url: string): Promise<string> => {
 	return new Promise((resolve) => {
 		let data = '';
 		https.get(url, (res) => {
@@ -237,6 +237,16 @@ export const fetch = async (url: string): Promise<string> => {
 		});
 	});
 };
+
+export { fetchString as fetch };
+
+/**
+ * Fetch (and therefore cache) the new latest legs segment data for the overview map
+ */
+export const preloadLegOverview = async () => {
+	const v = await ((await fetch('/api/legs/version')).json()) as { ok: boolean, version: number };
+	if (v.ok === true) await fetch(`/api/legs?v=${v.version}`);
+}
 
 /**
  * Deletes queries from the URL without affecting the search history

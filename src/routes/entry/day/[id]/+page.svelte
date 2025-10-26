@@ -13,7 +13,7 @@
   import Tag from '$lib/components/decorations/Tag.svelte';
   import { FormManager, clearUID } from '$lib/components/entry/localStorage';
   import * as Entry from '$lib/components/entry';
-  import { dateToDateStringForm, dateToDateStringFormMonthDayYear, getInlineDateUTC } from '$lib/helpers';
+  import { dateToDateStringForm, dateToDateStringFormMonthDayYear, getInlineDateUTC, preloadLegOverview } from '$lib/helpers';
   import { ArrowRight, CalendarOff, ListOrdered, Plus, Timer, TowerControl } from 'lucide-svelte';
   import Warning from '$lib/components/Warning.svelte';
   import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
@@ -239,6 +239,7 @@
           return async ({ update }) => {
             await update({ reset: false });
             submitting = false;
+            preloadLegOverview();
             setTimeout(() => {
               if (formData?.ok !== false) formManager.clearUID(false);
             }, 1);

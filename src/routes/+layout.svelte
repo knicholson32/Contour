@@ -2,7 +2,7 @@
   import { page } from "$app/state";
   import { cubicIn, cubicInOut, cubicOut } from "svelte/easing";
   import "../app.css";
-  import { setContext } from 'svelte';
+  import { onMount, setContext } from 'svelte';
   import { EscapeOrClickOutside } from "$lib/components/events";
   import { fade, scale, slide } from "svelte/transition";
   import { backArrow, backButtonClicked, backText, unsaved } from "$lib/stores";
@@ -16,6 +16,7 @@
   import escapeOrClickOutside from "$lib/components/events/escapeOrClickOutside";
   import type { GitCommit } from "$lib/server/api/git/schema";
   import { timeConverter } from "$lib/helpers";
+    import { browser } from "$app/environment";
 
   interface Props {
     data: import('./$types').PageData;

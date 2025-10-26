@@ -7,15 +7,24 @@
     import type { Position } from "deck.gl";
     import { BedDouble, Gauge, Plane, Route, Table2, Timer, ChevronLeft } from "lucide-svelte";
 
-    export let data: import('./$types').PageData;
+    interface Props {
+      data: import('./$types').PageData;
+    }
 
-    let mobileOpen = false;
+    let { data }: Props = $props();
+
+    let mobileOpen = $state(false);
     const toggleDrawer = () => {
       mobileOpen = !mobileOpen;
     }
 
+    let viewportWidth = $state(1024);
+
 
 </script>
+
+<svelte:window bind:innerWidth={viewportWidth} />
+
 
 {#snippet titleCard()}
   <div class="p-4 rounded-lg text-zinc-200 bg-zinc-900/80 backdrop-blur-sm flex flex-row items-center gap-4">
@@ -29,11 +38,17 @@
 
 <OneColumn>
 
-  <Deck.Core corePadding={{left: 50, right: 450, top: 50, bottom: 50}} startCenteredOn={[data.startAirport?.latitude ?? 0, data.startAirport?.longitude ?? 0]} customControlPositioning="left-4 top-4 md:top-auto md:bottom-4">
-
-    <Deck.Airports airports={data.visitedAirports} />
-    <Deck.Legs legs={`/api/legs?v=${data.dataVersion}`} triggerCameraMove={false} pickable={true} onclick={(id: string) => { goto(`/entry/leg/${id}?active=form`)}} />
-  </Deck.Core>
+  {#if viewportWidth > 768}
+    <Deck.Core corePadding={{left: 50, right: 450, top: 50, bottom: 50}} startCenteredOn={[data.startAirport?.latitude ?? 0, data.startAirport?.longitude ?? 0]} customControlPositioning="left-4 top-4 md:top-auto md:bottom-4">
+      <Deck.Airports airports={data.visitedAirports} />
+      <Deck.Legs legs={`/api/legs?v=${data.dataVersion}`} triggerCameraMove={false} pickable={true} onclick={(id: string) => { goto(`/entry/leg/${id}?active=form`)}} />
+    </Deck.Core>
+  {:else}
+    <Deck.Core corePadding={{left: 50, right: 50, top: 50, bottom: 50}} startCenteredOn={[data.startAirport?.latitude ?? 0, data.startAirport?.longitude ?? 0]} customControlPositioning="left-4 top-4 md:top-auto md:bottom-4">
+      <Deck.Airports airports={data.visitedAirports} />
+      <Deck.Legs legs={`/api/legs?v=${data.dataVersion}`} triggerCameraMove={false} pickable={true} onclick={(id: string) => { goto(`/entry/leg/${id}?active=form`)}} />
+    </Deck.Core>
+  {/if}
 
   
 

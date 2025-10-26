@@ -10,7 +10,7 @@
   import { onMount } from 'svelte';
   import Warning from '$lib/components/Warning.svelte';
 
-  import { dateToDateStringForm, getInlineDateUTC, timeStrAndTimeZoneToUTC, validateURL } from '$lib/helpers';
+  import { dateToDateStringForm, getInlineDateUTC, preloadLegOverview, timeStrAndTimeZoneToUTC, validateURL } from '$lib/helpers';
   import { Title } from '$lib/components/menuForm';
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
@@ -135,6 +135,7 @@
       return async ({ update }) => {
         await update({ reset: false });
         submitting = false;
+        preloadLegOverview();
         setTimeout(() => {
           if (form?.ok !== false) formManager.clearUID(false);
         }, 1);

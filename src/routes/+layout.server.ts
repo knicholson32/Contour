@@ -8,7 +8,7 @@ const MAX_MB = 10;
 export const load = async ({ parent, fetch, url }) => {
 
   const commit = process.env.GIT_COMMIT ?? '';
-  const set = await settings.getMany('system.debug', 'system.lastSeenCommit', 'entry.tour.current', 'general.gravatar.hash', 'general.name', 'general.email', 'general.timezone', 'general.prefers_globe', 'tour.defaultStartApt');
+  const set = await settings.getMany('system.debug', 'system.lastSeenCommit', 'entry.tour.current', 'general.gravatar.hash', 'general.name', 'general.email', 'general.timezone', 'general.prefers_globe', 'tour.defaultStartApt', 'entry.dataVersion');
   let contourUpdates = false
   if (set['system.lastSeenCommit'] !== commit && url.pathname !== '/changelog') contourUpdates = true;
 
