@@ -144,7 +144,7 @@
         <div style="--timeline-offset: {((data.currentDay.legs.filter((l) => l.aircraft.simulator === false)).length + data.currentDay.deadheads.length) * 1.25}rem" class="relative flex h-[calc(100vh_-_22rem_-_var(--nav-height)_-_4.75rem_-_var(--timeline-offset)_+_2px)] md:h-[calc(100vh_-_12.5rem_-_var(--nav-height)_-_4.75rem_-_var(--timeline-offset)_+_2px)] overflow-hidden">
           <Deck.Core padding={50} >
             <Deck.Legs legs={data.deckSegments} highlight={highlight} />
-            {#each data.airportList as airport, index (airport.id)}
+            {#each data.airportList as airport, index}
               <Deck.Widgets.GeoReferencedTooltip position={[airport.latitude, airport.longitude]}>
                 <div class="text-xs hover:opacity-10 transition-opacity rounded-full overflow-hidden inline-flex items-center justify-left {highlight !== null ? 'opacity-20' : ''}">
                   <div class="rounded-l-full bg-green-500 text-white font-medium inline-flex items-center justify-center pl-1 w-6 h-6">{index + 1}</div>

@@ -7,7 +7,7 @@ import crypto from 'node:crypto';
 /** @type {import('./$types').PageServerLoad} */
 export const load = async ({ params }) => {
 
-	const settingValues = { ...await settings.getSet('general'), ...await settings.getSet('tour')}
+	const settingValues = { ...await settings.getSet('general'), ...await settings.getSet('tour'), ...await settings.getSet('entry')}
 
 	return {
 		settingValues,
@@ -43,6 +43,13 @@ export const actions = {
 			if (success) await settings.set('tour.defaultStartApt', showAirport);
 			else return API.Form.formFailure('?/updateEmail', 'tour.defaultStartApt', 'Airport does not exist');
 		}
+
+		const blockStartPad = parseFloat((data.get('entry.day.entry.day.blockStartPad') ?? 'NaN') as string);
+		const blockEndPad = parseFloat((data.get('entry.day.entry.day.blockEndPad') ?? 'NaN') as string);
+
+		if (blockStartPad !== undefined && !isNaN(blockStartPad)) await settings.set('entry.day.blockStartPad', blockStartPad * 3600)
+		if (blockEndPad !== undefined && !isNaN(blockEndPad)) await settings.set('entry.day.blockEndPad', blockEndPad * 3600)
+
 	},
 	updateLocalization: async ({ request }) => {
 		const data = await request.formData();

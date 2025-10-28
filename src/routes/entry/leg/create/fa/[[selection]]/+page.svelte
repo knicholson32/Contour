@@ -16,6 +16,7 @@
   import icons from '$lib/components/icons';
   import Frame from '$lib/components/entry/Frame.svelte';
   import * as Deck from '$lib/components/map/deck';
+  import { CircleCheck, CircleDashedIcon, X } from 'lucide-svelte';
   
   interface Props {
     data: import('./$types').PageData;
@@ -87,6 +88,8 @@
 
   let urlFormParam: string | undefined = $state(undefined);
 
+  let hasTrackAssociation = $derived(data.options.some((o) => o.trackAssociation !== undefined));
+
 </script>
 
 <svelte:head>
@@ -152,14 +155,20 @@
                 <th class="">Date</th>
                 <th>Departure</th>
                 <th>Arrival</th>
+                {#if hasTrackAssociation}
+                  <th class="text-center hidden sm:table-cell">Track</th>
+                {/if}
                 <th class="text-center hidden sm:table-cell">A/C</th>
                 <th class="text-center">Duration</th>
               </tr>
             </thead>
             <tbody>
               {#each data.options as o}
-                <tr onclick={() => nav(`/entry/leg/create/fa/${o.fa_flight_id}?${urlFormParam}`)} class="{progress ? '' : 'cursor-pointer'} betterhover:hover:bg-gray-100 dark:betterhover:hover:bg-zinc-950/40 {page.params.selection === o.fa_flight_id ? 'bg-gray-200 dark:bg-zinc-950' : 'even:bg-gray-50 dark:even:bg-zinc-800/40'} {o.exists ? 'opacity-40 dark:opacity-20' : ''}">
-                  <td class="pl-2 text-center hidden md:table-cell"><a class="text-sky-400 inline-flex gap-1" target="_blank" href="https://www.flightaware.com/live/flight/id/{o.fa_flight_id}:0">
+                <tr onclick={() => nav(`/entry/leg/create/fa/${o.fa_flight_id}?${urlFormParam}`)} class="{progress ? '' : 'cursor-pointer'} {data.selected?.faFlightId === o.fa_flight_id ? 
+                    'bg-gray-200/90 odd:bg-gray-200 betterhover:hover:bg-gray-300 dark:bg-zinc-700 odd:dark:bg-zinc-600/40 dark:betterhover:hover:bg-zinc-600/80 border-l-8 border-sky-500' : 
+                    'bg-white odd:bg-gray-100 betterhover:hover:bg-gray-300 dark:bg-zinc-950 odd:dark:bg-zinc-800/40 dark:betterhover:hover:bg-zinc-600/80'
+                  } {o.exists ? 'text-gray-300 dark:text-zinc-700' : ''}">
+                  <td class="pl-2 text-center hidden md:table-cell"><a class="{!o.exists ? 'text-sky-400' : ''} inline-flex gap-1" target="_blank" href="https://www.flightaware.com/live/flight/id/{o.fa_flight_id}:0">
                     {o.ident}
                   </a></td>
                   <td class="text-yellow-500 pl-2 md:pl-0">
@@ -177,10 +186,10 @@
                     <p>{o.originAirport.timestamp}</p>
                     {#if o.originAirport.obj !== null}
                       <div class="font-mono text-xs hidden sm:inline-flex whitespace-nowrap gap-2">
-                        <a class="text-sky-400" href="/airports/{o.originAirport.id}">{o.originAirport.id}</a>
+                        <a class="{!o.exists ? 'text-sky-400' : ''}" href="/airports/{o.originAirport.id}">{o.originAirport.id}</a>
                         <div class="max-w-36 text-ellipsis overflow-hidden whitespace-nowrap" title="{o.originAirport.obj?.name}">{o.originAirport.obj?.name}</div>
                       </div>
-                      <p class="font-mono text-xs sm:hidden"><a class="text-sky-400" href="/airports/{o.originAirport.id}">{o.originAirport.id}</a></p>
+                      <p class="font-mono text-xs sm:hidden"><a class="{!o.exists ? 'text-sky-400' : ''}" href="/airports/{o.originAirport.id}">{o.originAirport.id}</a></p>
                     {:else}
                       <p>{o.originAirport.id}</p>
                     {/if}
@@ -190,10 +199,10 @@
                       <p>{o.destinationAirport.timestamp}</p>
                       {#if o.destinationAirport.obj !== null}
                         <div class="font-mono text-xs hidden sm:inline-flex whitespace-nowrap gap-2">
-                          <a class="text-sky-400" href="/airports/{o.destinationAirport.id}">{o.destinationAirport.id}</a>
+                          <a class="{!o.exists ? 'text-sky-400' : ''}" href="/airports/{o.destinationAirport.id}">{o.destinationAirport.id}</a>
                           <div class="max-w-36 text-ellipsis overflow-hidden whitespace-nowrap" title="{o.destinationAirport.obj?.name}">{o.destinationAirport.obj?.name}</div>
                         </div>
-                        <p class="font-mono text-xs sm:hidden"><a class="text-sky-400" href="/airports/{o.destinationAirport.id}">{o.destinationAirport.id}</a></p>
+                        <p class="font-mono text-xs sm:hidden"><a class="{!o.exists ? 'text-sky-400' : ''}" href="/airports/{o.destinationAirport.id}">{o.destinationAirport.id}</a></p>
                       {:else}
                         <p>{o.destinationAirport.id}</p>
                       {/if}
@@ -203,28 +212,30 @@
                       <p>{o.diversionAirport.timestamp} - <span class="text-yellow-500">Divert</span></p>
                       {#if o.diversionAirport.obj !== null}
                         <div class="font-mono text-xs hidden sm:inline-flex whitespace-nowrap gap-2">
-                          <a class="text-sky-400" href="/airports/{o.diversionAirport.id}">{o.diversionAirport.id}</a>
+                          <a class="{!o.exists ? 'text-sky-400' : ''}" href="/airports/{o.diversionAirport.id}">{o.diversionAirport.id}</a>
                           <div class="max-w-36 text-ellipsis overflow-hidden whitespace-nowrap" title="{o.diversionAirport.obj?.name}">{o.diversionAirport.obj?.name}</div>
                         </div>
-                        <p class="font-mono text-xs sm:hidden"><a class="text-sky-400" href="/airports/{o.diversionAirport.id}">{o.diversionAirport.id}</a></p>
+                        <p class="font-mono text-xs sm:hidden"><a class="{!o.exists ? 'text-sky-400' : ''}" href="/airports/{o.diversionAirport.id}">{o.diversionAirport.id}</a></p>
                       {:else}
                         <p>{o.diversionAirport.id}</p>
                       {/if}
                     </td>
                   {/if}
+                  {#if hasTrackAssociation}
+                    {#if o.trackAssociation !== undefined}
+                      <td class="hidden sm:table-cell m-auto text-center text-green-500"><CircleCheck class="m-auto w-5 h-5"/></td>
+                    {:else}
+                      <td class="hidden sm:table-cell m-auto text-center text-gray-500 dark:text-zinc-700"><X class="m-auto w-5 h-5"/></td>
+                    {/if}
+                  {/if}
                   {#if o.type.id === undefined}
                     <td class="text-center hidden sm:table-cell">{o.type.name}</td>
                   {:else}
-                    <td class="text-center hidden sm:table-cell"><a class="text-sky-400" href="/aircraft/type/{o.type.id}">{o.type.name}</a></td>
+                    <td class="text-center hidden sm:table-cell"><a class="{!o.exists ? 'text-sky-400' : ''}" href="/aircraft/type/{o.type.id}">{o.type.name}</a></td>
                   {/if}
                   <td class="text-center">{o.duration}</td>
-                  <!-- <td class="pr-2 text-center">
-                    <a type="button" href="/tour/{data.params.tour}/day/{data.params.id}/entry/new/link/{o.fa_flight_id}?flight-id={o.ident}&active=form" class="grow text-center md:grow-0 touch-manipulation select-none transition-colors px-3 py-1 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 
-                      ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-zinc-800 text-gray-800 dark:text-white betterhover:hover:bg-gray-100 betterhover:hover:text-gray-900">
-                        X
-                    </a>
-                  </td> -->
                 </tr>
+                <!-- {page.params.selection === o.fa_flight_id ? 'bg-gray-200 dark:bg-zinc-950' : 'even:bg-gray-50 dark:even:bg-zinc-800/40'}  -->
               {/each}
             </tbody>
           </table>
@@ -261,18 +272,28 @@
               <div class="relative flex h-[50vh]">
                 <Deck.Core>
                   <Deck.Airports airports={data.airportList} highlight={data.airportList.map((a) => a.id)}/>
-                  <Deck.Leg leg={{
-                    id: 'preview',
-                    segments: [{
-                      style: 'highlight',
-                      positions: [[data.airportList[0].longitude, data.airportList[0].latitude], [data.airportList[1].longitude, data.airportList[1].latitude]]
-                    }]
-                  }}/>
+                  {#if data.trackLeg !== null}
+                    <Deck.Leg leg={data.trackLeg}/>
+                    <div class="absolute z-10 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 backdrop-blur-lg px-3 py-2 rounded-lg bottom-4 right-4">
+                      <div class="text-xxs uppercase">Using Tracker Data</div>
+                      <CircleCheck class="w-4 h-4 text-green-500"/>
+                    </div>
+                  {:else}
+                    <Deck.Leg leg={{
+                      id: 'preview',
+                      segments: [{
+                        style: 'highlight',
+                        positions: [[data.airportList[0].longitude, data.airportList[0].latitude], [data.airportList[1].longitude, data.airportList[1].latitude]]
+                      }]
+                    }}/>
+                    <div class="absolute z-10 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 backdrop-blur-lg px-3 py-2 rounded-lg bottom-4 right-4">
+                      <div class="text-xxs uppercase">Using FlightAware Data</div>
+                      <CircleDashedIcon class="w-4 h-4 text-green-500"/>
+                    </div>
+                  {/if}
                 </Deck.Core>
               </div>
             </Section>
-          {:else}
-            NULL
           {/if}
         
 

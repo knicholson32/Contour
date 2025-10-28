@@ -254,6 +254,8 @@ model Leg {
 
   flightAwareData FlightAwareData?
 
+  positionsFromTracker Boolean @default(false)
+
   ident String? // @db.VarChar(16)
 
   originAirportId      String? // @db.VarChar(5)
@@ -448,10 +450,76 @@ model Airport {
 
   deadheadStart Deadhead[] @relation("deadheadStart")
   deadheadEnd   Deadhead[] @relation("deadheadEnd")
+
+  ProspectMetadataStart ProspectMetadata[] @relation("ProspectMetadataStart")
+  ProspectMetadataEnd   ProspectMetadata[] @relation("ProspectMetadataEnd")
+
   Approach      Approach[]
 
   @@unique([latitude, longitude])
   @@map("airports")
+}
+
+model Position {
+  legId          String
+  altitude       Int
+  altitudeChange String // @db.VarChar(10) //ENUM: AltitudeChange
+  groundspeed    Int
+  heading        Int
+  latitude       Float
+  longitude      Float
+  timestamp      Int
+  updateType     String? // @db.VarChar(15) //ENUM: UpdateType?
+
+  leg Leg @relation(fields: [legId], references: [id], onDelete: Cascade)
+
+  @@unique([legId, timestamp, latitude, longitude])
+  @@map("positions")
+}
+
+model ProspectMetadata {
+  id String @id @default(uuid())
+
+  startLatitude Float
+  startLongitude Float
+  endLatitude Float
+  endLongitude Float
+
+  startAirportId String?
+  endAirportId String?
+
+  startTime_utc Int
+  endTime_utc Int
+
+  distance_km Float?
+  preview String?
+
+  startAirport   Airport?  @relation("ProspectMetadataStart", fields: [startAirportId], references: [id], onDelete: Restrict)
+  endAirport     Airport? @relation("ProspectMetadataEnd", fields: [endAirportId], references: [id], onDelete: Restrict)
+
+  previewLightJpeg Bytes?
+  previewDarkJpeg  Bytes?
+
+  positions ProspectPosition[]
+
+  @@map("prospectMetadata")
+}
+
+model ProspectPosition {
+  trackId String
+
+  altitude       Int
+  altitudeChange String // @db.VarChar(10) //ENUM: AltitudeChange
+  groundspeed    Int
+  heading        Int
+  latitude       Float
+  longitude      Float
+  timestamp      Int
+
+  ProspectMetadata ProspectMetadata @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([trackId, timestamp, latitude, longitude])
+  @@map("prospectPositions")
 }
 
 model Approach {
@@ -557,23 +625,6 @@ model NavAirports {
   longitude   Float
 
   @@map("navDataAirport")
-}
-
-model Position {
-  legId          String
-  altitude       Int
-  altitudeChange String // @db.VarChar(10) //ENUM: AltitudeChange
-  groundspeed    Int
-  heading        Int
-  latitude       Float
-  longitude      Float
-  timestamp      Int
-  updateType     String? // @db.VarChar(15) //ENUM: UpdateType?
-
-  leg Leg @relation(fields: [legId], references: [id], onDelete: Cascade)
-
-  @@unique([legId, timestamp, latitude, longitude])
-  @@map("positions")
 }
 
 model Fix {

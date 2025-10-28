@@ -168,7 +168,6 @@ export const GET = async ({ request, url }) => {
     if (versioned) {
       const responseHeaders = new Headers();
       responseHeaders.set('cache-control', `max-age=${CACHE_AGE}, stale-while-revalidate=${CACHE_AGE}`);
-      console.log(responseHeaders);
       return jsonCompressed(legsPositions, request.headers, responseHeaders);
     } else {
       return jsonCompressed(legsPositions, request.headers);

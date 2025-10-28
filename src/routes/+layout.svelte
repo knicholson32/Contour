@@ -174,7 +174,7 @@
 
 <ModeWatcher />
 
-{#if page.url.pathname.includes('/test')}
+{#if page.url.pathname.includes('/api')}
   {@render children?.()}
 {:else}
 

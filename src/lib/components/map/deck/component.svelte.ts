@@ -197,13 +197,13 @@ export class MapComponentRootState {
       } else {
         try {
           const viewports = this.deckInstance.getViewports();
+          console.log(viewports);
           if (viewports.length === 0) return;
           const viewport = viewports[0] as _GlobeViewport;
           const viewportWebMercator = new WebMercatorViewport(viewport);
           let {longitude, latitude, zoom} = viewportWebMercator.fitBounds(bounds, { maxZoom: MAX_ZOOM_BOUNDS, offset: this.offset, padding: this.padding });
           // Check if we are zooming to one point. Don't zoom in all the way
           if (bounds[0][0] === bounds[1][0] && bounds[0][1] === bounds[1][1]) zoom = ZOOM_WHEN_SINGLE_POINT;
-
           this.deckInstance.setProps({ initialViewState: {
             latitude,
             longitude,

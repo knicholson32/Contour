@@ -7,6 +7,8 @@ import { API, DayNewEntryState } from '$lib/types';
 import type { Prisma } from '@prisma/client';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateAirportList } from '$lib/server/helpers';
+import type { Leg } from '$lib/components/map/deck/types.js';
+import { findBestProspectTrackLog } from '$lib/server/db/positions.js';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -107,6 +109,8 @@ export const load = async ({ params, fetch, url }) => {
   const airportsRaw = await ((await fetch('/api/airports')).json()) as API.Airports;
   const airports = (airportsRaw.ok === true) ? airportsRaw.airports : [] as API.Types.Airport[];
 
+  const trackOptions = await prisma.prospectMetadata.findMany({ include: { positions: true } });
+
   type AirportDetails = {
     id: string,
     obj: API.Types.Airport | null
@@ -128,8 +132,9 @@ export const load = async ({ params, fetch, url }) => {
       name: string,
       id?: string,
     },
+    trackAssociation?: string,
     duration: string,
-    faLink: string
+    faLink: string,
   }[] = [];
 
   const aircraftTypes = await prisma.aircraftType.findMany({ select: { id: true, typeCode: true }});
@@ -139,6 +144,8 @@ export const load = async ({ params, fetch, url }) => {
     return null;
   }
 
+
+  let trackLeg: Leg | null = null;
 
 
   for (const o of availableOptions) {
@@ -163,6 +170,23 @@ export const load = async ({ params, fetch, url }) => {
       }
     }
 
+    const endAirport = diversionAirport !== null ? diversionAirport : destAirport;
+    let trackAssociation: string | undefined = undefined;
+    const prospectTrack = await findBestProspectTrackLog(o.startTime, originAirport?.id, endAirport?.id);
+    if (prospectTrack !== null) {
+      trackAssociation = prospectTrack.id;
+      if (selected !== null && selected.faFlightId === o.faFlightId && trackAssociation !== undefined) {
+        console.log('sel', selected);
+        trackLeg = {
+          id: 'segment',
+          segments: [{
+            positions: prospectTrack.positions.map((p) => [p.longitude, p.latitude]),
+            style: 'highlight',
+          }]
+        }
+      }
+    }
+    
     optionsExport.push({
       fa_flight_id: o.faFlightId,
       ident: o.ident,
@@ -186,6 +210,7 @@ export const load = async ({ params, fetch, url }) => {
         name: o.aircraftType ?? 'Unknown',
         id: getAircraftIdFromTypeCode(o.aircraftType)?.id ?? undefined
       },
+      trackAssociation: trackAssociation,
       duration,
       faLink: ''
     })
@@ -214,8 +239,6 @@ export const load = async ({ params, fetch, url }) => {
   const totalTime = selected === null ? 0 : ((selected.endTime - selected.startTime) / 60 / 60);
   const existingFData = selected === null ? null : await prisma.flightAwareData.findUnique({ where: { faFlightId: selected.faFlightId } });
 
-  
-
   return {
     entrySettings,
     options: optionsExport,
@@ -228,6 +251,7 @@ export const load = async ({ params, fetch, url }) => {
     totalTime,
     existingEntry: existingFData !== null,
     airportList: selected === null ? null : await generateAirportList(selected.originAirportId, selected.destinationAirportId, selected.diversionAirportId),
+    trackLeg,
     currentTour,
     currentDay,
     airports

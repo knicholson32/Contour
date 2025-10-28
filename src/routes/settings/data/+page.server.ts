@@ -141,48 +141,6 @@ export const actions = {
 		const clearOptions = data.get('options.clear') === 'true';
 		if (clearOptions) await prisma.option.deleteMany({ });
 
-		const migrateUseBlock = data.get('useBlock.migrate') === 'true';
-		if (migrateUseBlock) { 
-
-			// Get all legs for us to parse through
-			const legs = await prisma.leg.findMany({ select: { startTime_utc: true, endTime_utc: true, id: true, useBlock: true, aircraft: { select: { simulator: true } }, day: { select: { startTime_utc: true, endTime_utc: true } } } });
-
-			// Use a transaction (faster)
-			const mods: Types.Prisma.PrismaPromise<any>[] = [];
-			
-			// Loop through all the legs
-			for (const leg of legs) {
-
-				// If the leg is already using block time, nothing to migrate
-				if (leg.useBlock === true) continue;
-
-				// If the leg has a duty day, it probably will be using block
-				if (leg.day !== null) {
-					// Check if this is a simulator though
-					if (leg.aircraft.simulator === true) {
-						// Only use block if it is already using block times. We can tell because the start time doesn't match the day's start time
-						if (leg.startTime_utc !== leg.day.startTime_utc) {
-							// They don't match. Use block.
-							if (debug > 0) console.log('Migrating leg', leg.id, ': USE BLOCK', leg.startTime_utc);
-							mods.push(prisma.leg.update({ where: { id: leg.id }, data: { useBlock: true } }));			
-						}
-					} else {
-						// It isn't. Use block.
-						if (debug > 0) console.log('Migrating leg', leg.id, ': USE BLOCK', leg.startTime_utc);
-						mods.push(prisma.leg.update({ where: { id: leg.id }, data: { useBlock: true } }));		
-					}
-				}
-			}
-
-			try {
-				// Execute the prisma transaction
-				await prisma.$transaction(mods)
-			} catch (e) {
-				console.log('Error: Unable to migrate useBlock', e);
-				return API.Form.formFailure('?/updateOptions', 'useBlock.migrate', 'Unable to migrate: ' + e);
-			}
-		}
-
 	},
 	updateApproaches: async ({ request }) => {
 		const data = await request.formData(); 

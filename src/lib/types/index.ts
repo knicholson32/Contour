@@ -122,6 +122,7 @@ export const legSelector = {
 			}
 		}
 	},
+	positionsFromTracker: true,
 	_count: {
 		select: {
 			approaches: true,

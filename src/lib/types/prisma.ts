@@ -55,6 +55,7 @@ export namespace DB {
     DATALINK = 'DATALINK',
     ADSB_ASDEX = 'ADSB_ASDEX',
     SPACE = 'SPACE',
+    TRACKER = 'TRACKER',
     UNKNOWN = 'UNKNOWN',
   }
   export const updateTypeObj = Object.values(UpdateType);

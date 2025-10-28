@@ -4,6 +4,8 @@ import type * as Types from '@prisma/client';
 import crypto from 'node:crypto';
 import { DB } from '$lib/types';
 
+const MAX_START_TIME_OFFSET_S = 30 * 60; // 30 minutes
+
 // ------------------------------------------------------------------------------------------------
 // DB Tools
 // ------------------------------------------------------------------------------------------------
@@ -103,7 +105,7 @@ export const storePositions = async (positions: aero.schema.Position[], legID: s
         const hash = crypto.createHash('md5').update(`${legID}.${pos.timestamp}.${pos.latitude.toFixed(4)}.${pos.longitude.toFixed(4)}`).digest('hex');
         // If this point already exists, skip it
         if (pointHashes.includes(hash)) continue;
-        // Create a promise to inser it
+        // Create a promise to inset it
         inserts.push(prisma.position.create({ data: aeroToDB(pos, legID) }));
         // Record the point hash
         pointHashes.push(hash)
@@ -115,6 +117,83 @@ export const storePositions = async (positions: aero.schema.Position[], legID: s
     } catch (e) {
         console.log('Unable to add positions!', e);
     }
+}
+
+/**
+ * Store an array of Track Logger positions
+ * @param prospectMetadataID the ID source for this data (to be deleted upon save)
+ * @param positions the array of positions to store
+ * @param legID the flight ID to associate this positions with
+ */
+export const storePositionsFromTrackLogger = async (prospectTrack: Types.Prisma.ProspectMetadataGetPayload<{ include: { positions: true } }>, legID: string): Promise<void> => {
+
+    // Delete any positions that might already be associated with this flight
+    await deletePositions(legID);
+
+    // Create some arrays to hold the inserts and hashes created in the loop
+    const inserts: Types.Prisma.PrismaPromise<any>[] = [];
+    const pointHashes: string[] = [];
+
+    // Loop through each position
+    for (const pos of prospectTrack.positions) {
+        // Create a hash of the leg ID, timestamp, and lat/long. These together must be unique, so make a hash so we can ensure there isn't a collision
+        const hash = crypto.createHash('md5').update(`${legID}.${pos.timestamp}.${pos.latitude.toFixed(4)}.${pos.longitude.toFixed(4)}`).digest('hex');
+        // If this point already exists, skip it
+        if (pointHashes.includes(hash)) continue;
+        // Create a promise to inset it
+        inserts.push(prisma.position.create({ data: {
+            legId: legID,
+            latitude: pos.latitude,
+            longitude: pos.longitude,
+            altitude: pos.altitude,
+            altitudeChange: pos.altitudeChange,
+            timestamp: pos.timestamp,
+            updateType: DB.UpdateType.TRACKER,
+            groundspeed: pos.groundspeed,
+            heading: pos.heading,
+        }}));
+        // Record the point hash
+        pointHashes.push(hash)
+    }
+
+    try {
+        // Execute the prisma transaction that will add all the points
+        await prisma.$transaction(inserts)
+        // Delete the prospect data since we have saved it to a leg
+        await prisma.prospectMetadata.delete({ where: { id: prospectTrack.id } });
+        // Log that this leg is using tracker data
+        await prisma.leg.update({ where: { id: legID }, data: { positionsFromTracker: true } });
+    } catch (e) {
+        console.log('Unable to add positions!', e);
+    }
+}
+
+/**
+ * Find the single best prospect track log for a given time and airport pair
+ * @param startTime_utc the start time of the leg
+ * @param startAirportId the start airport
+ * @param endAirportId the end airport
+ * @returns the best prospect track log
+ */
+export const findBestProspectTrackLog = async (startTime_utc: number, startAirportId: string | null | undefined, endAirportId: string | null | undefined) => {
+    // Get all positions with the start and end airports
+    let trackOptions: Types.Prisma.ProspectMetadataGetPayload<{ include: { positions: true } }>[] = [];
+
+    if (startAirportId === undefined) startAirportId = null;
+    if (endAirportId === undefined) endAirportId = null;
+
+    if (startAirportId !== null && endAirportId !== null) {
+        trackOptions = await prisma.prospectMetadata.findMany({ where: { startAirportId: startAirportId, endAirportId: endAirportId }, include: { positions: true } });
+    } else if (startAirportId !== null && endAirportId === null) {
+        trackOptions = await prisma.prospectMetadata.findMany({ where: { startAirportId: startAirportId }, include: { positions: true } });
+    } else if (startAirportId === null && endAirportId !== null) {
+        trackOptions = await prisma.prospectMetadata.findMany({ where: { endAirportId: endAirportId }, include: { positions: true } });
+    }
+    // Sort by position length
+    trackOptions.sort((a, b) => a.positions.length - b.positions.length );
+    trackOptions.sort((a, b) => Math.abs(a.startTime_utc - startTime_utc) - Math.abs(b.startTime_utc - startTime_utc) )
+    trackOptions = trackOptions.filter((t) => Math.abs(t.startTime_utc - startTime_utc) < MAX_START_TIME_OFFSET_S);
+    return trackOptions.length > 0 ? trackOptions[0] : null;
 }
 
 /**

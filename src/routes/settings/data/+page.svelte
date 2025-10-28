@@ -91,7 +91,6 @@
 
 	{#if mxMode}
 		<Settings.Switch {form} name="options.clear" title="Clear Options ({data.numFlightOptions} in DB)" value={false} update={() => optionList?.update()}/>
-		<Settings.Switch {form} name="useBlock.migrate" title="Migrate 'UseBlock' to DB" value={false} update={() => optionList?.update()}/>
 	{/if}
 </Settings.List>
 

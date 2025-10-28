@@ -148,7 +148,7 @@
     center();
   });
 
-  let legComponent: Deck.Leg
+  let legComponent: Deck.Leg;
 
 </script>
 

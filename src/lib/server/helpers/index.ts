@@ -75,11 +75,130 @@ export const isNightOperation = (now: Date, lat: number, lon: number): boolean =
 	return now < sunriseMinus1Hr || now > sunsetPlus1Hr;
 }
 
+const CIVIL_TWILIGHT_ALTITUDE = -6 * (Math.PI / 180);
+const MAX_INTERPOLATION_SPACING = 0.1 * 60 * 60; // 0.1 hr in seconds
+const DEG_TO_RAD = Math.PI / 180;
+const RAD_TO_DEG = 180 / Math.PI;
+
+/**
+ * Calculate whether or not a position at a time is "night" or not
+ * TODO: This doesn't take aircraft altitude into affect. Does this matter?
+ * @param timestamp the time
+ * @param lat the latitude
+ * @param lon the longitude
+ * @returns whether or not the position is in "night"
+ */
+export const isCivilNightTime = (timestamp: number | Date, lat: number, lon: number): boolean => {
+	const date = typeof timestamp === 'number' ? new Date(timestamp) : timestamp;
+	if (!(date instanceof Date) || Number.isNaN(date.getTime())) return false;
+
+	const { altitude } = sunCalc.getPosition(date, lat, lon);
+	return altitude <= CIVIL_TWILIGHT_ALTITUDE;
+}
+
+/**
+ * Calculate the total number of seconds spent in civil night across a series of positions.
+ * If the positions are more then 0.1hr apart, interpolation is performed.
+ * @param positions Track positions.
+ * @returns Total duration in seconds where the aircraft was in civil night.
+ */
+export const getCivilNightSeconds = (positions: { latitude: number; longitude: number; timestamp: number }[]): number => {
+	const count = positions.length;
+	if (count < 2) return 0;
+
+	const sorted = positions;
+	sorted.sort((a, b) => a.timestamp - b.timestamp);
+
+	let total = 0;
+	for (let i = 0; i < sorted.length - 1; i++) {
+		const current = sorted[i];
+		const next = sorted[i + 1];
+		const delta = next.timestamp - current.timestamp;
+
+		if (delta <= 0) continue;
+
+		if (delta <= MAX_INTERPOLATION_SPACING) {
+			if (isCivilNightTime(current.timestamp * 1000, current.latitude, current.longitude)) {
+				total += delta;
+			}
+			continue;
+		}
+
+		const segments = Math.ceil(delta / MAX_INTERPOLATION_SPACING);
+		const step = delta / segments;
+
+		const lat1 = current.latitude;
+		const lon1 = current.longitude;
+		const lat2 = next.latitude;
+		const lon2 = next.longitude;
+
+		const lat1Rad = lat1 * DEG_TO_RAD;
+		const lon1Rad = lon1 * DEG_TO_RAD;
+		const lat2Rad = lat2 * DEG_TO_RAD;
+		const lon2Rad = lon2 * DEG_TO_RAD;
+
+		const cosLat1 = Math.cos(lat1Rad);
+		const sinLat1 = Math.sin(lat1Rad);
+		const cosLon1 = Math.cos(lon1Rad);
+		const sinLon1 = Math.sin(lon1Rad);
+
+		const cosLat2 = Math.cos(lat2Rad);
+		const sinLat2 = Math.sin(lat2Rad);
+		const cosLon2 = Math.cos(lon2Rad);
+		const sinLon2 = Math.sin(lon2Rad);
+
+		const x1 = cosLat1 * cosLon1;
+		const y1 = cosLat1 * sinLon1;
+		const z1 = sinLat1;
+		const x2 = cosLat2 * cosLon2;
+		const y2 = cosLat2 * sinLon2;
+		const z2 = sinLat2;
+
+		let dot = x1 * x2 + y1 * y2 + z1 * z2;
+		if (dot > 1) dot = 1;
+		else if (dot < -1) dot = -1;
+
+		const angle = Math.acos(dot);
+		const linear = angle < 1e-6;
+		const sinAngle = linear ? 0 : Math.sin(angle);
+		const invSinAngle = linear ? 0 : 1 / sinAngle;
+
+		for (let segmentIndex = 0; segmentIndex < segments; segmentIndex++) {
+			let latitude = lat1;
+			let longitude = lon1;
+
+			if (segmentIndex !== 0) {
+				const fraction = segmentIndex / segments;
+				if (linear) {
+					latitude = lat1 + (lat2 - lat1) * fraction;
+					longitude = lon1 + (lon2 - lon1) * fraction;
+				} else {
+					const factor1 = Math.sin((1 - fraction) * angle) * invSinAngle;
+					const factor2 = Math.sin(fraction * angle) * invSinAngle;
+					const x = factor1 * x1 + factor2 * x2;
+					const y = factor1 * y1 + factor2 * y2;
+					const z = factor1 * z1 + factor2 * z2;
+					const hyp = Math.hypot(x, y);
+					latitude = Math.atan2(z, hyp) * RAD_TO_DEG;
+					longitude = Math.atan2(y, x) * RAD_TO_DEG;
+				}
+			}
+
+			const sampleTime = current.timestamp + segmentIndex * step;
+			if (isCivilNightTime(sampleTime * 1000, latitude, longitude)) {
+				total += step;
+			}
+		}
+	}
+
+	return total;
+}
+
 /**
  * Generate a list of airport objects from airport ICAO codes
  * @param airports the base airport list
  * @param args the variable ICAO airport codes
- * @returns the list of airport obkects
+ * @returns the list of airport objects
  */
 export const generateAirportList = async (...args: (string | null)[]): Promise<Types.Airport[]> => {
 	const icaoOptions: string[] = [];

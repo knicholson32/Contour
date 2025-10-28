@@ -12,8 +12,9 @@ import * as aero from '$lib/server/api/flightaware';
 import { v4 as uuidv4 } from 'uuid';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
-import { generateAirportList, isNightOperation } from '$lib/server/helpers';
+import { generateAirportList, getCivilNightSeconds, isNightOperation } from '$lib/server/helpers';
 import { incrementDataVersion } from '$lib/server/pdf';
+import type { Leg } from '$lib/components/map/deck/types.js';
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60;
 const TWENTY_FOUR_HOURS = 24 * 60 * 60;
@@ -39,6 +40,7 @@ export const load = async ({ params, fetch, url }) => {
   
   if (selection === null) {
     return {
+      entrySettings,
       airports,
       aircraft,
       dayId
@@ -129,6 +131,34 @@ export const load = async ({ params, fetch, url }) => {
     }
   }
 
+
+
+  let trackLeg: Leg | null = null;
+  let nightEstimate: number | null = null
+
+  const prospectTrack = await Positions.findBestProspectTrackLog(entry.startTime, entry.originAirportId, destAirport);
+  if (prospectTrack !== null) {
+    trackLeg = {
+      id: 'segment',
+      segments: [{
+        positions: prospectTrack.positions.map((p) => [p.longitude, p.latitude]),
+        style: 'highlight',
+      }]
+    }
+    const nightTime_s = getCivilNightSeconds(prospectTrack.positions);
+    nightEstimate = Math.round((nightTime_s / 3600) * 10) / 10;
+  } else {
+    const destinationAirport = entry.diversionAirportId ?? entry.destinationAirportId;
+    if (entry.originAirportId !== null && destinationAirport !== null) {
+      const start = airportList.find((a) => a.id === entry.originAirportId);
+      const end = airportList.find((a) => a.id === destinationAirport);
+      if (start !== undefined && end !== undefined) {
+        const nightTime_s = getCivilNightSeconds([{ latitude: start.latitude, longitude: start.longitude, timestamp: entry.startTime }, { latitude: end.latitude, longitude: end.longitude, timestamp: entry.endTime }]);
+        nightEstimate = Math.round((nightTime_s / 3600) * 10) / 10;
+      }
+    }
+  }
+
   // const totalTime = ((entry.endTime - entry.startTime) / 60 / 60)
 
   const existingFData = await prisma.flightAwareData.findUnique({ where: { faFlightId: entry.faFlightId } });
@@ -145,16 +175,20 @@ export const load = async ({ params, fetch, url }) => {
     changeSourceURL,
     dayId,
     selection,
+    nightEstimate,
     // totalTime,
     runwayOperations,
     xc: entry.diversionAirportId === null ? (entry.originAirportId === entry.destinationAirportId ? false : true) : (entry.originAirportId === entry.diversionAirportId ? false : true),
     existingEntry: existingFData !== null,
     startTime: helpers.dateToDateStringForm(entry.startTime, false, 'UTC'),
+    startTimePadded: helpers.dateToDateStringForm(entry.startTime - entrySettings['entry.day.blockStartPad'], false, 'UTC'),
     startTimezone: originAirport === null ? null : helpers.getTimezoneObjectFromTimezone(originAirport.timezone),
     endTime: helpers.dateToDateStringForm(entry.endTime, false, 'UTC'),
+    endTimePadded: helpers.dateToDateStringForm(entry.endTime + entrySettings['entry.day.blockEndPad'], false, 'UTC'),
     endTimezone: destinationAirport === null ? null : helpers.getTimezoneObjectFromTimezone(destinationAirport.timezone),
     airports,
     airportList,
+    trackLeg,
     aircraft: aircraft
   };
 };
@@ -493,9 +527,18 @@ export const actions = {
         // If we make it here, it is time to store positions
 
         try {
-          if (faFlightId !== null) {
-            const track = await aero.getFlightTrack(faFlightId, aeroAPIKey);
-            await Positions.storePositions(track.positions, leg.id);
+
+
+          const destAirport = divertAirport ?? endAirport;
+          
+          const prospectTrack = await Positions.findBestProspectTrackLog(startUTCValue, startAirport, destAirport);
+          if (prospectTrack !== null) {
+            await Positions.storePositionsFromTrackLogger(prospectTrack, leg.id);
+          } else {
+            if (faFlightId !== null) {
+              const track = await aero.getFlightTrack(faFlightId, aeroAPIKey);
+              await Positions.storePositions(track.positions, leg.id);
+            }
           }
 
           // If we made it here, it is time to store the route

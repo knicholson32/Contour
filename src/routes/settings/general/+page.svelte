@@ -75,6 +75,8 @@
 	<Settings.Input {form} name="general.email" title="Email" update={() => emailList?.update()} bind:value={email} />
 	<Settings.Input {form} name="tour.defaultStartApt" title="Base Airport" update={() => emailList?.update()} bind:value={showAirport} />
 	<Settings.Switch {form} name="general.prefers_globe" title="Prefer Globe" update={() => emailList?.update()} bind:value={prefersGlobe} />
+	<Settings.NumericalInput {form} name="entry.day.entry.day.blockStartPad" min={0} max={0.5} step={'0.1'} title="Before Takeoff Block Pad (hr)" update={() => emailList?.update()} value={Math.round(data.settingValues['entry.day.blockStartPad'] / 3600 * 10) / 10} />
+	<Settings.NumericalInput {form} name="entry.day.entry.day.blockEndPad" min={0} max={0.5} step={'0.1'} title="After Landing Block Pad (hr)" update={() => emailList?.update()} value={Math.round(data.settingValues['entry.day.blockEndPad'] / 3600 * 10) / 10} />
 
 </Settings.List>
 

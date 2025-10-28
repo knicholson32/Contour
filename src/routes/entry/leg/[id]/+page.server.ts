@@ -8,7 +8,7 @@ import * as helpers from '$lib/helpers';
 import type { Prisma } from '@prisma/client';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { generateDeadheads } from '$lib/server/db/deadhead';
-import { filterOutliers, generateAirportList } from '$lib/server/helpers';
+import { filterOutliers, generateAirportList, getCivilNightSeconds } from '$lib/server/helpers';
 import { getDistanceFromLatLonInKm } from '$lib/helpers';
 import type * as Types from '@prisma/client';
 import { fetchLegsForSideMenu } from '$lib/server/lib/leg';
@@ -36,6 +36,9 @@ export const load = async ({ fetch, params, url }) => {
           type: true
         }
       },
+      originAirport: true,
+      destinationAirport: true,
+      diversionAirport: true,
       positions: true,
       fixes: true,
       approaches: true
@@ -218,6 +221,20 @@ export const load = async ({ fetch, params, url }) => {
   const deckLegs = leg === null ? [] : (await (await fetch('/api/legs?id=' + leg.id + '&fixes=true&filterDuplicates=false' + '&v=' + entrySettings['entry.dataVersion'])).json()) as DeckTypes.Legs;
   const deckLeg = deckLegs.length > 0 ? deckLegs[0] : null;
 
+  let nightEstimate: null | number = null;
+  if (leg !== null) {
+    if (leg.positions.length > 1) {
+      const nightTime_s = getCivilNightSeconds(leg.positions);
+      nightEstimate = Math.round((nightTime_s / 3600) * 10) / 10;
+    } else {
+      const dest = leg.diversionAirport ?? leg.destinationAirport;
+      if (leg.originAirport !== null && dest !== null && leg.useBlock) {
+        const nightTime_s = getCivilNightSeconds([{ latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude, timestamp: leg.startTime_utc }, { latitude: dest.latitude, longitude: dest.longitude, timestamp: leg.endTime_utc }]);
+        nightEstimate = Math.round((nightTime_s / 3600) * 10) / 10;
+      }
+    }
+  }
+
   return {
     searchParams: {
       dayId,
@@ -227,6 +244,7 @@ export const load = async ({ fetch, params, url }) => {
     entrySettings,
     leg,
     legs,
+    nightEstimate,
     deckLeg,
     currentDay,
     selectedAircraftAPI,

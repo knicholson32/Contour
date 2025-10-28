@@ -2,7 +2,7 @@
     import icons from "$lib/components/icons";
     import { dateToDateStringFormMonthDayYear } from "$lib/helpers";
     import type { Entry } from "$lib/types";
-    import { Waypoints, Server, Briefcase } from "lucide-svelte";
+    import { Waypoints, Server, Briefcase, Satellite } from "lucide-svelte";
     import Tag from "$lib/components/decorations/Tag.svelte";
 
     interface Props {
@@ -28,7 +28,13 @@
         {/if}
       {/if}
       {#if leg._count.positions > 0}
-        <span class="text-primary ml-2"><Waypoints class="w-3 h-3"/></span>
+        <span class="text-primary ml-2">
+          {#if leg.positionsFromTracker}
+            <Satellite class="w-3 h-3 text-green-500"/>
+          {:else}
+            <Waypoints class="w-3 h-3"/>
+          {/if}
+        </span>
       {/if}
     </span>
     <span class="grow ml-1 leading-5">

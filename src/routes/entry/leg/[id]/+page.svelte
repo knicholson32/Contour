@@ -17,7 +17,7 @@
   import { dateToDateStringForm, dateToTimeStringZulu, pad, preloadLegOverview, timeStrAndTimeZoneToUTC } from '$lib/helpers';
   import { v4 as uuidv4 } from 'uuid';
   import { browser } from '$app/environment';
-  import { CircleAlert, CalendarDays, ChevronRight, Server, Fullscreen, Gauge, Link, Maximize, Plus, Route, RouteOff, Table2, Timer, Waypoints } from 'lucide-svelte';
+  import { CircleAlert, CalendarDays, ChevronRight, Server, Fullscreen, Gauge, Link, Maximize, Plus, Route, RouteOff, Table2, Timer, Waypoints, CircleCheck } from 'lucide-svelte';
   import { VisXYContainer, VisLine, VisAxis, VisCrosshair, VisTooltip, VisBulletLegend } from "@unovis/svelte";
 	import { color } from "$lib/components/ui/helpers";
   import Tooltip from '$lib/components/routeSpecific/leg/Tooltip.svelte';
@@ -445,6 +445,12 @@
                   </Deck.Widgets.GeoReferencedTooltip>
                 {/if}
             </Deck.Core>
+            {#if data.leg.positionsFromTracker}
+              <div class="absolute z-10 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 backdrop-blur-lg px-3 py-2 rounded-lg bottom-4 right-4">
+                <div class="text-xxs uppercase">Using Tracker Data</div>
+                <CircleCheck class="w-4 h-4 text-green-500"/>
+              </div>
+            {/if}
             {#if data.leg.positions.length === 0}
               <a href="/entry/leg/{data.leg.id}/upload-positions" class="absolute bottom-4 right-4 z-10 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 backdrop-blur-lg px-3 py-2 rounded-lg text-xxs uppercase">
                 <span>Upload KLM</span>
@@ -657,7 +663,13 @@
             <Entry.FlightTime required={true} title={selectedAircraftAPI === null || selectedAircraftAPI.simulator === false ? 'Total Time' : 'Simulated Flight'} name="total-time" autoFill={null} bind:value={totalTime} defaultValue={data.leg.totalTime} />
             <Entry.FlightTime title="PIC" name="pic-time" bind:autoFill={totalTime} defaultValue={data.leg.pic} />
             <Entry.FlightTime title="SIC" name="sic-time" bind:autoFill={totalTime} defaultValue={data.leg.sic} />
-            <Entry.FlightTime title="Night" name="night-time" bind:autoFill={totalTime} defaultValue={data.leg.night} />
+            <Entry.FlightTime title="Night" name="night-time" bind:autoFill={totalTime} defaultValue={data.leg.night}>
+              <div slot="details" class="text-xs text-gray-400 dark:text-zinc-600 italic select-none">
+                {#if data.nightEstimate !== null && data.nightEstimate > 0}
+                  Calculated time: {data.nightEstimate} hr
+                {/if}
+              </div>
+            </Entry.FlightTime>
             <Entry.FlightTime title="Cross Country" name="xc-time" bind:autoFill={totalTime} defaultValue={data.leg.xc} />
           </Section>
 

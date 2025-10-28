@@ -692,6 +692,32 @@ export const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: numb
 }
 
 /**
+ * Calculate the initial true heading from point A to B.
+ * @see https://www.movable-type.co.uk/scripts/latlong.html
+ * @param lat1 starting latitude in decimal degrees
+ * @param lon1 starting longitude in decimal degrees
+ * @param lat2 destination latitude in decimal degrees
+ * @param lon2 destination longitude in decimal degrees
+ * @returns heading in degrees relative to true north (0-360)
+ */
+export const getTrueHeadingBetweenPoints = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+	const φ1 = deg2rad(lat1);
+	const φ2 = deg2rad(lat2);
+	const Δλ = deg2rad(lon2 - lon1);
+
+	const y = Math.sin(Δλ) * Math.cos(φ2);
+	const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+
+	if (x === 0 && y === 0) return 0; // Points overlap; heading undefined, default to 0.
+
+	const θ = Math.atan2(y, x);
+	return (θ * (180 / Math.PI) + 360) % 360;
+}
+
+
+
+
+/**
  * Convert degrees to radians
  * @param deg the degrees
  * @returns radians

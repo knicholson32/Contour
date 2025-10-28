@@ -11,7 +11,6 @@
   import type { Padding } from './types';
   import { useGlobeGlobal } from './components/states';
 
-
   // TODO:
   //  [ ] Consider using MabLibra (https://github.com/maplibre/maplibre-gl-js). Its vector based and may be able to
   //      get us away from external map tile services
@@ -38,7 +37,9 @@
     offset = [0, 0],
     corePadding = { left: 0, right: 0, top: 0, bottom: 0 },
     globe = $useGlobeGlobal,
+    showControls = true,
     customControlPositioning = $bindable('bottom-4 left-4'),
+    onLoad,
     children,
   }: {
     startCenteredOn?: [number, number],
@@ -46,7 +47,9 @@
     offset?: [number, number],
     corePadding?: Required<Padding>,
     globe?: boolean,
+    showControls?: boolean,
     customControlPositioning?: string
+    onLoad?: () => void
     children?: Snippet
   } = $props();
 
@@ -115,7 +118,7 @@
         latitude: startCenteredOn === undefined || startCenteredOn.length !== 2 ? (start === undefined ? 0 : start.latitude) : startCenteredOn[0],
         zoom: start === undefined ? 3 : start.zoom,
         minZoom: 1,
-        maxZoom: 14,
+        maxZoom: 19,
       },
       pickingRadius: 4,
       controller: { inertia: false },
@@ -187,6 +190,7 @@
 
     // await initializeLayers();
     initializeMap();
+    if (onLoad !== undefined) onLoad();
   }
 
 
@@ -231,16 +235,18 @@
 </script>
 
 <div class="{useGlobe ? 'dark:bg-black bg-zinc-950' : 'dark:bg-[#222222] bg-[#D9E8EB]'} flex-grow flex">
-  <div bind:this={element} id="deck" class="flex-grow {useTransition ? 'transition-opacity duration-500' : ''} " style="opacity: {opacity}%;">
+  <div bind:this={element} class="flex-grow {useTransition ? 'transition-opacity duration-500' : ''} " style="opacity: {opacity}%;">
     <canvas id="deck-canvas"></canvas>
   </div>
 </div>
 
 
-<div class="absolute z-10 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 backdrop-blur-lg px-3 py-2 rounded-lg group {customControlPositioning}">
-  <button type="button" onclick={() => changeVariant(false)} class="{!useGlobe ? 'opacity-100' : 'opacity-50'} cursor-pointer text-xxs uppercase">Map</button>
-  <button type="button" onclick={() => changeVariant(true)} class="{useGlobe ? 'opacity-100' : 'opacity-50'} cursor-pointer text-xxs uppercase">Globe</button>
-</div>
+{#if showControls}
+  <div class="absolute z-10 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 backdrop-blur-lg px-3 py-2 rounded-lg group {customControlPositioning}">
+    <button type="button" onclick={() => changeVariant(false)} class="{!useGlobe ? 'opacity-100' : 'opacity-50'} cursor-pointer text-xxs uppercase">Map</button>
+    <button type="button" onclick={() => changeVariant(true)} class="{useGlobe ? 'opacity-100' : 'opacity-50'} cursor-pointer text-xxs uppercase">Globe</button>
+  </div>
+{/if}
 
 <div bind:this={mapWidgets} id="map-widgets" class="{useTransition ? 'transition-opacity duration-700' : ''}" style="opacity: {opacity}%;">
   {@render children?.()}

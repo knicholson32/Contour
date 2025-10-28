@@ -10,6 +10,8 @@ export const TypeNames = {
 	'entry.day.entry.state': types.DayNewEntryState.NOT_STARTED,
 	'entry.day.entry.fa_id': '',
 	'entry.day.entry.fa_link': '',
+	'entry.day.blockStartPad': 360,
+	'entry.day.blockEndPad': 360,
 	'entry.flight_id.last': '',
 	'entry.dataVersion': 0,
 	'entry.day.current': -1,
@@ -52,6 +54,8 @@ export type ObjectType<T extends TypeName> =
 	T extends 'entry.defaultStartApt' ? string : 	// String
 	T extends 'entry.entryMXMode' ? boolean : // Boolean
 	T extends 'entry.dataVersion' ? number : 			// Integer
+	T extends 'entry.day.blockStartPad' ? number : 			// Integer
+	T extends 'entry.day.blockEndPad' ? number : 			// Integer
 	T extends 'system.debug' ? number : 					// Integer
 	T extends 'system.lastSeenCommit' ? string :  // String
 	T extends 'data.approaches.lastSync' ? number :	// Integer
@@ -107,6 +111,8 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			// Integer Conversion ------------------------------------------------------------------------
 			case 'entry.tour.current':
 			case 'entry.day.current':
+			case 'entry.day.blockStartPad':
+			case 'entry.day.blockEndPad':
 			case 'entry.dataVersion':
 			case 'system.debug':
 			case 'data.approaches.lastSync':

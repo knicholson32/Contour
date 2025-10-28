@@ -15,6 +15,8 @@
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
   import type { API } from '$lib/types';
+  import * as Deck from '$lib/components/map/deck';
+    import { CircleCheck } from 'lucide-svelte';
   export let data: import('./$types').PageData;
 	export let form: import('./$types').ActionData;
 
@@ -23,6 +25,7 @@
   let endApt: string | null;
   let divertApt: string | null;
   let myLeg: boolean = true;
+  let autoPad: boolean = true;
 
   let outTime: string | null = data.startTime ?? null;
   let inTime: string | null = data.endTime ?? null;
@@ -34,6 +37,7 @@
   $: outTimeUTC = outTZ === null ? null : timeStrAndTimeZoneToUTC(outTime, outTZ);
   $: inTimeUTC = inTZ === null ? null : timeStrAndTimeZoneToUTC(inTime, inTZ);
   $: calcTotalTime = outTimeUTC === null || inTimeUTC === null || isNaN(outTimeUTC.value) || isNaN(inTimeUTC.value) ? null : ((inTimeUTC.value - outTimeUTC.value) / 60 / 60);
+  // $: calcTotalTimeVerbose = calcTotalTime === null ? '0' : autoPad ? `-${data.entrySettings['entry.day.blockStartPad'] / 3600} +${data.entrySettings['entry.day.blockEndPad'] / 3600} | ${calcTotalTime.toFixed(1)}` : '';
 
   let runwayOperations = data.runwayOperations;
 
@@ -148,6 +152,21 @@
         <Title title="Duty Day (Tour) Leg" />
       {/if}
 
+      {#if data.airportList !== null && data.airportList !== undefined && data.trackLeg !== null && data.trackLeg !== undefined}
+        <Section title="Map">
+          <div class="relative flex h-[50vh]">
+            <Deck.Core>
+              <Deck.Airports airports={data.airportList} highlight={data.airportList.map((a) => a.id)}/>
+              <Deck.Leg leg={data.trackLeg}/>
+            </Deck.Core>
+            <div class="absolute z-10 inline-flex gap-2 items-center justify-center border border-zinc-300 dark:border-zinc-950/50 bg-zinc-100/70 dark:bg-zinc-900/50 backdrop-blur-lg px-3 py-2 rounded-lg bottom-4 right-4">
+              <div class="text-xxs uppercase">Using Tracker Data</div>
+              <CircleCheck class="w-4 h-4 text-green-500"/>
+            </div>
+          </div>
+        </Section>
+      {/if}
+
       <Section title="Warnings" warning={true}>
         {#if data.entry !== undefined}
           {#if data.entry.progressPercent !== null && data.entry.progressPercent !== 100}
@@ -190,9 +209,21 @@
         {/if}
         <!-- {/if} -->
         {#if useBlock || useBlockRequired}
-          <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTime ?? null} />
-          <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZ} defaultValue={data.endTime ?? null} />
-          <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime} />
+          <Entry.Switch title="Auto-Pad" name="auto-pad" noLocalStorage={true} bind:value={autoPad} defaultValue={true} />
+          {#if autoPad}
+            <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTimePadded ?? null} />
+            <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZ} defaultValue={data.endTimePadded ?? null} />
+          {:else}
+            <Entry.TimePicker required={true} title="Out" name="out" bind:value={outTime} bind:tz={outTZ} bind:autoTZ={startAirportTZ} defaultValue={data.startTime ?? null} />
+            <Entry.TimePicker required={true} title="In" name="in" bind:value={inTime} bind:tz={inTZ} autoTZ={outTZ} defaultValue={data.endTime ?? null} />
+          {/if}
+          <Entry.FlightTime required={false} disabled={true} title="Calculated Total Time" name="calc-total-time" bind:defaultValue={calcTotalTime}>
+            <div slot="details" class="text-xs text-gray-400 dark:text-zinc-600 flex items-center font-mono italic">
+              {#if autoPad}
+                Auto pad results in +{((data.entrySettings['entry.day.blockStartPad'] + data.entrySettings['entry.day.blockEndPad']) / 3600).toFixed(1)}
+              {/if}
+            </div>
+          </Entry.FlightTime>
         {/if}
       </Section>
 
@@ -200,7 +231,7 @@
         <Entry.FlightTime required={true} title={selectedAircraftAPI === null || selectedAircraftAPI.simulator === false ? 'Total Time' : 'Simulated Flight'} name="total-time" autoFill={null} bind:value={totalTime} defaultValue={calcTotalTime} />
         <Entry.FlightTime title="PIC" name="pic-time" bind:autoFill={totalTime} defaultValue={null} />
         <Entry.FlightTime title="SIC" name="sic-time" bind:autoFill={totalTime} defaultValue={calcTotalTime} />
-        <Entry.FlightTime title="Night" name="night-time" bind:autoFill={totalTime} defaultValue={null} />
+        <Entry.FlightTime title="Night" name="night-time" bind:autoFill={totalTime} defaultValue={data.nightEstimate === null || data.nightEstimate === undefined ? null : data.nightEstimate === 0 ? null : data.nightEstimate} />
         <Entry.FlightTime title="Cross Country" name="xc-time" bind:autoFill={totalTime} defaultValue={data.xc ? calcTotalTime : null} />
       </Section>
 
