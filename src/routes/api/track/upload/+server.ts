@@ -7,20 +7,41 @@ import * as settings from '$lib/server/settings';
 import { getDistanceFromLatLonInKm, getTrueHeadingBetweenPoints } from '$lib/helpers/index.js';
 import { addIfDoesNotExist } from '$lib/server/db/airports';
 import { v4 as uuidv4 } from 'uuid';
+import { MEDIA_FOLDER } from '$lib/server/env';
+import fs from 'node:fs';
+import { Debug } from '$lib/types/prisma';
 
 // import { generatePreviews } from '$lib/server/track';
 
 
-const SPEED_CUTOFF_KN = 80;
+const SPEED_CUTOFF_KN = 60;
 
 export const POST = async ({ url, request }) => {
 
-  
+  const debug = await settings.get('system.debug');
+
   try {
     const data = await request.json() as TrackerPosition[]; // Parses the request body as JSON
 
-    if (data.length === 0) return json({ ok: false, message: 'No data submitted' }, { status: 400 });
-    if (data.length < 2) return json({ ok: false, message: 'At least 2 data points are required' }, { status: 400 });
+    if (debug >= Debug.VERBOSE) {
+      const file = `${MEDIA_FOLDER}/tracks/${(new Date()).toISOString()}.json`;
+      console.log('---- Track Data');
+      console.log('Saving incoming track data to file: ', file);
+      try {
+        fs.writeFileSync(file, JSON.stringify(data));
+      } catch (e) {
+        console.log('ERROR: Unable to save track data to backup log: ', e);
+      }
+    }
+
+    if (data.length === 0) {
+      if (debug >= Debug.VERBOSE) console.log('No data submitted');
+      return json({ ok: false, message: 'No data submitted' }, { status: 400 });
+    }
+    if (data.length < 2) {
+      if (debug >= Debug.VERBOSE) console.log('At least 2 data points are required');
+      return json({ ok: false, message: 'At least 2 data points are required' }, { status: 400 });
+    }
     data.sort((a, b) => a.time - b.time);
 
     const aeroAPIKey = await settings.get('general.aeroAPI');
@@ -57,6 +78,7 @@ export const POST = async ({ url, request }) => {
 
         if (inFlight) {
           if(speed < SPEED_CUTOFF_KN) {
+            if (debug >= Debug.VERBOSE) console.log('End of data segment found', currentPoint.time);
             // We have landed. Break and submit this data.
             inFlight = false;
             break;
@@ -109,6 +131,8 @@ export const POST = async ({ url, request }) => {
       if (matchingTracks.length === 0) {
         const id = uuidv4();
 
+        if (debug >= Debug.VERBOSE) console.log('Adding track', id, closestStartAirport?.id, closestEndAirport?.id);
+
         const metadata: Prisma.ProspectMetadataCreateInput = {
           id: id,
           startLatitude: startPosition.latitude,
@@ -151,12 +175,15 @@ export const POST = async ({ url, request }) => {
     // Generate previews async
     // generatePreviews(ids);
 
+    if (debug >= Debug.VERBOSE) console.log('Track upload cycle complete!');
+
 
     return json({ ok: true, ids: ids }, { status: 200 });
 
     
   } catch (e) {
     const err = e as Error;
+    console.log('Error downloading track info:');
     console.log(err);
     return json({ ok: false, message: err.message }, { status: 400 });
   }
