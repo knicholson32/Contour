@@ -30,6 +30,7 @@
     "abort-controller": "^3.0.0",
     "bits-ui": "^2.9.2",
     "chalk": "^5.5.0",
+    "country-code-emoji": "^2.3.0",
     "cssnano": "^7.1.0",
     "date-fns": "^4.1.0",
     "date-format": "^4.0.14",

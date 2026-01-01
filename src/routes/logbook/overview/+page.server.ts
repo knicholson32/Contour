@@ -3,6 +3,7 @@ import prisma from '$lib/server/prisma';
 import * as DeckTypes from '$lib/components/map/deck/types.js';
 import { addIfDoesNotExist } from '$lib/server/db/airports.js';
 import { getDistanceFromLatLonInKm } from '$lib/helpers/index.js';
+import { countryCodeEmoji} from 'country-code-emoji';
 
 const SECONDS_PER_YEAR = 60 * 60 * 24 * 365;
 
@@ -47,9 +48,9 @@ export const load = async ({ fetch, params, parent, url }) => {
       }
     } 
   });
-  const airports = await prisma.airport.findMany({ select: { ...DeckTypes.AirportSelect, _count: { select: { legOrigin: true, legDestination: true, legDiversion: true } }} });
+  const airports = await prisma.airport.findMany({ select: { ...DeckTypes.AirportSelect, countryCode: true, _count: { select: { legOrigin: true, legDestination: true, legDiversion: true } }} });
 
-  const visitedAirports: DeckTypes.Airport[] = [];
+  const visitedAirports: (DeckTypes.Airport & {countryCode: string})[] = [];
   const legs: DeckTypes.Leg[] = [];
 
   for (const airport of airports) {
@@ -60,6 +61,7 @@ export const load = async ({ fetch, params, parent, url }) => {
       latitude: airport.latitude,
       longitude: airport.longitude,
       priority: numLegs,
+      countryCode: airport.countryCode
       // name: airport.name
     });
   }
@@ -113,8 +115,21 @@ export const load = async ({ fetch, params, parent, url }) => {
   airportVisits.sort((a, b) => b.visits - a.visits);
   aircraftTypes.sort((a, b) => b.legs - a.legs);
 
+  const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+  const countries: {code: string, count: number, name: string | undefined, emoji: string}[] = [];
+  for (const airport of visitedAirports) {
+    const idx = countries.findIndex((v) => v.code === airport.countryCode);
+    if (idx === -1) {
+      countries.push({ code: airport.countryCode, count: 1, emoji: countryCodeEmoji(airport.countryCode), name: regionNames.of(airport.countryCode) });
+    } else {
+      countries[idx].count++;
+    }
+  }
+  countries.sort((a, b) => b.count - a.count);
+
   return {
     visitedAirports,
+    countries,
     summary: {
       numFlights: legsRaw.length,
       numFlightsLast12Months: numPastYear,

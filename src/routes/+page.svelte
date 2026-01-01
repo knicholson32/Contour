@@ -19,7 +19,6 @@
   import OneColumn from "$lib/components/scrollFrames/OneColumn.svelte";
   import * as Popover from "$lib/components/ui/popover";
   import AircraftHoverCard from "$lib/components/decorations/AircraftHoverCard.svelte";
-  import type { MjolnirEvent } from "mjolnir.js";
 
   interface Props {
     data: import('./$types').PageData;
@@ -391,8 +390,17 @@
                 <TowerControl class="h-4 w-4 text-muted-foreground" />
               </Card.Header>
               <Card.Content>
-                <div class="text-2xl font-bold">{data.airports.length}</div>
-                <p class="text-xs text-muted-foreground">{data.operations} operations</p>
+                <div class="inline-flex items-end gap-2">
+                  <span class="text-2xl font-bold">{data.airports.length}</span>
+                  <span class="text-xs text-muted-foreground font-normal pb-1">{data.operations} operations</span>
+                </div>
+                <p class="text-xs text-muted-foreground inline-flex items-center gap-1 w-full overflow-hidden whitespace-nowrap">
+                  <span class="inline-flex text-lg select-none overflow-x-scroll">
+                    {#each data.countries as country}
+                      <span title={country.name + ', ' + country.count + (country.count === 1 ? ' airport' : ' airports')}>{country.emoji}</span>
+                    {/each}
+                  </span>
+                </p>
               </Card.Content>
             </Card.Root>
 

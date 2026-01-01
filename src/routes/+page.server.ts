@@ -6,6 +6,7 @@ import * as settings from '$lib/server/settings';
 import { redirect } from '@sveltejs/kit';
 import { pad } from '$lib/helpers';
 import { AirportSelect, type Airport, type Legs } from '$lib/components/map/deck/types.js';
+import { countryCodeEmoji} from 'country-code-emoji';
 // import type { PageServerLoad } from './$types';
 // import type { PageData } from './$types';
 
@@ -117,7 +118,7 @@ export const load = async ({ parent, url, fetch }) => {
 
   const posGroups: [number, number][][] = [];
   const posGroupsIDs: string[] = [];
-  const airports: Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true }}>[] = baseAirport === null ? [] : [baseAirport];
+  const airports: Types.Prisma.AirportGetPayload<{ select: { id: true, latitude: true, longitude: true, countryCode: true }}>[] = baseAirport === null ? [] : [baseAirport];
   let operations = 0;
 
   const acTypeList: { [key: string]: number } = {};
@@ -144,11 +145,11 @@ export const load = async ({ parent, url, fetch }) => {
 
       operations += 2;
 
-      if (airports.findIndex((a) => a.id === leg.originAirportId) === -1 && leg.originAirport !== null) airports.push({ id: leg.originAirport.id, latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude });
+      if (airports.findIndex((a) => a.id === leg.originAirportId) === -1 && leg.originAirport !== null) airports.push({ id: leg.originAirport.id, latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude, countryCode: leg.originAirport.countryCode });
       if (leg.diversionAirportId !== null && leg.diversionAirport !== null) {
-        if (airports.findIndex((a) => a.id === leg.diversionAirportId) === -1) airports.push({ id: leg.diversionAirportId, latitude: leg.diversionAirport.latitude, longitude: leg.diversionAirport.longitude });
+        if (airports.findIndex((a) => a.id === leg.diversionAirportId) === -1) airports.push({ id: leg.diversionAirportId, latitude: leg.diversionAirport.latitude, longitude: leg.diversionAirport.longitude, countryCode: leg.diversionAirport.countryCode });
       } else {
-        if (airports.findIndex((a) => a.id === leg.destinationAirportId) === -1 && leg.destinationAirport !== null) airports.push({ id: leg.destinationAirport.id, latitude: leg.destinationAirport.latitude, longitude: leg.destinationAirport.longitude });
+        if (airports.findIndex((a) => a.id === leg.destinationAirportId) === -1 && leg.destinationAirport !== null) airports.push({ id: leg.destinationAirport.id, latitude: leg.destinationAirport.latitude, longitude: leg.destinationAirport.longitude, countryCode: leg.destinationAirport.countryCode });
       }
     }
   }
@@ -185,11 +186,11 @@ export const load = async ({ parent, url, fetch }) => {
 
     operations += 2;
 
-    if (airports.findIndex((a) => a.id === leg.originAirportId) === -1 && leg.originAirport !== null) airports.push({ id: leg.originAirport.id, latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude });
+    if (airports.findIndex((a) => a.id === leg.originAirportId) === -1 && leg.originAirport !== null) airports.push({ id: leg.originAirport.id, latitude: leg.originAirport.latitude, longitude: leg.originAirport.longitude, countryCode: leg.originAirport.countryCode });
     if (leg.diversionAirportId !== null && leg.diversionAirport !== null) {
-      if (airports.findIndex((a) => a.id === leg.diversionAirportId) === -1) airports.push({ id: leg.diversionAirportId, latitude: leg.diversionAirport.latitude, longitude: leg.diversionAirport.longitude });
+      if (airports.findIndex((a) => a.id === leg.diversionAirportId) === -1) airports.push({ id: leg.diversionAirportId, latitude: leg.diversionAirport.latitude, longitude: leg.diversionAirport.longitude, countryCode: leg.diversionAirport.countryCode });
     } else {
-      if (airports.findIndex((a) => a.id === leg.destinationAirportId) === -1 && leg.destinationAirport !== null) airports.push({ id: leg.destinationAirport.id, latitude: leg.destinationAirport.latitude, longitude: leg.destinationAirport.longitude });
+      if (airports.findIndex((a) => a.id === leg.destinationAirportId) === -1 && leg.destinationAirport !== null) airports.push({ id: leg.destinationAirport.id, latitude: leg.destinationAirport.latitude, longitude: leg.destinationAirport.longitude, countryCode: leg.destinationAirport.countryCode });
     }
   }
 
@@ -463,6 +464,19 @@ export const load = async ({ parent, url, fetch }) => {
     });
   }
 
+  const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+  const countries: {code: string, count: number, name: string | undefined, emoji: string}[] = [];
+  for (const airport of airports) {
+    const idx = countries.findIndex((v) => v.code === airport.countryCode);
+    if (idx === -1) {
+      countries.push({ code: airport.countryCode, count: 1, emoji: countryCodeEmoji(airport.countryCode), name: regionNames.of(airport.countryCode) });
+    } else {
+      countries[idx].count++;
+    }
+  }
+
+  countries.sort((a, b) => b.count - a.count);
+
   return {
     lastTour,
     groundSpeed,
@@ -477,6 +491,7 @@ export const load = async ({ parent, url, fetch }) => {
     deckSegments,
     startAirport: await prisma.airport.findUnique({ where: { id: sets['tour.defaultStartApt'] } }),
     airports,
+    countries,
     visitedAirports,
     operations,
     mostCommonAC: {

@@ -28,7 +28,7 @@
 
 {#snippet titleCard()}
   <div class="p-4 rounded-lg text-zinc-200 bg-zinc-900/80 backdrop-blur-sm flex flex-row items-center gap-4">
-    <img class="w-16" src="/logo.png" alt="Contour logo">
+    <img class="w-10" src="/logo.png" alt="Contour logo">
     <div class="flex flex-col gap-0 items-start justify-center w-full text-sm">
       <div class="text-lg font-medium tracking-wider">Contour Logbook Overview</div>
       <div class="text-xs opacity-70">Generated for {data.settings['general.name']}</div>
@@ -116,6 +116,16 @@
         </div>
         <!-- Summary -->
         <div class="col-span-2 grid grid-cols-2 gap-4 items-center p-4">
+          <div class="col-span-2 flex flex-col gap-2">
+            <div class="uppercase text-xs text-slate-300/50">Countries ({data.countries.length})</div>
+            <div class="text-xs text-muted-foreground inline-flex items-center gap-1 w-full overflow-hidden whitespace-nowrap">
+              <span class="inline-flex text-xl select-none overflow-x-scroll">
+                {#each data.countries as country}
+                  <span title={country.name + ', ' + country.count + (country.count === 1 ? ' airport' : ' airports')}>{country.emoji}</span>
+                {/each}
+              </span>
+            </div>
+          </div>
           <div class="flex flex-col gap-4">
             <div class="uppercase text-xs text-slate-300/50">Top Airports</div>
             <div class="grid grid-cols-2 gap-1 text-xs opacity-90">

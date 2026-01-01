@@ -138,6 +138,9 @@ importers:
       chalk:
         specifier: ^5.5.0
         version: 5.5.0
+      country-code-emoji:
+        specifier: ^2.3.0
+        version: 2.3.0
       cssnano:
         specifier: ^7.1.0
         version: 7.1.0(postcss@8.5.6)
@@ -219,6 +222,7 @@ packages:
 
   '@arcgis/lumina@4.34.4':
     resolution: {integrity: sha512-KEKPQkFywAUJk9FCZRm8XS6o+GilVW6hphs/TfwPc9glgoNQtczQIcdCPmfjxP9Va2PImUnUbo5vhrJ3tySrVg==}
+    deprecated: This version is no longer supported. Upgrade to @latest
     peerDependencies:
       '@lit/context': ^1.1.5
       lit: ^3.3.0
@@ -228,6 +232,7 @@ packages:
 
   '@arcgis/toolkit@4.34.4':
     resolution: {integrity: sha512-KEW34oaxawE3tiB2v6Bv/i2rm2LiZBdGSKpJ1HE0EdlR4N26DjLma+tPQPfDjs1R6OaNiBF4AN6vvhftxBirjA==}
+    deprecated: This version is no longer supported. Upgrade to @latest
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -2020,6 +2025,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  country-code-emoji@2.3.0:
+    resolution: {integrity: sha512-MqmIWr3aucoU/3XZU44e0sz6izAlErqaUYp9/NFzdnzb9TrwwornyW3ws2da5TSnpTUr2qP2840oJW9oNKXCoQ==}
 
   crc-32@1.2.2:
     resolution: {integrity: sha512-ROmzCKrTnOwybPcJApAA6WBWij23HVfGVNKqqrZpuyZOHqK2CwHSvpGuyt/UNNvaIjEd8X5IFGp4Mh+Ie1IHJQ==}
@@ -6237,6 +6245,8 @@ snapshots:
       parse-json: 5.2.0
     optionalDependencies:
       typescript: 5.9.2
+
+  country-code-emoji@2.3.0: {}
 
   crc-32@1.2.2: {}
 
