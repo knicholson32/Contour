@@ -50,12 +50,17 @@ export const load = async ({ fetch, params, parent, url }) => {
   });
   const airports = await prisma.airport.findMany({ select: { ...DeckTypes.AirportSelect, countryCode: true, _count: { select: { legOrigin: true, legDestination: true, legDiversion: true } }} });
 
+  const dutyAirports = (await prisma.dutyDay.findMany({ select: { startAirportId: true, endAirportId: true } })).flatMap((a) => [a.startAirportId, a.endAirportId]);
+
   const visitedAirports: (DeckTypes.Airport & {countryCode: string})[] = [];
   const legs: DeckTypes.Leg[] = [];
 
   for (const airport of airports) {
     const numLegs = airport._count.legDestination + airport._count.legOrigin + airport._count.legDiversion;
-    if (numLegs === 0) continue;
+    if (numLegs === 0) {
+      // See if we have a duty day with the airport
+      if (!dutyAirports.includes(airport.id)) continue;
+    }
     visitedAirports.push({
       id: airport.id,
       latitude: airport.latitude,

@@ -114,7 +114,7 @@ export const load = async ({ parent, url, fetch }) => {
       { startTime_utc: { gte: s } },
       { endTime_utc: { lte: e } },
     ]
-  }, orderBy: { startTime_utc: 'asc' }, include: { legs: { include: { aircraft: true, positions: true, originAirport: true, destinationAirport: true, diversionAirport: true, _count: { select: { approaches: true } } } }, deadheads: true } });
+  }, orderBy: { startTime_utc: 'asc' }, include: { legs: { include: { aircraft: true, positions: true, originAirport: true, destinationAirport: true, diversionAirport: true, _count: { select: { approaches: true } } } }, deadheads: true, startAirport: true, endAirport: true } });
 
   const posGroups: [number, number][][] = [];
   const posGroupsIDs: string[] = [];
@@ -192,6 +192,13 @@ export const load = async ({ parent, url, fetch }) => {
     } else {
       if (airports.findIndex((a) => a.id === leg.destinationAirportId) === -1 && leg.destinationAirport !== null) airports.push({ id: leg.destinationAirport.id, latitude: leg.destinationAirport.latitude, longitude: leg.destinationAirport.longitude, countryCode: leg.destinationAirport.countryCode });
     }
+  }
+
+  for (const day of days) {
+    if (airports.findIndex((a) => a.id === day.startAirportId) === -1 && day.startAirport !== null) 
+      airports.push({ id: day.startAirport.id, latitude: day.startAirport.latitude, longitude: day.startAirport.longitude, countryCode: day.startAirport.countryCode });
+    if (airports.findIndex((a) => a.id === day.endAirportId) === -1 && day.endAirport !== null) 
+      airports.push({ id: day.endAirport.id, latitude: day.endAirport.latitude, longitude: day.endAirport.longitude, countryCode: day.endAirport.countryCode });
   }
 
   acList.sort((a, b) => a.time - b.time);
@@ -455,7 +462,7 @@ export const load = async ({ parent, url, fetch }) => {
 
   for (const airport of airportsWithPriority) {
     const numLegs = airport._count.legDestination + airport._count.legOrigin + airport._count.legDiversion;
-    if (numLegs === 0) continue;
+    // if (numLegs === 0) continue;
     visitedAirports.push({
       id: airport.id,
       latitude: airport.latitude,
