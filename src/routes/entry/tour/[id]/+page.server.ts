@@ -91,7 +91,9 @@ export const load = async ({ fetch, params, url }) => {
                   }
                 }
               }
-            }
+            },
+            startAirport: true,
+            endAirport: true
           }
         }
       }
@@ -119,6 +121,9 @@ export const load = async ({ fetch, params, url }) => {
       for (const d of tourExtended.days) {
 
         stats.duty += (d.endTime_utc - d.startTime_utc) / 60 / 60;
+
+        tourMap.airports.push(d.startAirport);
+        tourMap.airports.push(d.endAirport);
 
         for (const l of d.legs) {
           stats.flight += l.totalTime;
