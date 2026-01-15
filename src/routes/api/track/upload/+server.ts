@@ -145,7 +145,7 @@ export const POST = async ({ url, request }) => {
         }
 
         ids.push(id);
-        for (const p of dataExpanded) p.ProspectMetadata = { connect: { id: metadata.id } };
+        for (const p of dataExpanded) p.ProspectMetadata = { connect: { id: id } };
 
         if (closestStartAirport !== null) {
           await addIfDoesNotExist(closestStartAirport.id, aeroAPIKey);

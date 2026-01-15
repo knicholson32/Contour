@@ -61,7 +61,7 @@ RUN corepack enable
 
 # Assign labels
 LABEL org.opencontainers.image.title=contour
-LABEL org.opencontainers.image.description="Docker container for managing and archiving audiobooks"
+LABEL org.opencontainers.image.description="Docker container logging flight data"
 LABEL org.opencontainers.image.documentation="https://github.com/knicholson32/contour"
 LABEL org.opencontainers.image.authors="Keenan Nicholson, Norris Nicholson"
 LABEL org.opencontainers.image.source="https://github.com/knicholson32/contour"

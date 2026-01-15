@@ -119,7 +119,7 @@ export const actions = {
     if (endUTC === null) return API.Form.formFailure('?/default', 'end-time', 'Unknown Timezone');
 
     if (startUTC.value > endUTC.value) return API.Form.formFailure('?/default', 'start-time', 'Start time is after end time');
-    if (endUTC.value - startUTC.value > 86400) return API.Form.formFailure('?/default', 'start-time', 'Duty day is longer than 24 hours');
+    if (endUTC.value - startUTC.value > 86400 * 2) return API.Form.formFailure('?/default', 'start-time', 'Duty day is longer than 48 hours');
     
 
     // Create airport if it does not exist

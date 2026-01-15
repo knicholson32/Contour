@@ -102,7 +102,13 @@ export const serverError = (error: any, context?: string) => {
 };
 
 
-
+/**
+ * Compress JSON data and return a response
+ * @param data the data to convert to JSON
+ * @param requestHeaders Any request headers
+ * @param responseHeaders Any response headers
+ * @returns the response
+ */
 export const jsonCompressed = (data: any, requestHeaders: Headers, responseHeaders?: Headers) => {
 	const body = JSON.stringify(data);
 	const headers = responseHeaders === undefined ? new Headers() : responseHeaders;
