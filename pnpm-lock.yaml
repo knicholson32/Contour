@@ -56,6 +56,9 @@ importers:
       mode-watcher:
         specifier: ^1.1.0
         version: 1.1.0(svelte@5.38.1)
+      prisma:
+        specifier: ^6.14.0
+        version: 6.14.0(typescript@5.9.2)
       puppeteer:
         specifier: ^24.26.1
         version: 24.26.1(typescript@5.9.2)
@@ -183,9 +186,6 @@ importers:
       prettier-plugin-svelte:
         specifier: ^3.4.0
         version: 3.4.0(prettier@3.6.2)(svelte@5.38.1)
-      prisma:
-        specifier: ^6.14.0
-        version: 6.14.0(typescript@5.9.2)
       suncalc:
         specifier: ^1.9.0
         version: 1.9.0
