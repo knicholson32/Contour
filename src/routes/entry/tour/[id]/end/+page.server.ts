@@ -60,7 +60,7 @@ export const actions = {
     const endTimeTZ = data.get('end-time-tz') as null | string;
 
     const company = data.get('company') as null | 'true' | 'false';
-    const lineCheck = data.get('line-check') as null | 'true' | 'false';
+    const trainingEvent = data.get('training-event') as null | 'true' | 'false';
 
     const notes = data.get('notes') as null | string;
 
@@ -73,7 +73,7 @@ export const actions = {
     if (endTime === null || endTime === '') return API.Form.formFailure('?/default', 'end-time', 'Required field');
     if (endTimeTZ === null || endTimeTZ === '') return API.Form.formFailure('?/default', 'end-time', 'Required field');
     if (company === null || company as string === '') return API.Form.formFailure('?/default', 'company', 'Required field');
-    if (lineCheck === null || lineCheck as string === '') return API.Form.formFailure('?/default', 'line-check', 'Required field');
+    if (trainingEvent === null || trainingEvent as string === '') return API.Form.formFailure('?/default', 'training-event', 'Required field');
 
 
     const showUtc = helpers.timeStrAndTimeZoneToUTC(showTime, showTimeTZ);
@@ -123,7 +123,7 @@ export const actions = {
           endTimezoneOffset: endUtc.raw.rawOffsetInMinutes,
           endAirportId: endAirport,
           companyId: company,
-          lineCheck: lineCheck === 'true',
+          trainingEvent: trainingEvent === 'true',
           notes: notes ?? undefined
         }
       });

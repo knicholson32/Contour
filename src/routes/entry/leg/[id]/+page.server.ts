@@ -15,7 +15,6 @@ import { fetchLegsForSideMenu } from '$lib/server/lib/leg';
 import type { Types as DeckTypes } from '$lib/components/map/deck';
 import { incrementDataVersion } from '$lib/server/pdf';
 
-// TODO: Calculate sunset and sunrise time for this day in local and Zulu time and display
 
 // Number of values to filter out for the average speed
 const AVG_FILTER_NUM = 2;
@@ -502,6 +501,7 @@ export const actions = {
     // -----------------------------------------------------------------------------------------------------------------
     // Other
     // -----------------------------------------------------------------------------------------------------------------
+    let lineCheck = data.get('line-check') as string | null === 'true' ? true : false;
     let flightReview = data.get('flight-review') as string | null === 'true' ? true : false;
     let checkride = data.get('checkride') as string | null === 'true' ? true : false;
     let ipc = data.get('ipc') as string | null === 'true' ? true : false;
@@ -540,6 +540,7 @@ export const actions = {
 
         holds: holds === null ? undefined : parseInt(holds),
 
+        lineCheck: lineCheck,
         flightReview: flightReview,
         checkride: checkride,
         ipc: ipc,

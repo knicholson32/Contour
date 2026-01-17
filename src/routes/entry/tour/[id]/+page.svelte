@@ -234,7 +234,7 @@
 
         <Section title="Details">
           <Entry.Select required={true} title="Company" options={['NetJets', 'Cape Air']} placeholder="Unset" name="company" defaultValue={data.currentTour?.companyId ?? 'NetJets'} />
-          <Entry.Switch required={true} title="Line Check" name="line-check" defaultValue={data.currentTour?.lineCheck ?? false} />
+          <Entry.Switch required={true} title="Training Event" name="training-event" defaultValue={data.currentTour?.trainingEvent ?? false} />
         </Section>
         <Section title="Notes">
           <Entry.TextField name="notes" placeholder="Enter Notes" defaultValue={data.currentTour?.notes ?? null} />

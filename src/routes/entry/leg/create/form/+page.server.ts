@@ -415,6 +415,7 @@ export const actions = {
     // -----------------------------------------------------------------------------------------------------------------
     // Other
     // -----------------------------------------------------------------------------------------------------------------
+    let lineCheck = data.get('line-check') as string | null === 'true' ? true : false;
     let flightReview = data.get('flight-review') as string | null === 'true' ? true : false;
     let checkride = data.get('checkride') as string | null === 'true' ? true : false;
     let ipc = data.get('ipc') as string | null === 'true' ? true : false;
@@ -458,6 +459,7 @@ export const actions = {
 
         holds: holds === null ? undefined : parseInt(holds),
 
+        lineCheck: lineCheck,
         flightReview: flightReview,
         checkride: checkride,
         ipc: ipc,

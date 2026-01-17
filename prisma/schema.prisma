@@ -100,7 +100,7 @@ model Tour {
   endAirport     Airport? @relation("endAirport", fields: [endAirportId], references: [id], onDelete: Restrict)
 
   companyId String
-  lineCheck Boolean
+  trainingEvent Boolean
 
   notes String @default("") // @db.VarChar(1024)
 
@@ -295,6 +295,7 @@ model Leg {
   checkride    Boolean @default(false)
   ipc          Boolean @default(false)
   faa6158      Boolean @default(false)
+  lineCheck    Boolean @default(false)
 
   passengers Int @default(0)
 
