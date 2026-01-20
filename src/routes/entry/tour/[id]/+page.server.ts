@@ -25,7 +25,7 @@ export const load = async ({ fetch, params, url }) => {
 
   const entrySettings = await settings.getSet('entry');
 
-  const tours = await prisma.tour.findMany({ select: { id: true, startTime_utc: true, endTime_utc: true, _count: true }, orderBy: { startTime_utc: 'desc' } });
+  const tours = await prisma.tour.findMany({ select: { id: true, startTime_utc: true, endTime_utc: true, _count: true, trainingEvent: true }, orderBy: { startTime_utc: 'desc' } });
 
   let tour: Prisma.TourGetPayload<{
     include: { days: { include: { legs: { include: { positions: true } } } } }

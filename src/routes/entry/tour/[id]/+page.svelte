@@ -14,7 +14,7 @@
   import * as Entry from '$lib/components/entry';
   import { dateToDateStringForm, dateToDateStringFormMonthDayYear, getInlineDateUTC } from '$lib/helpers';
   import * as Deck from '$lib/components/map/deck';
-  import { ArrowRight, Timer, TowerControl } from 'lucide-svelte';
+  import { ArrowRight, BookCheck, Timer, TowerControl } from 'lucide-svelte';
   import MenuSection from '$lib/components/menuForm/MenuSection.svelte';
   import MenuElement from '$lib/components/menuForm/MenuElement.svelte';
   import { TourPreview } from '$lib/components/tourPreview';
@@ -94,7 +94,7 @@
         {#each data.tours as tour (tour.id)}
           <MenuElement href="/entry/tour/{tour.id}?{urlActiveParam}" selected={tour.id === data.id && !isMobileSize}>
             <div class="flex flex-col gap-1 w-full overflow-hidden pl-2 mr-5 flex-initial font-medium text-xs">
-              <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis">
+              <div class="inline-flex overflow-hidden whitespace-nowrap text-ellipsis items-center">
                 <span class="text-sky-600 w-20">{dateToDateStringFormMonthDayYear(tour.startTime_utc)}</span>
                 <span class="mx-2 text-xxs">→</span>
                 <span class="ml-1 text-sky-600 w-20">
@@ -109,6 +109,9 @@
                     <Tag>UNSAVED</Tag>
                   {/if}
                 </span>
+                {#if tour.trainingEvent === true}
+                  <BookCheck class="w-3 h-3 text-green-500" />
+                {/if}
                 <span class="mx-2 text-xxs">
                   {tour._count.days + ' '}
                   {#if tour._count.days === 1}
