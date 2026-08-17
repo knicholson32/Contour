@@ -47,7 +47,7 @@
     goto(`?page=${newPage + 1}&select=${val}`);
   }
 
-  const perPageOptions = [24, 48, 100, 200, 500];
+  const perPageOptions = [8, 16, 24, 48, 100, 200, 500];
   if (!perPageOptions.includes(data.select)) {
     perPageOptions.push(data.select);
     perPageOptions.sort((a, b) => a - b);
