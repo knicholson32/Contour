@@ -31,8 +31,8 @@ const dataDescriptorDefault: Descriptor[] = [
     { id: 'amel', title: 'AMEL', colSpan: 3 },
   ]},
   { id: 'inst-title', title: 'Instrument', subCols: [
-    { id: 'inst', title: 'Inst' },
-    { id: 'sim-inst', title: 'Sim Inst' },
+    { id: 'inst', title: 'Inst', colSpan: 2},
+    { id: 'sim-inst', title: 'Sim Inst', colSpan: 2 },
     { id: 'approaches', title: '# A', colSpan: 2 },
     { id: 'holds', title: '# H', colSpan: 2 },
   ]},
@@ -43,6 +43,7 @@ const dataDescriptorDefault: Descriptor[] = [
     { id: 'landings.night', title: 'Night', colSpan: 2, rotate: true }
   ]},
   { id: 'detail', title: 'Type of Pilot Experience or Training', subCols: [
+    { id: 'dual-recv', title: 'Dual Recv.', colSpan: 3  },
     { id: 'xc', title: 'XC', colSpan: 3  },
     { id: 'xc-p2p', title: 'XC P2P', colSpan: 3  },
     { id: 'crossings', title: 'Xing', colSpan: 1, rotate: true  },
@@ -50,7 +51,6 @@ const dataDescriptorDefault: Descriptor[] = [
     { id: 'solo', title: 'Solo', colSpan: 3  },
     { id: 'pic', title: 'PIC', colSpan: 3  },
     { id: 'sic', title: 'SIC', colSpan: 3  },
-    { id: 'dual-recv', title: 'Dual Recv.', colSpan: 3  },
     { id: 'dual-given', title: 'Dual Given', colSpan: 3  },
   ]},
   { id: 'notes', title: 'Remarks and Endorsements', colSpan: 15},
@@ -344,6 +344,10 @@ export const load = async ({ fetch, params, parent, url }) => {
         addTo(id, data.nightLandings);
         entry.text = data.nightLandings === 0 ? '' : data.nightLandings.toFixed(0);
         return entry;
+      case 'dual-recv':
+        addTo(id, data.dualReceived);
+        entry.text = data.dualReceived === 0 ? '' : data.dualReceived.toFixed(1);
+        return entry;
       case 'xc':
         addTo(id, data.xc);
         entry.text = data.xc === 0 ? '' : data.xc.toFixed(1);
@@ -377,10 +381,6 @@ export const load = async ({ fetch, params, parent, url }) => {
         addTo(id, data.sic);
         entry.text = data.sic === 0 ? '' : data.sic.toFixed(1);
         return entry;
-      case 'dual-recv':
-        addTo(id, data.dualReceived);
-        entry.text = data.dualReceived === 0 ? '' : data.dualReceived.toFixed(1);
-        return entry;
       case 'dual-given':
         addTo(id, data.dualGiven);
         entry.text = data.dualGiven === 0 ? '' : data.dualGiven.toFixed(1);
@@ -406,13 +406,13 @@ export const load = async ({ fetch, params, parent, url }) => {
         case 'inst':
         case 'sim-inst':
         case 'sim-atd':
+        case 'dual-recv':
         case 'xc':
         case 'xc-p2p':
         case 'night':
         case 'solo':
         case 'pic':
         case 'sic':
-        case 'dual-recv':
         case 'dual-given':
           if (summedData[id] === 1) console.log(summedData);
           entry.text = summedData[id] === 0 ? '' : summedData[id].toFixed(1);
@@ -481,6 +481,10 @@ export const load = async ({ fetch, params, parent, url }) => {
         entry.text = forwardedSums._sum.simulatedInstrument?.toFixed(1) ?? '';
         if (entry.text === '0.0') entry.text = '';
         return entry;
+      case 'dual-recv':
+        entry.text = forwardedSums._sum.dualReceived?.toFixed(1) ?? '';
+        if (entry.text === '0.0') entry.text = '';
+        return entry;
       case 'xc':
         entry.text = forwardedSums._sum.xc?.toFixed(1) ?? '';
         if (entry.text === '0.0') entry.text = '';
@@ -507,10 +511,6 @@ export const load = async ({ fetch, params, parent, url }) => {
         return entry;
       case 'sic':
         entry.text = forwardedSums._sum.sic?.toFixed(1) ?? '';
-        if (entry.text === '0.0') entry.text = '';
-        return entry;
-      case 'dual-recv':
-        entry.text = forwardedSums._sum.dualReceived?.toFixed(1) ?? '';
         if (entry.text === '0.0') entry.text = '';
         return entry;
       case 'dual-given':
