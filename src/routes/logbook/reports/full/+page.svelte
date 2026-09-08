@@ -57,6 +57,12 @@
     return { value: v, label: `${v} per page` }
   });
 
+  // Every 4th row gets a bolder dividing line, splitting the page into blocks of 4.
+  // The final row of the page is skipped, since the totals section already draws a border there.
+  const ROWS_PER_BLOCK = 4;
+  const isBlockEnd = (rowIndex: number) =>
+    (rowIndex + 1) % ROWS_PER_BLOCK === 0 && rowIndex + 1 < data.select;
+
   let selected: Selected<number> = {
     value: data.select,
     label: `${data.select} per page`
@@ -98,6 +104,8 @@
           {/each}
         {/if}
       {/each}
+      <!-- Border for top section, matching the one above the bottom section -->
+      <div class="h-px bg-zinc-400 dark:bg-zinc-600" style="grid-column: span {data.numCols} / span {data.numCols};"></div>
     </div>
 
 
@@ -117,7 +125,15 @@
       {/if}
     {/snippet}
 
-    {#each data.rows as row}
+    <!-- Divides the rows into blocks. Drawn the same way as the bottom section border: a full
+         width rule occupying its own grid row, so it never shifts the cells on either side -->
+    {#snippet BlockDivider()}
+      <div class="h-px bg-zinc-400 dark:bg-zinc-600" style="grid-column: span {data.numCols} / span {data.numCols};"></div>
+      <!-- Paired with an invisible div so the rule doesn't flip the even: bg selectors below -->
+      <div class="hidden"></div>
+    {/snippet}
+
+    {#each data.rows as row, rowIndex}
       <div class="contents group/row">
         {#each row as entry, i}
           {@render Entry(entry, (i > data.SIGNATURE_SECTION_COLS - 1))}
@@ -127,6 +143,9 @@
           <div class="hidden"></div>
         {/if}
       </div>
+      {#if isBlockEnd(rowIndex)}
+        {@render BlockDivider()}
+      {/if}
     {/each}
 
     {#if data.rows.length % 2 === 0}
@@ -134,7 +153,7 @@
     {/if}
 
     <!-- Filler cells for the last page (where there may not be a full page of entries) -->
-    {#each {length: data.select - data.rows.length} as _, i}
+    {#each {length: data.select - data.rows.length} as _, fillerIndex}
       {#each {length: data.SIGNATURE_SECTION_COLS + data.signatureSectionColSpan.dataColSpans.length} as _, i}
         {@render Entry({ text: '', colSpan: data.rawColSpans[i] }, (i > data.SIGNATURE_SECTION_COLS - 1))}
         <!-- <div class="text-xs h-4 {i > data.SIGNATURE_SECTION_COLS - 1 ? 'bg-zinc-100 even:bg-zinc-200' : 'bg-zinc-100'}" style="grid-column: span {data.rawColSpans[i]} / span {data.rawColSpans[i]};"></div> -->
@@ -142,6 +161,9 @@
       <!-- If we have an odd number of columns, create an invisible div so the even: bg selector still works -->
       {#if (data.signatureSectionColSpan.skipCols + data.signatureSectionColSpan.dataColSpans.length) % 2 === 1}
         <div class="hidden"></div>
+      {/if}
+      {#if isBlockEnd(data.rows.length + fillerIndex)}
+        {@render BlockDivider()}
       {/if}
     {/each}
 
@@ -163,17 +185,17 @@
         <div class="hidden"></div>
       {/if}
 
-      <div class="text-xxs text-right align-middle font-bold pr-1 bg-zinc-100 dark:bg-zinc-900" style="grid-column: span {data.signatureSectionColSpan.titles} / span {data.signatureSectionColSpan.titles};">Forwarded</div>
-      {#each data.totalsRows[0] as entry}
-        {@render Entry(entry, true, true)}
-      {/each}
-      {#if data.signatureSectionColSpan.dataColSpans.length % 2 === 1}
-        <div class="hidden"></div>
-      {/if}
       <div class="text-xxs text-right align-middle font-bold pr-1 bg-zinc-100 dark:bg-zinc-900" style="grid-column: span {data.signatureSectionColSpan.titles} / span {data.signatureSectionColSpan.titles};">This Page</div>
       {#each data.totalsRows[1] as entry}
         {@render Entry(entry)}
         {/each}
+      {#if data.signatureSectionColSpan.dataColSpans.length % 2 === 1}
+        <div class="hidden"></div>
+      {/if}
+      <div class="text-xxs text-right align-middle font-bold pr-1 bg-zinc-100 dark:bg-zinc-900" style="grid-column: span {data.signatureSectionColSpan.titles} / span {data.signatureSectionColSpan.titles};">Forwarded</div>
+      {#each data.totalsRows[0] as entry}
+        {@render Entry(entry, true, true)}
+      {/each}
       {#if data.signatureSectionColSpan.dataColSpans.length % 2 === 1}
         <div class="hidden"></div>
       {/if}
