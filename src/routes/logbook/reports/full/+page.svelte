@@ -187,14 +187,14 @@
 
       <div class="text-xxs text-right align-middle font-bold pr-1 bg-zinc-100 dark:bg-zinc-900" style="grid-column: span {data.signatureSectionColSpan.titles} / span {data.signatureSectionColSpan.titles};">This Page</div>
       {#each data.totalsRows[1] as entry}
-        {@render Entry(entry)}
+        {@render Entry(entry, true, true)}
         {/each}
       {#if data.signatureSectionColSpan.dataColSpans.length % 2 === 1}
         <div class="hidden"></div>
       {/if}
       <div class="text-xxs text-right align-middle font-bold pr-1 bg-zinc-100 dark:bg-zinc-900" style="grid-column: span {data.signatureSectionColSpan.titles} / span {data.signatureSectionColSpan.titles};">Forwarded</div>
       {#each data.totalsRows[0] as entry}
-        {@render Entry(entry, true, true)}
+        {@render Entry(entry)}
       {/each}
       {#if data.signatureSectionColSpan.dataColSpans.length % 2 === 1}
         <div class="hidden"></div>
