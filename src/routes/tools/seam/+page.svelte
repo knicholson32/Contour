@@ -415,8 +415,16 @@
 							Save
 						</button>
 					</form>
+					<!--
+						Opened in a new tab so SvelteKit's client router leaves the link
+						alone. A same-tab navigation fires beforeNavigate, which starts
+						NProgress and only stops it on navigate.complete - and a download
+						never completes a navigation, so the bar would sit there forever.
+					-->
 					<a
 						href="/tools/seam/calendar.ics{page.url.search}"
+						target="_blank"
+						rel="noopener"
 						class="cursor-pointer flex items-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium"
 					>
 						<Download size={14} /> Download .ics

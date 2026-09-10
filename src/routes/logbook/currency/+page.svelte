@@ -1240,9 +1240,9 @@
                 </div>
                 <div class="h-2 w-full rounded-full bg-muted">
                   <div
-                    class={`h-full rounded-full transition-all ${selected.status === "expired" ? "bg-rose-500 dark:bg-rose-500" : "bg-sky-500 dark:bg-sky-400"}`}
+                    class={`h-full rounded-full transition-all ${selected.status === "expired" ? "bg-destructive" : "bg-primary"}`}
                     style={`width: ${timeline.progressPercent}%`}
-                  />
+                  ></div>
                 </div>
                 <div
                   class="flex justify-between text-xxs font-mono uppercase text-muted-foreground"
@@ -1302,7 +1302,7 @@
               <ul class="space-y-3">
                 {#each nextToExpire as item (item.id)}
                   <li
-                    class="flex items-center justify-between gap-3 rounded-xl border border-transparent bg-muted p-3 transition hover:border-sky-200 hover:bg-sky-50 dark:hover:border-sky-500/40 dark:hover:bg-sky-500/10"
+                    class="hover:border-primary/40 hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border border-transparent bg-muted p-3 transition-colors"
                   >
                     <div>
                       <p class="text-sm font-medium">
