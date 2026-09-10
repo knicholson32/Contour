@@ -99,7 +99,7 @@
     { title: 'Profile', href: '/profile' },
     { title: 'Settings', href: '/settings' },
     { title: 'About', button: openAboutOverlay },
-    { title: 'Sign out', href: '/signout' },
+    { title: 'Tools', href: '/tools' },
   ];
 
 	// Primary profile menu

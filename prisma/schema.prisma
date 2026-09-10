@@ -351,6 +351,26 @@ model Settings {
   @@map("settings")
 }
 
+// An awarded week of vacation. Vacation is bid and awarded in whole-week
+// blocks (Section 8.5, 8.10(C)), so every entry covers exactly seven days
+// beginning at startDate.
+//
+// Unlike the timestamps elsewhere in this schema, this is a calendar date
+// rather than an instant: storing it as a unix timestamp would make the day it
+// lands on depend on the reader's timezone. Hence a plain YYYY-MM-DD string.
+model VacationWeek {
+  id Int @id @default(autoincrement())
+
+  startDate String @unique // YYYY-MM-DD, the first of the seven days
+
+  // Bid identifier from subsection 8.5 ("A", "B", "C", "D"). Blank if unknown.
+  label String @default("")
+
+  notes String @default("") // @db.VarChar(1024)
+
+  @@map("vacation_weeks")
+}
+
 // ------------------------------------------------------------------------------------------------
 // Supporting Datatypes
 // ------------------------------------------------------------------------------------------------

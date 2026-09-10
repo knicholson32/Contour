@@ -8,5 +8,6 @@ vite.config.js.timestamp-*
 /library
 *.bak
 .pnpm-store
-.mcp.jsonp
+.mcp.json
+/src/routes/test
 /prisma/dev.db

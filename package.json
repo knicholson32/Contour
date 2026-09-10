@@ -10,7 +10,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
     "lint": "prettier --plugin-search-dir . --check . && eslint .",
-    "format": "prettier --plugin-search-dir . --write ."
+    "format": "prettier --plugin-search-dir . --write .",
+    "check:schedule": "node --experimental-strip-types --import ./scripts/ts-register.mjs ./scripts/check-schedule.ts && node --experimental-strip-types --import ./scripts/ts-register.mjs ./scripts/check-vacation.ts && node --experimental-strip-types --import ./scripts/ts-register.mjs ./scripts/check-ical.ts && node --experimental-strip-types --import ./scripts/ts-register.mjs ./scripts/check-holidays.ts"
   },
   "devDependencies": {
     "@internationalized/date": "^3.8.2",

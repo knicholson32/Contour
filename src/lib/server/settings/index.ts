@@ -19,6 +19,10 @@ export const TypeNames = {
 	'entry.entryMXMode': false,
 	// Tour ----------------------------------
 	'tour.defaultStartApt': 'KPDK',
+	// Schedule ------------------------------
+	'schedule.current.line': -1,
+	'schedule.current.type': '',
+	'schedule.ical.tourTitle': 'Tour',
 	// System --------------------------------
 	'system.debug': 0,
 	'system.lastSeenCommit': '',
@@ -56,6 +60,9 @@ export type ObjectType<T extends TypeName> =
 	T extends 'entry.dataVersion' ? number : 			// Integer
 	T extends 'entry.day.blockStartPad' ? number : 			// Integer
 	T extends 'entry.day.blockEndPad' ? number : 			// Integer
+	T extends 'schedule.current.line' ? number : 	// Integer, -1 when unset
+	T extends 'schedule.current.type' ? string : 	// String, '7&7' | '8&6', '' when unset
+	T extends 'schedule.ical.tourTitle' ? string : // String, calendar event title
 	T extends 'system.debug' ? number : 					// Integer
 	T extends 'system.lastSeenCommit' ? string :  // String
 	T extends 'data.approaches.lastSync' ? number :	// Integer
@@ -120,6 +127,7 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			case 'data.navData.lastSync':
 			case 'data.navData.validDate':
 			case 'data.airportData.lastSync':
+			case 'schedule.current.line':
 				return parseInt(settingVal.value) as ObjectType<T>;
 
 			// Float Conversion --------------------------------------------------------------------------
@@ -132,6 +140,8 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 			case 'entry.day.entry.fa_link':
 			case 'entry.flight_id.last':
 			case 'tour.defaultStartApt':
+			case 'schedule.current.type':
+			case 'schedule.ical.tourTitle':
 			case 'data.approaches.source':
 			case 'data.navData.source':
 			case 'system.lastSeenCommit':
