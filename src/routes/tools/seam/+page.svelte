@@ -505,7 +505,12 @@
 								{y.months.length === 1 ? 'month' : 'months'}
 							</span>
 						</div>
-						<div class="flex flex-wrap gap-x-6 gap-y-5">
+						<!--
+							A month grid is a fixed 252px (7 x size-9), so only one fits below
+							the sm breakpoint. Centre it there, and go back to a flush left
+							edge once two or more sit on a row.
+						-->
+						<div class="flex flex-wrap justify-center gap-x-6 gap-y-5 sm:justify-start">
 							{#each y.months as m (m.key)}
 								<div class="space-y-2">
 									<h4 class="text-center text-sm font-medium">{m.label}</h4>
