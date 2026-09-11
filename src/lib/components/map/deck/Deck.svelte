@@ -71,6 +71,34 @@
 
   let deckInstance: Deck<MapView> | Deck<_GlobeView>;
 
+  // deck.gl 9.4 rewrote the globe controller to pan trackball-style: a drag rotates the whole
+  // camera frame, so `bearing` drifts away from 0 and the globe no longer stays north-up.
+  // (Zooming around the pointer rotates the frame too.) Before 9.4 the globe pan only moved
+  // longitude/latitude and `dragRotate` was forced off, so north was always up. Pin `bearing`
+  // to 0 in the controller state to restore that.
+  let northUpGlobeController: any = null;
+  const getNorthUpGlobeController = () => {
+    if (northUpGlobeController !== null) return northUpGlobeController;
+    const GlobeController = Core._GlobeController as any;
+    northUpGlobeController = class NorthUpGlobeController extends GlobeController {
+      constructor(...args: any[]) {
+        super(...args);
+        const BaseControllerState = this.ControllerState as any;
+        this.ControllerState = class NorthUpGlobeState extends BaseControllerState {
+          applyConstraints(props: any) {
+            // Zero before, so the pointer-anchored zoom math runs against a north-up frame...
+            props.bearing = 0;
+            const constrained = super.applyConstraints(props);
+            // ...and after, to drop any bearing the pan/zoom rotation produced.
+            constrained.bearing = 0;
+            return constrained;
+          }
+        } as any;
+      }
+    };
+    return northUpGlobeController;
+  };
+
   let layers: (Layer | Layer[] | null)[] = [];
 
   const initializeMap = () => {
@@ -121,7 +149,7 @@
         maxZoom: 19,
       },
       pickingRadius: 4,
-      controller: { inertia: false },
+      controller: useGlobe ? { type: getNorthUpGlobeController(), inertia: false } : { inertia: false },
       // controller: { keyboard: false, inertia: true },
       // getTooltip: ({tile}: TileLayerPickingInfo) => tile && `x:${tile.index.x}, y:${tile.index.y}, z:${tile.index.z}`,
       layers: [tiles, ...layers],
