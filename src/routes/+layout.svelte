@@ -16,7 +16,7 @@
   import escapeOrClickOutside from "$lib/components/events/escapeOrClickOutside";
   import type { GitCommit } from "$lib/server/api/git/schema";
   import { timeConverter } from "$lib/helpers";
-    import { browser } from "$app/environment";
+  import { browser } from "$app/environment";
 
   interface Props {
     data: import('./$types').PageData;

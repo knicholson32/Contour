@@ -27,6 +27,9 @@
   const globalSettings = getContext<{ "general.prefers_globe": boolean } | undefined>('settings')
   const startAirport = getContext< Prisma.AirportGetPayload<{}> | null>('startAirport');
 
+  const cartoKey = getContext<{ "general.cartoAPI": string } | undefined>('settings');
+  const stadiaKey = getContext<{ "general.stadiaAPI": string } | undefined>('settings');
+
   if ($useGlobeGlobal === null) {
     $useGlobeGlobal = globalSettings?.['general.prefers_globe'] ?? true;
   }
@@ -105,8 +108,8 @@
     const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
     const tileSet = usingDarkMode
-      ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}@2x.png?api_key=ad49e48b-b4ff-4da3-a7d4-2dc77d16ae77'
-      : 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png';
+      ? `https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}@2x.png?api_key=${stadiaKey?.['general.stadiaAPI']}`
+      : `https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png?key=${cartoKey?.['general.cartoAPI']}`;
 
 
     const tiles = new GeoLayers.TileLayer({

@@ -22,6 +22,15 @@ export const actions = {
 		const aeroAPI = (data.get('general.aeroAPI') ?? undefined) as undefined | string;
 		if (aeroAPI !== undefined) await settings.set('general.aeroAPI', aeroAPI);
 	},
+	updateMapAPI: async ({ request }) => {
+		const data = await request.formData();
+
+		const cartoAPI = (data.get('general.cartoAPI') ?? undefined) as undefined | string;
+		if (cartoAPI !== undefined) await settings.set('general.cartoAPI', cartoAPI);
+
+		const stadiaAPI = (data.get('general.stadiaAPI') ?? undefined) as undefined | string;
+		if (stadiaAPI !== undefined) await settings.set('general.stadiaAPI', stadiaAPI);
+	},
 	updateEmail: async ({ request }) => {
 		const data = await request.formData();
 

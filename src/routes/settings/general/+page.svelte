@@ -16,6 +16,12 @@
 	let aeroAPIUnsavedChanges = $state(false);
 	let aeroAPI = $state(data.settingValues['general.aeroAPI']);
 
+	// Map API Keys
+	let mapAPIList: Settings.List | null = $state(null);
+	let mapAPIUnsavedChanges = $state(false);
+	let cartoAPI = $state(data.settingValues['general.cartoAPI']);
+	let stadiaAPI = $state(data.settingValues['general.stadiaAPI']);
+
 	// Email
 	let emailList: Settings.List | null = $state(null);
 	let emailUnsavedChanges = $state(false);
@@ -50,7 +56,7 @@
 	{/snippet}
 
 	<Settings.Password name="general.aeroAPI" {form} autocomplete={false} title="Aero API Key" update={() => aeroAPIList?.update()} bind:value={aeroAPI} hoverTitle="Aero API Key">
-	<a href="https://www.flightaware.com/aeroapi/portal/overview" target="_blank" title="Click to sign into Plex to generate a Plex Token for Unabridged to use." class="select-none w-full sm:w-auto flex justify-center items-center whitespace-nowrap px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-200 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500">
+	<a href="https://www.flightaware.com/aeroapi/portal/overview" target="_blank" title="Click to sign into FlightAware to generate an API key for Contour to use." class="select-none w-full sm:w-auto flex justify-center items-center whitespace-nowrap px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-200 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500">
 		View AeroAPI Settings
 		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ml-1 w-4 h-4">
 			{@html icons.arrowTopRightOnSquare}
@@ -59,6 +65,35 @@
 	</Settings.Password>
 
 	<!-- <Settings.Select {form} name="general.aeroAPI" title="Aero API Key" update={() => aeroAPIList?.update()} bind:value={aeroAPI} options={timeZonesNames.concat('UTC')} /> -->
+</Settings.List>
+
+<!-- MapAPI -->
+<Settings.List bind:this={mapAPIList} class="" {form} action="?/updateMapAPI" bind:unsavedChanges={mapAPIUnsavedChanges} >
+	{#snippet title()}
+		<span>Map API Keys</span>
+	{/snippet}
+	{#snippet description()}
+		<span>Configure Map API Key details.</span>
+	{/snippet}
+
+	<Settings.Password name="general.cartoAPI" {form} autocomplete={false} title="Carto API Key" update={() => mapAPIList?.update()} bind:value={cartoAPI} hoverTitle="Carto API Key">
+	<a href="https://dashboard.basemaps.carto.com/keys" target="_blank" title="Click to sign into Carto to generate an API Token for Contour to use." class="select-none w-full sm:w-auto flex justify-center items-center whitespace-nowrap px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-200 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500">
+		View Carto API Settings
+		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ml-1 w-4 h-4">
+			{@html icons.arrowTopRightOnSquare}
+		</svg>
+	</a>
+	</Settings.Password>
+
+	<Settings.Password name="general.stadiaAPI" {form} autocomplete={false} title="Stadia API Key" update={() => mapAPIList?.update()} bind:value={stadiaAPI} hoverTitle="Stadia API Key">
+	<a href="https://client.stadiamaps.com/dashboard" target="_blank" title="Click to sign into Stadia Maps to generate an API Token for Contour to use." class="select-none w-full sm:w-auto flex justify-center items-center whitespace-nowrap px-3 py-2 rounded-md text-sm font-semibold shadow-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 bg-white dark:bg-transparent text-gray-800 dark:text-gray-200 hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200 focus-visible:outline-grey-500">
+		View Stadia Maps API Settings
+		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ml-1 w-4 h-4">
+			{@html icons.arrowTopRightOnSquare}
+		</svg>
+	</a>
+	</Settings.Password>
+
 </Settings.List>
 
 

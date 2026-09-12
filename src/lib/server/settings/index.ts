@@ -38,6 +38,8 @@ export const TypeNames = {
 	'general.prefers_globe': false,
 	'general.encKey': 'UNSET',
 	'general.aeroAPI': '',
+	'general.cartoAPI': '',
+	'general.stadiaAPI': '',
 	'general.email': '',
 	'general.name': '',
 	'general.gravatar.hash': '00000000000000000000000000000000',
@@ -75,6 +77,8 @@ export type ObjectType<T extends TypeName> =
 	T extends 'general.prefers_globe' ? boolean :		// Boolean
 	T extends 'general.encKey' ? string : 				// String
 	T extends 'general.aeroAPI' ? string : 				// String
+	T extends 'general.cartoAPI' ? string : 				// String
+	T extends 'general.stadiaAPI' ? string : 				// String
 	T extends 'general.email' ? string : 				  // String
 	T extends 'general.name' ? string : 				  // String
 	T extends 'general.gravatar.hash' ? string : 	// String
@@ -154,6 +158,8 @@ export const get = async <T extends TypeName>(setting: T, settingVal?: SettingPa
 
 			// Encrypted Strings -------------------------------------------------------------------------
 			case 'general.aeroAPI':
+			case 'general.cartoAPI':
+			case 'general.stadiaAPI':	
 				return (await helpers.decrypt(settingVal.value)) as ObjectType<T>;
 
 			// Enum Conversion ---------------------------------------------------------------------------
@@ -265,7 +271,7 @@ export const set = async <T extends TypeName>(setting: T, value: ObjectType<T>) 
 	// Make sure the setting can exist
 	if (!(setting in TypeNames)) throw Error(`Unknown setting: ${setting}`);
 
-	if (setting === 'general.aeroAPI') {
+	if (setting === 'general.aeroAPI' || setting === 'general.cartoAPI' || setting === 'general.stadiaAPI') {
 		value = (await helpers.encrypt(value as string)) as ObjectType<T>;
 	}
 
