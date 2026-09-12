@@ -1,7 +1,8 @@
 import { Context } from "runed";
 
 import { getDistanceFromLatLonInKm } from "$lib/helpers";
-import { type _GlobeView, type _GlobeViewport, WebMercatorViewport, type Deck, type Layer, type MapView, type Position, type Viewport, type Widget } from "deck.gl";
+import { type _GlobeView, type _GlobeViewport, WebMercatorViewport, type Deck, type Layer, type MapView, type Position, type Viewport, Widget } from "deck.gl";
+import type { WidgetProps } from "@deck.gl/core";
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -117,8 +118,18 @@ export class DraggingNotifier {
   }
 }
 
-export class GeoReferencedTooltipWidget implements Widget {
+type GeoReferencedTooltipWidgetProps = WidgetProps & {
+  position: Position;
+  hidden: boolean;
+  fade: boolean;
+}
 
+// deck.gl 9.4's WidgetManager calls base-class internals (`_onAdd`, `updateHTML`, `props._container`),
+// so this must extend `Widget` rather than just implement its interface.
+export class GeoReferencedTooltipWidget extends Widget<GeoReferencedTooltipWidgetProps> {
+
+  placement = 'top-left' as const;
+  className = 'geo-referenced-tooltip';
 
   // Create a new map widget and assign context
   static create(opts: Omit<ConstructorParameters<typeof GeoReferencedTooltipWidget>[0], 'root'>) {
@@ -129,14 +140,6 @@ export class GeoReferencedTooltipWidget implements Widget {
   // tar?: HTMLDivElement;
   // children?: HTMLCollection;
   
-  props: {
-    position: Position;
-    hidden: boolean;
-    fade: boolean;
-  }
-  id: string;
-
-
   root: MapWidgetsRootState;
   viewport?: Viewport;
   _stopProcessing = false;
@@ -147,7 +150,9 @@ export class GeoReferencedTooltipWidget implements Widget {
   
 
   constructor(options: { position: Position, id?: string, hidden: boolean, fade: boolean, root: MapWidgetsRootState }) {
+    super({ position: options.position, hidden: options.hidden, fade: options.fade });
     this.props = {
+      ...(Widget.defaultProps as Required<WidgetProps>),
       position: options.position,
       hidden: options.hidden,
       fade: options.fade
@@ -164,6 +169,9 @@ export class GeoReferencedTooltipWidget implements Widget {
     this.root.register(this);
   }
 
+  // The tooltip element is owned by Svelte and positioned in `onRedraw`, so deck's root element stays empty
+  onRenderHTML() {}
+
   onAdd(params: { deck: Deck<any>; viewId: string | null; }) {
     // this.element = document.createElement('div');
     // this.element.classList.add('transition-opacity', 'absolute', 'z-20', '-translate-x-[50%]', '-translate-y-[50%]');
@@ -178,7 +186,6 @@ export class GeoReferencedTooltipWidget implements Widget {
     // }
 
     this.onRedraw({ viewports: params.deck.getViewports(), layers: [] });
-    return null;
   }
 
   setTarget(el: HTMLDivElement) {
@@ -278,7 +285,7 @@ export class GeoReferencedTooltipWidget implements Widget {
     this.viewport = this.root.getViewport() ?? undefined;
   }
 
-  setProps (props: Partial<typeof this.props>) {
+  setProps (props: Partial<GeoReferencedTooltipWidgetProps>) {
     if ('hidden' in props && props.hidden !== undefined) {
       this.props.hidden = props.hidden;
       if (this.hiddenTimeout !== null) clearTimeout(this.hiddenTimeout);

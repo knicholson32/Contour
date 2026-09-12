@@ -6,7 +6,8 @@
 	<meta charset="utf-8" />
 	<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 	<link rel="apple-touch-icon" href="%sveltekit.assets%/logo-square.png">
-	<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
+	<!-- use-credentials so the Cloudflare Access cookie is sent; otherwise Access redirects the manifest request to its login page -->
+	<link rel="manifest" href="%sveltekit.assets%/manifest.json" crossorigin="use-credentials" />
 	<meta name="viewport"
 		content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, viewport-fit=cover" />
 	<!-- <meta name="apple-mobile-web-app-capable" content="yes" /> -->
