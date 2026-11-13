@@ -1,5 +1,6 @@
 # Project arguments
 ARG NODE_VERSION=24.5.0
+ARG PNPM_VERSION=10.19.0
 ARG USR_LOCAL_EXPORT=/export-usr-bin
 ARG ROOT_EXPORT=/export-root
 ARG SERVER_PORT=3000
@@ -13,7 +14,8 @@ FROM ${PARENT_IMAGE} AS node_install
 FROM ${PARENT_IMAGE} AS dev
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+ARG PNPM_VERSION
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 # Install pnpm
 RUN pnpm fetch --prod
@@ -34,7 +36,8 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 FROM ${PARENT_IMAGE} AS build
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+ARG PNPM_VERSION
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 # Copy the application and move to the copied folder
 WORKDIR /app
@@ -57,7 +60,8 @@ RUN echo "---- BUILD SERVER ----" \
 FROM ${PARENT_IMAGE} AS prod
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+ARG PNPM_VERSION
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 # Assign labels
 LABEL org.opencontainers.image.title=contour
